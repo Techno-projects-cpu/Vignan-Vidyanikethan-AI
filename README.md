@@ -387,16 +387,13 @@ DEPLOY.md                 Exact Render + Supabase deployment steps
 
 ## Repository name
 
-The in-repo name is `vignan-vidyanikethan-ai` and all user-facing branding is **Vignan Vidyanikethan AI**. Arena's GitHub App token cannot rename repositories (it returns `HTTP 403: Resource not accessible by integration`), so the remote rename must be done by you:
+The GitHub repository is now **Techno-projects-cpu/Vignan-Vidyanikethan-AI**. The old `Vignan-Vidyanikethan-E.M.-School` URL redirects here, so existing bookmarks and Render deploy hooks keep working. The in-repo package name is `vignan-vidyanikethan-ai` and all user-facing branding is **Vignan Vidyanikethan AI**.
 
-1. Open the repo on GitHub → **Settings** → **Repository name**.
-2. Rename it to `Vignan-Vidyanikethan-AI` (the other repo with that name is already deleted).
-3. In this checkout, run:
-   ```bash
-   git remote set-url origin https://github.com/Techno-projects-cpu/Vignan-Vidyanikethan-AI.git
-   ```
+If a local checkout still points at the old URL, run:
 
-GitHub redirects the old URL, so existing bookmarks and the Render deploy hook will keep working after the rename.
+```bash
+git remote set-url origin https://github.com/Techno-projects-cpu/Vignan-Vidyanikethan-AI.git
+```
 
 ---
 

@@ -12,18 +12,15 @@ This repository is now a clean, root-level Vignan Vidyanikethan AI app. The old 
 - Supabase Auth email signup is enabled and `mailer_autoconfirm` is on, so synthetic student emails do not need real delivery.
 - `render.yaml`, `.env.example`, `supabase/migrations/`, and an optional `supabase/functions/vignan-ai/` Edge Function are included.
 
-## 1. Rename the GitHub repo (you must do this part)
+## 1. Confirm the GitHub repo
 
-Arena's GitHub App token returns `HTTP 403: Resource not accessible by integration` when it tries to rename a repository. The name `Vignan-Vidyanikethan-AI` is free, but the rename must be done in the GitHub web UI:
+The repository is now **Techno-projects-cpu/Vignan-Vidyanikethan-AI**. The old `Vignan-Vidyanikethan-E.M.-School` URL redirects here, so Render's existing deploy hook keeps working.
 
-1. Open <https://github.com/Techno-projects-cpu/Vignan-Vidyanikethan-E.M.-School> → **Settings** → **Repository name**.
-2. Rename to `Vignan-Vidyanikethan-AI`.
-3. In this checkout, run:
-   ```bash
-   git remote set-url origin https://github.com/Techno-projects-cpu/Vignan-Vidyanikethan-AI.git
-   ```
+If a local checkout still points at the old URL, run:
 
-GitHub redirects the old URL, so Render's existing deploy hook keeps working.
+```bash
+git remote set-url origin https://github.com/Techno-projects-cpu/Vignan-Vidyanikethan-AI.git
+```
 
 ## 2. Create the Render web service
 
