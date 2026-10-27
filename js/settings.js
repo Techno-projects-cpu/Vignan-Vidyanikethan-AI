@@ -1,0 +1,139 @@
+/** Settings defaults, migration and health checks for the model router. */
+
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js";
+
+export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
+
+const DEFAULT_PROVIDER_CONFIGS = Object.fromEntries(
+  PROVIDER_IDS.map((id) => [id, defaultProviderConfig(id)]),
+);
+
+export const DEFAULT_SETTINGS = {
+  // Vignan Vidyanikethan AI is an orchestrator around existing AIs. Each job can be routed to
+  // a different provider; "offline" uses the deterministic local engine.
+  routing: {
+    answer: "offline",
+    quiz: "offline",
+    flashcards: "offline",
+    grade: "offline",
+    verify: "offline",
+  },
+  fallback: "offline",
+  providers: DEFAULT_PROVIDER_CONFIGS,
+  activeProvider: "webllm",
+  localAIModel: DEFAULT_LOCAL_MODEL_ID,
+  localAIAutoEnable: true,
+  webEnabled: false,
+  webMode: "server",
+  searchEndpoint: "",
+  searchToken: "",
+  language: "en",
+  theme: "dark",
+  profile: "Student",
+  disclaimerSeen: false,
+  freeRouterDismissed: false,
+};
+
+function cleanProviderConfig(config = {}, fallback = {}) {
+  return {
+    endpoint: String(config.endpoint ?? fallback.endpoint ?? "").trim(),
+    model: String(config.model ?? fallback.model ?? "").trim(),
+    apiKey: String(config.apiKey ?? "").trim(),
+  };
+}
+
+function migrateLegacy(raw) {
+  if (!raw?.engine || raw.routing) return raw;
+  const legacyMap = { server: "server", ollama: "ollama", webllm: "webllm", custom: "openai" };
+  const providerId = legacyMap[raw.engine] || (raw.engine === "offline" ? "offline" : "custom");
+  const routing = {
+    answer: providerId,
+    quiz: providerId,
+    flashcards: providerId,
+    grade: "offline",
+    verify: "offline",
+  };
+  const providers = { ...DEFAULT_PROVIDER_CONFIGS };
+  if (providerId !== "offline") {
+    providers[providerId] = cleanProviderConfig(
+      { endpoint: raw.endpoint, model: raw.model, apiKey: raw.apiKey },
+      DEFAULT_PROVIDER_CONFIGS[providerId],
+    );
+  }
+  return { ...raw, routing, providers, activeProvider: providerId === "offline" ? "server" : providerId };
+}
+
+export function normalizeSettings(value = {}) {
+  const raw = migrateLegacy(value || {});
+  const merged = {
+    ...DEFAULT_SETTINGS,
+    ...raw,
+    routing: { ...DEFAULT_SETTINGS.routing, ...(raw.routing || {}) },
+    providers: { ...DEFAULT_PROVIDER_CONFIGS },
+  };
+  for (const id of PROVIDER_IDS) {
+    merged.providers[id] = cleanProviderConfig(raw.providers?.[id], DEFAULT_PROVIDER_CONFIGS[id]);
+  }
+  const candidateLocalModel = raw.localAIModel || raw.providers?.webllm?.model || DEFAULT_LOCAL_MODEL_ID;
+  merged.localAIModel = LOCAL_MODELS.some((model) => model.id === candidateLocalModel)
+    ? candidateLocalModel
+    : DEFAULT_LOCAL_MODEL_ID;
+  merged.localAIAutoEnable = raw.localAIAutoEnable !== false;
+  merged.providers.webllm.model = merged.localAIModel;
+  for (const task of ROUTING_TASKS) {
+    const route = merged.routing[task];
+    if (route !== "offline" && !PROVIDERS[route]) merged.routing[task] = "offline";
+  }
+  if (merged.fallback !== "offline" && !PROVIDERS[merged.fallback]) merged.fallback = "offline";
+  if (!PROVIDERS[merged.activeProvider]) merged.activeProvider = "server";
+  if (!["server", "custom"].includes(merged.webMode)) merged.webMode = "server";
+  if (!["light", "dark"].includes(merged.theme)) merged.theme = "light";
+  if (!["en", "te"].includes(merged.language)) merged.language = "en";
+  merged.freeRouterDismissed = Boolean(raw.freeRouterDismissed);
+  merged.profile = String(merged.profile || "Student").slice(0, 32);
+  return merged;
+}
+
+export function isModelConnected(settings) {
+  return ROUTING_TASKS.some((task) => settings?.routing?.[task] && settings.routing[task] !== "offline");
+}
+
+export function connectedProviders(settings) {
+  return ROUTING_TASKS.map((task) => settings?.routing?.[task]).filter(
+    (providerId, index, list) => providerId && providerId !== "offline" && list.indexOf(providerId) === index,
+  );
+}
+
+export function engineLabel(settings) {
+  const primary = settings?.routing?.answer;
+  if (!primary || primary === "offline") return "Offline engine";
+  return PROVIDERS[primary]?.label || "Connected model";
+}
+
+export function privacyLabel(settings) {
+  const providers = connectedProviders(settings);
+  if (!providers.length) return "Nothing leaves this device";
+  const allPrivate = providers.every((id) => PROVIDERS[id]?.private);
+  return allPrivate
+    ? "Short passages go only to your local models"
+    : "Short passages go to your configured AI provider(s)";
+}
+
+export function providerConfig(settings, providerId = settings?.activeProvider) {
+  return settings?.providers?.[providerId] || defaultProviderConfig(providerId);
+}
+
+export async function serverHealth({ timeout = 1500 } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch("api/health", { signal: controller.signal, cache: "no-store" });
+    if (!response.ok) throw new Error(`Health check failed (${response.status})`);
+    return await response.json();
+  } catch {
+    return { ok: false, ai: false, aiProviders: [], freeRouter: false, search: false, accountsBackend: "local", offlineReady: false };
+  } finally {
+    clearTimeout(timer);
+  }
+}

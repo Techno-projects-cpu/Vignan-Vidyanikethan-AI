@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Vignan Vidyanikethan AI icon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071327"/>
+      <stop offset="1" stop-color="#0d3c6b"/>
+    </linearGradient>
+    <linearGradient id="v" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#7cc6ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="226" r="150" fill="#3da5ff" opacity="0.10"/>
+  <path d="M150 184 L256 366 L362 184" fill="none" stroke="url(#v)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

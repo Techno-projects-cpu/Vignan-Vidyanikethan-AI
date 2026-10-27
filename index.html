@@ -1,91 +1,350 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vignana Vidyanikethan E.M. School</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0c0e">
+  <meta name="description" content="Vignan Vidyanikethan AI — textbook-grounded answers, custom quizzes, flashcards and offline study tools built by students.">
+  <title>Vignan Vidyanikethan AI — learn from your own textbooks</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
+  <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8.6 8.6 0 0 1-3.6-.8L4 20l1.3-4A7.5 7.5 0 1 1 20 11.5Z"/><path d="M9 11h6M9 14h4"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5Z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19v5H6.5A2.5 2.5 0 0 1 4 18.5Z"/><path d="M8 7h7M8 10h5"/></symbol>
+    <symbol id="i-quiz" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h5M8 16h8"/><path d="m16 12 1.4 1.4L20 10.8"/></symbol>
+    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v11"/><path d="M7 11h5M7 15h4"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1-2.8-2.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3v-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.8-2.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h4v.1A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.9-.3l.1-.1 2.8 2.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m4 12 16-8-6 16-2.5-6.5Z"/><path d="m11.5 13.5 3-3"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2.5 14 9l6.5 2-6.5 2-2 6.5-2-6.5-6.5-2L10 9Z"/><path d="M19 17.5 19.7 20l2.3.7-2.3.7L19 24l-.7-2.6-2.3-.7 2.3-.7Z"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2-2A5 5 0 0 0 12 4l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20l1.2-1.2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="12" r="4"/><path d="M12 12h9m-3 0v3m-3-3v2"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 18v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></symbol>
+  </svg>
 
-    <!-- Apple-style Navigation Bar -->
-    <nav class="apple-nav">
-        <div class="nav-container">
-            <a href="#" class="nav-brand">Vignana Vidyanikethan</a>
-            <div class="nav-links">
-                <a href="about.html">About</a>
-                <a href="#academics">Academics</a>
-                <a href="about.html#campus">Campus</a> 
-               <a href="about.html#contact" class="nav-cta">Enroll Now</a> 
-            </div>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="./" aria-label="Vignan Vidyanikethan AI home">
+        <span class="brand-mark">V</span>
+        <span class="brand-text"><strong>Vignan</strong><small>Vidyanikethan AI</small></span>
+      </a>
+      <div class="sidebar-label">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Vignan Vidyanikethan AI sections">
+        <button type="button" class="nav-item active" data-view="ask"><svg><use href="#i-chat"></use></svg><span data-i18n="nav.ask">Ask</span></button>
+        <button type="button" class="nav-item" data-view="library"><svg><use href="#i-book"></use></svg><span data-i18n="nav.library">Library</span></button>
+        <button type="button" class="nav-item" data-view="quiz"><svg><use href="#i-quiz"></use></svg><span data-i18n="nav.quiz">Quiz</span></button>
+        <button type="button" class="nav-item" data-view="flashcards"><svg><use href="#i-cards"></use></svg><span data-i18n="nav.flashcards">Flashcards</span></button>
+        <button type="button" class="nav-item" data-view="progress"><svg><use href="#i-chart"></use></svg><span data-i18n="nav.progress">Progress</span></button>
+        <button type="button" class="nav-item" data-view="settings"><svg><use href="#i-settings"></use></svg><span data-i18n="nav.settings">Settings</span></button>
+      </nav>
+      <div class="engine-card" id="local-engine-card">
+        <span class="eyebrow">LOCAL ENGINE</span>
+        <strong id="engine-model">Offline extractive</strong>
+        <span id="engine-detail">No local model loaded</span>
+        <button type="button" class="text-button" id="sidebar-local-ai">Open local AI →</button>
+      </div>
+      <div class="sidebar-foot">
+        <div class="status-line"><span class="status-dot"></span><span id="engine-label">Offline engine</span></div>
+        <p data-i18n="app.tagline">Your books stay on this device.</p>
+        <a href="./" data-i18n="app.schoolSite">Home</a>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-heading">
+          <div class="kicker" id="view-kicker">GROUND ANSWERS</div>
+          <h1 id="view-title">Ask your textbooks</h1>
+          <p id="view-subtitle">Every answer points back to a page you can open.</p>
         </div>
+        <div class="topbar-actions">
+          <span class="chip" id="offline-chip"><span class="chip-dot"></span><span data-i18n="app.offlineReady">Offline ready</span></span>
+          <button type="button" class="icon-button" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme"><svg><use href="#i-moon"></use></svg></button>
+          <button type="button" class="profile-chip account-chip" id="profile-button" title="Account"><span id="profile-initial">S</span><span class="account-dot" id="account-dot"></span></button>
+          <span class="account-name hidden" id="account-name"></span>
+        </div>
+      </header>
+
+      <main id="main" class="main">
+        <!-- ASK -->
+        <section class="view active" id="view-ask" data-panel="ask">
+          <div class="ask-layout">
+            <div class="chat-column card">
+              <div class="connect-banner" id="connect-banner">
+                <div class="connect-copy">
+                  <strong>Choose your Vignan Vidyanikethan AI engine</strong>
+                  <p>Every answer stays grounded in your textbooks. Run a real open-weight model on this device with WebGPU, use official free-tier keys on the server, or keep the private cited-excerpt engine. No public or leaked keys are bundled.</p>
+                </div>
+                <div class="connect-actions">
+                  <button type="button" class="button primary small" id="use-local-ai-button">Use local AI</button>
+                  <button type="button" class="button ghost small" id="use-free-ai-button">Use free AI</button>
+                  <button type="button" class="button ghost small" id="free-keys-button">Get free keys</button>
+                  <button type="button" class="button ghost small" id="connect-model-button">Choose a model</button>
+                  <button type="button" class="button ghost small" id="dismiss-banner">Later</button>
+                </div>
+              </div>
+              <div class="chat-log" id="chat-log" aria-live="polite"></div>
+              <div class="chat-suggestions" id="chat-suggestions"></div>
+              <div class="typing hidden" id="typing"><span class="spinner"></span><span>Reading your textbooks…</span></div>
+              <form class="composer" id="ask-form">
+                <div class="mode-row" id="mode-row">
+                  <button type="button" class="mode-chip active" data-mode="answer" data-i18n="mode.answer">Answer</button>
+                  <button type="button" class="mode-chip" data-mode="explain" data-i18n="mode.explain">Explain</button>
+                  <button type="button" class="mode-chip" data-mode="summarize" data-i18n="mode.summarize">Summary</button>
+                  <button type="button" class="mode-chip" data-mode="practice" data-i18n="mode.practice">Practice</button>
+                  <button type="button" class="mode-chip" data-mode="flashcards" data-i18n="mode.flashcards">Flashcards</button>
+                </div>
+                <div class="composer-input-row">
+                  <textarea id="ask-input" rows="2" placeholder="Ask anything from your textbooks…" data-i18n-placeholder="ask.placeholder"></textarea>
+                  <button type="submit" class="send-button" id="ask-send" aria-label="Send question" data-i18n-aria="ask.send"><svg><use href="#i-send"></use></svg></button>
+                </div>
+                <div class="composer-meta">
+                  <select id="ask-book-scope" aria-label="Book scope"></select>
+                  <label class="switch-label"><input type="checkbox" id="ask-web-fallback"><span data-i18n="ask.webFallback">Allow web fallback</span></label>
+                  <button type="button" class="text-button" id="clear-chat" data-i18n="ask.clear">Clear chat</button>
+                </div>
+              </form>
+            </div>
+            <aside class="source-column card">
+              <div class="panel-head">
+                <div><span class="eyebrow">VERIFY</span><h2 data-i18n="ask.sources">Sources &amp; verification</h2></div>
+                <span class="count-badge" id="source-count">0</span>
+              </div>
+              <div class="confidence-box hidden" id="confidence-box">
+                <div class="confidence-top"><span>Grounding confidence</span><strong id="confidence-value">0%</strong></div>
+                <div class="meter"><span id="confidence-bar"></span></div>
+                <p id="confidence-label"></p>
+              </div>
+              <div class="verification-box hidden" id="verification-box"></div>
+              <div class="source-list" id="source-list"></div>
+              <div class="web-results hidden" id="web-results"></div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- LIBRARY -->
+        <section class="view" id="view-library" data-panel="library">
+          <div class="section-toolbar">
+            <div class="section-copy"><span class="eyebrow" data-i18n="view.library.kicker">YOUR LIBRARY</span><h2 data-i18n="view.library.title">Add your class books</h2><p data-i18n="view.library.subtitle">PDF, TXT, Markdown or pasted notes. Indexed once, kept locally.</p></div>
+            <button type="button" class="button primary" id="add-demo-book" data-i18n="library.demoButton">Load demo study pack</button>
+          </div>
+          <div class="library-grid">
+            <section class="card upload-card">
+              <h3 data-i18n="library.uploadTitle">Upload a book</h3>
+              <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose a PDF or text file">
+                <svg><use href="#i-upload"></use></svg>
+                <strong data-i18n="library.dropzone">Drop a PDF or text file here, or click to choose</strong>
+                <span data-i18n="library.dropHint">PDF, TXT, MD · page markers like [[page:12]] are supported in text files</span>
+                <input type="file" id="file-input" accept=".pdf,.txt,.md,.markdown,application/pdf,text/plain" hidden>
+              </div>
+              <div class="selected-file hidden" id="selected-file"></div>
+              <div class="form-grid">
+                <label><span data-i18n="library.titleLabel">Title</span><input type="text" id="book-title" placeholder="e.g. Class 8 Science"></label>
+                <label><span data-i18n="library.subjectLabel">Subject</span><input type="text" id="book-subject" placeholder="Science"></label>
+                <label><span data-i18n="library.gradeLabel">Class</span><input type="text" id="book-grade" placeholder="8"></label>
+                <label><span data-i18n="library.boardLabel">Board</span><input type="text" id="book-board" placeholder="State board"></label>
+              </div>
+              <button type="button" class="button primary full" id="upload-submit" data-i18n="library.addBook">Add to library</button>
+              <div class="upload-progress hidden" id="upload-progress"><div class="meter"><span id="upload-meter"></span></div><p id="upload-status"></p></div>
+            </section>
+            <section class="card paste-card">
+              <h3 data-i18n="library.pasteTitle">Or paste notes</h3>
+              <label><span data-i18n="library.titleLabel">Title</span><input type="text" id="paste-title" placeholder="My chapter notes"></label>
+              <label class="grow"><span>Notes</span><textarea id="paste-text" rows="8" placeholder="Paste a chapter here. Use [[page:1]], [[page:2]] to keep page numbers." data-i18n-placeholder="library.pastePlaceholder"></textarea></label>
+              <button type="button" class="button primary full" id="paste-submit" data-i18n="library.addNotes">Add notes</button>
+              <p class="hint">Tip: use <code>[[page:12]]</code> on its own line to preserve real page numbers.</p>
+            </section>
+          </div>
+          <div class="section-divider"><h3 data-i18n="library.yourBooks">Books in this device</h3><span id="book-summary"></span></div>
+          <div class="book-grid" id="book-list"></div>
+          <div class="card info-card"><svg><use href="#i-spark"></use></svg><div><strong>How grounding works</strong><p>Each page is split into short passages and cached with a local search vector. Your AI provider receives only the most relevant passages — never the whole internet and never a newly trained model.</p></div></div>
+        </section>
+
+        <!-- QUIZ -->
+        <section class="view" id="view-quiz" data-panel="quiz">
+          <div class="section-toolbar">
+            <div class="section-copy"><span class="eyebrow" data-i18n="view.quiz.kicker">PRACTICE</span><h2 data-i18n="view.quiz.title">Quiz yourself</h2><p data-i18n="view.quiz.subtitle">Custom questions from your chapters, graded with a revise list.</p></div>
+          </div>
+          <div class="card quiz-setup" id="quiz-setup">
+            <div class="form-grid four">
+              <label class="span-2"><span data-i18n="quiz.topicLabel">Chapter or topic</span><input type="text" id="quiz-topic" placeholder="e.g. photosynthesis, forces, linear equations" data-i18n-placeholder="quiz.topicPlaceholder"></label>
+              <label><span>Book</span><select id="quiz-book-scope"></select></label>
+              <label><span data-i18n="quiz.countLabel">Questions</span><input type="number" id="quiz-count" min="3" max="10" value="5"></label>
+              <label><span data-i18n="quiz.typeLabel">Question type</span><select id="quiz-type"><option value="mcq" data-i18n="quiz.typeMcq">Multiple choice</option><option value="fill" data-i18n="quiz.typeFill">Fill in the blank</option><option value="short" data-i18n="quiz.typeShort">Short answer</option><option value="mix" data-i18n="quiz.typeMix">Mixed</option></select></label>
+              <label><span data-i18n="quiz.difficultyLabel">Difficulty</span><select id="quiz-difficulty"><option value="easy" data-i18n="quiz.easy">Easy</option><option value="medium" selected data-i18n="quiz.medium">Medium</option><option value="hard" data-i18n="quiz.hard">Hard</option></select></label>
+              <label><span>Timed</span><select id="quiz-timed"><option value="no">Untimed</option><option value="yes">Timed (45s / question)</option></select></label>
+              <label class="checkbox-row"><input type="checkbox" id="quiz-use-model" checked><span>Use connected AI writer when available</span></label>
+            </div>
+            <div class="setup-actions"><button type="button" class="button primary" id="quiz-generate" data-i18n="quiz.generate">Generate quiz</button><span class="hint" id="quiz-engine-note"></span></div>
+          </div>
+          <div class="card quiz-runner hidden" id="quiz-runner">
+            <div class="quiz-header"><div><span class="eyebrow" id="quiz-progress-label">Question 1 of 5</span><h2 id="quiz-topic-title">Chapter quiz</h2></div><div class="timer hidden" id="quiz-timer">--:--</div></div>
+            <div class="meter"><span id="quiz-progress-bar"></span></div>
+            <div id="quiz-question" class="quiz-question"></div>
+            <div class="quiz-actions"><button type="button" class="button ghost" id="quiz-prev" data-i18n="quiz.previous">Previous</button><button type="button" class="button primary" id="quiz-next" data-i18n="quiz.next">Next</button><button type="button" class="button primary hidden" id="quiz-submit" data-i18n="quiz.submit">Submit quiz</button></div>
+          </div>
+          <div id="quiz-results" class="quiz-results hidden"></div>
+        </section>
+
+        <!-- FLASHCARDS -->
+        <section class="view" id="view-flashcards" data-panel="flashcards">
+          <div class="section-toolbar">
+            <div class="section-copy"><span class="eyebrow" data-i18n="view.flashcards.kicker">RECALL</span><h2 data-i18n="view.flashcards.title">Flashcards</h2><p data-i18n="view.flashcards.subtitle">Review with spaced repetition, one card at a time.</p></div>
+          </div>
+          <div class="card deck-setup">
+            <div class="form-grid three">
+              <label class="span-2"><span data-i18n="flashcards.topicLabel">Topic</span><input type="text" id="flash-topic" placeholder="e.g. photosynthesis"></label>
+              <label><span>Book</span><select id="flash-book-scope"></select></label>
+              <label><span>Cards</span><select id="flash-count"><option>6</option><option selected>10</option><option>15</option></select></label>
+            </div>
+            <div class="setup-actions">
+              <label class="checkbox-row inline"><input type="checkbox" id="flash-use-model" checked><span>Use AI writer when available</span></label>
+              <button type="button" class="button primary" id="flash-generate" data-i18n="flashcards.generate">Make flashcards</button>
+              <span class="hint" id="deck-stats"></span>
+            </div>
+          </div>
+          <div id="flashcard-area" class="flashcard-area"></div>
+        </section>
+
+        <!-- PROGRESS -->
+        <section class="view" id="view-progress" data-panel="progress">
+          <div class="section-toolbar">
+            <div class="section-copy"><span class="eyebrow" data-i18n="view.progress.kicker">MOMENTUM</span><h2 data-i18n="view.progress.title">Your progress</h2><p data-i18n="view.progress.subtitle">Streaks, topic mastery and a local class leaderboard.</p></div>
+          </div>
+          <div class="stat-grid" id="stat-grid"></div>
+          <section class="card account-card" id="account-card">
+            <div class="panel-head">
+              <div><span class="eyebrow">SQUAD</span><h2>Join the Vignan squad</h2><p class="hint">Log in to save streaks, climb the live leaderboard and invite friends with your own code.</p></div>
+              <span class="chip" id="account-chip">Guest</span>
+            </div>
+            <div id="account-body"></div>
+          </section>
+          <div class="two-column">
+            <section class="card"><h3 data-i18n="progress.mastery">Topic mastery</h3><div id="mastery-list" class="list-stack"></div></section>
+            <section class="card"><h3>Live class leaderboard</h3><p class="hint">Only usernames and scores are public. Exact age and gender stay private.</p><div id="server-leaderboard-list" class="list-stack"></div></section>
+          </div>
+          <section class="card"><h3 data-i18n="progress.leaderboard">Leaderboard on this device</h3><p class="hint">Local results from this browser, even when the account server is offline.</p><div id="leaderboard-list" class="list-stack"></div></section>
+          <section class="card"><h3 data-i18n="progress.recent">Recent results</h3><div id="recent-results" class="list-stack"></div></section>
+          <section class="card profile-card"><label><span data-i18n="progress.profileName">Your name on this device</span><input type="text" id="profile-name" maxlength="32"></label><button type="button" class="button ghost" id="save-profile">Save name</button><button type="button" class="button ghost danger" id="reset-progress">Reset progress</button></section>
+        </section>
+
+        <!-- SETTINGS -->
+        <section class="view" id="view-settings" data-panel="settings">
+          <div class="section-toolbar">
+            <div class="section-copy"><span class="eyebrow" data-i18n="view.settings.kicker">CONTROL</span><h2 data-i18n="view.settings.title">Settings</h2><p data-i18n="view.settings.subtitle">Choose a local model, free keys, fallback and privacy options.</p></div>
+          </div>
+          <div class="settings-grid">
+            <section class="card settings-card span-2 local-ai-card" id="local-ai-panel">
+              <div class="panel-head">
+                <div><span class="eyebrow">OFFLINE AI</span><h2><svg class="panel-icon"><use href="#i-cpu"></use></svg>Real local model</h2><p class="hint">Open-weight Meta / SmolLM2 / Qwen models run in this browser with Vignan's own textbook rules.</p></div>
+                <span class="chip" id="local-ai-chip">Checking device…</span>
+              </div>
+              <div class="notice router-notice"><strong>No key · no training.</strong> WebLLM downloads one model the first time, then caches it on this device. Questions, answers, quizzes, flashcards and grading can run locally. The deterministic cited-excerpt engine remains the final fallback.</div>
+              <div class="form-grid three local-ai-form">
+                <label class="span-2"><span>Model</span><select id="local-model-select" aria-label="Local model"></select></label>
+                <label><span>Recommended</span><input type="text" id="local-recommended" readonly aria-label="Recommended model"></label>
+                <label><span>Device</span><input type="text" id="local-device-info" readonly aria-label="Device capability"></label>
+                <label class="span-2"><span>Cache</span><input type="text" id="local-cache-info" readonly aria-label="Model cache status"></label>
+              </div>
+              <div class="local-progress" id="local-progress" aria-live="polite">
+                <div class="meter"><span id="local-progress-bar"></span></div>
+                <span class="mono" id="local-progress-text">Checking browser cache…</span>
+              </div>
+              <div class="button-row wrap">
+                <button type="button" class="button primary" id="local-ai-download">Download &amp; enable</button>
+                <button type="button" class="button ghost" id="local-ai-use">Use cached model</button>
+                <button type="button" class="button ghost" id="local-ai-test">Test local AI</button>
+                <button type="button" class="button ghost danger" id="local-ai-clear">Clear cached model</button>
+              </div>
+              <p class="hint" id="local-ai-status" aria-live="polite"></p>
+              <p class="hint">WebGPU is required for the in-browser model. On laptops without it, run <code>ollama pull llama3.2:1b</code> and choose <strong>Ollama</strong> below; on phones, the cited-excerpt engine still works offline.</p>
+            </section>
+
+            <section class="card settings-card span-2" id="free-api-card">
+              <div class="panel-head"><div><span class="eyebrow">FREE KEYS</span><h2><svg class="panel-icon"><use href="#i-key"></use></svg>Official free-tier API keys</h2><p class="hint">Generate your own keys. Put them in Render → Environment, never in Git.</p></div><span class="chip">$0 budget</span></div>
+              <div class="notice warning-notice" id="free-api-warning"></div>
+              <div class="key-grid" id="free-api-links"></div>
+            </section>
+
+            <section class="card settings-card span-2">
+              <div class="panel-head"><div><span class="eyebrow">MODEL ROUTER</span><h2 data-i18n="settings.aiTitle">AI engine</h2><p class="hint" data-i18n="settings.aiHelp">Offline is the default. A connected model is optional.</p></div><span class="chip" id="server-status">Checking server…</span></div>
+              <div class="notice router-notice"><strong>No model training · $0 budget.</strong> Vignan Vidyanikethan AI orchestrates existing AIs. Choose the local WebLLM model, the server's free router (Gemini, Groq, Cloudflare, OpenRouter, Mistral, Cohere, Arena), Ollama, or any OpenAI-compatible endpoint. Textbook passages stay the source of truth.</div>
+              <div class="routing-table" id="routing-table"></div>
+              <div class="provider-editor" id="provider-editor">
+                <h3>Provider setup</h3>
+                <div class="form-grid three">
+                  <label><span>Provider</span><select id="provider-select"></select></label>
+                  <label class="span-2"><span data-i18n="settings.endpoint">Endpoint</span><input type="text" id="provider-endpoint" spellcheck="false"></label>
+                  <label><span data-i18n="settings.model">Model name</span><input type="text" id="provider-model" spellcheck="false"></label>
+                  <label class="span-2"><span data-i18n="settings.apiKey">API key (stored only in this browser)</span><input type="password" id="provider-key" autocomplete="off" spellcheck="false"></label>
+                  <label><span>Fallback provider</span><select id="fallback-provider"></select></label>
+                  <label class="checkbox-row span-2"><input type="checkbox" id="provider-use-now" checked><span>Use this provider for answers and quizzes now</span></label>
+                </div>
+                <p class="hint" id="provider-description"></p>
+                <div class="button-row"><button type="button" class="button primary" id="provider-save">Save provider</button><button type="button" class="button ghost" id="provider-test" data-i18n="settings.test">Test connection</button><button type="button" class="button ghost" id="provider-reset">Reset to defaults</button></div>
+                <p class="hint" id="provider-test-result"></p>
+              </div>
+            </section>
+
+            <section class="card settings-card">
+              <h2 data-i18n="settings.webTitle">Web fallback</h2>
+              <p class="hint">Used only when your textbooks have no answer. Results are labelled “outside your textbooks”.</p>
+              <label class="switch-label block"><input type="checkbox" id="settings-web-enabled"><span data-i18n="settings.webEnable">Enable web search when books have no answer</span></label>
+              <label><span data-i18n="settings.webMode">Search source</span><select id="settings-web-mode"><option value="server" data-i18n="settings.webServer">Configured server endpoint</option><option value="custom" data-i18n="settings.webCustom">Custom JSON endpoint</option></select></label>
+              <label><span data-i18n="settings.webEndpoint">Endpoint with {q} placeholder</span><input type="text" id="settings-web-endpoint" placeholder="https://searx.example/search?q={q}&format=json" spellcheck="false"></label>
+              <label><span data-i18n="settings.webToken">Optional bearer token</span><input type="password" id="settings-web-token" autocomplete="off"></label>
+              <button type="button" class="button primary full" id="web-save">Save web settings</button>
+            </section>
+
+            <section class="card settings-card">
+              <h2 data-i18n="settings.privacyTitle">Privacy &amp; data</h2>
+              <p class="hint" data-i18n="settings.privacyHelp">Books, chats and results are stored in this browser only.</p>
+              <div class="storage-summary" id="storage-summary">Checking storage…</div>
+              <div class="button-row wrap"><button type="button" class="button ghost" id="export-data" data-i18n="settings.export">Export data (JSON)</button><button type="button" class="button ghost" id="clear-chat-data">Clear chat</button><button type="button" class="button ghost danger" id="delete-all" data-i18n="settings.deleteAll">Delete all local data</button></div>
+              <p class="hint">API keys are never included in exports.</p>
+            </section>
+
+            <section class="card settings-card">
+              <h2>Appearance</h2>
+              <label><span data-i18n="settings.language">Interface language</span><select id="settings-language"><option value="en">English</option><option value="te">తెలుగు</option></select></label>
+              <label><span data-i18n="settings.theme">Theme</span><select id="settings-theme"><option value="light" data-i18n="settings.themeLight">Light</option><option value="dark" data-i18n="settings.themeDark">Dark</option></select></label>
+              <label><span data-i18n="progress.profileName">Your name</span><input type="text" id="settings-profile" maxlength="32"></label>
+              <button type="button" class="button primary full" id="appearance-save">Save appearance</button>
+            </section>
+
+            <section class="card settings-card span-2">
+              <h2 data-i18n="settings.helpTitle">How this works</h2>
+              <p class="hint" data-i18n="settings.helpBody">Your books are split into page-preserving passages. A local hybrid search finds evidence; the offline engine quotes it with citations. If you connect a model, only those short passages are sent. Web results are labelled as outside your textbooks.</p>
+              <ol class="help-list"><li>Upload PDFs or paste notes in <strong>Library</strong>.</li><li>Ask a question; Vignan Vidyanikethan AI retrieves the best passages with page numbers.</li><li>A local open model, the free router, or the offline excerpt engine writes the answer from those passages.</li><li>Generate a quiz, get instant feedback, and share a funky edit video.</li></ol>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <nav class="mobile-nav" aria-label="Vignan Vidyanikethan AI mobile sections">
+      <button type="button" class="mobile-nav-item active" data-view="ask"><svg><use href="#i-chat"></use></svg><span data-i18n="nav.ask">Ask</span></button>
+      <button type="button" class="mobile-nav-item" data-view="library"><svg><use href="#i-book"></use></svg><span data-i18n="nav.library">Library</span></button>
+      <button type="button" class="mobile-nav-item" data-view="quiz"><svg><use href="#i-quiz"></use></svg><span data-i18n="nav.quiz">Quiz</span></button>
+      <button type="button" class="mobile-nav-item" data-view="flashcards"><svg><use href="#i-cards"></use></svg><span data-i18n="nav.flashcards">Cards</span></button>
+      <button type="button" class="mobile-nav-item" data-view="progress"><svg><use href="#i-chart"></use></svg><span data-i18n="nav.progress">Progress</span></button>
+      <button type="button" class="mobile-nav-item" data-view="settings"><svg><use href="#i-settings"></use></svg><span data-i18n="nav.settings">Settings</span></button>
     </nav>
+  </div>
 
-    <!-- Main Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1 class="fade-up">Brilliant minds.<br>Shaped here.</h1>
-            <p class="hero-subhead fade-up">Welcome to Vignana Vidyanikethan E.M. School, Kallur.</p>
-            <div class="hero-ctas fade-up">
-                <a href="#academics" class="btn-primary">Explore Programs</a>
-                <a href="about.html#contact" class="btn-link">Contact Admissions &rarr;</a> 
-            </div>
-        </div>
-        <div class="hero-fallback-bg"></div>
-    </section>
-
-    <!-- School Showcase Bento Grid -->
-    <section id="academics" class="grid-section">
-        <div class="section-container">
-            <h2 class="section-title fade-up">Designed for excellence.</h2>
-            
-            <div class="bento-grid">
-                <!-- Card 1: Large Feature -->
-                <div class="bento-card card-large fade-up">
-                    <div class="card-text">
-                        <span>ACADEMICS</span>
-                        <h3>A foundation built for future innovators.</h3>
-                        <p>Our robust English Medium curriculum focuses on critical thinking, conceptual clarity, and academic rigor tailored for modern challenges.</p>
-                    </div>
-                </div>
-
-                <!-- Card 2: Medium Feature -->
-                <div class="bento-card card-medium fade-up">
-                    <div class="card-text">
-                        <span>INFRASTRUCTURE</span>
-                        <h3>State-of-the-art laboratories.</h3>
-                        <p>Modern science and computer spaces designed for practical, hands-on learning environments.</p>
-                    </div>
-                </div>
-
-                <!-- Card 3: Medium Feature -->
-                <div class="bento-card card-medium fade-up">
-                    <div class="card-text">
-                        <span>SPORTS & ARTS</span>
-                        <h3>Beyond the classroom.</h3>
-                        <p>Nurturing physical health, collaborative teamwork, and creative expression through diverse extracurriculars.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Apple-style Footer -->
-    <footer class="apple-footer">
-        <div class="footer-container">
-            <div class="footer-info" id="contact">
-                <p><strong>Vignana Vidyanikethan E.M. School</strong></p>
-                <p>Kallur, Khammam District, Telangana — 507209</p>
-            </div>
-            <hr class="footer-divider">
-            <div class="footer-credit">
-                <p>Made by</p>
-                <img src="assets/nezaad-industries.png" alt="Nezaad Industries Logo" class="footer-logo">
-            </div>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./vendor/pdfjs/pdf.min.js"></script>
+  <script type="module" src="./js/app.js"></script>
 </body>
 </html>
-
