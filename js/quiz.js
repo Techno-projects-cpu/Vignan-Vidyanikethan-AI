@@ -6,6 +6,7 @@
  * can show the student what to revise instead of just a score.
  */
 
+import { questionCopy } from "./question-copy.js?v=16";
 import { hashFeature } from "./vector.js?v=16";
 import { splitSentences, tokenize } from "./text.js?v=16";
 import {
@@ -144,6 +145,7 @@ function buildQuestion({ candidate, type, difficulty, distractorPool, index, phr
     points: 1,
   };
 
+  const copy = questionCopy(language);
   if (type === "short") {
     const keyword = phrase.split(/\s+/)[0];
     return {
@@ -151,7 +153,7 @@ function buildQuestion({ candidate, type, difficulty, distractorPool, index, phr
       type: "short",
       prompt: language === "te" ? `“${keyword}” గురించి మీ పుస్తకం ఏమి చెబుతుందో మీ మాటల్లో వివరించండి.`
         : language === "hi" ? `“${keyword}” के बारे में अपनी किताब की बात अपने शब्दों में समझाएँ।`
-          : `In your own words, explain what your textbook says about “${keyword}” in ${source.section || "this chapter"}.`,
+          : `${copy.whatIs.replace("{subject}", keyword)} — ${copy.complete}`,
       options: [],
       answer: "",
       acceptable: tokenize(sentence).slice(0, 8),
@@ -164,7 +166,7 @@ function buildQuestion({ candidate, type, difficulty, distractorPool, index, phr
     return {
       ...base,
       type: "fill",
-      prompt: `${language === "te" ? "ఖాళీని పూరించండి" : language === "hi" ? "रिक्त स्थान भरें" : "Fill in the blank"}: “${truncate(blanked, 220)}”`,
+      prompt: `${copy.fill}: “${truncate(blanked, 220)}”`,
       options: [],
       answer: correct,
       acceptable: [correct, tokenize(correct)[0] || correct],
@@ -193,7 +195,7 @@ function buildQuestion({ candidate, type, difficulty, distractorPool, index, phr
   return {
     ...base,
     type: "mcq",
-    prompt: `${language === "te" ? "ఈ వాక్యాన్ని పూర్తి చేసే పదాన్ని ఎంచుకోండి" : language === "hi" ? "वाक्य पूरा करने वाला शब्द चुनें" : "Choose the word or phrase that completes this textbook statement"}: “${truncate(blanked, 220)}”`,
+    prompt: `${copy.choose}: “${truncate(blanked, 220)}”`,
     options,
     answer: correct,
     acceptable: [correct],

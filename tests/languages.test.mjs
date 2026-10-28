@@ -131,3 +131,31 @@ test("short conversational replies and the safety message exist in every languag
   assert.notEqual(conversationReply("hello", "fr"), conversationReply("hello", "en"));
   assert.equal(safetyReply("what is photosynthesis", "ja"), "", "non-safety questions are untouched");
 });
+
+test("quiz and flashcard question copy follows the chosen language", async () => {
+  const { questionCopy, QUESTION_COPY } = await import("../js/question-copy.js");
+  const { generateQuiz } = await import("../js/quiz.js");
+  const { buildFlashcards } = await import("../js/flashcards.js");
+  for (const code of LANGUAGE_CODES) {
+    const copy = questionCopy(code);
+    for (const key of ["fill", "choose", "whatIs", "complete"]) assert.ok(copy[key] && copy[key].length > 1, `${code}.${key}`);
+    assert.ok(QUESTION_COPY[code], `${code} has its own copy`);
+  }
+  const hits = [{ text: "Photosynthesis is the process by which green plants make food using sunlight and chlorophyll.", title: "Plants", section: "Nutrition in Plants", page: 12, score: 1 }];
+  for (const code of ["ja", "ta", "ur", "de"]) {
+    const quiz = generateQuiz({ hits, count: 2, language: code }).questions;
+    for (const question of quiz) assert.ok(question.prompt && !question.prompt.startsWith("undefined"), `${code} prompt`);
+    const cards = buildFlashcards(hits, 2, { language: code });
+    for (const card of cards) assert.ok(card.front && !card.front.startsWith("undefined"), `${code} card`);
+  }
+  assert.match(generateQuiz({ hits, count: 2, language: "ja" }).questions[0].prompt, /[\u3040-\u30ff]/);
+});
+
+test("no question scaffolding falls back to English by accident", async () => {
+  const { questionCopy } = await import("../js/question-copy.js");
+  const english = questionCopy("en");
+  for (const code of LANGUAGE_CODES.filter((value) => value !== "en")) {
+    const copy = questionCopy(code);
+    assert.notDeepEqual(copy, english, `${code} is translated`);
+  }
+});

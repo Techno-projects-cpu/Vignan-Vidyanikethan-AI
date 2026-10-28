@@ -3,6 +3,7 @@
  * Cards are derived from retrieved passages and always carry a page citation.
  */
 
+import { questionCopy } from "./question-copy.js?v=16";
 import { localDay, truncate, uid } from "./util.js?v=16";
 import { splitSentences, tokenize } from "./text.js?v=16";
 
@@ -30,9 +31,11 @@ function definitionCard(sentence, language = "en") {
   if (!match) return null;
   const subject = match[1].replace(/^(the|a|an)\s+/i, "").trim();
   const verb = /means|refers/i.test(match[2]) ? "mean" : "is/are";
+  const copy = questionCopy(language);
   return {
     front: language === "te" ? `“${subject}” అంటే ఏమిటి?` : language === "hi" ? `“${subject}” क्या है?`
-      : verb === "mean" ? `What does “${subject}” mean?` : `What ${verb.includes("is") ? "is" : "are"} ${subject}?`,
+      : language !== "en" ? copy.whatIs.replace("{subject}", subject)
+        : verb === "mean" ? `What does “${subject}” mean?` : `What ${verb.includes("is") ? "is" : "are"} ${subject}?`,
     back: sentence,
   };
 }
@@ -46,7 +49,7 @@ function clozeCard(sentence, language = "en") {
   if (blanked === sentence) blanked = sentence.replace(new RegExp(escaped, "iu"), "________");
   if (blanked === sentence) return null;
   return {
-    front: `${language === "te" ? "వాక్యాన్ని పూర్తి చేయండి" : language === "hi" ? "वाक्य पूरा करें" : "Complete the sentence"}: “${truncate(blanked, 190)}”`,
+    front: `${questionCopy(language).complete}: “${truncate(blanked, 190)}”`,
     back: `**${term}** — ${sentence}`,
   };
 }
