@@ -3,10 +3,11 @@
  *
  * Textbook answers never silently mix with web content. If the local index has
  * no evidence, these results are shown with an "outside your textbooks" label.
- * The app ships with web fallback OFF and no third-party search provider.
+ * The built-in server fallback searches Wikipedia without an API key. Students
+ * can turn it off; configured JSON search providers remain optional.
  */
 
-import { safeUrl, truncate } from "./util.js?v=13";
+import { safeUrl, truncate } from "./util.js?v=15";
 
 function firstArray(data) {
   if (Array.isArray(data)) return data;
@@ -35,7 +36,7 @@ export function parseSearchResults(data, limit = 5) {
       title: truncate(title || new URL(url).hostname, 120),
       url,
       domain: new URL(url).hostname.replace(/^www\./, ""),
-      snippet: truncate(snippet || "Open this source to read more.", 220),
+      snippet: truncate(snippet || "Open this source to read more.", 1000),
     });
     if (results.length >= limit) break;
   }
@@ -58,12 +59,12 @@ export async function searchWeb(query, settings = {}, { signal } = {}) {
     const response = await fetch("api/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ query, language: ["en", "te", "hi"].includes(settings.language) ? settings.language : "en" }),
       signal,
     });
     const data = await responseJson(response);
     if (!response.ok) throw new Error(data.error || `Search failed (${response.status})`);
-    return { results: parseSearchResults(data.results || data), enabled: true, message: data.message || "" };
+    return { results: parseSearchResults(data.results || data), enabled: true, provider: data.provider === "Wikipedia" ? "Wikipedia" : "Web search", message: data.message || "" };
   }
 
   const endpoint = String(settings.searchEndpoint || "").trim();
@@ -78,7 +79,7 @@ export async function searchWeb(query, settings = {}, { signal } = {}) {
   const response = await fetch(url, { headers, signal });
   const data = await responseJson(response);
   if (!response.ok) throw new Error(data.error?.message || `Search failed (${response.status})`);
-  return { results: parseSearchResults(data), enabled: true, message: "" };
+  return { results: parseSearchResults(data), enabled: true, provider: "Web search", message: "" };
 }
 
 export function externalSearchUrl(query, provider = "duckduckgo") {

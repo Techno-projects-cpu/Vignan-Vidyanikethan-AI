@@ -18,13 +18,13 @@ test("premium shell hides navigation in a command menu and foregrounds PDF + Bol
   assert.match(html, /<link rel="stylesheet" href="\.\/styles-premium\.css(?:\?v=\d+)?">/);
   assert.match(html, /id="command-overlay"[^>]*hidden/);
   assert.match(html, /id="command-menu-button"/);
-  assert.match(html, /id="premium-ai-trigger"/);
-  assert.match(html, /id="command-ai-list"/);
+  assert.match(html, /<div class="ai-chooser-trigger ai-status" id="premium-ai-trigger"/);
+  assert.doesNotMatch(html, /id="ai-chooser-menu"|id="command-ai-list"/);
   assert.match(html, /data-premium-action="upload-pdf"/);
   assert.match(html, /data-premium-action="instant-ai"/);
   assert.match(html, /Built-in instant AI|BUILT-IN INSTANT AI/i);
   assert.match(html, /Upload a textbook PDF/);
-  assert.match(html, /Nicknames hide provider names/);
+  assert.match(html, /Advanced settings/);
   assert.match(html, /premium-settings-launcher/);
 });
 

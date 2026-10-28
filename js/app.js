@@ -6,18 +6,24 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=13";
-import { retrieve, retrieveChapter } from "./retrieval.js?v=13";
-import { ingestPdf, ingestText, ingestDemoPack } from "./ingest.js?v=13";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=13";
+import * as db from "./db.js?v=15";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=15";
+import { ingestPdf, ingestText } from "./ingest.js?v=15";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=15";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=15";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=15";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=15";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=15";
+import { composeLinkAnswer, composeWebAnswer } from "./external-answer.js?v=15";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=15";
 import {
   answerWithModel,
   generateFlashcardsWithModel,
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=13";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=13";
+} from "./llm.js?v=15";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=15";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -29,9 +35,9 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=13";
-import { TASKS } from "./model-router.js?v=13";
-import { PROVIDERS, providerList } from "./providers.js?v=13";
+} from "./local-ai.js?v=15";
+import { TASKS } from "./model-router.js?v=15";
+import { PROVIDERS, providerList } from "./providers.js?v=15";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -40,30 +46,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=13";
-import { parseApiKeys } from "./key-pool.js?v=13";
+} from "./settings.js?v=15";
+import { parseApiKeys } from "./key-pool.js?v=15";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=13";
+} from "./student-keys.js?v=15";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=13";
+} from "./quiz.js?v=15";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=13";
+} from "./flashcards.js?v=15";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=13";
+} from "./study-decks.js?v=15";
 import {
   accuracy,
   currentStreak,
@@ -74,13 +80,13 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=13";
-import { externalSearchUrl, searchWeb } from "./web.js?v=13";
-import { openEditStudio } from "./edit-studio.js?v=13";
-import { openReader } from "./reader.js?v=13";
-import { applyTranslations, setLanguage, t } from "./i18n.js?v=13";
-import { clamp, downloadBlob, formatDate, readFileAsText, truncate, uid } from "./util.js?v=13";
-import * as ui from "./ui.js?v=13";
+} from "./progress.js?v=15";
+import { externalSearchUrl, searchWeb } from "./web.js?v=15";
+import { openEditStudio } from "./edit-studio.js?v=15";
+import { openReader } from "./reader.js?v=15";
+import { applyTranslations, setLanguage, t } from "./i18n.js?v=15";
+import { clamp, downloadBlob, formatDate, truncate, uid } from "./util.js?v=15";
+import * as ui from "./ui.js?v=15";
 import {
   clearReferral,
   getLeaderboard,
@@ -90,8 +96,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=13";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=13";
+} from "./auth.js?v=15";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=15";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -99,8 +105,8 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=13";
-import { initMotion, revealVisible } from "./motion.js?v=13";
+} from "./premium-ui.js?v=15";
+import { initMotion, revealVisible } from "./motion.js?v=15";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -117,7 +123,8 @@ const VIEW_META = {
 const SUGGESTIONS = [
   { label: "Why do leaves look green?", prompt: "Why do leaves look green?", mode: "answer" },
   { label: "Explain photosynthesis", prompt: "Explain photosynthesis step by step", mode: "explain" },
-  { label: "Quiz on forces", prompt: "forces", view: "quiz" },
+  { label: "Quiz me on forces", prompt: "Make a quiz on forces", mode: "answer" },
+  { label: "Make flashcards", prompt: "Make flashcards on photosynthesis", mode: "answer" },
 ];
 
 const state = {
@@ -130,6 +137,10 @@ const state = {
   currentView: "ask",
   lastAnswer: {},
   selectedFile: null,
+  askBusy: false,
+  linkContext: null,
+  paper: null,
+  paperSelection: new Map(),
   quiz: null,
   quizResponses: {},
   quizIndex: 0,
@@ -179,7 +190,6 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     setLanguage(state.settings.language);
     setTheme(state.settings.theme, { save: false });
     await reloadIndexes();
-    if (!state.indexes.length) await loadDemoPack({ silent: true });
     if (!state.messages.length) addWelcomeMessage();
     bindEvents();
     subscribeLocalAI((snapshot) => {
@@ -188,14 +198,6 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     });
     state.referral = readReferral();
     state.serverHealth = await healthPromise;
-    if (state.serverHealth.ai && !isModelConnected(state.settings) && !state.settings.freeRouterDismissed) {
-      for (const task of TASKS) state.settings.routing[task.id] = "server";
-      state.settings.fallback = "offline";
-      state.settings.activeProvider = "server";
-      state.settings.disclaimerSeen = true;
-      await saveSettings();
-      ui.showToast("Free Vignan Vidyanikethan AI router connected — answers stay grounded in your books.", "success", 5200);
-    }
     if (guest) {
       state.account = null;
       state.authAvailable = Boolean(state.serverHealth.ok && state.serverHealth.accounts);
@@ -233,8 +235,29 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
   }
 }
 
+const rebuiltLegacyIndexes = new Map();
 async function reloadIndexes() {
-  state.indexes = await db.loadAllIndexes();
+  const loaded = await db.loadAllIndexes();
+  // Retire only the old auto-installed sample. Never delete student uploads,
+  // notes, decks, chat history or quiz results during this migration.
+  for (const index of loaded.filter((item) => item.book.demo === true)) {
+    try { await db.deleteBook(index.book.id); }
+    catch { ui.showToast("The old sample could not be removed from device storage; it is hidden from the library.", "warning"); }
+  }
+  const stored = loaded.filter((index) => index.book.demo !== true);
+  const activeIds = new Set(stored.map((index) => index.book.id));
+  for (const id of rebuiltLegacyIndexes.keys()) if (!activeIds.has(id)) rebuiltLegacyIndexes.delete(id);
+  state.indexes = stored.map((index) => {
+    if (Number(index.book.indexVersion) >= 2 || !index.book.pages?.length) return index;
+    // Rebuild older tokenization without deleting or mutating stored books. If
+    // storage is interrupted, the original textbook and PDF remain untouched.
+    let rebuilt = rebuiltLegacyIndexes.get(index.book.id);
+    if (!rebuilt) {
+      rebuilt = buildBookIndex(index.book, index.book.pages);
+      rebuiltLegacyIndexes.set(index.book.id, rebuilt);
+    }
+    return rebuilt;
+  });
   state.books = state.indexes.map((index) => index.book);
 }
 
@@ -356,6 +379,17 @@ function renderQuizEngineNote() {
 
 function renderAll() {
   applyTranslations(document);
+  for (const button of $$(".nav-item, .mobile-nav-item")) {
+    const label = button.textContent.trim();
+    button.title = label;
+    button.setAttribute("aria-label", label);
+  }
+  const meta = VIEW_META[state.currentView];
+  if (meta) {
+    $("#view-kicker").textContent = t(meta.kicker);
+    $("#view-title").textContent = t(meta.title);
+    $("#view-subtitle").textContent = t(meta.subtitle);
+  }
   renderSuggestions();
   renderChat();
   renderSources(state.lastAnswer);
@@ -602,11 +636,15 @@ function renderAccount() {
 /* ------------------------------------------------------------------- chat */
 
 function addMessage(message, { persist = true } = {}) {
+  // Locally generated actions can finish within one millisecond. Preserve the
+  // user/assistant order when IndexedDB restores messages after a reload.
+  const previousTime = Date.parse(state.messages.at(-1)?.createdAt || "") || 0;
+  const createdAt = new Date(Math.max(Date.now(), previousTime + 1)).toISOString();
   const full = {
     id: uid("msg"),
     role: message.role === "user" ? "user" : "assistant",
     content: String(message.content || ""),
-    createdAt: new Date().toISOString(),
+    createdAt,
     sources: message.sources || [],
     webSources: message.webSources || [],
     meta: message.meta || "",
@@ -623,7 +661,7 @@ function addMessage(message, { persist = true } = {}) {
 function addWelcomeMessage() {
   addMessage({
     role: "assistant",
-    content: "**Welcome.** Ask a question and Vignan Vidyanikethan AI will answer from your textbooks with page citations. Add books in Library or start with the demo pack.",
+    content: "**Welcome.** Add study material you have permission to use in Library, then ask a question for cited answers. When books have no match, web search can look on Wikipedia.",
     meta: "Offline ready",
   });
 }
@@ -723,121 +761,242 @@ function showTyping(visible) {
   $("#ask-send").disabled = visible;
 }
 
+function chatActionText(key, language = state.settings.language, values = {}) {
+  const copies = {
+    missingContext: {
+      en: "I need a recent cited library answer for “that”. Ask about a chapter first, or name the topic in your request. Web snippets must be imported into Library before I can make study materials from them.",
+      te: "‘దాని’ కోసం ఇటీవల పుస్తక మూలాలతో వచ్చిన సమాధానం కావాలి. ముందుగా అధ్యాయం గురించి అడగండి లేదా అంశం పేరు చెప్పండి. వెబ్ సమాచారాన్ని ముందుగా Library లో చేర్చండి.",
+      hi: "‘उस’ के लिए हाल का स्रोत सहित लाइब्रेरी उत्तर चाहिए। पहले अध्याय के बारे में पूछें या विषय का नाम बताएँ। वेब सामग्री पहले Library में जोड़ें।",
+    },
+    cancelled: { en: "Cancelled. Your unfinished quiz is still here.", te: "రద్దు చేశాను. మీ అసంపూర్తి క్విజ్ అలాగే ఉంది.", hi: "रद्द किया। आपकी अधूरी क्विज़ सुरक्षित है।" },
+    quiz: { en: "I started a quiz with {count} cited questions. Open Quiz to begin.", te: "{count} మూలాలతో కూడిన ప్రశ్నల క్విజ్ మొదలైంది. Quiz తెరిచి ప్రారంభించండి.", hi: "{count} स्रोत सहित प्रश्नों की क्विज़ शुरू है। Quiz खोलकर शुरू करें।" },
+    cards: { en: "I made {count} cited flashcards and opened your deck.", te: "{count} మూలాలతో ఫ్లాష్ కార్డులు తయారు చేసి డెక్ తెరిచాను.", hi: "{count} स्रोत सहित फ़्लैशकार्ड बनाकर डेक खोल दिया है।" },
+    paper: { en: "I assembled {count} practice questions from the selected local documents. The preview shows source pages; questions can be reused and the paper does not predict the exam. No answer key was inferred.", te: "ఎంచుకున్న ఫైళ్ల నుండి {count} సాధన ప్రశ్నలు తయారు చేశాను. మూల పేజీలు ప్రివ్యూలో ఉన్నాయి. ప్రశ్నలు తిరిగి వాడవచ్చు; ఇది పరీక్ష అంచనా కాదు. సమాధానాలు ఊహించలేదు.", hi: "चुनी हुई फ़ाइलों से {count} अभ्यास प्रश्न बनाए हैं। स्रोत पृष्ठ प्रीव्यू में हैं। प्रश्न दोबारा उपयोग हो सकते हैं; यह परीक्षा की भविष्यवाणी नहीं है। उत्तरमाला का अनुमान नहीं लगाया।" },
+  };
+  let value = copies[key]?.[language] || copies[key]?.en || "";
+  for (const [name, replacement] of Object.entries(values)) value = value.replaceAll(`{${name}}`, String(replacement));
+  return value;
+}
+
+async function executeChatAction(intent, history) {
+  if (intent.action === "navigate") return { text: `Opened ${intent.view}.`, view: intent.view, sources: [] };
+  const context = intent.contextual ? lastCitedStudyContext(history) : null;
+  if (intent.contextual && !context) return { text: chatActionText("missingContext"), sources: [] };
+  const topic = intent.contextual ? (intent.topic || context.topic) : intent.topic;
+  const ids = intent.contextual
+    ? [...new Set(context.sources.map((source) => source.bookId).filter(Boolean))]
+    : scopeIds("#ask-book-scope");
+
+  if (intent.action === "quiz") {
+    if (state.quizSubmitting) return { text: "Please wait while your current quiz is graded.", sources: [] };
+    const guard = { quiz: state.quiz, result: state.result };
+    if (state.quiz && !state.result) {
+      const confirmed = await ui.confirmDialog({
+        title: "Start a different quiz?", message: "Your current unfinished quiz will be discarded only if the new quiz is ready.", confirmLabel: "Start a new quiz",
+      });
+      if (!confirmed) return { text: chatActionText("cancelled"), sources: [] };
+      if (state.quiz !== guard.quiz || state.result !== guard.result || state.quizSubmitting) return { text: "Your quiz changed while the confirmation was open. Please try again.", sources: [] };
+    }
+    const prior = { context: state.quizContext, topic: $("#quiz-topic").value, scope: $("#quiz-book-scope").value };
+    renderBookScopes();
+    $("#quiz-topic").value = topic || "";
+    const select = $("#quiz-book-scope");
+    select.value = ids.length === 1 && [...select.options].some((option) => option.value === ids[0]) ? ids[0] : "all";
+    $("#quiz-count").value = String(intent.count || 5);
+    $("#quiz-type").value = intent.type || "mcq";
+    $("#quiz-difficulty").value = intent.difficulty || "medium";
+    $("#quiz-timed").value = "no";
+    state.quizContext = context ? { topic: topic || "", bookScope: select.value, sources: context.sources } : null;
+    const result = await generateQuizHandler({ guard });
+    if (!result?.ok) {
+      state.quizContext = prior.context;
+      $("#quiz-topic").value = prior.topic;
+      select.value = prior.scope;
+      return { text: result?.message || "I could not make that quiz.", sources: [] };
+    }
+    return { text: chatActionText("quiz", undefined, { count: result.quiz.questions.length }), sources: sourcesFromHits(result.hits), view: "quiz", focus: "#quiz-question" };
+  }
+
+  if (intent.action === "flashcards") {
+    $("#flash-topic").value = topic || "";
+    const select = $("#flash-book-scope");
+    select.value = ids.length === 1 && [...select.options].some((option) => option.value === ids[0]) ? ids[0] : "all";
+    const result = await generateFlashcardsHandler({ topic: topic || "", bookIds: ids, count: intent.count || 10, ...(context ? { sources: context.sources } : {}) });
+    if (!result?.ok) return { text: result?.message || "I could not make those flashcards.", sources: [] };
+    const notSaved = result.saved ? "" : " The deck is only available in this tab because saving failed.";
+    return { text: chatActionText("cards", undefined, { count: result.cards.length }) + notSaved, sources: sourcesFromHits(result.hits), view: "flashcards", focus: "#flashcard-area .flashcard" };
+  }
+
+  if (intent.action === "paper") {
+    const chosen = context ? ids : [...state.paperSelection].filter(([, checked]) => checked).map(([id]) => id);
+    const result = generateModelPaper({ bookIds: chosen, topic: context ? intent.topic : topic, count: intent.count || 10 });
+    if (!result.ok) return { text: result.message, sources: [] };
+    if (context) {
+      for (const book of state.books) state.paperSelection.set(book.id, chosen.includes(book.id));
+      renderPaperSources();
+    }
+    $("#paper-builder").open = true;
+    return { text: chatActionText("paper", undefined, { count: result.paper.questions.length }), sources: [], view: "library", focus: "#paper-preview-title" };
+  }
+  return { text: "I could not complete that action.", sources: [] };
+}
+
 async function handleAsk(event) {
   event.preventDefault();
+  if (state.askBusy) return;
   const input = $("#ask-input");
   const query = input.value.trim();
   if (!query) return;
+  const submittedLink = firstLink(query);
+  if (submittedLink && hasLinkCredentials(submittedLink)) {
+    ui.showToast("Please remove usernames, passwords or signed tokens and use a public link.", "warning", 6500);
+    return;
+  }
+  const history = state.messages.slice(-12);
   addMessage({ role: "user", content: query });
   input.value = "";
+  state.askBusy = true;
   showTyping(true);
 
   try {
-    const bookIds = scopeIds("#ask-book-scope");
-    const retrieval = retrieve(query, state.indexes, { topK: 5, bookIds });
-    const hits = retrieval.hits;
-    const webToggle = $("#ask-web-fallback").checked;
-    const webEnabled = webToggle && state.settings.webEnabled;
-    if (webToggle && !state.settings.webEnabled) {
-      ui.showToast("Turn on web fallback in Settings to use outside sources.", "warning");
-    }
-    let webResults = [];
-    if (!retrieval.grounded && webEnabled && retrieval.reason !== "too-vague") {
-      try {
-        const search = await searchWeb(query, { ...state.settings, webEnabled: true });
-        webResults = search.results || [];
-      } catch (error) {
-        ui.showToast(`Web fallback failed: ${error.message}`, "warning");
-      }
-    }
-
+    const requestedLink = submittedLink;
+    const previousAssistant = [...history].reverse().find((message) => message.role === "assistant" && !["Bolt · conversation", "Bolt · casual"].includes(message.meta));
+    const recentLink = state.linkContext && previousAssistant?.webSources?.some((source) =>
+      String(source.url || "").split("#")[0] === state.linkContext.resource.url.split("#")[0],
+    );
     let answer = null;
-    let modelError = null;
-    const connected = state.settings.routing.answer !== "offline";
-    if (hits.length && connected) {
-      try {
-        const history = state.messages
-          .slice(0, -1)
-          .slice(-6)
-          .map(({ role, content }) => ({ role, content }));
-        const model = await answerWithModel({
-          query,
-          hits,
-          mode: state.mode,
-          history,
-          settings: state.settings,
-        });
-        if (!model.offline && model.content) {
-          answer = {
-            text: model.content,
-            sources: sourcesFromHits(hits),
-            webSources: [],
-            grounded: true,
-            confidence: retrieval.confidence,
-            verification: model.verification,
-            meta: `${aiProfile(model.engine).nickname} · AI answer${model.fallbackUsed ? " (fallback)" : ""}`,
-            flashcards: [],
-          };
-        } else if (model.error) {
-          modelError = model.error;
-        }
-      } catch (error) {
-        modelError = error;
+    let hits = [];
+    const language = state.settings.language;
+    const safety = safetyReply(query, language);
+    const intent = !safety && !asksAboutCreator(query) ? parseChatIntent(query) : null;
+    const greeting = conversationReply(query, language);
+    const casual = requestedLink ? "" : casualReply(query, language, consecutiveCasualTurns(history));
+    const requestMode = requestedChatMode(query) || state.mode;
+    if (safety) {
+      state.linkContext = null;
+      answer = { text: safety, sources: [], webSources: [], flashcards: [], grounded: false, confidence: 0, meta: "Bolt · support", verification: { enabled: false } };
+    } else if (asksAboutCreator(query)) {
+      state.linkContext = null;
+      answer = {
+        text: creatorAnswer(language), sources: [], webSources: [], flashcards: [],
+        grounded: false, confidence: 0, meta: "About Vignan AI", verification: { enabled: false },
+      };
+    } else if (intent) {
+      const action = await executeChatAction(intent, history);
+      answer = { text: action.text, sources: action.sources || [], webSources: [], flashcards: [], grounded: Boolean(action.sources?.length), confidence: 0, meta: "Bolt · study action", verification: { enabled: false } };
+      state.lastAnswer = answer;
+      addMessage({ role: "assistant", content: answer.text, sources: answer.sources, meta: answer.meta });
+      renderSources(answer);
+      if (action.view) {
+        setView(action.view);
+        if (action.focus) requestAnimationFrame(() => $(action.focus)?.focus({ preventScroll: false }));
       }
-    }
+      return;
+    } else if (greeting || casual) {
+      answer = {
+        text: greeting || casual, sources: [], webSources: [], flashcards: [],
+        grounded: false, confidence: 0, meta: greeting ? "Bolt · conversation" : "Bolt · casual", verification: { enabled: false },
+      };
+    } else if (requestedLink || (recentLink && isFollowUp(query))) {
+      if (requestedLink) {
+        const resource = await readPublicLink(requestedLink);
+        const index = buildBookIndex({ id: uid("link"), title: resource.title, subject: "Public web source", sourceUrl: resource.url }, resource.pages);
+        state.linkContext = { resource, index };
+      }
+      answer = composeLinkAnswer({ query, ...state.linkContext });
+    } else {
+      state.linkContext = null;
+      const effectiveQuery = contextualQuery(query, history);
+      const bookIds = scopeIds("#ask-book-scope");
+      const retrieval = retrievePreferBooks(effectiveQuery, state.indexes, { topK: 5, bookIds });
+      hits = retrieval.hits;
+      const webEnabled = Boolean(state.settings.webEnabled);
+      let webResults = [];
+      let searchProvider = "Web search";
+      if (!retrieval.grounded && webEnabled && retrieval.reason !== "too-vague") {
+        try {
+          const search = await searchWeb(searchTopic(effectiveQuery), { ...state.settings, webEnabled: true });
+          webResults = search.results || [];
+          searchProvider = search.provider || "Web search";
+        } catch (error) {
+          ui.showToast(`Web fallback failed: ${error.message}`, "warning");
+        }
+      }
 
-    if (!answer) {
-      answer = composeGroundedAnswer({
-        query,
-        hits,
-        mode: state.mode,
-        reason: retrieval.reason,
-        confidence: retrieval.confidence,
-        webResults,
-        webEnabled,
-      });
-      answer.meta = modelError
-        ? "Model unavailable — cited excerpts shown"
-        : "Bolt · cited textbook excerpts";
-      answer.verification = { enabled: false };
-      showKeyExhaustedToast(modelError);
-    }
-    answer.webSources = webResults;
-    if (state.mode === "flashcards" && hits.length && !answer.flashcards?.length) {
-      answer.flashcards = buildFlashcards(hits, 6);
+      let modelError = null;
+      const connected = state.settings.routing.answer !== "offline";
+      if (hits.length && connected) {
+        try {
+          const model = await answerWithModel({
+            query,
+            hits,
+            mode: requestMode,
+            history: history.slice(-6).map(({ role, content }) => ({ role, content })),
+            settings: state.settings,
+          });
+          if (!model.offline && model.content) {
+            const webImportNotice = hits.some((hit) => hit.sourceUrl)
+              ? "_This answer includes a website you imported; it is not an independently verified textbook._\n\n"
+              : "";
+            answer = {
+              text: webImportNotice + model.content,
+              sources: sourcesFromHits(hits), webSources: [], grounded: true,
+              confidence: retrieval.confidence, verification: model.verification,
+              meta: `${aiProfile(model.engine).nickname} · AI answer${model.fallbackUsed ? " (fallback)" : ""}`,
+              flashcards: [],
+            };
+          } else if (model.error) modelError = model.error;
+        } catch (error) { modelError = error; }
+      }
+      if (!answer && !hits.length && webResults.length) {
+        answer = composeWebAnswer({ query: effectiveQuery, results: webResults, provider: searchProvider });
+      }
+      if (!answer) {
+        answer = composeGroundedAnswer({
+          query, evidenceQuery: effectiveQuery, hits, mode: requestMode,
+          reason: retrieval.reason, confidence: retrieval.confidence, webResults, webEnabled, language: state.settings.language,
+        });
+        answer.meta = modelError ? "Model unavailable — cited excerpts shown"
+          : hits.length ? "Bolt · cited library excerpts" : "Bolt · no matching source";
+        answer.verification = { enabled: false };
+        showKeyExhaustedToast(modelError);
+      }
+      if (requestMode === "flashcards" && hits.length && !answer.flashcards?.length) {
+        answer.flashcards = buildFlashcards(hits, 6, { language: state.settings.language });
+      }
     }
     state.lastAnswer = answer;
-
     addMessage({
-      role: "assistant",
-      content: answer.text,
-      sources: answer.sources,
-      webSources: answer.webSources,
-      meta: answer.meta,
-      confidence: answer.confidence,
-      verification: answer.verification,
-      flashcards: answer.flashcards,
+      role: "assistant", content: answer.text, sources: answer.sources,
+      webSources: answer.webSources, meta: answer.meta, confidence: answer.confidence,
+      verification: answer.verification, flashcards: answer.flashcards,
     });
     renderSources(answer);
-
     if (answer.flashcards?.length) {
       const { saved } = await saveNewDeck({ cards: answer.flashcards, topic: query, bookIds: hits.map((hit) => hit.bookId) });
       if (saved) ui.showToast(state.storageMode === "memory" ? "Cited cards are ready for this session." : "A cited revision deck was saved in Flashcards.", "success");
     }
-    if (webResults.length) {
-      ui.showToast("Outside sources are labelled separately — they are not textbook answers.", "warning");
-    }
   } catch (error) {
-    console.error(error);
-    ui.showToast(`Could not answer: ${error.message}`, "error");
+    // Never leave a submitted message unanswered, even for a blocked link.
+    const message = firstLink(query)
+      ? `I could not read that link. ${error.message || "Please use a public webpage, PDF or text file."}`
+      : "I could not complete that answer. Please try again.";
+    const answer = { text: message, sources: [], webSources: [], meta: "Bolt · request not completed", confidence: 0 };
+    state.lastAnswer = answer;
+    addMessage({ role: "assistant", content: answer.text, meta: answer.meta });
+    renderSources(answer);
+    ui.showToast(message, "warning", 6500);
   } finally {
+    state.askBusy = false;
     showTyping(false);
   }
 }
 
 async function clearChat() {
+  if (state.askBusy) { ui.showToast("Wait for the current answer before clearing the chat.", "info"); return; }
   await db.clearMessages();
   state.messages = [];
+  state.linkContext = null;
   addWelcomeMessage();
   state.lastAnswer = {};
   renderSources({});
@@ -849,7 +1008,7 @@ async function clearChat() {
 function renderSources(answer = {}) {
   const sources = answer.sources || [];
   const webSources = answer.webSources || [];
-  $("#source-count").textContent = String(sources.length);
+  $("#source-count").textContent = String(sources.length + webSources.length);
   const list = $("#source-list");
   list.replaceChildren();
   if (!sources.length) {
@@ -877,8 +1036,8 @@ function sourceCard(source) {
   const card = ui.element("div", "source-card");
   const top = ui.element("div", "source-card-top");
   top.appendChild(ui.element("span", "source-number", String(source.n)));
-  top.appendChild(ui.element("div", "source-title", truncate(source.title, 54)));
-  top.appendChild(ui.element("span", "source-page", `p. ${source.page}`));
+  top.appendChild(ui.element("div", "source-title", `${source.sourceUrl ? "Web import · " : ""}${truncate(source.title, 54)}`));
+  top.appendChild(ui.element("span", "source-page", source.sourceUrl && source.sourceKind !== "pdf" ? `section ${source.page}` : `p. ${source.page}`));
   const snippet = ui.element("p", "source-snippet", truncate(source.quote || source.text, 190));
   const actions = ui.element("div", "source-actions");
   const read = ui.element("button", "", t("ask.reader"));
@@ -972,8 +1131,14 @@ function openWebSource(source) {
   if (source?.url) window.open(source.url, "_blank", "noopener,noreferrer");
 }
 
+function studySourceLabel(source = {}) {
+  source ||= {};
+  const kind = source.sourceUrl && source.sourceKind !== "pdf" ? "section" : "page";
+  return `${source.sourceUrl ? "Web import · " : ""}${source.title || "Library source"} · ${kind} ${source.page || "?"}`;
+}
+
 function formatAnswerForCopy(message) {
-  const references = (message.sources || []).map((source, index) => `[${source.n || index + 1}] ${source.title || "Textbook"} · page ${source.page || "?"}`);
+  const references = (message.sources || []).map((source, index) => `[${source.n || index + 1}] ${source.sourceUrl ? "Web import: " : ""}${source.title || "Library source"} · ${source.sourceUrl && source.sourceKind !== "pdf" ? "section" : "page"} ${source.page || "?"}${source.sourceUrl ? ` — ${source.sourceUrl}` : ""}`);
   const outside = (message.webSources || []).map((source, index) => `[W${index + 1}] ${source.title || "Outside source"} — ${source.url || ""}`);
   return [message.content || "", ...(references.length ? ["", "Textbook sources:", ...references] : []), ...(outside.length ? ["", "Outside sources:", ...outside] : [])].join("\n");
 }
@@ -1005,6 +1170,19 @@ function scopeIds(selector) {
   return value === "all" ? [] : [value];
 }
 
+function citedHitsFromLibrary(sources = []) {
+  return sources.flatMap((source) => {
+    const index = state.indexes.find((entry) => entry.book.id === source.bookId);
+    const chunk = index?.chunks?.find((entry) => entry.id === source.chunkId);
+    if (!chunk) return [];
+    return [{
+      ...source, bookId: index.book.id, chunkId: chunk.id, title: index.book.title,
+      page: chunk.page, section: chunk.section, text: chunk.text,
+      sourceUrl: index.book.sourceUrl || "", sourceKind: index.book.type || "text",
+    }];
+  });
+}
+
 function topicSearchMessage(reason) {
   if (reason === "empty-library") return "Add a textbook or choose a book with readable text first.";
   if (reason === "too-vague") return "Name a topic, or leave it blank for general practice.";
@@ -1013,6 +1191,7 @@ function topicSearchMessage(reason) {
 }
 
 function renderLibrary() {
+  renderPaperSources();
   const list = $("#book-list");
   list.replaceChildren();
   const totalPages = state.books.reduce((sum, book) => sum + (book.pageCount || 0), 0);
@@ -1028,7 +1207,7 @@ function renderLibrary() {
     top.appendChild(ui.element("div", "book-icon", (book.subject || "B").slice(0, 2).toUpperCase()));
     const copy = document.createElement("div");
     copy.appendChild(ui.element("h4", "", book.title));
-    copy.appendChild(ui.element("p", "", book.demo ? t("library.demoNote") : `${book.type?.toUpperCase() || "TEXT"} · ${book.fileName || "local notes"}`));
+    copy.appendChild(ui.element("p", "", `${book.sourceUrl ? "WEB IMPORT · " : ""}${book.type?.toUpperCase() || "TEXT"} · ${book.fileName || "local notes"}`));
     top.appendChild(copy);
     const meta = ui.element("div", "book-meta");
     [
@@ -1059,40 +1238,105 @@ function renderLibrary() {
   }
 }
 
-async function loadDemoPack({ silent = false } = {}) {
-  if (state.books.some((book) => book.demo)) {
-    if (!silent) ui.showToast("The demo study pack is already in your library.", "warning");
+function renderPaperSources() {
+  const container = $("#paper-sources");
+  if (!container) return;
+  container.replaceChildren();
+  const ids = new Set(state.books.map((book) => book.id));
+  for (const id of state.paperSelection.keys()) if (!ids.has(id)) state.paperSelection.delete(id);
+  if (!state.books.length) {
+    container.appendChild(ui.element("p", "hint", t("paper.empty")));
     return;
   }
-  try {
-    const response = await fetch("./data/demo-textbook.txt");
-    if (!response.ok) throw new Error("Demo study pack could not be loaded.");
-    const raw = await response.text();
-    const index = await ingestDemoPack(raw, {
-      title: "Demo Study Pack",
-      subject: "Science, Maths & English",
-      grade: "8",
-      board: "Sample notes",
-    });
-    await db.saveBookIndex(index);
-    await reloadIndexes();
-    renderBookScopes();
-    renderLibrary();
-    if (!silent) ui.showToast("Demo study pack added — try asking about photosynthesis.", "success");
-  } catch (error) {
-    if (!silent) ui.showToast(error.message, "error");
+  for (const book of state.books) {
+    const label = ui.element("label", "paper-source-choice");
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = book.id;
+    input.checked = state.paperSelection.has(book.id) ? state.paperSelection.get(book.id) : true;
+    state.paperSelection.set(book.id, input.checked);
+    input.addEventListener("change", () => state.paperSelection.set(book.id, input.checked));
+    const pageCount = book.pageCount || 0;
+    const text = ui.element("span", "", `${book.sourceUrl ? "Web import · " : ""}${book.title} · ${pageCount} ${t(pageCount === 1 ? "common.page" : "common.pages")}`);
+    label.append(input, text);
+    container.appendChild(label);
   }
+}
+
+function renderModelPaper(paper) {
+  const preview = $("#paper-preview");
+  preview.hidden = !paper?.questions?.length;
+  if (preview.hidden) return;
+  $("#paper-preview-title").textContent = paper.title;
+  const stats = paper.analysis;
+  $("#paper-analysis").textContent = t("paper.stats", {
+    found: stats.extracted, duplicates: stats.duplicates, selected: paper.questions.length,
+    choices: stats.types["multiple-choice"] || 0, other: stats.types.written || 0,
+    limited: stats.truncated ? t("paper.limited") : "",
+  });
+  const list = $("#paper-questions");
+  list.replaceChildren();
+  for (const item of paper.questions) {
+    const li = document.createElement("li");
+    li.appendChild(ui.element("div", "paper-question-text", item.text));
+    const source = ui.element("button", "source-link paper-question-source", `${item.source.sourceUrl ? "Web import · " : ""}${item.source.title} · page ${item.source.page} ↗`);
+    source.type = "button";
+    source.addEventListener("click", () => openSource(item.source));
+    li.appendChild(source);
+    list.appendChild(li);
+  }
+}
+
+function clearModelPaperPreview() {
+  state.paper = null;
+  $("#paper-preview").hidden = true;
+  $("#paper-questions").replaceChildren();
+  $("#paper-analysis").textContent = "";
+}
+
+function generateModelPaper({ bookIds, topic, count } = {}) {
+  const chosen = Array.isArray(bookIds) ? bookIds : [...state.paperSelection].filter(([, checked]) => checked).map(([id]) => id);
+  const indexes = state.indexes.filter((index) => chosen.includes(index.book.id));
+  if (!indexes.length) {
+    clearModelPaperPreview();
+    const message = t("paper.selectSources");
+    $("#paper-status").textContent = message;
+    return { ok: false, message };
+  }
+  const target = typeof topic === "string" ? topic.trim() : $("#paper-topic").value.trim();
+  const requested = clamp(Number(count) || Number($("#paper-count").value) || 10, 1, 30);
+  const paper = buildModelPaper(indexes, { topic: target, count: requested });
+  if (!paper.questions.length) {
+    clearModelPaperPreview();
+    const message = target ? t("paper.noTopic", { topic: target }) : t("paper.noQuestions");
+    $("#paper-status").textContent = message;
+    return { ok: false, message };
+  }
+  state.paper = paper;
+  $("#paper-topic").value = target;
+  $("#paper-count").value = String(requested);
+  $("#paper-status").textContent = paper.questions.length < requested
+    ? t("paper.builtFewer", { selected: paper.questions.length, requested })
+    : t("paper.built", { selected: paper.questions.length });
+  renderModelPaper(paper);
+  return { ok: true, paper };
 }
 
 function handleFile(file) {
   if (!file) return;
-  const allowed = /\.(pdf|txt|md|markdown)$/i.test(file.name);
-  if (!allowed) {
-    ui.showToast("Choose a PDF, TXT or Markdown file.", "warning");
+  if ($("#upload-submit").disabled) {
+    ui.showToast("Wait for the current import to finish.", "info");
     return;
   }
-  if (file.size > 40 * 1024 * 1024) {
-    ui.showToast("That file is larger than 40 MB. Split it into chapters first.", "warning");
+  state.selectedFile = null;
+  $("#selected-file").classList.add("hidden");
+  try {
+    checkFileName(file.name, file.type);
+    if (file.size > MAX_PDF_BYTES) throw new Error("That file is larger than 40 MB. Split it into chapters first.");
+    if (!file.size) throw new Error("That file is empty.");
+  } catch (error) {
+    $("#file-input").value = "";
+    ui.showToast(error.message, "warning");
     return;
   }
   state.selectedFile = file;
@@ -1141,13 +1385,11 @@ async function handleUpload() {
       board: $("#book-board").value.trim(),
       fileName: file.name,
     };
-    let index;
-    if (/\.pdf$/i.test(file.name)) {
-      index = await ingestPdf(file, meta, uploadProgress);
-    } else {
-      const raw = await readFileAsText(file);
-      index = ingestText(raw, meta, uploadProgress);
-    }
+    const inspected = await inspectFile(file);
+    const index = inspected.kind === "pdf"
+      ? await ingestPdf(file, meta, uploadProgress)
+      : ingestText(inspected.text, meta, uploadProgress);
+    if (!index.chunks.length) throw new Error("That file does not contain enough readable text to index.");
     await db.saveBookIndex(index);
     await reloadIndexes();
     state.selectedFile = null;
@@ -1161,17 +1403,47 @@ async function handleUpload() {
     renderLibrary();
     ui.showToast(`${index.book.title} added — ${index.book.pageCount} pages indexed.`, "success");
   } catch (error) {
-    console.error(error);
+    $("#upload-progress").classList.add("hidden");
     ui.showToast(error.message || "Could not add that book.", "error");
   } finally {
     ui.setBusy(button, false);
   }
 }
 
+async function handleLinkImport() {
+  const input = $("#library-url");
+  const url = input.value.trim();
+  if (!url) { ui.showToast("Enter a public webpage, PDF or text-file URL.", "warning"); return; }
+  const button = $("#library-url-submit");
+  if (button.disabled) return;
+  ui.setBusy(button, true, "Importing…");
+  try {
+    const { url: finalUrl, file, inspected } = await downloadPublicLink(url);
+    const fallbackTitle = file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ") || new URL(finalUrl).hostname;
+    const meta = { title: inspected.title || fallbackTitle, subject: "Web import", fileName: file.name, sourceUrl: finalUrl };
+    const index = inspected.kind === "pdf" ? await ingestPdf(file, meta, uploadProgress) : ingestText(inspected.text, meta);
+    if (!index.chunks.length) throw new Error("That source does not contain enough readable text to index.");
+    await db.saveBookIndex(index);
+    await reloadIndexes();
+    input.value = "";
+    $("#upload-progress").classList.add("hidden");
+    renderBookScopes();
+    renderLibrary();
+    ui.showToast(`${index.book.title} imported. It remains labelled as a web source.`, "success", 5500);
+  } catch (error) {
+    $("#upload-progress").classList.add("hidden");
+    ui.showToast(error.message || "Could not import that link.", "warning", 6500);
+  } finally { ui.setBusy(button, false); }
+}
+
 async function handlePaste() {
   const raw = $("#paste-text").value.trim();
   if (raw.length < 40) {
     ui.showToast("Paste at least a paragraph of notes.", "warning");
+    return;
+  }
+  if (new TextEncoder().encode(raw).length > MAX_TEXT_BYTES) {
+    ui.showToast("Notes are limited to 4 MB. Split the material into chapters first.", "warning");
     return;
   }
   const button = $("#paste-submit");
@@ -1220,6 +1492,10 @@ async function handleBookAction(event) {
     });
     if (!confirmed) return;
     await db.deleteBook(book.id);
+    if (state.paper?.questions.some((item) => item.source?.bookId === book.id)) {
+      clearModelPaperPreview();
+      $("#paper-status").textContent = "A source was removed. Build the paper again from the remaining documents.";
+    }
     await reloadIndexes();
     renderBookScopes();
     renderLibrary();
@@ -1229,7 +1505,7 @@ async function handleBookAction(event) {
 
 /* ------------------------------------------------------------------- quiz */
 
-async function generateQuizHandler() {
+async function generateQuizHandler(options = {}) {
   const topic = $("#quiz-topic").value.trim();
   const bookIds = scopeIds("#quiz-book-scope");
   const count = clamp(Number($("#quiz-count").value) || 5, 3, 10);
@@ -1245,21 +1521,20 @@ async function generateQuizHandler() {
     const usingAnswer = context && topic === context.topic && $("#quiz-book-scope").value === context.bookScope;
     let retrieval;
     if (usingAnswer) {
-      const hits = context.sources.filter((source) => {
-        const index = state.indexes.find((entry) => entry.book.id === source.bookId);
-        return source.text && index?.chunks?.some((chunk) => chunk.id === source.chunkId);
-      });
+      const hits = citedHitsFromLibrary(context.sources);
       if (!hits.length) {
-        ui.showToast("Those cited pages are no longer in your library. Choose another book or topic.", "warning", 6500);
-        return;
+        const message = "Those cited pages are no longer in your library. Choose another book or topic.";
+        ui.showToast(message, "warning", 6500);
+        return { ok: false, message };
       }
       retrieval = { hits, reason: "answer-sources" };
     } else {
       retrieval = retrieveChapter(topic, state.indexes, { topK: Math.max(12, count * 2), bookIds });
     }
     if (!retrieval.hits.length) {
-      ui.showToast(topicSearchMessage(retrieval.reason), "warning", 6500);
-      return;
+      const message = topicSearchMessage(retrieval.reason);
+      ui.showToast(message, "warning", 6500);
+      return { ok: false, message };
     }
     let quiz = null;
     let engine = "offline";
@@ -1302,11 +1577,18 @@ async function generateQuizHandler() {
         timed,
         secondsPerQuestion: 45,
         bookIds,
+        language: state.settings.language,
       });
     }
     if (!quiz.questions.length) {
-      ui.showToast("Not enough readable text was found for a quiz.", "warning");
-      return;
+      const message = "Not enough readable text was found for a quiz.";
+      ui.showToast(message, "warning");
+      return { ok: false, message };
+    }
+    if (options.guard && (state.quiz !== options.guard.quiz || state.result !== options.guard.result || state.quizSubmitting)) {
+      const message = "The current quiz changed while questions were being written. Your current work was kept; please try again.";
+      ui.showToast(message, "warning", 6500);
+      return { ok: false, message };
     }
     state.quiz = quiz;
     state.quizResponses = {};
@@ -1322,9 +1604,12 @@ async function generateQuizHandler() {
     if (quiz.questions.length < count) ui.showToast(`Found enough material for ${quiz.questions.length} of the ${count} requested questions.`, "info", 5000);
     startQuizTimer();
     renderQuizQuestion();
+    return { ok: true, quiz, hits: retrieval.hits };
   } catch (error) {
     console.error(error);
-    ui.showToast(error.message || "Could not generate the quiz.", "error");
+    const message = error.message || "Could not generate the quiz.";
+    ui.showToast(message, "error");
+    return { ok: false, message };
   } finally {
     ui.setBusy(button, false);
   }
@@ -1403,7 +1688,7 @@ function renderQuizQuestion() {
     textarea.addEventListener("input", () => saveQuizResponse(textarea.value));
     container.appendChild(textarea);
   }
-  const source = ui.element("p", "hint", `${question.source?.title || "Textbook"} · page ${question.source?.page || "?"}`);
+  const source = ui.element("p", "hint", studySourceLabel(question.source));
   container.appendChild(source);
 
   $("#quiz-prev").disabled = state.quizIndex === 0;
@@ -1629,7 +1914,7 @@ function renderQuizResults(result) {
     box.appendChild(top);
     box.appendChild(ui.element("p", "", `Your answer: ${item.submitted || "(empty)"}`));
     box.appendChild(ui.element("p", "", `${item.feedback} Correct: ${truncate(item.correctText, 120)}`));
-    const source = ui.element("button", "source-link", `${item.question.source?.title || "Textbook"} · page ${item.question.source?.page || "?"} ↗`);
+    const source = ui.element("button", "source-link", `${studySourceLabel(item.question.source)} ↗`);
     source.type = "button";
     source.addEventListener("click", () => openQuestionSource(item.question.source));
     box.appendChild(source);
@@ -1761,18 +2046,23 @@ async function reviewMistakes(result) {
   if (saved) ui.showToast(state.storageMode === "memory" ? "Revision cards are ready for this session." : "Missed questions saved as a revision deck.", "success");
 }
 
-async function generateFlashcardsHandler() {
-  const topic = $("#flash-topic").value.trim();
-  const bookIds = scopeIds("#flash-book-scope");
-  const count = Number($("#flash-count").value) || 10;
+async function generateFlashcardsHandler(options = {}) {
+  const topic = typeof options.topic === "string" ? options.topic : $("#flash-topic").value.trim();
+  const bookIds = Array.isArray(options.bookIds) ? options.bookIds : scopeIds("#flash-book-scope");
+  const count = clamp(Number(options.count) || Number($("#flash-count").value) || 10, 3, 15);
   const useModel = $("#flash-use-model")?.checked !== false;
   const button = $("#flash-generate");
   ui.setBusy(button, true, "Writing cards…");
   try {
-    const retrieval = retrieveChapter(topic, state.indexes, { topK: Math.max(12, count), bookIds });
+    const retrieval = Array.isArray(options.sources)
+      ? { hits: citedHitsFromLibrary(options.sources), reason: "missing-cited-pages" }
+      : retrieveChapter(topic, state.indexes, { topK: Math.max(12, count), bookIds });
     if (!retrieval.hits.length) {
-      ui.showToast(topicSearchMessage(retrieval.reason), "warning", 6500);
-      return;
+      const message = retrieval.reason === "missing-cited-pages"
+        ? "Those cited pages are no longer in your library. Choose another book or topic."
+        : topicSearchMessage(retrieval.reason);
+      ui.showToast(message, "warning", 6500);
+      return { ok: false, message };
     }
     let cards = [];
     if (useModel && state.settings.routing.flashcards !== "offline" && retrieval.hits.length) {
@@ -1788,10 +2078,11 @@ async function generateFlashcardsHandler() {
         showKeyExhaustedToast(error);
       }
     }
-    if (!cards.length) cards = buildFlashcards(retrieval.hits, count);
+    if (!cards.length) cards = buildFlashcards(retrieval.hits, count, { language: state.settings.language });
     if (!cards.length) {
-      ui.showToast("Not enough readable sentences for flashcards. Try another topic.", "warning");
-      return;
+      const message = "Not enough readable sentences for flashcards. Try another topic.";
+      ui.showToast(message, "warning");
+      return { ok: false, message };
     }
     const { saved } = await saveNewDeck({ cards, topic, bookIds: bookIds.length ? bookIds : retrieval.hits.map((hit) => hit.bookId) });
     if (saved) {
@@ -1799,9 +2090,12 @@ async function generateFlashcardsHandler() {
       const fewer = cards.length < count ? ` (${cards.length} of ${count} requested)` : "";
       ui.showToast(`${cards.length} cited cards ${message}${fewer}.`, "success", 5000);
     }
+    return { ok: true, cards, hits: retrieval.hits, saved };
   } catch (error) {
     console.error(error);
-    ui.showToast(error.message || "Could not make flashcards.", "error");
+    const message = error.message || "Could not make flashcards.";
+    ui.showToast(message, "error");
+    return { ok: false, message };
   } finally {
     ui.setBusy(button, false);
   }
@@ -1856,7 +2150,7 @@ function renderFlashcards() {
   const front = ui.element("div", "flashcard-face flashcard-front");
   front.appendChild(ui.element("div", "flashcard-kicker", `Tap or press to reveal · ${state.flashIndex + 1}/${state.flashDeck.length}`));
   front.appendChild(ui.element("div", "flashcard-text", card.front));
-  front.appendChild(ui.element("div", "flashcard-source", `${card.source?.title || "Textbook"} · page ${card.source?.page || "?"}`));
+  front.appendChild(ui.element("div", "flashcard-source", studySourceLabel(card.source)));
   const back = ui.element("div", "flashcard-face flashcard-back");
   const plainBack = card.back.replace(/\*\*(.*?)\*\*/g, "$1");
   back.appendChild(ui.element("div", "flashcard-kicker", "Answer · press to see question"));
@@ -1865,7 +2159,7 @@ function renderFlashcards() {
   flashcard.appendChild(inner);
   area.appendChild(flashcard);
 
-  const sourceButton = ui.element("button", "text-button deck-source", `Open ${card.source?.title || "textbook"} · page ${card.source?.page || "?"} ↗`);
+  const sourceButton = ui.element("button", "text-button deck-source", `Open ${studySourceLabel(card.source)} ↗`);
   sourceButton.type = "button";
   sourceButton.disabled = !card.source?.bookId;
   sourceButton.addEventListener("click", () => openQuestionSource(card.source));
@@ -2436,12 +2730,38 @@ function renderProviderEditor() {
   fallback.value = state.settings.fallback || "offline";
 }
 
+function renderWebChoice() {
+  const enabled = Boolean(state.settings.webEnabled);
+  $("#settings-web-enabled").checked = enabled;
+  $("#ask-web-fallback").checked = enabled;
+  const label = t(enabled ? "ask.webOn" : "ask.webOff");
+  $("#web-search-state").textContent = label;
+  $("#settings-web-state").textContent = label;
+}
+
+let webPreferenceWrites = Promise.resolve();
+async function setWebChoice(enabled) {
+  state.settings.webEnabled = enabled;
+  if (enabled && state.settings.webMode === "custom" && !state.settings.searchEndpoint) {
+    state.settings.webMode = "server";
+    $("#settings-web-mode").value = "server";
+    ui.showToast("Using the built-in search because no custom search source was set.", "info");
+  }
+  renderWebChoice();
+  try {
+    webPreferenceWrites = webPreferenceWrites.catch(() => {}).then(() => saveSettings());
+    await webPreferenceWrites;
+    void renderStorageSummary();
+  } catch {
+    ui.showToast("That web preference could not be saved; it applies only to this session.", "warning");
+  }
+}
+
 function renderWebSettings() {
-  $("#settings-web-enabled").checked = Boolean(state.settings.webEnabled);
+  renderWebChoice();
   $("#settings-web-mode").value = state.settings.webMode;
   $("#settings-web-endpoint").value = state.settings.searchEndpoint || "";
   $("#settings-web-token").value = state.settings.searchToken || "";
-  $("#ask-web-fallback").checked = Boolean(state.settings.webEnabled);
 }
 
 function renderAppearanceSettings() {
@@ -2568,14 +2888,17 @@ async function testProviderConnection() {
 }
 
 async function saveWebSettings() {
-  state.settings.webEnabled = $("#settings-web-enabled").checked;
-  state.settings.webMode = $("#settings-web-mode").value;
-  state.settings.searchEndpoint = $("#settings-web-endpoint").value.trim();
-  state.settings.searchToken = $("#settings-web-token").value.trim();
-  if (state.settings.webEnabled && state.settings.webMode === "custom" && !state.settings.searchEndpoint) {
+  const enabled = $("#settings-web-enabled").checked;
+  const mode = $("#settings-web-mode").value;
+  const endpoint = $("#settings-web-endpoint").value.trim();
+  if (enabled && mode === "custom" && !endpoint) {
     ui.showToast("Add a custom JSON search endpoint first.", "warning");
     return;
   }
+  state.settings.webEnabled = enabled;
+  state.settings.webMode = mode;
+  state.settings.searchEndpoint = endpoint;
+  state.settings.searchToken = $("#settings-web-token").value.trim();
   await saveSettings();
   renderWebSettings();
   ui.showToast("Web fallback settings saved.", "success");
@@ -2619,6 +2942,7 @@ async function deleteAllData() {
   });
   if (!confirmed) return;
   await deckWriteQueue.catch(() => {});
+  await webPreferenceWrites.catch(() => {});
   await db.clearAllData();
   state.studyProgress = resetProgress();
   writeFlashProgress({});
@@ -2626,6 +2950,15 @@ async function deleteAllData() {
   await db.setSetting("settings", state.settings);
   state.messages = [];
   state.results = [];
+  state.linkContext = null;
+  state.paper = null;
+  state.paperSelection.clear();
+  $("#paper-preview").hidden = true;
+  $("#paper-questions").replaceChildren();
+  $("#paper-preview-title").textContent = "Practice model paper";
+  $("#paper-analysis").textContent = "";
+  $("#paper-status").textContent = "";
+  $("#paper-topic").value = "";
   state.quiz = null;
   state.result = null;
   state.quizResponses = {};
@@ -2639,12 +2972,11 @@ async function deleteAllData() {
   state.lastAnswer = {};
   clearQuizTimer();
   await reloadIndexes();
-  await loadDemoPack({ silent: true });
   addWelcomeMessage();
   setLanguage(state.settings.language);
   setTheme(state.settings.theme, { save: false });
   renderAll();
-  ui.showToast("All local data deleted. A fresh demo pack was loaded.", "success");
+  ui.showToast("All local data deleted. Your library is empty.", "success");
 }
 
 /* ----------------------------------------------------------------- events */
@@ -2676,9 +3008,7 @@ function openSettingsPanel(id) {
 }
 
 function currentAIId() {
-  const routes = TASKS.map((task) => state.settings.routing[task.id]);
-  if (routes.every((route) => route === "offline")) return "offline";
-  return routes.find((route) => route !== "offline") || state.settings.activeProvider || "server";
+  return state.settings.routing.answer || "offline";
 }
 
 async function setActiveAI(providerId) {
@@ -2873,6 +3203,8 @@ function bindEvents() {
   window.addEventListener("offline", updateOfflineChip);
 
   $("#ask-form").addEventListener("submit", handleAsk);
+  $("#ask-web-fallback").addEventListener("change", (event) => void setWebChoice(event.target.checked));
+  $("#settings-web-enabled").addEventListener("change", (event) => void setWebChoice(event.target.checked));
   $("#ask-input").addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -2881,7 +3213,11 @@ function bindEvents() {
   });
   $("#mode-row").addEventListener("click", (event) => {
     const chip = event.target.closest(".mode-chip");
-    if (chip) setMode(chip.dataset.mode);
+    if (chip) {
+      setMode(chip.dataset.mode);
+      const disclosure = chip.closest("details");
+      if (disclosure) disclosure.open = false;
+    }
   });
   $("#clear-chat").addEventListener("click", clearChat);
   $("#use-local-ai-button")?.addEventListener("click", () => openSettingsPanel("local-ai-panel"));
@@ -2913,7 +3249,6 @@ function bindEvents() {
     requestAnimationFrame(() => $("#student-provider-keys")?.focus({ preventScroll: true }));
   });
 
-  $("#add-demo-book").addEventListener("click", () => loadDemoPack());
   const dropzone = $("#dropzone");
   dropzone.addEventListener("click", () => $("#file-input").click());
   dropzone.addEventListener("keydown", (event) => {
@@ -2934,8 +3269,21 @@ function bindEvents() {
   });
   $("#file-input").addEventListener("change", (event) => handleFile(event.target.files?.[0]));
   $("#upload-submit").addEventListener("click", handleUpload);
+  $("#library-url-submit").addEventListener("click", handleLinkImport);
+  $("#library-url").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") { event.preventDefault(); void handleLinkImport(); }
+  });
   $("#paste-submit").addEventListener("click", handlePaste);
   $("#book-list").addEventListener("click", handleBookAction);
+  $("#paper-generate").addEventListener("click", () => generateModelPaper());
+  $("#paper-download").addEventListener("click", () => {
+    if (state.paper) downloadBlob(new Blob([modelPaperText(state.paper)], { type: "text/plain;charset=utf-8" }), "vignan-practice-paper.txt");
+  });
+  $("#paper-print").addEventListener("click", () => {
+    if (!state.paper) return;
+    document.body.classList.add("paper-printing");
+    try { window.print(); } finally { document.body.classList.remove("paper-printing"); }
+  });
 
   $("#quiz-generate").addEventListener("click", generateQuizHandler);
   $("#quiz-use-model").addEventListener("change", renderQuizEngineNote);

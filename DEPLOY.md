@@ -11,7 +11,7 @@ This repository is now a clean, root-level Vignan Vidyanikethan AI app. The old 
 - Migration `20261027150656_create_vignan_ai_schema` applied: profiles, sessions, RLS, triggers, progress and leaderboard helpers.
 - Supabase Auth email signup is enabled and `mailer_autoconfirm` is on, so synthetic student emails do not need real delivery.
 - `render.yaml`, `.env.example`, `supabase/migrations/`, and an optional `supabase/functions/vignan-ai/` Edge Function are included.
-- The premium monochrome shell is live: command menu (`Ctrl/⌘ + K`), centered Ask hero, one-click PDF upload, built-in **Bolt** instant AI, and nicknamed AI routes with specialties instead of provider names.
+- The premium monochrome shell includes the command menu (`Ctrl/⌘ + K`), an Ask composer, PDF/text upload, public-link import, and built-in **Bolt** cited-excerpt lookup. Model routing is tucked away in advanced Settings.
 - Advanced model, key, web, privacy and appearance controls are hidden behind the command menu and **Settings → Advanced settings**.
 
 ## 1. Confirm the GitHub repo
@@ -108,6 +108,12 @@ Free-tier reality (Oct 2026):
 
 There is no legitimate “free unlimited AI API”. The local open-weight model and the cited-excerpt engine are the truly unlimited $0 fallbacks.
 
+### 4d. Wikipedia fallback and public URL reading
+
+The Node server searches English, Telugu or Hindi Wikipedia according to the selected interface language, without a key, when a new student's books have no match. The composer switch turns fallback off, and existing saved opt-outs remain off. The query, including a recent topic for follow-ups, is sent to Wikipedia (or a configured provider); public URLs explicitly requested in Ask or Library are fetched by the site server. Warn students not to submit sensitive queries or private links. Wikipedia is not a whole-web search and excerpts can be incomplete or wrong. Operators can set `STUDY_AI_WIKIPEDIA_SEARCH=false` to disable this default, or set `STUDY_AI_SEARCH_URL` to override it with a JSON provider. See the README for privacy, file limits, SSRF controls and unsupported formats.
+
+`/api/fetch` needs the Node server. It blocks private IPs, unusual ports and credential-bearing URLs, pins validated DNS answers, rechecks redirects and limits duration, bytes and concurrency. These are safeguards, not a substitute for malware scanning or abuse monitoring. Rate limits are per instance and reset on restart; consider edge controls if the site receives sustained abuse.
+
 ## 5. Verify the deployment
 
 ```bash
@@ -118,7 +124,7 @@ curl https://<your-render-service>.onrender.com/api/health
 #  "accountsBackend":"supabase","offlineReady":true,"localAI":{"bundled":true},...}
 ```
 
-Open the root URL. When `/api/health` reports `ai:true`, Vignan Vidyanikethan AI can auto-select the free router for answers, quizzes, flashcards, grading and verification. Students can instead enable the bundled local model; if every provider is down, the app still answers from the demo textbook offline.
+Open the root URL. Bolt remains the default even when `/api/health` reports `ai:true`. Enable the server router explicitly in **Settings → Advanced settings** if desired, or enable a bundled local model. If every provider is down, Bolt still returns cited excerpts from the library.
 
 ## 6. Optional: Supabase Edge Function
 

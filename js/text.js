@@ -4,13 +4,28 @@
  * answer, quiz question and flashcard can be verified against a real page.
  */
 
-import { normalizeText, truncate, unique } from "./util.js?v=13";
+import { normalizeText, truncate, unique } from "./util.js?v=15";
 
 export const STOPWORDS = new Set(
-  `a about above after again against all am an and any are arent as at be because been before being below between both but by can cannot could couldnt did didnt do does doesnt doing dont down during each few for from further had hadnt has hasnt have havent having he hed hell hes her here heres hers herself him himself his how hows i id ill im ive if in into is isnt it its itself lets me more most mustnt my myself no nor not of off on once only or other ought our ours ourselves out over own same shant she shed shell shes should shouldnt so some such than that thats the their theirs them themselves then there theres these they theyd theyll theyre theyve this those through to too under until up very was wasnt we wed well were weve were werent what whats when whens where wheres which while who whos whom why whys with wont would wouldnt you youd youll youre youve your yours yourself yourselves explain describe define give tell write short long answer question please textbook book page chapter notes summary summaryof according using use meaning means term called name state list`.split(
+  `a about above after again against all am an and any are arent as at be because been before being below between both but by can cannot could couldnt did didnt do does doesnt doing dont down during each few for from further had hadnt has hasnt have havent having he hed hell hes her here heres hers herself him himself his how hows i id ill im ive if in into is isnt it its itself lets me more most mustnt my myself no nor not of off on once only or other ought our ours ourselves out over own same shant she shed shell shes should shouldnt so some such than that thats the their theirs them themselves then there theres these they theyd theyll theyre theyve this those through to too under until up very was wasnt we wed well were weve were werent what whats when whens where wheres which while who whos whom why whys with wont would wouldnt you youd youll youre youve your yours yourself yourselves explain describe define give tell write short long answer question please textbook book page chapter notes summary summarize summarise summaryof according using use meaning means term called name state list`.split(
     /\s+/,
   ),
 );
+
+// Frequent question words in Hindi and Telugu; preserve Indic vowel signs in
+// actual content words instead of treating their combining marks as punctuation.
+for (const word of `का के की है हैं था थे थी में और या से को पर तक यह वह क्या क्यों कैसे कब कौन आप तुम मुझे इसके उसके बारे एक इस उस अध्याय सारांश समझाइए समझाओ ఇది అది అంటే ఏమిటి ఏమి ఎలా ఎందుకు మరియు ఒక లో కి ను యొక్క పై గురించి మీరు నేను నాకు దాని ఇవి అవి ఉన్న ఉంది అధ్యాయం పాఠం సారాంశం వివరించండి వివరించు`.split(/\s+/)) STOPWORDS.add(word.normalize("NFKC"));
+
+/** A numbered chapter reference, retaining its language and normalising digits. */
+export function chapterReference(text = "") {
+  const match = String(text).match(/(?:\b(?:chapter|ch\.?)\s*|(?:अध्याय|అధ్యాయం|పాఠం)\s*)([0-9०-९౦-౯]{1,3})(?![0-9०-९౦-౯])/iu);
+  if (!match) return null;
+  const digits = match[1].replace(/[०-९౦-౯]/g, (digit) => {
+    const code = digit.codePointAt(0);
+    return String(code >= 0x0c66 ? code - 0x0c66 : code - 0x0966);
+  });
+  return { number: Number(digits), text: match[0].trim() };
+}
 
 const PAGE_MARKER =
   /^\s*(?:\[\[\s*page\s*[:#=-]?\s*(\d+)\s*\]\]|[-=*_]{2,}\s*page\s+(\d+)\s*[-=*_]*|page\s+(\d+)\s*[:.-]?)\s*$/i;
@@ -31,6 +46,7 @@ export function detectHeading(line) {
   const trimmed = String(line ?? "").trim();
   const markdown = trimmed.match(HEADING_MD);
   if (markdown) return markdown[1].trim();
+  if (trimmed.length <= 100 && /^(?:chapter|ch\.?|अध्याय|అధ్యాయం|పాఠం)\s*[0-9०-९౦-౯]{1,3}(?:\s|[.:\-–]|$)/iu.test(trimmed)) return trimmed;
   if (HEADING_CAPS.test(trimmed) && /[A-Za-z]/.test(trimmed)) return trimmed;
   return "";
 }
@@ -111,14 +127,14 @@ export function splitSentences(text) {
     .trim();
   if (!clean) return [];
   return clean
-    .split(/(?<=[.!?।])\s+(?=[A-Z0-9"'“‘(])/u)
+    .split(/(?<=[.!?।])\s+(?=[\p{L}\p{N}"'“‘(])/u)
     .map((sentence) => sentence.replace(/§/g, ".").trim())
     .filter((sentence) => sentence.length > 12);
 }
 
 export function tokenize(text) {
   return normalizeText(text)
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/[^\p{L}\p{M}\p{N}\s]/gu, " ")
     .split(/\s+/)
     .map((word) => word.trim())
     .filter((word) => word.length > 1 && !STOPWORDS.has(word) && !/^\d+$/.test(word))

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { newPasswordProblem } from "../js/password-policy.js";
-import { login, register } from "../js/auth.js?v=13";
+import { login, register } from "../js/auth.js?v=15";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const html = read("index.html");
@@ -28,7 +28,7 @@ test("entry screen offers login and registration before guest mode", () => {
 });
 
 test("entry boot restores signed-in sessions, offers offline guest access and initializes once", () => {
-  assert.match(html, /js\/boot\.js\?v=13/);
+  assert.match(html, /js\/boot\.js\?v=15/);
   assert.match(boot, /guestChosen\(\)/);
   assert.match(boot, /getSession\(\{ timeout: 5000 \}\)/);
   assert.match(boot, /unlock\(\{ guest: true \}\)/);
@@ -39,7 +39,7 @@ test("entry boot restores signed-in sessions, offers offline guest access and in
   assert.match(app, /classList\.toggle\("has-conversation"/);
   assert.match(css, /#view-ask:not\(\.has-conversation\) \.chat-log \{ display: none; \}/);
   assert.match(css, /#view-ask \.mode-row \{ flex-wrap: wrap; overflow: visible; \}/);
-  assert.match(html, /id="ask-input"[^>]*aria-label="Ask a question from your textbooks"/);
+  assert.match(html, /id="ask-input"[^>]*aria-label="Ask, paste a public link, or request a quiz"/);
 });
 
 test("in-flight account requests can be cancelled before a response", async () => {
@@ -108,11 +108,11 @@ test("application module imports share the offline cache version", () => {
   for (const file of readdirSync(new URL("../js/", import.meta.url)).filter((name) => name.endsWith(".js"))) {
     const source = read(`js/${file}`);
     for (const match of source.matchAll(/(?:from\s+|import\()\s*["'](\.\/[^"']+\.js(?:\?v=\d+)?)["']/g)) {
-      assert.match(match[1], /\?v=13$/, `${file} imports ${match[1]} without the release version`);
+      assert.match(match[1], /\?v=15$/, `${file} imports ${match[1]} without the release version`);
       assert.ok(sw.includes(`"./js/${match[1].slice(2)}"`), `${match[1]} is precached`);
     }
   }
-  assert.ok(sw.includes('"./js/local-ai-worker.js?v=13"'));
+  assert.ok(sw.includes('"./js/local-ai-worker.js?v=15"'));
 });
 
 test("PDF reader is patched, lazily loaded, and available in the offline cache", () => {
@@ -125,11 +125,11 @@ test("PDF reader is patched, lazily loaded, and available in the offline cache",
   for (const url of ["./js/boot.js", "./js/password-policy.js", "./vendor/pdfjs/pdf.min.mjs", "./vendor/pdfjs/pdf.worker.min.mjs"]) {
     assert.ok(precache.urls.includes(url), `${url} is precached`);
   }
-  for (const url of ["./styles-premium.css?v=13", "./styles-identity.css?v=13", "./styles-legal.css?v=13", "./js/boot.js?v=13", "./js/app.js?v=13", "./js/auth.js?v=13", "./js/ingest.js?v=13", "./js/edit-studio.js?v=13", "./js/card.js?v=13", "./js/edit-audio.js?v=13", "./js/ui.js?v=13", "./js/reader.js?v=13", "./js/i18n.js?v=13", "./js/study-decks.js?v=13", "./js/startup.js?v=13", "./vendor/qr/qrcode.js?v=13", "./privacy.html", "./terms.html", "./assets/brand/nezaad-mark.png", "./assets/fonts/manrope-latin.woff2", "./assets/fonts/space-grotesk-latin.woff2"]) {
+  for (const url of ["./styles-premium.css?v=15", "./styles-identity.css?v=15", "./styles-legal.css?v=15", "./js/boot.js?v=15", "./js/app.js?v=15", "./js/auth.js?v=15", "./js/ingest.js?v=15", "./js/edit-studio.js?v=15", "./js/card.js?v=15", "./js/edit-audio.js?v=15", "./js/ui.js?v=15", "./js/reader.js?v=15", "./js/i18n.js?v=15", "./js/study-decks.js?v=15", "./js/startup.js?v=15", "./vendor/qr/qrcode.js?v=15", "./privacy.html", "./terms.html", "./assets/brand/nezaad-mark.png", "./assets/fonts/manrope-latin.woff2", "./assets/fonts/space-grotesk-latin.woff2"]) {
     assert.ok(sw.includes(`"${url}"`), `${url} is a core asset`);
   }
   assert.ok(precache.urls.includes("./js/edit-studio.js"));
   assert.ok(precache.urls.includes("./js/edit-audio.js"));
-  assert.equal(precache.version, 13);
+  assert.equal(precache.version, 15);
   assert.ok(!precache.urls.includes("./vendor/pdfjs/pdf.min.js"));
 });

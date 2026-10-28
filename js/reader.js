@@ -1,7 +1,7 @@
 /** Page-level textbook reader used by every citation. */
 
-import { element, openModal, qs, showToast } from "./ui.js?v=13";
-import { truncate } from "./util.js?v=13";
+import { element, openModal, qs, showToast } from "./ui.js?v=15";
+import { safeUrl, truncate } from "./util.js?v=15";
 
 /** Resolve a cited page number, which may not equal its position in pasted notes. */
 export function pageIndexForCitation(pages = [], pageNumber = 1) {
@@ -66,6 +66,14 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
   openPdf.rel = "noopener noreferrer";
   if (!pdfUrl) openPdf.classList.add("hidden");
   controls.append(previous, pageLabel, next, openPdf);
+  const origin = safeUrl(book?.sourceUrl);
+  if (origin) {
+    const openOrigin = element("a", "button ghost small", "Open original web source ↗");
+    openOrigin.href = origin;
+    openOrigin.target = "_blank";
+    openOrigin.rel = "noopener noreferrer";
+    controls.appendChild(openOrigin);
+  }
   toolbar.append(title, controls);
   const searchWrap = element("label", "reader-search");
   const search = document.createElement("input");
@@ -84,7 +92,7 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
     const button = element(
       "button",
       "reader-page-button",
-      `Page ${page.page || index + 1}${page.heading && page.heading !== "Notes" ? ` · ${truncate(page.heading, 28)}` : ""}`,
+      `${book?.sourceUrl && book?.type !== "pdf" ? "Section" : "Page"} ${page.page || index + 1}${page.heading && page.heading !== "Notes" ? ` · ${truncate(page.heading, 28)}` : ""}`,
     );
     button.type = "button";
     button.dataset.page = String(index + 1);
@@ -97,13 +105,13 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
     current = Math.min(Math.max(1, pageNumber), pageList.length);
     const page = pageList[current - 1];
     title.textContent = `${book?.title || "Book"} · ${page.heading && page.heading !== "Notes" ? page.heading : "Page"}`.slice(0, 90);
-    pageLabel.textContent = `Page ${page.page || current} · ${current} of ${pageList.length}`;
+    pageLabel.textContent = `${book?.sourceUrl && book?.type !== "pdf" ? "Section" : "Page"} ${page.page || current} · ${current} of ${pageList.length}`;
     previous.disabled = current <= 1;
     next.disabled = current >= pageList.length;
     pageText.replaceChildren();
     appendHighlighted(pageText, page.text || "", searchText || (current === initialIndex + 1 ? highlight : ""));
-    sourceNote.textContent = book?.demo
-      ? "Demo study pack — original sample notes, not an official board textbook."
+    sourceNote.textContent = book?.sourceUrl
+      ? `Imported from a public website. Verify the original.${book?.type !== "pdf" ? " Text sections are approximate." : ""}`
       : `${book?.subject || "Textbook"}${book?.board ? ` · ${book.board}` : ""}${book?.grade ? ` · Class ${book.grade}` : ""}`;
     if (pdfUrl) openPdf.href = `${pdfUrl}#page=${page.page || current}`;
     pageButtons.forEach((button, index) => button.classList.toggle("active", index + 1 === current));

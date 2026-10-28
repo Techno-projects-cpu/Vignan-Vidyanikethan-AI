@@ -25,8 +25,9 @@ function appendInline(parent, text, { sources = [], webSources = [], onSource, o
       const number = Number(piece.slice(1, -1));
       const button = element("button", "citation", piece);
       button.type = "button";
-      button.title = sources[number - 1]
-        ? `${sources[number - 1].title}, page ${sources[number - 1].page}`
+      const source = sources[number - 1];
+      button.title = source
+        ? `${source.sourceUrl ? "Web import: " : ""}${source.title}, ${source.sourceUrl && source.sourceKind !== "pdf" ? "section" : "page"} ${source.page}`
         : "Source reference";
       button.addEventListener("click", () => onSource?.(number, sources[number - 1]));
       parent.appendChild(button);

@@ -28,6 +28,8 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { parseSearchResults } from "./js/web.js";
 import { buildUpstreams, callFreeRouter, getKeyCooldownStatus } from "./server/free-router.mjs";
 import { buildStudentUpstreams } from "./server/student-keys.mjs";
+import { fetchPublicResource, PublicFetchError } from "./server/safe-fetch.mjs";
+import { limitedText, searchWikipedia } from "./server/web-search.mjs";
 import { createSupabaseAccountStore } from "./server/supabase-accounts.mjs";
 import { ValidationError, cleanUsername, createAccountStore, publicUser, validateLoginPassword, validateUsername } from "./server/accounts.mjs";
 
@@ -56,6 +58,11 @@ const STUDENT_KEY_FALLBACK = String(env("STUDENT_KEY_FALLBACK") || "true").toLow
 const AI_RATE_LIMIT = Math.min(600, Math.max(1, Number(env("AI_RATE_LIMIT") || 60) || 60));
 const SEARCH_RATE_LIMIT = Math.min(600, Math.max(1, Number(env("SEARCH_RATE_LIMIT") || 30) || 30));
 const SEARCH_URL = env("SEARCH_URL");
+const WIKIPEDIA_SEARCH = String(env("WIKIPEDIA_SEARCH", "true")).toLowerCase() !== "false";
+const wikiCache = new Map();
+const wikiRequestTimes = [];
+let activeWikiSearches = 0;
+let activePageFetches = 0;
 const SEARCH_TOKEN = env("SEARCH_TOKEN");
 const SEARCH_TOKEN_HEADER = env("SEARCH_TOKEN_HEADER") || "Authorization";
 const ALLOWED_ORIGINS = new Set(
@@ -636,18 +643,43 @@ async function handleSearch(request, response) {
     sendError(response, 429, "Too many search requests from this network. Please try again in a minute.");
     return;
   }
-  if (!SEARCH_URL) {
-    sendError(
-      response,
-      501,
-      "Web fallback is not configured. Set STUDY_AI_SEARCH_URL to a JSON search endpoint with a {q} placeholder.",
-    );
-    return;
-  }
   const body = await readJson(request);
   const query = String(body.query || "").trim().slice(0, 300);
   if (!query) {
     sendError(response, 400, "A query is required.");
+    return;
+  }
+  if (!SEARCH_URL) {
+    if (!WIKIPEDIA_SEARCH) {
+      sendError(response, 503, "Web search is disabled on this server.");
+      return;
+    }
+    const language = ["en", "te", "hi"].includes(body.language) ? body.language : "en";
+    const key = `${language}:${query.toLowerCase()}`;
+    const now = Date.now();
+    const cached = wikiCache.get(key);
+    if (cached && cached.expires > now) {
+      sendJson(response, 200, { ok: true, results: cached.results, provider: "Wikipedia", message: "" }, { api: true });
+      return;
+    }
+    while (wikiRequestTimes.length && wikiRequestTimes[0] <= now - 60_000) wikiRequestTimes.shift();
+    if (activeWikiSearches >= 4 || wikiRequestTimes.length >= 60) {
+      sendError(response, 429, "Web search is busy. Please try again shortly.");
+      return;
+    }
+    wikiRequestTimes.push(now);
+    activeWikiSearches += 1;
+    try {
+      const results = await searchWikipedia(query, { language });
+      const entry = { results, expires: Date.now() + 5 * 60_000 };
+      wikiCache.set(key, entry);
+      const expiry = setTimeout(() => { if (wikiCache.get(key) === entry) wikiCache.delete(key); }, 5 * 60_000);
+      expiry.unref?.();
+      while (wikiCache.size > 100) wikiCache.delete(wikiCache.keys().next().value);
+      sendJson(response, 200, { ok: true, results, provider: "Wikipedia", message: results.length ? "" : "No Wikipedia results found for this question." }, { api: true });
+    } catch {
+      sendError(response, 502, "Wikipedia search could not be reached. Check your connection or try again later.");
+    } finally { activeWikiSearches -= 1; }
     return;
   }
   let url;
@@ -666,7 +698,7 @@ async function handleSearch(request, response) {
     : {};
   try {
     const upstream = await fetch(url, { headers, signal: AbortSignal.timeout(20_000) });
-    const raw = await upstream.text();
+    const raw = await limitedText(upstream);
     let data;
     try {
       data = JSON.parse(raw);
@@ -694,10 +726,50 @@ async function handleSearch(request, response) {
   }
 }
 
+async function handleFetch(request, response) {
+  if (!rateLimit(request, "fetch", 15, 60_000)) {
+    sendError(response, 429, "Too many link requests from this network. Please try again in a minute.");
+    return;
+  }
+  const body = await readJson(request);
+  if (typeof body.url !== "string" || !body.url.trim()) {
+    sendError(response, 400, "A public webpage or file URL is required.");
+    return;
+  }
+  if (activePageFetches >= 4) {
+    sendError(response, 429, "Link reading is busy. Please try again shortly.");
+    return;
+  }
+  activePageFetches += 1;
+  const controller = new AbortController();
+  const onClose = () => { if (!response.writableFinished) controller.abort(); };
+  response.on("close", onClose);
+  try {
+    const resource = await fetchPublicResource(body.url, { signal: controller.signal });
+    const type = /^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/i.test(resource.contentType) ? resource.contentType : "application/octet-stream";
+    response.writeHead(200, {
+      ...securityHeaders({ api: true }),
+      "Content-Type": "application/octet-stream",
+      "Content-Disposition": "attachment; filename=source.bin",
+      "Content-Length": String(resource.bytes.length),
+      "X-Vignan-Content-Type": type,
+      "X-Vignan-Source-URL": encodeURIComponent(resource.finalUrl),
+    });
+    response.end(resource.bytes);
+  } catch (error) {
+    if (!response.destroyed && !response.headersSent) {
+      sendError(response, error instanceof PublicFetchError ? error.status : 502, error instanceof PublicFetchError ? error.message : "That link could not be read.");
+    }
+  } finally {
+    response.removeListener("close", onClose);
+    activePageFetches -= 1;
+  }
+}
+
 function health() {
   return {
     ok: true,
-    version: "1.7.1",
+    version: "1.9.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,
@@ -709,7 +781,9 @@ function health() {
       cooldownMs: KEY_COOLDOWN_MS,
       studentKeyFallback: STUDENT_KEY_FALLBACK,
     },
-    search: Boolean(SEARCH_URL),
+    search: Boolean(SEARCH_URL || WIKIPEDIA_SEARCH),
+    searchProvider: SEARCH_URL ? "configured" : WIKIPEDIA_SEARCH ? "Wikipedia" : null,
+    linkReading: true,
     accounts: accountsBackend !== "unavailable",
     accountsBackend,
     offlineReady: true,
@@ -765,7 +839,7 @@ async function serveStatic(request, response, pathname) {
   }
   const extension = path.extname(target).toLowerCase();
   const contentType = MIME[extension] || "application/octet-stream";
-  const noCache = ["sw.js", "index.html", "precache.json", "manifest.webmanifest", "demo-textbook.txt"].includes(path.basename(target));
+  const noCache = ["sw.js", "index.html", "precache.json", "manifest.webmanifest"].includes(path.basename(target));
   const buffer = await fs.readFile(target);
   const headers = {
     "Content-Type": contentType,
@@ -800,8 +874,9 @@ const server = http.createServer(async (request, response) => {
     sendError(response, 403, "Security check failed. Refresh the page and try again.", authOptions(request));
     return;
   }
-  if (unsafeApiRequest && accountMutation && !/^application\/json(?:\s*;|\s*$)/i.test(String(request.headers["content-type"] || ""))) {
-    sendError(response, 415, "Please send account requests as JSON.", authOptions(request));
+  const jsonOnly = accountMutation || apiPath === "/api/search" || apiPath === "/api/fetch";
+  if (unsafeApiRequest && jsonOnly && !/^application\/json(?:\s*;|\s*$)/i.test(String(request.headers["content-type"] || ""))) {
+    sendError(response, 415, "Please send this request as JSON.", authOptions(request));
     return;
   }
   try {
@@ -847,6 +922,10 @@ const server = http.createServer(async (request, response) => {
       await handleSearch(request, response);
       return;
     }
+    if (apiPath === "/api/fetch" && request.method === "POST") {
+      await handleFetch(request, response);
+      return;
+    }
     if (apiPath.startsWith("/api/")) {
       sendError(response, 404, "Unknown API endpoint.");
       return;
@@ -874,7 +953,7 @@ server.listen(PORT, HOST, () => {
   console.log(
     `Free AI router: ${AI_UPSTREAMS.length ? `${AI_PROVIDER_IDS.join(" → ")} (${AI_UPSTREAMS.length} providers)` : "not configured (offline engine only)"}`,
   );
-  console.log(`Web fallback: ${SEARCH_URL ? "configured" : "not configured"}`);
+  console.log(`Web fallback: ${SEARCH_URL ? "configured provider" : WIKIPEDIA_SEARCH ? "Wikipedia (no key)" : "disabled"}`);
   console.log(
     `Student accounts: ${accountsBackend === "supabase" ? "Supabase Auth + persistent sessions" : accountsBackend === "local" ? "local JSON store (scrypt-hashed)" : "unavailable — check Supabase configuration"}`,
   );

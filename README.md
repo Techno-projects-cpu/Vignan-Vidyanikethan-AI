@@ -10,7 +10,7 @@ Your class books are the knowledge base. Vignan Vidyanikethan AI retrieves page-
 - sends those short passages to an existing AI provider (Gemini, Groq, Cloudflare, OpenRouter, Mistral, Cohere, OpenAI, Claude, Arena workspace, Ollama, LM Studio, or any OpenAI-compatible endpoint) for a natural explanation, or
 - uses its built-in offline extractive engine to quote the passages directly.
 
-Every answer, quiz question and flashcard keeps a page citation. If the books do not contain the answer, the app says so instead of inventing one.
+Book-based answers, quiz questions and flashcards keep a source citation. When books have no match, Bolt can show clearly labelled outside-source excerpts; it does not invent an answer or present web results as textbooks.
 
 ---
 
@@ -26,9 +26,9 @@ Open:
 
 - Vignan Vidyanikethan AI: <http://localhost:4173/>
 
-The server binds to `0.0.0.0`, so it also works in the Arena live preview. A plain static server (`python3 -m http.server`) can serve the app too, but the optional `/api/ai`, `/api/search` and `/api/auth/*` endpoints will not exist — the offline engine and guest progress still work.
+The server binds to `0.0.0.0`, so it also works in the Arena live preview. A plain static server (`python3 -m http.server`) can serve the app too, but the `/api/ai`, `/api/search`, `/api/fetch` and `/api/auth/*` endpoints will not exist — the offline engine and guest progress still work.
 
-A first-time visitor can enter or skip the branded startup screen, then choose **Log in**, **Register**, or **Continue as guest** beneath the account options. The intro is remembered for the current tab when session storage is available. Existing signed-in sessions and a guest choice reopen the workspace; the guest choice is remembered only in the current tab. The guest path remains available when the account server is offline. The app loads a small **Demo Study Pack** so you can try questions immediately. Replace it with real class PDFs in **Library**. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — the app auto-detects the free router, rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback. The minimal UI keeps those controls tucked behind **Settings → Advanced settings**.
+A first-time visitor can enter or skip the branded startup screen, then choose **Log in**, **Register**, or **Continue as guest** beneath the account options. The intro is remembered for the current tab when session storage is available. Existing signed-in sessions and a guest choice reopen the workspace; the guest choice is remembered only in the current tab. The guest path remains available when the account server is offline. The library starts empty; add material you have permission to use in **Library**. The old sample pack is retired, while student uploads and study history are preserved. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — enable the server route in **Settings → Advanced settings**; it rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback. The minimal UI keeps those controls tucked behind **Settings → Advanced settings**.
 
 ---
 
@@ -62,25 +62,29 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 
 | Area | What it does |
 | --- | --- |
-| Premium minimal interface | A skippable Nezaad-branded intro, sharp-edged monochrome workspace, locally bundled Space Grotesk and Manrope fonts, one composer, a keyboard-accessible command menu (`Ctrl/⌘ + K`) and an AI nickname chooser. Most navigation and advanced controls stay tucked away. |
-| Built-in fast AI | **Bolt** is the instant offline textbook engine: no download, no key, page-cited answers from the local book index. Optional **Nova** (WebLLM), **Atlas** (free router) and other nicknamed routes are available from the chooser. |
+| Premium minimal interface | A skippable Nezaad-branded intro, sharp-edged monochrome workspace, locally bundled Space Grotesk and Manrope fonts, one composer, a keyboard-accessible command menu (`Ctrl/⌘ + K`) and a simple engine status. Most navigation and advanced controls stay tucked away. |
+| Built-in fast AI | **Bolt** is the instant offline textbook engine: no download, no key, page-cited answers from the local book index. Optional local and connected model routes remain in advanced Settings. |
 | Grounded answers | Local hybrid retrieval (BM25 + hashed TF-IDF vectors + phrase matching) over page chunks, with `[1]` citations and a clickable page reader. |
 | Model router | Route **Answers**, **Quiz writing**, **Flashcard writing**, **Short-answer grading** and **Citation verification** to different existing AI providers. Automatic fallback to the offline engine. |
 | Real local AI | Bundled WebLLM + Web Worker runs open-weight Meta Llama 3.2 1B, SmolLM2 or Qwen2.5 on-device with Vignan's grounding rules. Download once, then use every AI task offline. |
 | Zero-budget AI runtime | Server-side **free AI router** tries Gemini, Groq, Cloudflare Workers AI, OpenRouter free models, Mistral, Cohere and an optional Arena AI workspace key in order; supports multiple keys per provider, auto-rotates on quota limits, cools down exhausted keys, skips rate-limited providers and keeps school keys off student devices. |
 | Student BYOK fallback | After all Render keys are exhausted, students can add one or more of their own keys in account settings. Keys stay browser-local, are used only through the site's own proxy, and never appear in exports, accounts or leaderboards. |
 | Official key links | Settings shows safe signup links for eight free/keyless providers and explicitly warns against leaked or shared keys. |
-| Library | Upload PDF / TXT / Markdown, paste notes, use `[[page:12]]` markers, delete books, open a page reader, open the original PDF at a cited page. |
+| Library | Upload PDFs and readable text (for example TXT, Markdown, CSV and JSON), paste notes, or import a public webpage/PDF/text URL. Scripts, executables and archives are rejected. Web imports retain their origin and are labelled separately. |
 | Quizzes | MCQ, fill-in-the-blank, short-answer and mixed quizzes; easy/medium/hard; timed or untimed; AI-written or offline-generated; instant grading with per-question review, topic breakdown and a revise list. |
 | Flashcards | Create multiple device-local cited decks, switch between them, review due cards with a Leitner schedule, or practise without altering that schedule. Missed quiz questions can become a revision deck. |
+| Chat actions | Ask “make a quiz on photosynthesis”, “quiz me on chapter 4”, “make flashcards on that”, or “open my library”. These start directly from chat. “That” uses the most recent cited library answer; it does not quietly convert a web snippet into a textbook. An unfinished quiz needs confirmation before replacement. |
+| Model question papers | Select readable past-paper PDFs/text in Library, or ask chat to make a model paper from selected documents. Bolt identifies, deduplicates and balances existing questions with source pages; preview, download as text, or print/save as PDF. It can reuse questions, cannot predict the exam, and does not infer an answer key. Scanned papers need OCR first. |
+| Friendly breaks | Bolt gives a few brief, supportive local replies and then redirects to study. Safety-sensitive language takes precedence over search or the break limit. These templates are not an unrestricted generative chatbot or emergency service. |
 | Progress | A recommended next step, local streak, XP, accuracy, topic mastery and reviewable recent results, plus an optional live class leaderboard. Full decks and question-by-question reviews remain on the device. |
 | Student accounts | Roblox-inspired Log In / Register with username, password, age band and private gender; local scrypt hashes or Supabase Auth, persistent Supabase sessions, under-13 guardian consent, referral codes and squad invites. |
 | Funky edit video | An 8-second story with four visual vibes, a branded Nezaad style, score reveal, replayable preview, original on-device synth beat, question bars and revision prompt. An optional on-device QR links to Zero Vast; a caption can be copied separately. Choose 540p, 720p or 1080p; MP4 is preferred, WebM and a 1080×1920 PNG are fallbacks. Nickname and invite code are opt-in. |
-| Web fallback | Disabled by default. When enabled, outside results are shown only after the books fail, and are labelled **OUTSIDE YOUR TEXTBOOKS**. |
-| Offline / PWA | Service worker caches the full app shell, WebLLM runtime, local AI worker, PDF.js, CMaps and the demo pack after the first online visit. Installable manifest included. |
+| Web fallback | New installs use a no-key Wikipedia search when the books fail; the composer can turn it off and stored opt-outs are preserved. Short excerpts are labelled **OUTSIDE YOUR TEXTBOOKS** and are not independently verified. Wikipedia is encyclopedic, not whole-web search. |
+| Conversation and links | Bolt carries a bounded recent topic into follow-ups, answers creator questions directly, and can quote a supplied public webpage or PDF with `[Wn]` citations. It is an extractive lookup engine, not a generative chatbot. |
+| Offline / PWA | Service worker caches the full app shell, WebLLM runtime, local AI worker, PDF.js and CMaps after the first online visit. Installable manifest included. |
 | Responsive study workspace | Monochrome, prompt-first design with a compact menu, comfortable touch targets, adaptive quiz layouts and a mobile-friendly edit studio. |
 | Privacy | Books, chats, decks and results are stored locally; optional connected AI and web search may send questions and relevant excerpts to external services. Student keys are excluded from exports and account/leaderboard records. [Privacy policy](./privacy.html) and [terms](./terms.html) are available before entry and in the app. |
-| Languages | English UI with a Telugu translation for the main interface. Textbook passages are never silently machine-translated. |
+| Languages | Core interface and common chat commands support English, Telugu and Hindi; untranslated controls fall back to English. Indic combining marks are preserved in retrieval and grading; older book indexes are rebuilt in memory without deleting the originals. Offline Bolt quotes the source language and does not translate. A connected AI is asked to respond in the selected language, but its translations and citations need checking. |
 
 ---
 
@@ -89,18 +93,20 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 The public interface is intentionally sparse: a skippable student-project intro, sharp-edged controls, one large headline, one composer, and a command menu for everything else. Its prompt-first layout was informed by [Arena.ai](https://arena.ai/).
 
 - Press **Ctrl/⌘ + K** or choose **Menu** to open the command palette. It contains every section, PDF upload, quiz/flashcard actions, sources, settings, keys, theme, account, credits and policy links. Use arrow keys to browse, Enter to open and Escape to close.
-- After the entry screen, the Ask workspace has a prominent **Upload PDF** action. Students can also drag a PDF into **Library** or paste notes. PDFs are indexed locally and page numbers are preserved.
+- After the entry screen, **Add a book** opens the file chooser. In **Library**, students can also drag a file, paste notes, or import a public URL. PDFs are indexed locally and their page numbers are preserved.
 - **Bolt** is the built-in super-fast AI: it answers from the local textbook index with citations, requires no model download and works offline. It is the default route.
-- The AI chooser hides provider names. Students choose nicknames with their specialty underneath: **Bolt** (instant offline lookup), **Nova** (private local reasoning), **Atlas** (free cloud router), **Dash** (ultra-fast cloud), **Prism** (balanced answers), **Sage** (model variety), **Echo** (laptop model), **Any** (custom endpoint), and others. Real IDs remain in `data-provider` / select values.
+- The main AI chooser is hidden. Bolt is the default; optional local and connected model routing is available only through the advanced Settings panels. Existing deliberately configured routes are preserved.
 - Settings open with a single **Control room** card; the dense model, key, web, privacy and appearance panels stay hidden until **Advanced settings** is chosen.
 - The interface palette is black/grey/white in both themes. Fonts are bundled locally, motion respects reduced-motion preferences, and the score studio offers additional colourful styles. See [OPEN_SOURCE_CREDITS.md](./OPEN_SOURCE_CREDITS.md).
 
 ## Study loop
 
-1. Import a PDF or notes in **Library**, or start with the demo pack. Ask a question and open a citation to verify its actual page; the reader can search within the book.
-2. Use the actions beneath a cited answer to copy it with sources or create a quiz using those passages. A named topic that does not match the books is not silently replaced with unrelated questions.
+1. Import a PDF or notes you have permission to use in **Library**. Ask a question and open a citation to verify its actual page; the reader can search within the book.
+2. In chat, say **“make a quiz on that”**, **“make flashcards on photosynthesis”**, or name a numbered chapter. The tools start immediately; a missing topic is not silently replaced with unrelated questions. “That” needs a recent cited library answer. There are also actions beneath each cited answer.
 3. Finish the quiz, review each answer and make a cited flashcard deck from missed questions. The result studio, retry/practice action and past results remain accessible from Progress.
 4. Return to **Flashcards** to switch decks and review cards due today. Practice-all does not change the review schedule. **Progress** suggests a useful next step.
+5. For a model paper, upload text-selectable past papers in **Library**, open **Make a model question paper**, choose the sources and build. Review the source pages before downloading or printing. The preview lasts for the current tab; downloads are separate files.
+6. Choose English, తెలుగు or हिन्दी under **Settings → Advanced settings → Appearance**. Offline Bolt does not translate a book from one language to another; a connected model can be asked to translate, with possible mistakes.
 
 Decks, detailed reviews and results remain in the browser, not in the account; only quiz summary statistics sync. The app warns when browser storage is unavailable or a write fails. JSON export includes saved decks, review schedules, history and book details, but excludes textbook pages, original PDFs and keys; keep originals separately.
 
@@ -172,7 +178,7 @@ Supported adapters:
 
 ## Configuring the free AI router / server proxy
 
-`serve.mjs` is zero-dependency. It serves the static site, proxies AI calls to configured free-tier providers, optionally proxies web search, and serves the account API. Nothing is sent anywhere unless you set environment variables.
+`serve.mjs` is zero-dependency. It serves the static site, proxies AI calls to configured providers, provides a keyless Wikipedia fallback by default, reads explicitly requested public links, and serves the account API. Web fallback can send unmatched questions to Wikipedia without any environment variables; turn it off in the composer or server configuration when unwanted.
 
 The easiest zero-budget start is one free key:
 
@@ -264,19 +270,13 @@ npm start
 STUDY_AI_AI_EXTRA_HEADERS='{"HTTP-Referer":"https://school.example","X-Title":"Vignan Vidyanikethan AI"}' npm start
 ```
 
-### Web fallback with a JSON search API
+### Web fallback and public links
 
-Web fallback is off by default. Configure a JSON endpoint with a `{q}` placeholder:
+For new installations, the composer’s **Search the web if needed** switch is on. If local books have no match, `/api/search` queries the public English, Telugu or Hindi Wikipedia API according to the selected interface language, without a key, and shows short, unverified excerpts with `[Wn]` links. This is an encyclopedic fallback, **not a search of the whole web**, and it can fail, rate-limit or return irrelevant/incomplete material. A recent conversational topic may be included in the search query. The student can switch this off in the composer; existing stored choices are not overridden. Questions that match textbooks stay local unless a connected AI was explicitly configured. Avoid entering personal or sensitive information.
 
-```bash
-STUDY_AI_SEARCH_URL='http://127.0.0.1:8080/search?q={q}&format=json' npm start
-# Optional authenticated provider:
-STUDY_AI_SEARCH_TOKEN='...' \
-STUDY_AI_SEARCH_TOKEN_HEADER='X-Subscription-Token' \
-npm start
-```
+Operators can set `STUDY_AI_WIKIPEDIA_SEARCH=false` to disable the built-in provider, or configure an optional JSON endpoint with a `{q}` placeholder. A configured `STUDY_AI_SEARCH_URL` takes precedence and can use `STUDY_AI_SEARCH_TOKEN` / `STUDY_AI_SEARCH_TOKEN_HEADER`. The server normalises common JSON shapes and caps search response size. The public provider may have its own use and privacy policies; check them before classroom deployment.
 
-The server normalises common JSON shapes (`results`, `items`, `organic`, `webPages.value`, DuckDuckGo `RelatedTopics`) and rejects non-HTTP URLs.
+Paste a public `http`/`https` URL in Ask to quote an excerpt without adding it to the library, or use **Library → Import a public link** to keep its extracted text on the device. The server retrieves the URL without forwarding student cookies or credentials and labels the resulting source as a web import. Only public network addresses and standard ports are allowed; DNS and every redirect are rechecked and the connection is pinned to an approved address. Downloads are capped at 12 MB, 3 redirects and 15 seconds; compressed HTTP responses are rejected. PDF text extraction is capped at 800 pages and approximately 4 million characters; text and HTML files are capped at 4 MB. HTML is converted to plain text without constructing or executing a DOM. Scripts, executables, archives and common binary signatures are rejected rather than opened. These safeguards are not a malware scanner or a guarantee that a PDF is harmless. Login-only, signed/private links, complex JavaScript-rendered pages, scanned PDFs and some encodings are unsupported. Links and search queries go to the site server and outside services, even if the rest of the library stays on the device; never paste private links or secrets.
 
 ### All environment variables
 
@@ -299,7 +299,8 @@ All variables also accept the new `VIGNAN_AI_` prefix as an alias, e.g. `VIGNAN_
 | `STUDY_AI_COHERE_KEY` / `_MODEL` / `_ENDPOINT` | empty / `command-r-08-2024` / Cohere compatibility endpoint | Cohere free trial key. |
 | `STUDY_AI_ARENA_KEY` / `_MODEL` / `_ENDPOINT` | empty / `coding-router-preview` / `https://api.arena.ai` | Optional Arena workspace API key. |
 | `STUDY_AI_AI_BASE_URL` / `_MODEL` / `_KEY` / `_KIND` / `_EXTRA_HEADERS` | legacy single upstream | `openai`, `ollama`, `anthropic` or `arena`. Also appears as `primary` in the router order. |
-| `STUDY_AI_SEARCH_URL` / `_TOKEN` / `_TOKEN_HEADER` | empty / empty / `Authorization` | Optional labelled web fallback. |
+| `STUDY_AI_WIKIPEDIA_SEARCH` | `true` | Set `false` to disable the default keyless Wikipedia fallback. |
+| `STUDY_AI_SEARCH_URL` / `_TOKEN` / `_TOKEN_HEADER` | empty / empty / `Authorization` | Optional JSON search provider overriding Wikipedia. |
 | `STUDY_AI_ACCOUNTS_BACKEND` | `local` | `local` or `supabase`. |
 | `STUDY_AI_ACCOUNTS_FILE` | `server/data/accounts.json` | Local JSON account store path. Ignored by Git and blocked from static serving. |
 | `STUDY_AI_SUPABASE_EMAIL_DOMAIN` | `students.vignanvidyanikethan.org` | Synthetic email domain for username/password Supabase Auth. No real emails are sent. |
@@ -316,7 +317,7 @@ Local WebLLM needs **no environment variable**. The model choice is stored in th
 ## How grounding works
 
 ```
-PDF / TXT / pasted notes
+PDF / readable text / user-imported web pages / pasted notes
         │
         ▼
 Page-preserving chunks  ──►  cached hashed TF-IDF vectors + BM25 stats
@@ -332,15 +333,15 @@ Hybrid retrieval (top-k passages with page numbers)
                          answer + [n] citations ──► verifier model (optional)
 ```
 
-The system prompt forbids answering from memory, requires `[n]` citations, and instructs the model to say **“I could not find this in your textbooks.”** when the passages are insufficient. Textbook passages are treated as data, not instructions, to reduce prompt injection.
+The system prompt forbids answering from memory, requires `[n]` citations and treats passages as data, not instructions. User-imported web sources retain their origin and are labelled. On a miss, optional Wikipedia excerpts use separate `[Wn]` links. Recent follow-ups reuse a bounded prior student topic; Bolt does not generate or remember like a large language model.
 
-A demo of the retrieval quality:
+A retrieval example using a test-only synthetic fixture (not included in the app):
 
 ```bash
 node --input-type=module -e "
 import fs from 'node:fs';
 import { buildBookIndex, retrieve } from './js/retrieval.js';
-const i = buildBookIndex({ id: 'demo', title: 'Demo' }, fs.readFileSync('./data/demo-textbook.txt', 'utf8'));
+const i = buildBookIndex({ id: 'demo', title: 'Demo' }, fs.readFileSync('./tests/fixtures/sample-study.txt', 'utf8'));
 console.log(retrieve('Why do leaves look green?', [i]).hits[0].page); // 3
 console.log(retrieve('State Newton second law', [i]).hits[0].page);   // 6
 "
@@ -350,10 +351,13 @@ console.log(retrieve('State Newton second law', [i]).hits[0].page);   // 6
 
 ## Adding your real textbooks
 
-- **PDF:** selectable text works out of the box via a vendored PDF.js build. Page numbers come from the PDF itself. PDFs up to 800 pages / 40 MB are supported; the original PDF is kept locally (up to 20 MB) so citations can open it at the exact page.
+Only add material you have permission to use with this retrieval application. No Telangana SCERT or NCERT textbooks are bundled or indexed by default: publisher permission is required before adding those books to this service. The official NCERT textbook portal describes its software and linking restrictions; SCERT copyright notices reserve storage in retrieval systems.
+
+- **PDF:** selectable text works via a vendored, patched PDF.js build. Page numbers come from the PDF itself. Local PDFs are limited to 800 pages / 40 MB and around 4 million extracted characters; the original PDF is kept locally (up to 20 MB) so citations can open it at the exact page. Remote downloads are limited to 12 MB.
 - **Scanned PDFs:** images only. Run OCR first or upload a TXT version — the app will tell you when no text is found.
-- **TXT / Markdown / pasted notes:** put `[[page:12]]` on its own line before each page's text. `--- Page 12 ---` and `Page 12:` also work. Without markers, long documents are split into approximate 420-word pages.
-- Markdown `# Heading` lines become chapter/section labels and are removed from quiz blanks.
+- **Readable UTF-8/UTF-16 text / pasted notes:** TXT, Markdown, CSV, JSON and other text formats are accepted up to 4 MB. Put `[[page:12]]` on its own line before each page's text. `--- Page 12 ---` and `Page 12:` also work. Without markers, long documents are split into approximate 420-word pages.
+- Markdown `# Heading` lines become chapter/section labels and are removed from quiz blanks. Imported webpages/text use approximate sections rather than claimed original page numbers.
+- **Not supported:** executable or script extensions, shebang scripts, archives, DOCX and other packaged formats, binaries, scanned PDFs and login-only/private links. File-name and signature checks reduce risk but do not replace a malware scanner.
 
 After adding files, run `npm run precache` if you changed anything inside the app root so the service worker caches the new assets.
 
@@ -367,7 +371,7 @@ npm test
 
 52 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing and performance-card drawing.
 
-A separate DOM smoke run (jsdom + fake IndexedDB) was used during development to verify first launch, demo pack loading, asking a question, generating a quiz, viewing results and opening the performance-card modal. Those harness dependencies are intentionally not added to this zero-dependency repository.
+A separate DOM smoke run (jsdom + fake IndexedDB) was used during development to verify first launch, adding notes, asking a question, generating a quiz, viewing results and opening the performance-card modal. Those harness dependencies are intentionally not added to this zero-dependency repository.
 
 ---
 
@@ -386,7 +390,7 @@ manifest.webmanifest      PWA manifest
 robots.txt, sitemap.xml   Search-engine crawling and canonical-page sitemap
 sw.js                     Offline service worker
 precache.json             Generated offline asset list
-data/demo-textbook.txt    Original sample study notes
+tests/fixtures/           Synthetic test data, not shipped as a book
 icons/                    SVG + PNG app icons (including maskable icons)
 vendor/webllm/            Vendored WebLLM 0.2.85 runtime (Apache-2.0)
 vendor/pdfjs/             Vendored PDF.js (Apache-2.0)
@@ -397,7 +401,11 @@ js/                       Browser ESM app modules
   app.js                  UI controller
   auth.js                 Account API client + account modal
   password-policy.js      Shared password checks for new accounts
-  ingest.js               Lazy-loaded PDF/TXT ingestion
+  ingest.js               Lazy-loaded PDF/text ingestion
+  files.js                Bounded file classification and inert HTML text extraction
+  link-reader.js          Public URL download and text/PDF extraction
+  conversation.js         Creator intent and bounded follow-up context
+  external-answer.js      Labelled web/link excerpt citations
   text.js                 Page parsing, sentences, chunks
   vector.js               Cached hashed TF-IDF vectors
   retrieval.js            Hybrid search + grounding decision
@@ -482,7 +490,7 @@ Student browser ──WebGPU──► Bundled WebLLM open-weight model (keyless,
 1. **Push this branch to GitHub.** Render deploys from the repo using `render.yaml`.
 2. **Create a free Supabase project** (Mumbai/`ap-south-1` is closest to Andhra Pradesh). Run `supabase/migrations/20261027000000_vignan_ai.sql` in the SQL editor. Note that Supabase free projects pause after a week of database inactivity and have a 500 MB database ([billing docs](https://supabase.com/docs/guides/platform/billing-on-supabase)).
 3. **In Render → Environment**, add `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and optionally one or more free AI keys generated from your own accounts (`STUDY_AI_GEMINI_KEYS`, `STUDY_AI_GROQ_KEYS`, etc. — comma/newline separated). Set `STUDY_AI_ACCOUNTS_BACKEND=supabase`, `STUDY_AI_COOKIE_SECURE=true`, `STUDY_AI_KEY_COOLDOWN_MS=60000` and `STUDY_AI_STUDENT_KEY_FALLBACK=true`. No key is required for the local WebLLM model; students can add their own keys in Settings when the Render pool is exhausted.
-4. **Reload the app.** When `/api/health` reports `ai:true`, Vignan Vidyanikethan AI can auto-select the free router for answers, quizzes, flashcards, grading and verification. Students can instead enable the local model. If all providers fail, the offline engine still answers from textbooks.
+4. **Reload the app.** When `/api/health` reports `ai:true`, enable the server route in **Settings → Advanced settings** if desired. Bolt remains the default; students can instead enable a local model. If providers fail, the offline engine still answers from the library.
 5. **Optional:** deploy `supabase/functions/vignan-ai/` as a Supabase Edge Function and point the `server` provider endpoint at it instead of Render's `/api/ai`. This can avoid Render's cold start for AI calls; the free tier includes 500,000 function invocations/month.
 
 Render free web services sleep after ~15 minutes of inactivity, share 750 instance-hours/month, and its free Postgres expires after 30 days ([Render free-tier notes](https://render.com/articles/platforms-with-a-real-free-tier-for-developers-in-2026)). That is why Supabase — not Render Postgres or the local JSON file — should hold accounts on a public deployment. Static files on Render Static Sites do not sleep, so a static frontend + Supabase Edge Function is the most always-on $0 option if you later split the app.
@@ -516,7 +524,7 @@ The in-app [privacy policy](./privacy.html) and [terms of use](./terms.html) are
 - Signing out does not remove books, chats or student keys saved in the browser; use **Settings → Delete all local data** on shared devices. This does not delete account records, downloaded files, browser caches or separately cached models.
 - WebLLM runs on the device after its first model download contacts the model host. Ollama / LM Studio requests go to the endpoint configured by the user, which may be on the device or another machine.
 - Connected cloud modes send the question, instructions and short retrieved passages needed for the task. Free-tier providers may have different data-retention/training policies — check each provider before uploading sensitive or copyrighted books. OpenRouter free models in particular can have per-provider training policies.
-- Web fallback is off by default; outside results are visually separated and labelled.
+- Web fallback is on for new installations and can be disabled in the composer; saved opt-outs remain off. Queries go to Wikipedia or the chosen provider only when local sources miss. Explicitly requested public URLs go through the site server to the destination even with fallback off; never include sensitive information. Search queries and results are cached briefly in server memory (about five minutes). Outside sources are labelled and not independently verified.
 - Server keys never reach the browser, health response, logs or exports. Student BYOK keys are browser-local, sent per request only to this site's proxy, and excluded from exports, accounts and leaderboards. **Settings → Export data** produces JSON without any API key values; **Delete all local data** clears the database, local progress and saved student keys.
 
 ---
@@ -525,4 +533,4 @@ The in-app [privacy policy](./privacy.html) and [terms of use](./terms.html) are
 
 - Made by a student of **Vignan Vidyanikethan English Medium High School** for the **INSPIRE-MANAK** science fair, with Arena.ai Agent Mode used as a development assistant. Nezaad Industries logo supplied by the project owner; [Zero Vast](https://zero-vast.vercel.app/).
 - PDF text extraction uses [PDF.js](https://github.com/mozilla/pdf.js) 4.2.67 (legacy build), with dynamic PDF font evaluation and XFA disabled, vendored under `vendor/pdfjs/` with its Apache-2.0 license and font/CMaps notices. This replaces the older build affected by [CVE-2024-4367](https://github.com/advisories/GHSA-wgrm-67xf-hhpq).
-- Application code is MIT licensed; see `LICENSE`. Replace the demo study pack with your own board textbooks before classroom use.
+- Application code is MIT licensed; see `LICENSE`. No board textbooks are bundled. Telangana SCERT books reserve rights including storage in retrieval systems, and NCERT restricts inclusion in software; obtain written publisher permission before including their material.

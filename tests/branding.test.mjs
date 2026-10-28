@@ -20,14 +20,14 @@ test("user-supplied AI mark is a self-contained, scalable vector", () => {
 
 test("favicons and installed-app icons exist with the advertised dimensions", () => {
   const html = read("index.html");
-  assert.match(html, /rel="icon" href="\.\/icons\/icon\.svg\?v=13"/);
-  assert.match(html, /rel="icon" href="\.\/icons\/icon-48\.png\?v=13"/);
-  assert.match(html, /rel="apple-touch-icon" href="\.\/icons\/icon-192\.png\?v=13"/);
+  assert.match(html, /rel="icon" href="\.\/icons\/icon\.svg\?v=15"/);
+  assert.match(html, /rel="icon" href="\.\/icons\/icon-48\.png\?v=15"/);
+  assert.match(html, /rel="apple-touch-icon" href="\.\/icons\/icon-192\.png\?v=15"/);
   const manifest = JSON.parse(read("manifest.webmanifest"));
   const maskableSizes = manifest.icons.filter((icon) => icon.purpose === "maskable").map((icon) => icon.sizes).sort();
   assert.deepEqual(maskableSizes, ["192x192", "512x512"]);
   for (const icon of manifest.icons) {
-    assert.match(icon.src, /\?v=13$/);
+    assert.match(icon.src, /\?v=15$/);
     const file = icon.src.replace(/^\.\//, "").split("?")[0];
     assert.ok(existsSync(path.join(root, file)), `${file} exists`);
     if (icon.type === "image/png") {
@@ -49,7 +49,7 @@ test("crawlable canonical URLs, sitemap and social metadata agree", () => {
   const sitemap = read("sitemap.xml");
   assert.ok(html.includes(`<link rel="canonical" href="${domain}/">`));
   assert.ok(html.includes(`<meta property="og:url" content="${domain}/">`));
-  assert.ok(html.includes(`${domain}/icons/icon-512.png?v=13`));
+  assert.ok(html.includes(`${domain}/icons/icon-512.png?v=15`));
   assert.match(robots, /^Allow: \/$/m);
   assert.match(robots, /^Disallow: \/api\/$/m);
   assert.ok(robots.includes(`Sitemap: ${domain}/sitemap.xml`));

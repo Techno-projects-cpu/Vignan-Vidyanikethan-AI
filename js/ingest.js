@@ -1,14 +1,15 @@
 /**
- * Ingestion pipeline for PDF, TXT, Markdown and pasted notes.
+ * Ingestion pipeline for PDFs, readable text and pasted notes.
  * PDF text extraction uses a vendored copy of PDF.js so it also works offline.
  */
 
-import { buildBookIndex } from "./retrieval.js?v=13";
-import { cleanPageText, detectHeading } from "./text.js?v=13";
-import { uid } from "./util.js?v=13";
+import { buildBookIndex } from "./retrieval.js?v=15";
+import { cleanPageText, detectHeading } from "./text.js?v=15";
+import { uid } from "./util.js?v=15";
 
 const PDF_BASE = new URL("../vendor/pdfjs/", import.meta.url).href;
 const MAX_PDF_PAGES = 800;
+const MAX_PDF_TEXT_CHARS = 4 * 1024 * 1024;
 const MAX_STORED_PDF_BYTES = 20 * 1024 * 1024;
 
 let pdfLibraryPromise;
@@ -26,21 +27,37 @@ async function pdfLibrary() {
   return library;
 }
 
-function itemsToText(items) {
+export function pdfItemsToText(items, maxChars = MAX_PDF_TEXT_CHARS) {
   const lines = [];
   let current = "";
+  let characters = 0;
+  let previousY = null;
+  let previousHeight = 0;
+  const flush = () => {
+    if (current.trim()) lines.push(current.trim());
+    current = "";
+    previousY = null;
+    previousHeight = 0;
+  };
   for (const item of items) {
     const value = typeof item.str === "string" ? item.str : "";
-    if (!value) continue;
+    if (!value) { if (item.hasEOL) flush(); continue; }
+    characters += value.length + 1;
+    if (characters > maxChars) throw new Error("This PDF contains too much extracted text. Split it into smaller chapters first.");
+    const y = Number(item.transform?.[5]);
+    const height = Number(item.height) || Math.abs(Number(item.transform?.[3])) || 10;
+    // Some PDFs never set hasEOL. Detect substantial baseline changes so
+    // numbered past-paper questions do not collapse into one long sentence.
+    if (current && Number.isFinite(y) && previousY !== null && Math.abs(y - previousY) > Math.max(2, Math.min(previousHeight || height, height) * 0.55)) flush();
     current += value;
-    if (item.hasEOL) {
-      if (current.trim()) lines.push(current.trim());
-      current = "";
-    } else if (!/\s$/.test(current)) {
-      current += " ";
+    if (item.hasEOL) flush();
+    else {
+      if (!/\s$/.test(current)) current += " ";
+      if (Number.isFinite(y)) previousY = y;
+      previousHeight = height;
     }
   }
-  if (current.trim()) lines.push(current.trim());
+  flush();
   return lines.join("\n");
 }
 
@@ -58,16 +75,20 @@ export async function extractPdfPages(file, onProgress = () => {}) {
     isEvalSupported: false,
     enableXfa: false,
   });
-  const document = await task.promise;
+  let document;
+  try { document = await task.promise; }
+  catch (error) { await task.destroy().catch(() => {}); throw error; }
   const originalPageCount = document.numPages;
   const pageCount = Math.min(originalPageCount, MAX_PDF_PAGES);
   const pages = [];
+  let totalCharacters = 0;
   try {
     let lastHeading = "Notes";
     for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
       const page = await document.getPage(pageNumber);
       const content = await page.getTextContent();
-      const text = cleanPageText(itemsToText(content.items));
+      const text = cleanPageText(pdfItemsToText(content.items, MAX_PDF_TEXT_CHARS - totalCharacters));
+      totalCharacters += text.length;
       const firstLines = text.split("\n").slice(0, 4);
       const heading = firstLines.map(detectHeading).find(Boolean) || lastHeading;
       if (heading !== lastHeading) lastHeading = heading;
@@ -80,7 +101,6 @@ export async function extractPdfPages(file, onProgress = () => {}) {
   } finally {
     await document.destroy();
   }
-  const totalCharacters = pages.reduce((sum, page) => sum + page.text.length, 0);
   if (totalCharacters < 80) {
     throw new Error(
       "This PDF appears to be scanned images, not selectable text. Run OCR on it first, or upload a TXT version of the notes.",
@@ -101,6 +121,7 @@ function normalizeMeta(meta, fallbackTitle, type) {
     board: (meta.board || "").trim(),
     language: (meta.language || "English").trim(),
     fileName: meta.fileName || "",
+    sourceUrl: meta.sourceUrl || "",
     type,
     demo: Boolean(meta.demo),
   };
@@ -125,8 +146,4 @@ export function ingestText(rawText, meta = {}, onProgress = () => {}) {
   );
   onProgress({ phase: "done", current: 1, total: 1 });
   return index;
-}
-
-export async function ingestDemoPack(rawText, meta = {}) {
-  return ingestText(rawText, { ...meta, demo: true, type: "demo" }, () => {});
 }

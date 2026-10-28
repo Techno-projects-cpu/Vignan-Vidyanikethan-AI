@@ -7,7 +7,7 @@
  * reasonably well, and is deterministic (important for verifiable answers).
  */
 
-import { bigrams, tokenize } from "./text.js?v=13";
+import { bigrams, tokenize } from "./text.js?v=15";
 
 export const VECTOR_DIM = 512;
 
@@ -66,7 +66,7 @@ export function computeStats(chunks) {
     n,
     avgdl: totalLength / n,
     idf,
-    maxIdf: values.length ? Math.max(...values) : 1,
+    maxIdf: values.length ? values.reduce((max, value) => Math.max(max, value), 0) : 1,
     dim: VECTOR_DIM,
   };
 }

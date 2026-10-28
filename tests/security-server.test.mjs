@@ -39,7 +39,7 @@ async function startServer(t, overrides = {}) {
       ...process.env,
       STUDY_AI_HOST: "127.0.0.1", STUDY_AI_PORT: "0", STUDY_AI_ACCOUNTS_BACKEND: "local",
       STUDY_AI_ACCOUNTS_FILE: accountFile, STUDY_AI_COOKIE_SECURE: "true", STUDY_AI_TRUST_PROXY: "false",
-      STUDY_AI_ALLOWED_ORIGINS: "", STUDY_AI_SEARCH_URL: "", STUDY_AI_GEMINI_KEY: "", STUDY_AI_GROQ_KEY: "",
+      STUDY_AI_ALLOWED_ORIGINS: "", STUDY_AI_SEARCH_URL: "", STUDY_AI_WIKIPEDIA_SEARCH: "false", STUDY_AI_GEMINI_KEY: "", STUDY_AI_GROQ_KEY: "",
       ...overrides,
     },
     stdio: ["ignore", "pipe", "pipe"],
@@ -89,7 +89,7 @@ test("account HTTP endpoints enforce CSRF, safe cookies, rate limits and preserv
   const robots = await get("/robots.txt");
   assert.equal(robots.status, 200);
   assert.match(await robots.text(), /Sitemap: https:/);
-  const icon = await get("/icons/icon.svg?v=13");
+  const icon = await get("/icons/icon.svg?v=15");
   assert.equal(icon.status, 200);
   assert.match(icon.headers.get("content-type"), /^image\/svg\+xml/);
 

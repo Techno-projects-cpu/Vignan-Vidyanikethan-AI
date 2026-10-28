@@ -6,8 +6,8 @@
  * can show the student what to revise instead of just a score.
  */
 
-import { hashFeature } from "./vector.js?v=13";
-import { splitSentences, tokenize } from "./text.js?v=13";
+import { hashFeature } from "./vector.js?v=15";
+import { splitSentences, tokenize } from "./text.js?v=15";
 import {
   clamp,
   levenshtein,
@@ -17,7 +17,7 @@ import {
   uid,
   unique,
   wordOverlap,
-} from "./util.js?v=13";
+} from "./util.js?v=15";
 
 const FILLER = new Set(
   `about above after again against because before being below between could during each every first following from have into itself more most other second should some such than that their these those through where which while would your textbook chapter page section notes`.split(
@@ -52,14 +52,14 @@ function seededShuffle(items, seedText) {
 }
 
 function wordsWithCase(sentence) {
-  return sentence.match(/\b[A-Za-z][A-Za-z-]{2,}\b/g) || [];
+  return sentence.match(/[\p{L}\p{M}][\p{L}\p{M}-]{2,}/gu) || [];
 }
 
 /** Pick a meaningful term or short phrase from a sentence to blank out. */
 export function pickBlankPhrase(sentence, difficulty = "medium") {
   const words = wordsWithCase(sentence).filter((word) => {
     const lower = word.toLowerCase();
-    return !FILLER.has(lower) && lower.length >= 4;
+    return !FILLER.has(lower) && lower.length >= 4 && tokenize(lower).length > 0;
   });
   if (!words.length) return "";
   const sorted = unique(words).sort((a, b) => b.length - a.length);
@@ -80,11 +80,12 @@ function candidateSentences(hits, topic) {
   hits.forEach((hit, hitIndex) => {
     splitSentences(hit.text).forEach((rawSentence, sentenceIndex) => {
       const sentence = rawSentence.replace(/\s+/g, " ").trim();
-      if (sentence.length < 55 || sentence.length > 260) return;
+      const indic = /[\u0900-\u097f\u0c00-\u0c7f]/u.test(sentence);
+      if (sentence.length < (indic ? 35 : 55) || sentence.length > 260) return;
       const words = sentence.split(/\s+/).filter(Boolean);
-      if (words.length < 9) return;
+      if (words.length < (indic ? 5 : 9)) return;
       const tokens = tokenize(sentence);
-      if (tokens.length < 4) return;
+      if (tokens.length < (indic ? 3 : 4)) return;
       const overlap = tokens.filter((word) => topicWords.has(word)).length;
       const definition = /\b(is|are|means|refers|called|defined|because|therefore|consists|formed|contains|equals)\b/i.test(
         sentence,
@@ -113,6 +114,8 @@ function makeSource(hit, sentence) {
     bookId: hit.bookId,
     chunkId: hit.chunkId,
     title: hit.title,
+    sourceUrl: hit.sourceUrl || "",
+    sourceKind: hit.sourceKind || "",
     page: hit.page,
     section: hit.section,
     quote: truncate(sentence || hit.text, 280),
@@ -125,7 +128,7 @@ function blankOut(sentence, phrase) {
   return blanked === sentence ? sentence.replace(new RegExp(escapeRegExp(phrase), "i"), "______") : blanked;
 }
 
-function buildQuestion({ candidate, type, difficulty, distractorPool, index, phrase: providedPhrase }) {
+function buildQuestion({ candidate, type, difficulty, distractorPool, index, phrase: providedPhrase, language = "en" }) {
   const { sentence, hit } = candidate;
   const phrase = providedPhrase || pickBlankPhrase(sentence, difficulty);
   if (!phrase) return null;
@@ -146,7 +149,9 @@ function buildQuestion({ candidate, type, difficulty, distractorPool, index, phr
     return {
       ...base,
       type: "short",
-      prompt: `In your own words, explain what your textbook says about “${keyword}” in ${source.section || "this chapter"}.`,
+      prompt: language === "te" ? `“${keyword}” గురించి మీ పుస్తకం ఏమి చెబుతుందో మీ మాటల్లో వివరించండి.`
+        : language === "hi" ? `“${keyword}” के बारे में अपनी किताब की बात अपने शब्दों में समझाएँ।`
+          : `In your own words, explain what your textbook says about “${keyword}” in ${source.section || "this chapter"}.`,
       options: [],
       answer: "",
       acceptable: tokenize(sentence).slice(0, 8),
@@ -159,7 +164,7 @@ function buildQuestion({ candidate, type, difficulty, distractorPool, index, phr
     return {
       ...base,
       type: "fill",
-      prompt: `Fill in the blank: “${truncate(blanked, 220)}”`,
+      prompt: `${language === "te" ? "ఖాళీని పూరించండి" : language === "hi" ? "रिक्त स्थान भरें" : "Fill in the blank"}: “${truncate(blanked, 220)}”`,
       options: [],
       answer: correct,
       acceptable: [correct, tokenize(correct)[0] || correct],
@@ -178,14 +183,17 @@ function buildQuestion({ candidate, type, difficulty, distractorPool, index, phr
   )
     .filter((term, position, list) => list.findIndex((other) => normalizeAnswer(other) === normalizeAnswer(term)) === position)
     .slice(0, 3);
-  while (distractors.length < 3) {
-    distractors.push(["energy", "matter", "motion", "nutrient", "process", "system"][distractors.length]);
+  const fallback = language === "te" ? ["శక్తి", "పదార్థం", "చలనం", "పోషకం", "వ్యవస్థ", "ప్రక్రియ"]
+    : language === "hi" ? ["ऊर्जा", "पदार्थ", "गति", "पोषक", "प्रक्रिया", "तंत्र"] : ["energy", "matter", "motion", "nutrient", "process", "system"];
+  for (const option of fallback) {
+    if (distractors.length >= 3) break;
+    if (normalizeAnswer(option) !== normalizeAnswer(correct) && !distractors.some((value) => normalizeAnswer(value) === normalizeAnswer(option))) distractors.push(option);
   }
   const options = seededShuffle([correct, ...distractors], `${sentence}-options-${index}`);
   return {
     ...base,
     type: "mcq",
-    prompt: `Choose the word or phrase that completes this textbook statement: “${truncate(blanked, 220)}”`,
+    prompt: `${language === "te" ? "ఈ వాక్యాన్ని పూర్తి చేసే పదాన్ని ఎంచుకోండి" : language === "hi" ? "वाक्य पूरा करने वाला शब्द चुनें" : "Choose the word or phrase that completes this textbook statement"}: “${truncate(blanked, 220)}”`,
     options,
     answer: correct,
     acceptable: [correct],
@@ -244,6 +252,7 @@ export function generateQuiz({
   timed = false,
   secondsPerQuestion = 45,
   bookIds = [],
+  language = "en",
 } = {}) {
   const candidates = candidateSentences(hits, topic);
   if (!candidates.length) return makeQuiz({ questions: [], topic, type, difficulty, timed, secondsPerQuestion, bookIds });
@@ -287,6 +296,7 @@ export function generateQuiz({
       distractorPool,
       index,
       phrase: selectedPhrase,
+      language,
     });
     if (question) questions.push(question);
   }

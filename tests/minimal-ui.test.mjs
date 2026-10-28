@@ -29,10 +29,12 @@ test("advanced settings stay in the DOM behind a disclosure control", () => {
   const end = html.indexOf('            </div>\n          </div>\n        </section>', start);
   assert.ok(start > 0 && end > start, "advanced wrapper boundaries exist");
   const advanced = html.slice(start, end);
-  for (const id of ["free-api-card", "student-key-card", "provider-editor", "settings-theme", "settings-web-enabled"]) {
+  for (const id of ["free-api-card", "student-key-card", "provider-editor", "settings-theme", "settings-web-mode"]) {
     assert.ok(advanced.includes(`id="${id}"`), `${id} remains available`);
   }
   assert.ok(!advanced.includes('id="local-ai-panel"'), "local model controls stay visible by default");
+  assert.ok(!advanced.includes('id="settings-web-enabled"'), "the basic web switch must not be hidden in advanced settings");
+  assert.match(html, /id="settings-web-enabled"/);
   assert.match(html, /id="toggle-advanced-settings"[^>]*aria-controls="advanced-settings"/);
   assert.match(css, /\.minimal-ui \.advanced-settings \{ display: none; \}/);
   assert.match(css, /#view-settings\.show-advanced \.advanced-settings \{ display: contents; \}/);

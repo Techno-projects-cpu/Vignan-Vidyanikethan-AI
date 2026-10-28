@@ -106,7 +106,8 @@ test("settings migrate legacy engine config and validate routes", () => {
   assert.equal(invalid.theme, "light");
   assert.equal(isModelConnected(invalid), false);
   assert.match(engineLabel(invalid), /Offline/i);
-  assert.match(privacyLabel(invalid), /Nothing leaves/i);
+  assert.match(privacyLabel(invalid), /Book lookup stays on this device/i);
+  assert.match(privacyLabel(invalid), /search query goes to Wikipedia/i);
 });
 
 test("task router defaults to offline and exposes four tasks", () => {
@@ -127,7 +128,7 @@ test("prompt context is page-labelled and length-limited", () => {
   const built = buildMessages({ query: "What is photosynthesis?", hits, mode: "explain" });
   assert.equal(built[0].content, SYSTEM_PROMPT);
   assert.match(built.at(-1).content, /Explain the idea step by step/);
-  assert.match(built.at(-1).content, /TEXTBOOK PASSAGES/);
+  assert.match(built.at(-1).content, /LIBRARY PASSAGES/);
 });
 
 test("extractJson tolerates code fences and surrounding prose", () => {

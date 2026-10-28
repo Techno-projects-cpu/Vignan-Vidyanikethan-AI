@@ -6,9 +6,9 @@
  * with a light MMR pass so the model sees more than one page of context.
  */
 
-import { bigrams, chunkPages, parsePages, tokenize } from "./text.js?v=13";
-import { clamp } from "./util.js?v=13";
-import { computeStats, cosine, queryVector, vectorize } from "./vector.js?v=13";
+import { bigrams, chapterReference, chunkPages, parsePages, tokenize } from "./text.js?v=15";
+import { clamp } from "./util.js?v=15";
+import { computeStats, cosine, queryVector, vectorize } from "./vector.js?v=15";
 
 const K1 = 1.5;
 const B = 0.75;
@@ -46,6 +46,7 @@ export function buildBookIndex(meta, raw) {
     board: meta.board || "",
     language: meta.language || "English",
     fileName: meta.fileName || "",
+    sourceUrl: meta.sourceUrl || "",
     type: meta.type || "text",
     demo: Boolean(meta.demo),
     createdAt: meta.createdAt || new Date().toISOString(),
@@ -54,7 +55,9 @@ export function buildBookIndex(meta, raw) {
     stats,
     pages,
     fileBlob: meta.fileBlob || null,
-    indexVersion: 1,
+    // Version 2 preserves Indic combining marks in tokens. Older indexes are
+    // rebuilt in memory from their stored pages when the app opens.
+    indexVersion: 2,
   };
   return { book, chunks, pages };
 }
@@ -128,6 +131,8 @@ function indexToHit(index, chunk) {
     subject: index.book.subject,
     grade: index.book.grade,
     board: index.book.board,
+    sourceUrl: index.book.sourceUrl || "",
+    sourceKind: index.book.type || "text",
     page: chunk.page,
     section: chunk.section || "Notes",
     text: chunk.text,
@@ -206,11 +211,56 @@ export function retrieve(query, indexes, { topK = 5, threshold = GROUNDING_THRES
   };
 }
 
+/** Prefer uploaded books/notes to public-web imports when both contain a match. */
+export function retrievePreferBooks(query, indexes, options = {}) {
+  const bookIds = options.bookIds || [];
+  const active = indexes.filter((index) => index?.book && (!bookIds.length || bookIds.includes(index.book.id)));
+  const local = active.filter((index) => !index.book.sourceUrl);
+  const imported = active.filter((index) => Boolean(index.book.sourceUrl));
+  const match = (indexGroup) => {
+    const result = retrieve(query, indexGroup, { ...options, bookIds: [] });
+    // A single common word in a longer question must not masquerade as an
+    // answer to a different named topic. Let the labelled web fallback try.
+    if (result.grounded && new Set(tokenize(cleanStudyQuery(query))).size >= 3 && result.hits[0]?.overlap < 0.5) {
+      return { ...result, hits: [], grounded: false, confidence: 0, reason: "not-in-books" };
+    }
+    return result;
+  };
+  const first = match(local);
+  if (first.grounded) return first;
+  const second = match(imported);
+  if (second.grounded) return second;
+  return first.reason === "empty-library" ? second : first;
+}
+
 /** Search a named topic; only an intentionally blank topic samples general material. */
 export function retrieveChapter(topic, indexes, { topK = 10, bookIds = [] } = {}) {
   const requested = String(topic || "").trim();
   if (requested) {
-    const result = retrieve(requested, indexes, { topK, threshold: 0.06, bookIds });
+    const chapter = chapterReference(requested);
+    let searchIndexes = indexes;
+    if (chapter) {
+      searchIndexes = indexes
+        .filter((index) => index?.book && (!bookIds.length || bookIds.includes(index.book.id)))
+        .map((index) => ({
+          ...index,
+          chunks: (index.chunks || []).filter((chunk) => {
+            const heading = chapterReference(chunk.section);
+            const title = chapterReference(index.book.title);
+            return heading ? heading.number === chapter.number : title?.number === chapter.number;
+          }),
+        }))
+        .filter((index) => index.chunks.length);
+      if (!searchIndexes.length) return { hits: [], allHits: [], grounded: false, confidence: 0, reason: "not-in-books", bestScore: 0 };
+      // A chapter number by itself is a request for that section, not a
+      // keyword query (numbers are intentionally omitted from the word index).
+      const remaining = requested.replace(chapter.text, " ").trim();
+      if (!tokenize(remaining).length) {
+        const hits = searchIndexes.flatMap((index) => index.chunks.map((chunk) => ({ ...indexToHit(index, chunk), score: 1, overlap: 1 }))).slice(0, topK);
+        return { hits, allHits: hits, grounded: Boolean(hits.length), confidence: 1, reason: "chapter-heading", bestScore: 1 };
+      }
+    }
+    const result = retrieve(requested, searchIndexes, { topK, threshold: 0.06, bookIds: chapter ? [] : bookIds });
     // A shared generic word alone should not turn an unrelated topic into a
     // confident-looking quiz. Ask the student to narrow the wording instead.
     if (result.hits.length && new Set(tokenize(cleanStudyQuery(requested))).size > 1 && result.hits[0].overlap < 0.6) {

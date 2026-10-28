@@ -1,10 +1,10 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=13";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=13";
-import { parseApiKeys } from "./key-pool.js?v=13";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=13";
-import { aiProfile } from "./ai-nicknames.js?v=13";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=15";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=15";
+import { parseApiKeys } from "./key-pool.js?v=15";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=15";
+import { aiProfile } from "./ai-nicknames.js?v=15";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -29,7 +29,9 @@ export const DEFAULT_SETTINGS = {
   activeProvider: "webllm",
   localAIModel: DEFAULT_LOCAL_MODEL_ID,
   localAIAutoEnable: true,
-  webEnabled: false,
+  // New installations can search Wikipedia when books have no match. Explicit
+  // stored choices (including older opt-outs) are preserved by normalization.
+  webEnabled: true,
   webMode: "server",
   searchEndpoint: "",
   searchToken: "",
@@ -98,7 +100,7 @@ export function normalizeSettings(value = {}) {
   if (!PROVIDERS[merged.activeProvider]) merged.activeProvider = "server";
   if (!["server", "custom"].includes(merged.webMode)) merged.webMode = "server";
   if (!["light", "dark"].includes(merged.theme)) merged.theme = "light";
-  if (!["en", "te"].includes(merged.language)) merged.language = "en";
+  if (!["en", "te", "hi"].includes(merged.language)) merged.language = "en";
   merged.freeRouterDismissed = Boolean(raw.freeRouterDismissed);
   merged.profile = String(merged.profile || "Student").slice(0, 32);
   return merged;
@@ -126,12 +128,18 @@ export function privacyLabel(settings) {
   const hasStudentKeys =
     settings?.studentKeyFallback !== false &&
     Object.values(settings?.studentKeys || {}).some((entry) => parseApiKeys(entry?.keys).length > 0);
-  if (!providers.length && !hasStudentKeys) return "Nothing leaves this device";
+  const web = settings?.webEnabled
+    ? "When books have no match, the search query goes to Wikipedia or your chosen search provider."
+    : "Web fallback is off.";
+  const links = "Links you explicitly request are sent to the site server and the linked website.";
+  if (!providers.length && !hasStudentKeys) return `Book lookup stays on this device. ${web} ${links}`;
   const allPrivate = providers.every((id) => PROVIDERS[id]?.private);
-  if (hasStudentKeys) return "Short passages go to configured AIs; your keys stay in this browser";
-  return allPrivate
-    ? "Short passages go only to your local models"
-    : "Short passages go to your configured AI provider(s)";
+  const ai = hasStudentKeys
+    ? "Short passages go to configured AIs; your keys stay in this browser."
+    : allPrivate
+      ? "Short passages go to your configured local models."
+      : "Short passages go to your configured AI provider(s).";
+  return `${ai} ${web} ${links}`;
 }
 
 export function providerConfig(settings, providerId = settings?.activeProvider) {

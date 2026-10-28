@@ -7,9 +7,9 @@
  * labelled as being outside the textbooks.
  */
 
-import { salientSentences, splitSentences } from "./text.js?v=13";
-import { truncate } from "./util.js?v=13";
-import { buildFlashcards } from "./flashcards.js?v=13";
+import { salientSentences, splitSentences } from "./text.js?v=15";
+import { truncate } from "./util.js?v=15";
+import { buildFlashcards } from "./flashcards.js?v=15";
 
 export function sourcesFromHits(hits = []) {
   return hits.map((hit, index) => ({
@@ -18,6 +18,8 @@ export function sourcesFromHits(hits = []) {
     chunkId: hit.chunkId,
     title: hit.title,
     subject: hit.subject,
+    sourceUrl: hit.sourceUrl || "",
+    sourceKind: hit.sourceKind || "",
     page: hit.page,
     section: hit.section,
     text: hit.text,
@@ -37,13 +39,15 @@ function citation(n) {
   return `[${n}]`;
 }
 
-function intro(query, mode) {
+function intro(query, mode, language = "en") {
   const topic = truncate(query.replace(/[?.!]+$/, ""), 90);
+  if (language === "te") return `**మీ పుస్తకాల నుండి — ${topic}**`;
+  if (language === "hi") return `**आपकी किताबों से — ${topic}**`;
   if (mode === "summarize") return `**Revision summary — ${topic}**`;
-  if (mode === "explain") return `**Step-by-step from your books — ${topic}**`;
+  if (mode === "explain") return `**Step-by-step from your library — ${topic}**`;
   if (mode === "practice") return `**Practice questions — ${topic}**`;
   if (mode === "flashcards") return `**Flashcards — ${topic}**`;
-  return `**From your textbooks — ${topic}**`;
+  return `**From your library — ${topic}**`;
 }
 
 function webBlock(webResults = []) {
@@ -58,11 +62,25 @@ function webBlock(webResults = []) {
   ].join("\n");
 }
 
-export function notFoundMessage(reason, webResults = [], webEnabled = false) {
+export function notFoundMessage(reason, webResults = [], webEnabled = false, language = "en") {
+  if (language === "te" || language === "hi") {
+    const messages = language === "te" ? {
+      "empty-library": "మీ గ్రంథాలయం ఖాళీగా ఉంది. ముందుగా Library లో PDF లేదా నోట్స్ జోడించండి.",
+      "too-vague": "దయచేసి ఒక అంశం లేదా అధ్యాయాన్ని స్పష్టంగా పేర్కొనండి.",
+      other: "**మీ పుస్తకాలలో దీనికి సమాధానం దొరకలేదు.** సంబంధిత అధ్యాయాన్ని జోడించండి లేదా వేరే పదాలతో అడగండి.",
+      web: "వెబ్ శోధనలో ఫలితాలు రాలేదు. కనెక్షన్‌ను తనిఖీ చేయండి.",
+    } : {
+      "empty-library": "आपकी लाइब्रेरी खाली है। पहले Library में PDF या नोट्स जोड़ें।",
+      "too-vague": "कृपया कोई विषय या अध्याय स्पष्ट रूप से बताएँ।",
+      other: "**आपकी किताबों में इसका उत्तर नहीं मिला।** संबंधित अध्याय जोड़ें या दूसरे शब्दों में पूछें।",
+      web: "वेब खोज से परिणाम नहीं मिले। अपना कनेक्शन जाँचें।",
+    };
+    return `${messages[reason] || messages.other}${webEnabled && !webResults.length ? `\n\n${messages.web}` : ""}${webBlock(webResults)}`;
+  }
   let headline;
   if (reason === "empty-library") {
     headline =
-      "Your library is empty. Add a class PDF, paste notes, or load the demo study pack in **Library** first — then I can answer with page citations.";
+      "Your library is empty. Add a PDF or notes you have permission to use in **Library** for answers with page citations.";
   } else if (reason === "too-vague") {
     headline = "Please name a topic or concept in your question — for example, “Why do leaves look green?”";
   } else {
@@ -71,7 +89,7 @@ export function notFoundMessage(reason, webResults = [], webEnabled = false) {
   }
   if (webEnabled && !webResults.length) {
     headline +=
-      "\n\nWeb fallback is on, but no outside results were returned. Check the search endpoint in **Settings**.";
+      "\n\nWeb fallback is on, but no outside results were returned. Try a shorter question or check your connection.";
   }
   return `${headline}${webBlock(webResults)}`;
 }
@@ -83,9 +101,11 @@ function extractiveLines(query, sources, mode) {
     const sentences = salientSentences(source.text, query, perSource).map(cleanSentence);
     if (!sentences.length) return;
     const marker = citation(source.n);
+    const origin = source.sourceUrl ? "**Web import** · " : "";
     const heading = source.section && source.section !== "Notes" ? `**${source.section}** · ` : "";
+    const location = source.sourceUrl && source.sourceKind !== "pdf" ? `section ${source.page}` : `p. ${source.page}`;
     sentences.forEach((sentence) => {
-      lines.push(`${heading}“${truncate(sentence, 320)}” — ${source.title}, p. ${source.page}. ${marker}`);
+      lines.push(`${origin}${heading}“${truncate(sentence, 320)}” — ${source.title}, ${location}. ${marker}`);
     });
   });
   return lines;
@@ -97,8 +117,8 @@ function practiceQuestions(query, sources) {
     const sentence = cleanSentence(salientSentences(source.text, query, 1)[0] || "");
     if (!sentence) return;
     const words = sentence.split(/\s+/).filter(Boolean);
-    const key = words.find((word) => word.replace(/[^A-Za-z]/g, "").length > 5) || "this idea";
-    questions.push(`- **${key.replace(/[^A-Za-z]/g, "")}:** ${truncate(sentence, 180)} What does this tell you? ${citation(source.n)}`);
+    const key = words.find((word) => word.replace(/[^\p{L}\p{M}]/gu, "").length > 5) || "this idea";
+    questions.push(`- **${key.replace(/[^\p{L}\p{M} ]/gu, "")}:** ${truncate(sentence, 180)} What does this tell you? ${citation(source.n)}`);
   });
   return questions;
 }
@@ -109,17 +129,19 @@ function practiceQuestions(query, sources) {
  */
 export function composeGroundedAnswer({
   query,
+  evidenceQuery = query,
   hits = [],
   mode = "answer",
   reason = "ok",
   confidence = 0,
   webResults = [],
   webEnabled = false,
+  language = "en",
 } = {}) {
   const sources = sourcesFromHits(hits);
   if (!sources.length) {
     return {
-      text: notFoundMessage(reason, webResults, webEnabled),
+      text: notFoundMessage(reason, webResults, webEnabled, language),
       sources: [],
       webSources: webResults,
       flashcards: [],
@@ -128,12 +150,15 @@ export function composeGroundedAnswer({
     };
   }
 
-  const parts = [intro(query, mode), ""];
+  const parts = [intro(query, mode, language), ""];
+  if (language === "te") parts.push("_ఆఫ్‌లైన్ Bolt మూల పాఠ్యాన్ని అనువదించకుండా చూపిస్తుంది._", "");
+  if (language === "hi") parts.push("_ऑफ़लाइन Bolt स्रोत को बिना अनुवाद के दिखाता है।_", "");
+  if (sources.some((source) => source.sourceUrl)) parts.push("_This answer includes material you imported from a website; verify it independently._", "");
   if (mode === "practice") {
-    parts.push(...practiceQuestions(query, sources));
+    parts.push(...practiceQuestions(evidenceQuery, sources));
     parts.push("", "_Write your answers first, then generate a quiz in the Quiz tab to check them._");
   } else if (mode === "flashcards") {
-    const flashcards = buildFlashcards(hits, 6);
+    const flashcards = buildFlashcards(hits, 6, { language });
     flashcards.forEach((card, index) => {
       parts.push(`**${index + 1}. ${card.front}**`);
       parts.push(`${card.back} ${citation(card.source.n)}`);
@@ -149,11 +174,11 @@ export function composeGroundedAnswer({
       confidence,
     };
   } else if (mode === "explain") {
-    const lines = extractiveLines(query, sources.slice(0, 3), mode);
+    const lines = extractiveLines(evidenceQuery, sources.slice(0, 3), mode);
     lines.forEach((line, index) => parts.push(`**${index + 1}.** ${line}`));
     parts.push("", "_Each step is taken from a cited passage; open the source to read the full page._");
   } else {
-    parts.push(...extractiveLines(query, sources, mode).map((line) => `- ${line}`));
+    parts.push(...extractiveLines(evidenceQuery, sources, mode).map((line) => `- ${line}`));
     if (mode === "summarize") {
       parts.push("", `_Quick check: ${cleanSentence(splitSentences(sources[0].text)[0] || "")}`);
     }

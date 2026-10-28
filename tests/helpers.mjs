@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { buildBookIndex, retrieveChapter } from "../js/retrieval.js";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const DEMO = path.resolve(HERE, "../data/demo-textbook.txt");
+const DEMO = path.resolve(HERE, "./fixtures/sample-study.txt");
 
 export function demoText() {
   return fs.readFileSync(DEMO, "utf8");

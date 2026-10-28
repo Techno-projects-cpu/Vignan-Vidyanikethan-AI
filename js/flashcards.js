@@ -3,8 +3,8 @@
  * Cards are derived from retrieved passages and always carry a page citation.
  */
 
-import { localDay, truncate, uid } from "./util.js?v=13";
-import { splitSentences, tokenize } from "./text.js?v=13";
+import { localDay, truncate, uid } from "./util.js?v=15";
+import { splitSentences, tokenize } from "./text.js?v=15";
 
 const PROGRESS_KEY = "vignan-study-ai.flashcards.v1";
 const INTERVALS = [0, 1, 3, 7, 16, 35];
@@ -15,7 +15,7 @@ const GENERIC = new Set(
 );
 
 function findKeyTerm(sentence) {
-  const candidates = sentence.match(/\b[A-Za-z][A-Za-z-]{4,}\b/g) || [];
+  const candidates = sentence.match(/[\p{L}\p{M}][\p{L}\p{M}-]{4,}/gu) || [];
   const meaningful = candidates.filter((word) => {
     const lower = word.toLowerCase();
     return !GENERIC.has(lower) && tokenize(lower).length && !/^(the|and|for|with|from|that|this)$/i.test(lower);
@@ -25,31 +25,34 @@ function findKeyTerm(sentence) {
   return words[0]?.replace(/[^A-Za-z-]/g, "") || "";
 }
 
-function definitionCard(sentence) {
+function definitionCard(sentence, language = "en") {
   const match = sentence.match(/^(.{3,80}?)\s+(is|are|means|refers to|is called|are called)\s+(.{8,220})$/i);
   if (!match) return null;
   const subject = match[1].replace(/^(the|a|an)\s+/i, "").trim();
   const verb = /means|refers/i.test(match[2]) ? "mean" : "is/are";
   return {
-    front: verb === "mean" ? `What does “${subject}” mean?` : `What ${verb.includes("is") ? "is" : "are"} ${subject}?`,
+    front: language === "te" ? `“${subject}” అంటే ఏమిటి?` : language === "hi" ? `“${subject}” क्या है?`
+      : verb === "mean" ? `What does “${subject}” mean?` : `What ${verb.includes("is") ? "is" : "are"} ${subject}?`,
     back: sentence,
   };
 }
 
-function clozeCard(sentence) {
+function clozeCard(sentence, language = "en") {
   const term = findKeyTerm(sentence);
   if (!term || sentence.length < 35) return null;
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const blanked = sentence.replace(new RegExp(`\\b${escaped}\\b`, "i"), "________");
+  let blanked = sentence.replace(new RegExp(`\\b${escaped}\\b`, "i"), "________");
+  // JavaScript's \\b is ASCII-oriented; retain words in Telugu/Hindi scripts.
+  if (blanked === sentence) blanked = sentence.replace(new RegExp(escaped, "iu"), "________");
   if (blanked === sentence) return null;
   return {
-    front: `Complete the sentence: “${truncate(blanked, 190)}”`,
+    front: `${language === "te" ? "వాక్యాన్ని పూర్తి చేయండి" : language === "hi" ? "वाक्य पूरा करें" : "Complete the sentence"}: “${truncate(blanked, 190)}”`,
     back: `**${term}** — ${sentence}`,
   };
 }
 
 /** Build up to `count` cards from ranked passages. */
-export function buildFlashcards(hits = [], count = 6) {
+export function buildFlashcards(hits = [], count = 6, { language = "en" } = {}) {
   const cards = [];
   const seen = new Set();
   hits.forEach((hit, index) => {
@@ -58,6 +61,8 @@ export function buildFlashcards(hits = [], count = 6) {
       bookId: hit.bookId,
       chunkId: hit.chunkId,
       title: hit.title,
+      sourceUrl: hit.sourceUrl || "",
+      sourceKind: hit.sourceKind || "",
       page: hit.page,
       section: hit.section,
       quote: truncate(hit.text, 260),
@@ -66,7 +71,7 @@ export function buildFlashcards(hits = [], count = 6) {
       if (cards.length >= count) break;
       const sentence = rawSentence.replace(/\s+/g, " ").trim();
       if (sentence.length < 35 || sentence.length > 280) continue;
-      const card = definitionCard(sentence) || clozeCard(sentence);
+      const card = definitionCard(sentence, language) || clozeCard(sentence, language);
       if (!card) continue;
       const key = card.front.toLowerCase().replace(/\s+/g, " ").slice(0, 80);
       if (seen.has(key)) continue;

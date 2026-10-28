@@ -13,15 +13,15 @@ import {
   SYSTEM_PROMPT,
   extractJson,
   formatContext,
-} from "./context.js?v=13";
+} from "./context.js?v=15";
 import {
   callProvider,
   callRoutedModel,
   gradeShortWithModel,
   testProvider,
   verifyAnswer,
-} from "./model-router.js?v=13";
-import { truncate, uid } from "./util.js?v=13";
+} from "./model-router.js?v=15";
+import { truncate, uid } from "./util.js?v=15";
 
 export {
   FLASHCARD_SCHEMA,
@@ -36,7 +36,13 @@ export {
   verifyAnswer,
 };
 
-export function buildMessages({ query, hits, mode = "answer", history = [] }) {
+const LANGUAGE_INSTRUCTION = {
+  en: "Respond in English.",
+  te: "Respond in Telugu. Keep source names and citation numbers as written; faithfully translate only what the passages support.",
+  hi: "Respond in Hindi. Keep source names and citation numbers as written; faithfully translate only what the passages support.",
+};
+
+export function buildMessages({ query, hits, mode = "answer", history = [], language = "en" }) {
   const context = formatContext(hits);
   const recent = history.slice(-6).map(({ role, content }) => ({ role, content: truncate(content, 700) }));
   return [
@@ -44,7 +50,7 @@ export function buildMessages({ query, hits, mode = "answer", history = [] }) {
     ...recent,
     {
       role: "user",
-      content: `${MODE_INSTRUCTION[mode] || MODE_INSTRUCTION.answer}\n\nTEXTBOOK PASSAGES:\n${context}\n\nQUESTION: ${query}\n\nRemember: cite [n] after each claim. If the passages are insufficient, say you could not find it in the textbooks.`,
+      content: `${MODE_INSTRUCTION[mode] || MODE_INSTRUCTION.answer}\n${LANGUAGE_INSTRUCTION[language] || LANGUAGE_INSTRUCTION.en}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}\n\nQUESTION: ${query}\n\nRemember: cite [n] after each claim. If the passages are insufficient, say you could not find it in the library.`,
     },
   ];
 }
@@ -65,7 +71,7 @@ export async function callModel({ settings, messages, temperature = 0.2, maxToke
 }
 
 export async function answerWithModel({ query, hits, mode, history, settings, signal, verify = true } = {}) {
-  const messages = buildMessages({ query, hits, mode, history });
+  const messages = buildMessages({ query, hits, mode, history, language: settings?.language });
   const result = await callModel({ settings, messages, task: "answer", signal });
   if (result.offline) return { ...result, verification: { enabled: false } };
   const hasCitation = /\[\d+\]/.test(result.content);
@@ -93,7 +99,7 @@ export async function generateQuizWithModel({ topic, hits, count, type, difficul
     { role: "system", content: `${SYSTEM_PROMPT}\n\nYou are writing a quiz. ${QUIZ_SCHEMA}` },
     {
       role: "user",
-      content: `Topic: ${topic || "this chapter"}\nDifficulty: ${difficulty}\nNumber of questions: ${count}\nPreferred type: ${type}\n\nTEXTBOOK PASSAGES:\n${context}`,
+      content: `Topic: ${topic || "this chapter"}\nDifficulty: ${difficulty}\nNumber of questions: ${count}\nPreferred type: ${type}\n${LANGUAGE_INSTRUCTION[settings?.language] || LANGUAGE_INSTRUCTION.en}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}`,
     },
   ];
   const result = await callModel({ settings, messages, task: "quiz", temperature: 0.5, maxTokens: 1800, signal });
@@ -118,6 +124,8 @@ export async function generateQuizWithModel({ topic, hits, count, type, difficul
           bookId: source.bookId,
           chunkId: source.chunkId,
           title: source.title,
+          sourceUrl: source.sourceUrl || "",
+          sourceKind: source.sourceKind || "",
           page: source.page,
           section: source.section,
           quote: truncate(source.text, 260),
@@ -139,7 +147,7 @@ export async function generateFlashcardsWithModel({ topic, hits = [], count = 10
     { role: "system", content: `${SYSTEM_PROMPT}\n\nYou are writing revision flashcards. ${FLASHCARD_SCHEMA}` },
     {
       role: "user",
-      content: `Topic: ${topic || "this chapter"}\nNumber of cards: ${count}\n\nTEXTBOOK PASSAGES:\n${context}`,
+      content: `Topic: ${topic || "this chapter"}\nNumber of cards: ${count}\n${LANGUAGE_INSTRUCTION[settings?.language] || LANGUAGE_INSTRUCTION.en}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}`,
     },
   ];
   const result = await callModel({ settings, messages, task: "flashcards", temperature: 0.45, maxTokens: 1600, signal });
@@ -164,6 +172,8 @@ export async function generateFlashcardsWithModel({ topic, hits = [], count = 10
           bookId: source.bookId,
           chunkId: source.chunkId,
           title: source.title,
+          sourceUrl: source.sourceUrl || "",
+          sourceKind: source.sourceKind || "",
           page: source.page,
           section: source.section,
           quote: truncate(source.text, 260),

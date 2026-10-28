@@ -38,7 +38,7 @@ export function normalizeText(value) {
 /** Loose equality for short student answers: case, punctuation and spacing tolerant. */
 export function normalizeAnswer(value) {
   return normalizeText(value)
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/[^\p{L}\p{M}\p{N}\s]/gu, " ")
     .replace(/\b(a|an|the|of|to|is|are|was|were|in|on|for|and)\b/g, " ")
     .replace(/\s+/g, " ")
     .trim();
