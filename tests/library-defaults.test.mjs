@@ -17,6 +17,10 @@ test("web search is on for new students but preserves a previous opt-out", () =>
   assert.match(html, /id="settings-web-enabled"/);
   assert.match(html, /id="web-search-help"/);
   assert.ok(html.indexOf('id="settings-web-enabled"') < html.indexOf('id="advanced-settings"'));
+  const css = read("styles-premium.css");
+  assert.doesNotMatch(css, /#view-settings \.settings-grid \{ display: none/);
+  assert.match(css, /#view-settings \.settings-grid \{ display: grid/);
+  assert.doesNotMatch(css, /display: none !important;[^}]*\}\s*body\.premium-ui #view-settings\.show-advanced \.premium-settings-launcher/);
 });
 
 test("sample and restricted board textbooks are not shipped as app content", () => {

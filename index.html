@@ -491,17 +491,12 @@
             </label>
             <p id="web-setting-help" data-i18n="ask.webPrivacy">Books first. If there's no match, your question goes to Wikipedia or your chosen search provider. Don't share private information.</p>
           </section>
-          <section class="card premium-settings-launcher" id="premium-settings-launcher" data-reveal>
-            <div class="premium-settings-kicker">CONTROL ROOM</div>
-            <h2>Only open what you need.</h2>
-            <p>AI engines, keys, web search, privacy and appearance stay behind the menu until you ask for them.</p>
-            <div class="premium-settings-actions">
-              <button type="button" class="premium-button primary" data-premium-action="advanced">Advanced settings</button>
-              <button type="button" class="premium-button" data-premium-action="keys">Student keys</button>
-              <button type="button" class="premium-button" data-premium-action="deep-ai">Local model</button>
-              <button type="button" class="premium-button quiet" data-premium-action="theme">Invert theme</button>
-            </div>
-          </section>
+          <div class="settings-shortcuts premium-settings-launcher" id="premium-settings-launcher">
+            <button type="button" class="premium-button primary" data-premium-action="advanced">Advanced settings</button>
+            <button type="button" class="premium-button" data-premium-action="keys">Student keys</button>
+            <button type="button" class="premium-button" data-premium-action="deep-ai">Local model</button>
+            <button type="button" class="premium-button quiet" data-premium-action="theme">Invert theme</button>
+          </div>
           <div class="settings-grid">
             <section class="card settings-card span-2 local-ai-card" id="local-ai-panel">
               <div class="panel-head">
