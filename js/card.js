@@ -445,7 +445,10 @@ function recordOnce({ canvas, frameOptions, duration, onProgress, signal, beat, 
     }
     if (!recorder) {
       stream.getTracks().forEach((track) => track.stop());
-      reject(lastError || new Error("This browser cannot create a video. Download the PNG poster instead."));
+      const error = new Error(lastError?.message || "This browser cannot create a video. Download the PNG poster instead.");
+      error.canRetryFormat = true;
+      error.noMoreFormats = true;
+      reject(error);
       return;
     }
 
@@ -531,10 +534,20 @@ export async function createPerformanceVideo({ canvas, result, progress, profile
   const length = clamp(Number(duration) || EDIT_DURATION, 200, 30000);
   // This is intentionally created before the first await, directly from a tap.
   let beat = music ? startEditBeat({ duration: length, record: true, defer: true }) : null;
+  let audioPhase = Boolean(beat);
+  let attempts = 0;
   const excludedMimes = new Set();
   try {
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      if (beat && !await waitForAudio(beat, signal)) { beat.stop(); beat = null; }
+    while (true) {
+      if (beat && !await waitForAudio(beat, signal)) {
+        beat.stop();
+        beat = null;
+        if (signal?.aborted) throw cancelledError();
+        audioPhase = false;
+        attempts = 0;
+        excludedMimes.clear();
+        onRetry({ silent: true });
+      }
       if (signal?.aborted) throw cancelledError();
       try {
         const recorded = await recordOnce({
@@ -544,16 +557,33 @@ export async function createPerformanceVideo({ canvas, result, progress, profile
         const extension = videoExtension(recorded.mime);
         return { ...recorded, extension, filename: `vignan-ai-edit-${new Date().toISOString().slice(0, 10)}.${extension}` };
       } catch (error) {
-        if (!error.canRetryFormat || attempt === 2 || signal?.aborted) throw error;
+        if (!error.canRetryFormat || signal?.aborted) throw error;
         excludedMimes.add(error.recordingMime);
-        onRetry();
+        attempts += 1;
+        if (error.noMoreFormats || attempts >= 3) {
+          if (!audioPhase) throw error;
+          // Some browsers can record video but cannot encode any audio track.
+          // Retry video-only rather than leaving the student without an edit.
+          beat?.stop();
+          beat = null;
+          audioPhase = false;
+          attempts = 0;
+          excludedMimes.clear();
+          onRetry({ silent: true });
+          continue;
+        }
+        onRetry({ silent: false });
         beat?.stop();
-        // A second audio context might be blocked after the original tap; if
-        // so, waitForAudio falls back to an honestly labelled silent video.
-        beat = music ? startEditBeat({ duration: length, record: true, defer: true }) : null;
+        // A second audio context might be blocked after the original tap.
+        beat = audioPhase ? startEditBeat({ duration: length, record: true, defer: true }) : null;
+        if (audioPhase && !beat) {
+          audioPhase = false;
+          attempts = 0;
+          excludedMimes.clear();
+          onRetry({ silent: true });
+        }
       }
     }
-    throw new Error("Video recording failed. Try the PNG poster instead.");
   } finally {
     beat?.stop();
   }

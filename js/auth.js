@@ -6,7 +6,7 @@
  * a purely static export) the app continues as a guest with local progress.
  */
 
-import * as ui from "./ui.js?v=10";
+import * as ui from "./ui.js?v=11";
 import { truncate } from "./util.js";
 import { newPasswordProblem } from "./password-policy.js";
 

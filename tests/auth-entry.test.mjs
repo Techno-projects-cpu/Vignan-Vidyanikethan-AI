@@ -27,7 +27,7 @@ test("entry screen offers login and registration before guest mode", () => {
 });
 
 test("entry boot restores signed-in sessions, offers offline guest access and initializes once", () => {
-  assert.match(html, /js\/boot\.js\?v=10/);
+  assert.match(html, /js\/boot\.js\?v=11/);
   assert.match(boot, /guestChosen\(\)/);
   assert.match(boot, /getSession\(\{ timeout: 5000 \}\)/);
   assert.match(boot, /unlock\(\{ guest: true \}\)/);
@@ -63,11 +63,11 @@ test("PDF reader is patched, lazily loaded, and available in the offline cache",
   for (const url of ["./js/boot.js", "./js/password-policy.js", "./vendor/pdfjs/pdf.min.mjs", "./vendor/pdfjs/pdf.worker.min.mjs"]) {
     assert.ok(precache.urls.includes(url), `${url} is precached`);
   }
-  for (const url of ["./styles-premium.css?v=10", "./js/boot.js?v=10", "./js/app.js?v=10", "./js/auth.js?v=10", "./js/ingest.js?v=9", "./js/edit-studio.js?v=10", "./js/card.js?v=10", "./js/edit-audio.js", "./js/ui.js?v=10", "./js/reader.js?v=10", "./js/i18n.js?v=10"]) {
+  for (const url of ["./styles-premium.css?v=11", "./js/boot.js?v=11", "./js/app.js?v=11", "./js/auth.js?v=11", "./js/ingest.js?v=9", "./js/edit-studio.js?v=11", "./js/card.js?v=11", "./js/edit-audio.js", "./js/ui.js?v=11", "./js/reader.js?v=11", "./js/i18n.js?v=11"]) {
     assert.ok(sw.includes(`"${url}"`), `${url} is a versioned core asset`);
   }
   assert.ok(precache.urls.includes("./js/edit-studio.js"));
   assert.ok(precache.urls.includes("./js/edit-audio.js"));
-  assert.equal(precache.version, 10);
+  assert.equal(precache.version, 11);
   assert.ok(!precache.urls.includes("./vendor/pdfjs/pdf.min.js"));
 });

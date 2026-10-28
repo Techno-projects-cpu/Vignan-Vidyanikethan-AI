@@ -1,6 +1,6 @@
 /** Page-level textbook reader used by every citation. */
 
-import { element, openModal, qs, showToast } from "./ui.js?v=10";
+import { element, openModal, qs, showToast } from "./ui.js?v=11";
 import { truncate } from "./util.js";
 
 function appendHighlighted(container, text, highlight) {

@@ -355,3 +355,73 @@ test("recording falls back to timed canvas capture if manual capture is unsuppor
     globalThis.cancelAnimationFrame = oldCancel;
   }
 });
+
+test("recording falls back to silent video when audio encoders are unavailable", async () => {
+  const oldRecorder = globalThis.MediaRecorder;
+  const oldAudio = globalThis.AudioContext;
+  const oldRaf = globalThis.requestAnimationFrame;
+  const oldCancel = globalThis.cancelAnimationFrame;
+  const param = { setValueAtTime() {}, exponentialRampToValueAtTime() {} };
+  const node = () => ({ gain: { ...param, value: 0 }, frequency: { ...param, value: 0 }, connect() {}, disconnect() {}, start() {}, stop() {} });
+  let closed = 0;
+  class FakeAudio {
+    constructor() { this.state = "running"; this.sampleRate = 8000; this.currentTime = 0; }
+    createMediaStreamDestination() {
+      const track = { kind: "audio", stop() {} };
+      return { stream: { getAudioTracks: () => [track], getTracks: () => [track] } };
+    }
+    createGain() { return node(); }
+    createOscillator() { return node(); }
+    createBufferSource() { return node(); }
+    createBiquadFilter() { return node(); }
+    createBuffer(_channels, length) { return { getChannelData: () => new Float32Array(length) }; }
+    close() { closed += 1; return Promise.resolve(); }
+  }
+  try {
+    globalThis.AudioContext = FakeAudio;
+    globalThis.requestAnimationFrame = (callback) => setTimeout(() => callback(performance.now()), 8);
+    globalThis.cancelAnimationFrame = clearTimeout;
+    for (const failure of ["constructor", "runtime"]) {
+      const retries = [];
+      class Recorder {
+        static isTypeSupported(type) { return ["video/webm;codecs=vp8,opus", "video/webm;codecs=vp8"].includes(type); }
+        constructor(stream, options) {
+          this.withAudio = stream.getAudioTracks().length > 0;
+          if (this.withAudio && failure === "constructor") throw new Error("Audio encoding unavailable");
+          this.mimeType = options.mimeType;
+          this.state = "inactive";
+        }
+        start() {
+          this.state = "recording";
+          if (this.withAudio && failure === "runtime") queueMicrotask(() => this.onerror?.({ error: new Error("Audio encoder failed") }));
+        }
+        stop() {
+          this.state = "inactive";
+          queueMicrotask(() => { this.ondataavailable?.({ data: new Blob(["video"]) }); this.onstop?.(); });
+        }
+      }
+      globalThis.MediaRecorder = Recorder;
+      const canvas = fakeCanvas();
+      canvas.captureStream = () => {
+        const tracks = [{ kind: "video", stop() {}, requestFrame() {} }];
+        return {
+          getTracks: () => tracks,
+          getVideoTracks: () => tracks.filter((track) => track.kind === "video"),
+          getAudioTracks: () => tracks.filter((track) => track.kind === "audio"),
+          addTrack: (track) => tracks.push(track),
+        };
+      };
+      const video = await createPerformanceVideo({ canvas, result, music: true, duration: 200, onRetry: (info) => retries.push(info) });
+      assert.equal(video.extension, "webm", failure);
+      assert.equal(video.hasAudio, false, failure);
+      assert.ok(video.blob.size, failure);
+      assert.ok(retries.some((retry) => retry.silent), failure);
+    }
+    assert.ok(closed >= 2);
+  } finally {
+    globalThis.MediaRecorder = oldRecorder;
+    globalThis.AudioContext = oldAudio;
+    globalThis.requestAnimationFrame = oldRaf;
+    globalThis.cancelAnimationFrame = oldCancel;
+  }
+});

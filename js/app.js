@@ -73,11 +73,11 @@ import {
   writeProgress as writeStudyProgress,
 } from "./progress.js";
 import { externalSearchUrl, searchWeb } from "./web.js";
-import { openEditStudio } from "./edit-studio.js?v=10";
-import { openReader } from "./reader.js?v=10";
-import { applyTranslations, setLanguage, t } from "./i18n.js?v=10";
+import { openEditStudio } from "./edit-studio.js?v=11";
+import { openReader } from "./reader.js?v=11";
+import { applyTranslations, setLanguage, t } from "./i18n.js?v=11";
 import { clamp, downloadBlob, formatDate, readFileAsText, truncate, uid } from "./util.js";
-import * as ui from "./ui.js?v=10";
+import * as ui from "./ui.js?v=11";
 import {
   clearReferral,
   getLeaderboard,
@@ -87,7 +87,7 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=10";
+} from "./auth.js?v=11";
 import { aiOptionLabel, aiProfile } from "./ai-nicknames.js";
 import {
   closeCommandMenu,

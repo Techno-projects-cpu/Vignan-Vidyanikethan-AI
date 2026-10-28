@@ -1,9 +1,9 @@
 /** Responsive result-edit studio. Everything is rendered and recorded locally. */
 
-import * as ui from "./ui.js?v=10";
+import * as ui from "./ui.js?v=11";
 import { downloadBlob } from "./util.js";
 import { canCreateEditBeat, startEditBeat } from "./edit-audio.js";
-import { EDIT_DURATION, EDIT_STYLES, createPerformanceVideo, createPoster, drawPerformanceCard, scorePercent } from "./card.js?v=10";
+import { EDIT_DURATION, EDIT_STYLES, createPerformanceVideo, createPoster, drawPerformanceCard, scorePercent } from "./card.js?v=11";
 
 function button(label, className = "") {
   const node = ui.element("button", className, label);
@@ -255,7 +255,9 @@ export function openEditStudio({ result = {}, progress = {}, profile = "Student"
         progressFill.style.width = `${percent}%`;
         progressWrap.setAttribute("aria-valuenow", String(percent));
       },
-      onRetry: () => { status.textContent = "Trying another video format. Keep this tab open."; },
+      onRetry: ({ silent } = {}) => {
+        status.textContent = silent ? "Sound isn't supported here; trying a silent video. Keep this tab open." : "Trying another video format. Keep this tab open.";
+      },
     }).then((video) => {
       if (closed) return;
       lastVideo = video;
