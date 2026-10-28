@@ -94,15 +94,19 @@ let activeModal = null;
 
 export function closeModal() {
   if (!activeModal) return;
-  const { overlay, onClose, keyHandler } = activeModal;
+  const { overlay, onClose, keyHandler, returnFocus } = activeModal;
   document.removeEventListener("keydown", keyHandler);
   overlay.remove();
   activeModal = null;
   onClose?.();
+  if (!activeModal && returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
 }
 
 export function openModal({ title = "", content, footer, className = "", onClose, wide = false } = {}) {
   closeModal();
+  const returnFocus = document.activeElement;
+  // An earlier toast should not cover the actions of a newly opened dialog.
+  qs("#toast")?.classList.remove("visible");
   const overlay = element("div", "modal-overlay");
   const dialog = element("div", `modal-dialog ${wide ? "modal-wide" : ""} ${className}`.trim());
   dialog.setAttribute("role", "dialog");
@@ -136,11 +140,32 @@ export function openModal({ title = "", content, footer, className = "", onClose
   });
   document.body.appendChild(overlay);
   const keyHandler = (event) => {
-    if (event.key === "Escape") closeModal();
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeModal();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const focusable = qsa('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])', dialog)
+      .filter((node) => node.getClientRects().length > 0 && !node.closest("[hidden], [inert]"));
+    if (!focusable.length) { event.preventDefault(); closeButton.focus(); return; }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+      event.preventDefault();
+      first.focus();
+    }
   };
   document.addEventListener("keydown", keyHandler);
-  activeModal = { overlay, onClose, keyHandler };
-  requestAnimationFrame(() => overlay.classList.add("visible"));
+  activeModal = { overlay, onClose, keyHandler, returnFocus };
+  requestAnimationFrame(() => {
+    if (activeModal?.overlay !== overlay) return;
+    overlay.classList.add("visible");
+    closeButton.focus({ preventScroll: true });
+  });
   return { element: dialog, body, close: closeModal };
 }
 

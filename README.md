@@ -75,10 +75,10 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 | Flashcards | AI-written or offline definition / cloze cards generated from cited sentences, with a Leitner spaced-repetition scheduler. |
 | Progress | Local streak, XP, accuracy, topic mastery, recent results, an on-device leaderboard and an optional live class leaderboard for logged-in students. |
 | Student accounts | Roblox-inspired Log In / Register with username, password, age band and private gender; local scrypt hashes or Supabase Auth, persistent Supabase sessions, under-13 guardian consent, referral codes and squad invites. |
-| Funky edit video | Animated 1080×1920 “edit” with neon cuts, beat pulses, glitch type, confetti, score ring, question bars, streak, XP, revise tip, hashtags and a squad invite. Records MP4 where supported, WebM otherwise, and always offers a PNG poster. |
+| Funky edit video | An 8-second story with animated score reveal, three visual vibes, replayable preview, an optional original on-device synth beat, honest points, streak, XP, question bars and a revision prompt. Choose 540p, 720p or 1080p; MP4 is preferred, WebM is the fallback, and a 1080×1920 PNG is available. Nickname and invite code are opt-in. |
 | Web fallback | Disabled by default. When enabled, outside results are shown only after the books fail, and are labelled **OUTSIDE YOUR TEXTBOOKS**. |
 | Offline / PWA | Service worker caches the full app shell, WebLLM runtime, local AI worker, PDF.js, CMaps and the demo pack after the first online visit. Installable manifest included. |
-| Arena-inspired UI | Dark technical workspace with a narrow left rail, 1px bounded panels, compact mono labels, warm off-white type, restrained blue links and selective coral edges. Responsive icon rail on tablets and a bottom nav on phones. |
+| Responsive study workspace | Monochrome, prompt-first design with a compact menu, comfortable touch targets, adaptive quiz layouts and a mobile-friendly edit studio. |
 | Privacy | Books, vectors, chats, settings and results stay in this browser's IndexedDB. Local AI sends nothing off the device. Server keys never reach the browser; student keys are excluded from exports, accounts, logs and leaderboards. |
 | Languages | English UI with a Telugu translation for the main interface. Textbook passages are never silently machine-translated. |
 
@@ -105,7 +105,7 @@ The entry screen opens to **Log in** and **Register**, with **Continue as guest*
 - The local demo backend hashes passwords with Node's built-in `scrypt`; Supabase Auth hashes passwords for Supabase accounts. Sessions use random `HttpOnly`, `SameSite=Lax` cookies, with `Secure` on HTTPS. Signing in again revokes the previous session cookie.
 - Each account gets a referral code such as `VIGNAN-ANANYA`. An invite link containing `?ref=VIGNAN-ANANYA&view=progress` opens the register tab and credits the referring student.
 - Quiz results sync XP, streak, best score, accuracy and recent topics to the account. The live leaderboard exposes only usernames and study stats — no password hashes, exact ages, genders, IDs or full history. Scores originate in the browser and can be manipulated, so the leaderboard is for practice rather than high-stakes assessment.
-- The result **edit video** includes the student's squad code so friends can join from a share caption.
+- The result **edit studio** can optionally include the student's squad code and nickname; both are hidden by default. When the squad option is enabled, a share caption can include the invite link too.
 
 Account endpoints reflect `Origin` only for the same host/proto or origins listed in `STUDY_AI_ALLOWED_ORIGINS`; they never combine credentialed cookies with a wildcard origin. Account/progress POSTs require a same-origin request, a JSON body and a double-submit CSRF token. A client should first `GET /api/auth/me` with credentials, then send the `vignan_csrf` cookie's value in `X-CSRF-Token` on each account/progress POST. The browser handles this automatically. Login failure throttles are in memory per instance and reset on restart; they are not a replacement for a production distributed rate limiter.
 
@@ -474,7 +474,7 @@ Other notes:
 - **Static hosting / GitHub Pages:** the offline app works from the site root, but the server API will not exist; use the local WebLLM model, direct provider endpoints (with CORS support), the Supabase Edge Function, or the offline engine.
 - **School LAN / desktop:** run `npm start` on one machine and open `http://<lan-ip>:4173/`. With WebLLM cached or Ollama configured, no internet is needed after setup.
 - **Offline first load:** service workers require HTTP/HTTPS. Open the app once while the server is reachable; afterwards the app shell, bundled WebLLM runtime, books you added, PDF.js and cached vectors remain available offline. Model weights download separately on first use.
-- **Edit videos:** `MediaRecorder` MP4 support varies by browser. The app prefers MP4, falls back to WebM, and always offers a PNG poster.
+- **Edit videos:** The 8-second edit and optional original synth beat are generated locally. Choose **Create my video**, keep the tab open, then tap **Download** or **Share**. MP4 and audio support vary by browser; WebM, silent recording or a PNG poster are fallbacks. 540p is the fastest option on many phones, 720p is the default and 1080p is optional. Nickname and invite code are opt-in; the score and topic are visible when shared. Reduced motion is enabled by default if the device requests it.
 
 ---
 

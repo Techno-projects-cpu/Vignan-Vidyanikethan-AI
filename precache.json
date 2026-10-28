@@ -1,6 +1,6 @@
 {
-  "version": 9,
-  "generatedAt": "2026-10-28T09:22:23.560Z",
+  "version": 10,
+  "generatedAt": "2026-10-28T11:16:02.600Z",
   "urls": [
     "./",
     "./index.html",
@@ -16,6 +16,8 @@
     "./js/card.js",
     "./js/context.js",
     "./js/db.js",
+    "./js/edit-audio.js",
+    "./js/edit-studio.js",
     "./js/flashcards.js",
     "./js/free-apis.js",
     "./js/i18n.js",

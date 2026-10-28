@@ -696,7 +696,7 @@ async function handleSearch(request, response) {
 function health() {
   return {
     ok: true,
-    version: "1.5.0",
+    version: "1.6.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,

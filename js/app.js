@@ -73,16 +73,11 @@ import {
   writeProgress as writeStudyProgress,
 } from "./progress.js";
 import { externalSearchUrl, searchWeb } from "./web.js";
-import {
-  createPerformanceVideo,
-  createPoster,
-  drawPerformanceCard,
-  preferredVideoMime,
-} from "./card.js";
-import { openReader } from "./reader.js";
-import { applyTranslations, setLanguage, t } from "./i18n.js";
+import { openEditStudio } from "./edit-studio.js?v=10";
+import { openReader } from "./reader.js?v=10";
+import { applyTranslations, setLanguage, t } from "./i18n.js?v=10";
 import { clamp, downloadBlob, formatDate, readFileAsText, truncate, uid } from "./util.js";
-import * as ui from "./ui.js";
+import * as ui from "./ui.js?v=10";
 import {
   clearReferral,
   getLeaderboard,
@@ -92,7 +87,7 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=9";
+} from "./auth.js?v=10";
 import { aiOptionLabel, aiProfile } from "./ai-nicknames.js";
 import {
   closeCommandMenu,
@@ -1453,18 +1448,28 @@ function renderQuizResults(result) {
     ui.element(
       "p",
       "",
-      `${Number(result.score).toFixed(Number.isInteger(result.score) ? 0 : 1)} / ${result.total} correct · ${truncate(result.topic, 44)}`,
+      `${Number(result.score).toFixed(Number.isInteger(result.score) ? 0 : 1)} / ${result.total} points · ${truncate(result.topic, 44)}`,
     ),
   );
   hero.appendChild(ui.element("p", "hint", streakMessage(state.studyProgress)));
+  const card = ui.element("button", "result-edit-cta");
+  card.type = "button";
+  card.setAttribute("aria-label", "Make my result edit video");
+  const cardIcon = ui.element("span", "result-edit-icon", "✳");
+  cardIcon.setAttribute("aria-hidden", "true");
+  const cardCopy = ui.element("span", "result-edit-copy");
+  cardCopy.append(ui.element("strong", "", t("quiz.card")), ui.element("small", "", "Your score, remixed into a short video"));
+  const cardArrow = ui.element("span", "result-edit-arrow", "↗");
+  cardArrow.setAttribute("aria-hidden", "true");
+  card.append(cardIcon, cardCopy, cardArrow);
+  card.addEventListener("click", () => openPerformanceCard(result));
+  hero.appendChild(card);
   const actions = ui.element("div", "result-actions");
   const newQuiz = ui.element("button", "button ghost small", t("quiz.newQuiz"));
   newQuiz.addEventListener("click", newQuizHandler);
   const retake = ui.element("button", "button ghost small", t("quiz.retake"));
   retake.addEventListener("click", retakeQuiz);
-  const card = ui.element("button", "button primary small", t("quiz.card"));
-  card.addEventListener("click", () => openPerformanceCard(result));
-  actions.append(newQuiz, retake, card);
+  actions.append(newQuiz, retake);
   hero.appendChild(actions);
   root.appendChild(hero);
 
@@ -1552,132 +1557,12 @@ function openQuestionSource(source) {
 /* ------------------------------------------------------- performance card */
 
 function openPerformanceCard(result) {
-  const content = ui.element("div", "card-preview");
-  const canvas = document.createElement("canvas");
-  canvas.width = 1080;
-  canvas.height = 1920;
-  content.appendChild(canvas);
-  const mime = preferredVideoMime();
   const share = {
     refCode: state.account?.refCode || "",
     link: state.account ? inviteLink(state.account.refCode) : "",
     username: state.account?.username || state.settings.profile || "Student",
   };
-  content.appendChild(
-    ui.element(
-      "p",
-      "hint",
-      `Funky edit mode: neon cuts, beat drops and a squad invite. MP4 when supported, otherwise WebM; PNG always works. Preferred: ${mime || "browser default"}.`,
-    ),
-  );
-  const progressWrap = ui.element("div", "recording-progress");
-  const meter = ui.element("div", "meter");
-  const fill = ui.element("span");
-  meter.appendChild(fill);
-  progressWrap.appendChild(meter);
-  content.appendChild(progressWrap);
-
-  let lastVideo = null;
-  const actions = ui.element("div", "card-actions");
-  const recordButton = ui.element("button", "button primary small", "Record edit video");
-  const pngButton = ui.element("button", "button ghost small", "Download PNG poster");
-  const shareButton = ui.element("button", "button ghost small", "Share video");
-  actions.append(recordButton, pngButton, shareButton);
-  content.appendChild(actions);
-
-  const drawPreview = () =>
-    drawPerformanceCard(canvas, {
-      result,
-      progress: state.studyProgress,
-      profile: share.username,
-      account: state.account,
-      share,
-      animation: 1,
-    });
-  drawPreview();
-
-  recordButton.addEventListener("click", async () => {
-    ui.setBusy(recordButton, true, "Recording…");
-    fill.style.width = "0%";
-    try {
-      lastVideo = await createPerformanceVideo({
-        canvas,
-        result,
-        progress: state.studyProgress,
-        profile: share.username,
-        account: state.account,
-        share,
-        duration: 7200,
-        onProgress: (value) => {
-          fill.style.width = `${Math.round(value * 100)}%`;
-        },
-      });
-      downloadBlob(lastVideo.blob, lastVideo.filename);
-      drawPreview();
-      ui.showToast(`Saved ${lastVideo.extension.toUpperCase()} edit video. Go flex those marks!`, "success");
-    } catch (error) {
-      drawPreview();
-      ui.showToast(error.message, "error");
-    } finally {
-      ui.setBusy(recordButton, false);
-    }
-  });
-
-  pngButton.addEventListener("click", async () => {
-    try {
-      const blob = await createPoster(canvas, {
-        result,
-        progress: state.studyProgress,
-        profile: share.username,
-        account: state.account,
-        share,
-      });
-      downloadBlob(blob, `vignan-vidyanikethan-edit-${new Date().toISOString().slice(0, 10)}.png`);
-      ui.showToast("PNG edit poster saved.", "success");
-    } catch (error) {
-      ui.showToast(error.message, "error");
-    }
-  });
-
-  shareButton.addEventListener("click", async () => {
-    try {
-      let video = lastVideo;
-      if (!video) {
-        ui.setBusy(shareButton, true, "Preparing…");
-        video = await createPerformanceVideo({
-          canvas,
-          result,
-          progress: state.studyProgress,
-          profile: share.username,
-          account: state.account,
-          share,
-          duration: 6200,
-          onProgress: (value) => {
-            fill.style.width = `${Math.round(value * 100)}%`;
-          },
-        });
-        lastVideo = video;
-        ui.setBusy(shareButton, false);
-        drawPreview();
-      }
-      const file = new File([video.blob], video.filename, { type: video.mime });
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: "My Vignan Vidyanikethan AI edit",
-          text: `I scored ${result.percent}% from my own textbooks. #VignanVidyanikethanAI #StudyStreak${share.refCode ? ` Join my squad: ${share.refCode}` : ""}`,
-        });
-      } else {
-        downloadBlob(video.blob, video.filename);
-        ui.showToast("Sharing is not supported here — the video was downloaded instead.", "warning");
-      }
-    } catch (error) {
-      ui.setBusy(shareButton, false);
-      ui.showToast(error.message || "Could not share the card.", "error");
-    }
-  });
-
-  ui.openModal({ title: "Share your funky result edit", content, wide: false });
+  openEditStudio({ result, progress: state.studyProgress, profile: share.username, account: state.account, share });
 }
 
 /* ------------------------------------------------------------- flashcards */

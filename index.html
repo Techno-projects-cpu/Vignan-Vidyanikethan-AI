@@ -10,7 +10,7 @@
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./styles-premium.css?v=9">
+  <link rel="stylesheet" href="./styles-premium.css?v=10">
 </head>
 <body class="minimal-ui premium-ui auth-locked">
 
@@ -339,9 +339,9 @@
               <label class="span-2"><span data-i18n="quiz.topicLabel">Chapter or topic</span><input type="text" id="quiz-topic" placeholder="e.g. photosynthesis, forces, linear equations" data-i18n-placeholder="quiz.topicPlaceholder"></label>
               <label><span>Book</span><select id="quiz-book-scope"></select></label>
               <label><span data-i18n="quiz.countLabel">Questions</span><input type="number" id="quiz-count" min="3" max="10" value="5"></label>
-              <label><span data-i18n="quiz.typeLabel">Question type</span><select id="quiz-type"><option value="mcq" data-i18n="quiz.typeMcq">Multiple choice</option><option value="fill" data-i18n="quiz.typeFill">Fill in the blank</option><option value="short" data-i18n="quiz.typeShort">Short answer</option><option value="mix" data-i18n="quiz.typeMix">Mixed</option></select></label>
               <label><span data-i18n="quiz.difficultyLabel">Difficulty</span><select id="quiz-difficulty"><option value="easy" data-i18n="quiz.easy">Easy</option><option value="medium" selected data-i18n="quiz.medium">Medium</option><option value="hard" data-i18n="quiz.hard">Hard</option></select></label>
               <label><span>Timed</span><select id="quiz-timed"><option value="no">Untimed</option><option value="yes">Timed (45s / question)</option></select></label>
+              <label class="quiz-type-field"><span data-i18n="quiz.typeLabel">Question type</span><select id="quiz-type"><option value="mcq" data-i18n="quiz.typeMcq">Multiple choice</option><option value="fill" data-i18n="quiz.typeFill">Fill in the blank</option><option value="short" data-i18n="quiz.typeShort">Short answer</option><option value="mix" data-i18n="quiz.typeMix">Mixed</option></select></label>
               <label class="checkbox-row"><input type="checkbox" id="quiz-use-model" checked><span>Use connected AI writer when available</span></label>
             </div>
             <div class="setup-actions"><button type="button" class="button primary" id="quiz-generate" data-i18n="quiz.generate">Generate quiz</button><span class="hint" id="quiz-engine-note"></span></div>
@@ -588,6 +588,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./js/boot.js?v=9"></script>
+  <script type="module" src="./js/boot.js?v=10"></script>
 </body>
 </html>
