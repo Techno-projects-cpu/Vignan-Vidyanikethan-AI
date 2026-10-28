@@ -28,7 +28,7 @@ Open:
 
 The server binds to `0.0.0.0`, so it also works in the Arena live preview. A plain static server (`python3 -m http.server`) can serve the app too, but the optional `/api/ai`, `/api/search` and `/api/auth/*` endpoints will not exist — the offline engine and guest progress still work.
 
-On first launch the app loads a small **Demo Study Pack** so you can try questions immediately. Replace it with real class PDFs in **Library**. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — the app auto-detects the free router, rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback.
+On first launch the app loads a small **Demo Study Pack** so you can try questions immediately. Replace it with real class PDFs in **Library**. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — the app auto-detects the free router, rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback. The minimal UI keeps those controls tucked behind **Settings → Advanced settings**.
 
 ---
 
@@ -50,9 +50,9 @@ Instead, Vignan Vidyanikethan AI offers a **keyless local model** plus a **provi
 | **Local WebLLM** | **Real open-weight AI on the device, $0, no key** ([WebLLM](https://github.com/mlc-ai/web-llm)) | First model download needs internet and a WebGPU-capable browser. |
 | Offline engine | Truly unlimited, $0, private | Extractive answers rather than fluent generative prose. |
 
-The server supports **multiple keys per provider**: paste several values into one Render secret separated by commas/newlines, or use a plural `*_KEYS` alias. Vignan builds one upstream per key, tries them in order, cools down a quota-limited key for 60 seconds, and only then tries student-owned keys. It skips 429/5xx/empty responses and falls back to the offline extractive engine if everything fails. Add school keys on the server only — never in the browser. See `.env.example`, `render.yaml` and `DEPLOY.md`. The **Settings → Official free-tier API keys** panel links to each provider's own key-creation page; **no key value is ever committed to this repository**.
+The server supports **multiple keys per provider**: paste several values into one Render secret separated by commas/newlines, or use a plural `*_KEYS` alias. Vignan builds one upstream per key, tries them in order, cools down a quota-limited key for 60 seconds, and only then tries student-owned keys. It skips 429/5xx/empty responses and falls back to the offline extractive engine if everything fails. Add school keys on the server only — never in the browser. See `.env.example`, `render.yaml` and `DEPLOY.md`. The **Settings → Advanced settings → Official free-tier API keys** panel links to each provider's own key-creation page; **no key value is ever committed to this repository**.
 
-When all Render keys are exhausted, students can add their own keys in **Settings → Your own API keys** (also linked from the account area). Those keys stay in that browser, are sent per request only to this site's `/api/ai` proxy, are never stored in Supabase accounts or the public leaderboard, and are excluded from JSON exports. They can be tested, paused or cleared per provider.
+When all Render keys are exhausted, students can add their own keys in **Settings → Advanced settings → Your own API keys** (also linked from the account area). Those keys stay in that browser, are sent per request only to this site's `/api/ai` proxy, are never stored in Supabase accounts or the public leaderboard, and are excluded from JSON exports. They can be tested, paused or cleared per provider.
 
 For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLLM runtime runs Meta Llama 3.2 1B / SmolLM2 / Qwen2.5 in a Web Worker with WebGPU, applies Vignan's own grounding rules, and caches the chosen model after one download. It powers answers, explanations, summaries, practice, quizzes, flashcards, short-answer grading and citation verification without a server key.
 
@@ -62,6 +62,7 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 
 | Area | What it does |
 | --- | --- |
+| Minimal interface | A calm dark workspace with a compact top navigation, one main question composer, short welcome copy and progressive disclosure. Advanced model, key, web and privacy controls stay available behind **Settings → Advanced settings**; all IDs and event hooks are preserved. |
 | Grounded answers | Local hybrid retrieval (BM25 + hashed TF-IDF vectors + phrase matching) over page chunks, with `[1]` citations and a clickable page reader. |
 | Model router | Route **Answers**, **Quiz writing**, **Flashcard writing**, **Short-answer grading** and **Citation verification** to different existing AI providers. Automatic fallback to the offline engine. |
 | Real local AI | Bundled WebLLM + Web Worker runs open-weight Meta Llama 3.2 1B, SmolLM2 or Qwen2.5 on-device with Vignan's grounding rules. Download once, then use every AI task offline. |

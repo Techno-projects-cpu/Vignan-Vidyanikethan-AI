@@ -1,6 +1,6 @@
 /* Offline service worker for Vignan Vidyanikethan AI. */
 
-const CACHE_NAME = "vignan-vidyanikethan-ai-v6";
+const CACHE_NAME = "vignan-vidyanikethan-ai-v7";
 const CORE = [
   "./",
   "./index.html",

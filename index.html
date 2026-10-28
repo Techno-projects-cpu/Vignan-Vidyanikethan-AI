@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0c0e">
+  <meta name="theme-color" content="#0f1115">
   <meta name="description" content="Vignan Vidyanikethan AI — textbook-grounded answers, custom quizzes, flashcards and offline study tools built by students.">
   <title>Vignan Vidyanikethan AI — learn from your own textbooks</title>
   <link rel="manifest" href="./manifest.webmanifest">
@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css">
 </head>
-<body>
+<body class="minimal-ui">
   <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8.6 8.6 0 0 1-3.6-.8L4 20l1.3-4A7.5 7.5 0 1 1 20 11.5Z"/><path d="M9 11h6M9 14h4"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5Z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19v5H6.5A2.5 2.5 0 0 1 4 18.5Z"/><path d="M8 7h7M8 10h5"/></symbol>
@@ -64,9 +64,12 @@
     <div class="workspace">
       <header class="topbar">
         <div class="topbar-heading">
-          <div class="kicker" id="view-kicker">GROUND ANSWERS</div>
-          <h1 id="view-title">Ask your textbooks</h1>
-          <p id="view-subtitle">Every answer points back to a page you can open.</p>
+          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home">V</a>
+          <div>
+            <div class="kicker" id="view-kicker">GROUND ANSWERS</div>
+            <h1 id="view-title">Ask your textbooks</h1>
+            <p id="view-subtitle">Every answer points back to a page you can open.</p>
+          </div>
         </div>
         <div class="topbar-actions">
           <span class="chip" id="offline-chip"><span class="chip-dot"></span><span data-i18n="app.offlineReady">Offline ready</span></span>
@@ -74,6 +77,14 @@
           <button type="button" class="profile-chip account-chip" id="profile-button" title="Account"><span id="profile-initial">S</span><span class="account-dot" id="account-dot"></span></button>
           <span class="account-name hidden" id="account-name"></span>
         </div>
+        <nav class="top-nav" aria-label="Vignan Vidyanikethan AI sections">
+          <button type="button" class="nav-item active" data-view="ask" data-i18n="nav.ask">Ask</button>
+          <button type="button" class="nav-item" data-view="library" data-i18n="nav.library">Library</button>
+          <button type="button" class="nav-item" data-view="quiz" data-i18n="nav.quiz">Quiz</button>
+          <button type="button" class="nav-item" data-view="flashcards" data-i18n="nav.flashcards">Flashcards</button>
+          <button type="button" class="nav-item" data-view="progress" data-i18n="nav.progress">Progress</button>
+          <button type="button" class="nav-item" data-view="settings" data-i18n="nav.settings">Settings</button>
+        </nav>
       </header>
 
       <main id="main" class="main">
@@ -83,16 +94,13 @@
             <div class="chat-column card">
               <div class="connect-banner" id="connect-banner">
                 <div class="connect-copy">
-                  <strong>Choose your Vignan Vidyanikethan AI engine</strong>
-                  <p>Every answer stays grounded in your textbooks. Run a real open-weight model on this device with WebGPU, use multiple official free-tier keys on the server, add your own key when those are exhausted, or keep the private cited-excerpt engine. No public or leaked keys are bundled.</p>
+                  <strong>Ask Vignan Vidyanikethan AI</strong>
+                  <p>Simple by default. Advanced model and key controls stay in Settings.</p>
                 </div>
                 <div class="connect-actions">
-                  <button type="button" class="button primary small" id="use-local-ai-button">Use local AI</button>
-                  <button type="button" class="button ghost small" id="use-free-ai-button">Use free AI</button>
-                  <button type="button" class="button ghost small" id="free-keys-button">Get free keys</button>
-                  <button type="button" class="button ghost small" id="add-my-key-button">Add my key</button>
-                  <button type="button" class="button ghost small" id="connect-model-button">Choose a model</button>
-                  <button type="button" class="button ghost small" id="dismiss-banner">Later</button>
+                  <button type="button" class="button primary small" id="use-local-ai-button">Local AI</button>
+                  <button type="button" class="button ghost small" id="use-free-ai-button">Free AI</button>
+                  <button type="button" class="button ghost small" id="connect-model-button">Add keys</button>
                 </div>
               </div>
               <div class="chat-log" id="chat-log" aria-live="polite"></div>
@@ -164,12 +172,12 @@
               <label><span data-i18n="library.titleLabel">Title</span><input type="text" id="paste-title" placeholder="My chapter notes"></label>
               <label class="grow"><span>Notes</span><textarea id="paste-text" rows="8" placeholder="Paste a chapter here. Use [[page:1]], [[page:2]] to keep page numbers." data-i18n-placeholder="library.pastePlaceholder"></textarea></label>
               <button type="button" class="button primary full" id="paste-submit" data-i18n="library.addNotes">Add notes</button>
-              <p class="hint">Tip: use <code>[[page:12]]</code> on its own line to preserve real page numbers.</p>
+              <p class="hint minimal-hide">Tip: use <code>[[page:12]]</code> on its own line to preserve real page numbers.</p>
             </section>
           </div>
           <div class="section-divider"><h3 data-i18n="library.yourBooks">Books in this device</h3><span id="book-summary"></span></div>
           <div class="book-grid" id="book-list"></div>
-          <div class="card info-card"><svg><use href="#i-spark"></use></svg><div><strong>How grounding works</strong><p>Each page is split into short passages and cached with a local search vector. Your AI provider receives only the most relevant passages — never the whole internet and never a newly trained model.</p></div></div>
+          <div class="card info-card minimal-hide"><svg><use href="#i-spark"></use></svg><div><strong>How grounding works</strong><p>Each page is split into short passages and cached with a local search vector. Your AI provider receives only the most relevant passages — never the whole internet and never a newly trained model.</p></div></div>
         </section>
 
         <!-- QUIZ -->
@@ -226,16 +234,16 @@
           <div class="stat-grid" id="stat-grid"></div>
           <section class="card account-card" id="account-card">
             <div class="panel-head">
-              <div><span class="eyebrow">SQUAD</span><h2>Join the Vignan squad</h2><p class="hint">Log in to save streaks, climb the live leaderboard and invite friends with your own code.</p></div>
+              <div><span class="eyebrow">SQUAD</span><h2>Join the Vignan squad</h2><p class="hint minimal-hide">Log in to save streaks, climb the live leaderboard and invite friends with your own code.</p></div>
               <span class="chip" id="account-chip">Guest</span>
             </div>
             <div id="account-body"></div>
           </section>
           <div class="two-column">
             <section class="card"><h3 data-i18n="progress.mastery">Topic mastery</h3><div id="mastery-list" class="list-stack"></div></section>
-            <section class="card"><h3>Live class leaderboard</h3><p class="hint">Only usernames and scores are public. Exact age and gender stay private.</p><div id="server-leaderboard-list" class="list-stack"></div></section>
+            <section class="card"><h3>Live class leaderboard</h3><p class="hint minimal-hide">Only usernames and scores are public. Exact age and gender stay private.</p><div id="server-leaderboard-list" class="list-stack"></div></section>
           </div>
-          <section class="card"><h3 data-i18n="progress.leaderboard">Leaderboard on this device</h3><p class="hint">Local results from this browser, even when the account server is offline.</p><div id="leaderboard-list" class="list-stack"></div></section>
+          <section class="card"><h3 data-i18n="progress.leaderboard">Leaderboard on this device</h3><p class="hint minimal-hide">Local results from this browser, even when the account server is offline.</p><div id="leaderboard-list" class="list-stack"></div></section>
           <section class="card"><h3 data-i18n="progress.recent">Recent results</h3><div id="recent-results" class="list-stack"></div></section>
           <section class="card profile-card"><label><span data-i18n="progress.profileName">Your name on this device</span><input type="text" id="profile-name" maxlength="32"></label><button type="button" class="button ghost" id="save-profile">Save name</button><button type="button" class="button ghost danger" id="reset-progress">Reset progress</button></section>
         </section>
@@ -244,14 +252,15 @@
         <section class="view" id="view-settings" data-panel="settings">
           <div class="section-toolbar">
             <div class="section-copy"><span class="eyebrow" data-i18n="view.settings.kicker">CONTROL</span><h2 data-i18n="view.settings.title">Settings</h2><p data-i18n="view.settings.subtitle">Choose a local model, free keys, fallback and privacy options.</p></div>
+            <button type="button" class="button ghost small" id="toggle-advanced-settings" data-i18n="settings.advanced" aria-expanded="false" aria-controls="advanced-settings">Advanced settings</button>
           </div>
           <div class="settings-grid">
             <section class="card settings-card span-2 local-ai-card" id="local-ai-panel">
               <div class="panel-head">
-                <div><span class="eyebrow">OFFLINE AI</span><h2><svg class="panel-icon"><use href="#i-cpu"></use></svg>Real local model</h2><p class="hint">Open-weight Meta / SmolLM2 / Qwen models run in this browser with Vignan's own textbook rules.</p></div>
+                <div><span class="eyebrow">OFFLINE AI</span><h2><svg class="panel-icon"><use href="#i-cpu"></use></svg>Real local model</h2><p class="hint minimal-hide">Open-weight Meta / SmolLM2 / Qwen models run in this browser with Vignan's own textbook rules.</p></div>
                 <span class="chip" id="local-ai-chip">Checking device…</span>
               </div>
-              <div class="notice router-notice"><strong>No key · no training.</strong> WebLLM downloads one model the first time, then caches it on this device. Questions, answers, quizzes, flashcards and grading can run locally. The deterministic cited-excerpt engine remains the final fallback.</div>
+              <div class="notice router-notice minimal-hide"><strong>No key · no training.</strong> WebLLM downloads one model the first time, then caches it on this device. Questions, answers, quizzes, flashcards and grading can run locally. The deterministic cited-excerpt engine remains the final fallback.</div>
               <div class="form-grid three local-ai-form">
                 <label class="span-2"><span>Model</span><select id="local-model-select" aria-label="Local model"></select></label>
                 <label><span>Recommended</span><input type="text" id="local-recommended" readonly aria-label="Recommended model"></label>
@@ -269,17 +278,18 @@
                 <button type="button" class="button ghost danger" id="local-ai-clear">Clear cached model</button>
               </div>
               <p class="hint" id="local-ai-status" aria-live="polite"></p>
-              <p class="hint">WebGPU is required for the in-browser model. On laptops without it, run <code>ollama pull llama3.2:1b</code> and choose <strong>Ollama</strong> below; on phones, the cited-excerpt engine still works offline.</p>
+              <p class="hint minimal-hide">WebGPU is required for the in-browser model. On laptops without it, run <code>ollama pull llama3.2:1b</code> and choose <strong>Ollama</strong> below; on phones, the cited-excerpt engine still works offline.</p>
             </section>
 
+            <div class="advanced-settings" id="advanced-settings">
             <section class="card settings-card span-2" id="free-api-card">
-              <div class="panel-head"><div><span class="eyebrow">FREE KEYS</span><h2><svg class="panel-icon"><use href="#i-key"></use></svg>Official free-tier API keys</h2><p class="hint">Generate your own keys. Put them in Render → Environment, never in Git. You can paste several keys into one variable.</p></div><div class="panel-head-actions"><span class="chip">$0 budget</span><button type="button" class="button ghost small" id="open-student-keys">Add my own key</button></div></div>
-              <div class="notice warning-notice" id="free-api-warning"></div>
+              <div class="panel-head"><div><span class="eyebrow">FREE KEYS</span><h2><svg class="panel-icon"><use href="#i-key"></use></svg>Official free-tier API keys</h2><p class="hint minimal-hide">Generate your own keys. Put them in Render → Environment, never in Git. You can paste several keys into one variable.</p></div><div class="panel-head-actions"><span class="chip">$0 budget</span><button type="button" class="button ghost small" id="open-student-keys">Add my own key</button></div></div>
+              <div class="notice warning-notice minimal-hide" id="free-api-warning"></div>
               <div class="key-grid" id="free-api-links"></div>
             </section>
 
             <section class="card settings-card span-2 student-key-card" id="student-key-card">
-              <div class="panel-head"><div><span class="eyebrow">STUDENT KEYS</span><h2><svg class="panel-icon"><use href="#i-key"></use></svg>Your own API keys</h2><p class="hint">Optional bring-your-own-key fallback. Used only after the school's Render keys are exhausted.</p></div><span class="chip" id="student-key-chip">Local only</span></div>
+              <div class="panel-head"><div><span class="eyebrow">STUDENT KEYS</span><h2><svg class="panel-icon"><use href="#i-key"></use></svg>Your own API keys</h2><p class="hint minimal-hide">Optional bring-your-own-key fallback. Used only after the school's Render keys are exhausted.</p></div><span class="chip" id="student-key-chip">Local only</span></div>
               <div class="notice warning-notice"><strong>Private by default.</strong> Your keys stay in this browser. They are sent to this site's <code>/api/ai</code> only for the current request, never saved to your account, leaderboard or data exports. Do not add keys on a shared computer unless you clear them afterwards.</div>
               <label class="switch-label block"><input type="checkbox" id="student-key-enabled" checked><span>Use my keys when all Render keys are exhausted</span></label>
               <div class="form-grid three">
@@ -298,8 +308,8 @@
             </section>
 
             <section class="card settings-card span-2">
-              <div class="panel-head"><div><span class="eyebrow">MODEL ROUTER</span><h2 data-i18n="settings.aiTitle">AI engine</h2><p class="hint" data-i18n="settings.aiHelp">Offline is the default. A connected model is optional.</p></div><span class="chip" id="server-status">Checking server…</span></div>
-              <div class="notice router-notice"><strong>No model training · $0 budget.</strong> Vignan Vidyanikethan AI orchestrates existing AIs. Choose the local WebLLM model, the server's free router (Gemini, Groq, Cloudflare, OpenRouter, Mistral, Cohere, Arena), Ollama, or any OpenAI-compatible endpoint. Textbook passages stay the source of truth.</div>
+              <div class="panel-head"><div><span class="eyebrow">MODEL ROUTER</span><h2 data-i18n="settings.aiTitle">AI engine</h2><p class="hint minimal-hide" data-i18n="settings.aiHelp">Offline is the default. A connected model is optional.</p></div><span class="chip" id="server-status">Checking server…</span></div>
+              <div class="notice router-notice minimal-hide"><strong>No model training · $0 budget.</strong> Vignan Vidyanikethan AI orchestrates existing AIs. Choose the local WebLLM model, the server's free router (Gemini, Groq, Cloudflare, OpenRouter, Mistral, Cohere, Arena), Ollama, or any OpenAI-compatible endpoint. Textbook passages stay the source of truth.</div>
               <div class="routing-table" id="routing-table"></div>
               <div class="provider-editor" id="provider-editor">
                 <h3>Provider setup</h3>
@@ -311,7 +321,7 @@
                   <label><span>Fallback provider</span><select id="fallback-provider"></select></label>
                   <label class="checkbox-row span-2"><input type="checkbox" id="provider-use-now" checked><span>Use this provider for answers and quizzes now</span></label>
                 </div>
-                <p class="hint" id="provider-description"></p>
+                <p class="hint minimal-hide" id="provider-description"></p>
                 <div class="button-row"><button type="button" class="button primary" id="provider-save">Save provider</button><button type="button" class="button ghost" id="provider-test" data-i18n="settings.test">Test connection</button><button type="button" class="button ghost" id="provider-reset">Reset to defaults</button></div>
                 <p class="hint" id="provider-test-result"></p>
               </div>
@@ -319,7 +329,7 @@
 
             <section class="card settings-card">
               <h2 data-i18n="settings.webTitle">Web fallback</h2>
-              <p class="hint">Used only when your textbooks have no answer. Results are labelled “outside your textbooks”.</p>
+              <p class="hint minimal-hide">Used only when your textbooks have no answer. Results are labelled “outside your textbooks”.</p>
               <label class="switch-label block"><input type="checkbox" id="settings-web-enabled"><span data-i18n="settings.webEnable">Enable web search when books have no answer</span></label>
               <label><span data-i18n="settings.webMode">Search source</span><select id="settings-web-mode"><option value="server" data-i18n="settings.webServer">Configured server endpoint</option><option value="custom" data-i18n="settings.webCustom">Custom JSON endpoint</option></select></label>
               <label><span data-i18n="settings.webEndpoint">Endpoint with {q} placeholder</span><input type="text" id="settings-web-endpoint" placeholder="https://searx.example/search?q={q}&format=json" spellcheck="false"></label>
@@ -329,10 +339,10 @@
 
             <section class="card settings-card">
               <h2 data-i18n="settings.privacyTitle">Privacy &amp; data</h2>
-              <p class="hint" data-i18n="settings.privacyHelp">Books, chats and results are stored in this browser only.</p>
+              <p class="hint minimal-hide" data-i18n="settings.privacyHelp">Books, chats and results are stored in this browser only.</p>
               <div class="storage-summary" id="storage-summary">Checking storage…</div>
               <div class="button-row wrap"><button type="button" class="button ghost" id="export-data" data-i18n="settings.export">Export data (JSON)</button><button type="button" class="button ghost" id="clear-chat-data">Clear chat</button><button type="button" class="button ghost danger" id="delete-all" data-i18n="settings.deleteAll">Delete all local data</button></div>
-              <p class="hint">Server keys never reach this browser. Student keys and provider keys are never included in exports.</p>
+              <p class="hint minimal-hide">Server keys never reach this browser. Student keys and provider keys are never included in exports.</p>
             </section>
 
             <section class="card settings-card">
@@ -343,11 +353,12 @@
               <button type="button" class="button primary full" id="appearance-save">Save appearance</button>
             </section>
 
-            <section class="card settings-card span-2">
+            <section class="card settings-card span-2 minimal-hide">
               <h2 data-i18n="settings.helpTitle">How this works</h2>
               <p class="hint" data-i18n="settings.helpBody">Your books are split into page-preserving passages. A local hybrid search finds evidence; the offline engine quotes it with citations. If you connect a model, only those short passages are sent. Web results are labelled as outside your textbooks.</p>
               <ol class="help-list"><li>Upload PDFs or paste notes in <strong>Library</strong>.</li><li>Ask a question; Vignan Vidyanikethan AI retrieves the best passages with page numbers.</li><li>A local open model, the free router, or the offline excerpt engine writes the answer from those passages.</li><li>Generate a quiz, get instant feedback, and share a funky edit video.</li></ol>
             </section>
+            </div>
           </div>
         </section>
       </main>

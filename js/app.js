@@ -109,9 +109,7 @@ const VIEW_META = {
 const SUGGESTIONS = [
   { label: "Why do leaves look green?", prompt: "Why do leaves look green?", mode: "answer" },
   { label: "Explain photosynthesis", prompt: "Explain photosynthesis step by step", mode: "explain" },
-  { label: "Newton's laws", prompt: "State Newton's laws of motion", mode: "answer" },
   { label: "Quiz on forces", prompt: "forces", view: "quiz" },
-  { label: "Water cycle summary", prompt: "Summarise the water cycle and monsoon", mode: "summarize" },
 ];
 
 const state = {
@@ -562,21 +560,14 @@ function addMessage(message, { persist = true } = {}) {
 function addWelcomeMessage() {
   addMessage({
     role: "assistant",
-    content: [
-      "**Welcome to Vignan Vidyanikethan AI.** I answer from your own textbooks and show the page behind every claim.",
-      "",
-      "- Add a class PDF in **Library**, or start with the demo study pack already loaded.",
-      "- Connect an existing AI model in **Settings** for natural explanations grounded in the same pages.",
-      "- Try: “Why do leaves look green?” or generate a quiz on forces.",
-      "",
-      "_No model was trained for this app. Your books are the knowledge base; existing AIs are optional reasoning engines._",
-    ].join("\n"),
+    content: "**Welcome.** Ask a question and Vignan Vidyanikethan AI will answer from your textbooks with page citations. Add books in Library or start with the demo pack.",
     meta: "Offline ready",
   });
 }
 
 function renderSuggestions() {
   const container = $("#chat-suggestions");
+  container.classList.toggle("hidden", state.messages.some((message) => message.role === "user"));
   container.replaceChildren();
   for (const suggestion of SUGGESTIONS) {
     const button = ui.element("button", "suggestion-chip", suggestion.label);
@@ -623,6 +614,7 @@ function renderChat() {
     log.appendChild(wrapper);
   }
   log.scrollTop = log.scrollHeight;
+  renderSuggestions();
 }
 
 function showTyping(visible) {
@@ -1870,6 +1862,7 @@ function renderSettings() {
   renderLocalAISettings();
   renderFreeAPILinks();
   renderStudentKeySettings();
+  syncAdvancedSettingsButton();
   updateStatus();
   if (!state.localStatusRequested) {
     state.localStatusRequested = true;
@@ -2355,11 +2348,29 @@ async function deleteAllData() {
 
 /* ----------------------------------------------------------------- events */
 
+function syncAdvancedSettingsButton() {
+  const button = $("#toggle-advanced-settings");
+  if (!button) return;
+  const shown = Boolean($("#view-settings")?.classList.contains("show-advanced"));
+  button.textContent = shown ? t("settings.hideAdvanced") : t("settings.advanced");
+  button.setAttribute("aria-expanded", String(shown));
+}
+
+function toggleAdvancedSettings() {
+  $("#view-settings")?.classList.toggle("show-advanced");
+  syncAdvancedSettingsButton();
+}
+
 function openSettingsPanel(id) {
+  const target = document.getElementById(id);
+  if (target && $("#advanced-settings")?.contains(target)) {
+    $("#view-settings")?.classList.add("show-advanced");
+  }
   setView("settings");
+  syncAdvancedSettingsButton();
   requestAnimationFrame(() => {
     const reduced = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    document.getElementById(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    target?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
   });
 }
 
@@ -2496,15 +2507,14 @@ function bindEvents() {
     if (chip) setMode(chip.dataset.mode);
   });
   $("#clear-chat").addEventListener("click", clearChat);
-  $("#use-local-ai-button").addEventListener("click", () => openSettingsPanel("local-ai-panel"));
-  $("#sidebar-local-ai").addEventListener("click", () => openSettingsPanel("local-ai-panel"));
-  $("#free-keys-button").addEventListener("click", () => openSettingsPanel("free-api-card"));
-  $("#add-my-key-button").addEventListener("click", () => openSettingsPanel("student-key-card"));
-  $("#open-student-keys").addEventListener("click", () => openSettingsPanel("student-key-card"));
-  $("#use-free-ai-button").addEventListener("click", async () => {
+  $("#use-local-ai-button")?.addEventListener("click", () => openSettingsPanel("local-ai-panel"));
+  $("#sidebar-local-ai")?.addEventListener("click", () => openSettingsPanel("local-ai-panel"));
+  $("#open-student-keys")?.addEventListener("click", () => openSettingsPanel("student-key-card"));
+  $("#toggle-advanced-settings")?.addEventListener("click", toggleAdvancedSettings);
+  $("#use-free-ai-button")?.addEventListener("click", async () => {
     if (!state.serverHealth.ai) {
       ui.showToast(
-        "No Render AI keys are configured yet. Generate a free key for Render, or add your own key in Settings → Your own API keys, then reload.",
+        "No Render AI keys are configured yet. Add your own key in Settings → Advanced settings → Your own API keys, then reload.",
         "warning",
         8000,
       );
@@ -2521,15 +2531,9 @@ function bindEvents() {
     updateStatus();
     ui.showToast("Vignan Vidyanikethan AI free router connected.", "success");
   });
-  $("#connect-model-button").addEventListener("click", () => {
-    openSettingsPanel("provider-editor");
-    requestAnimationFrame(() => $("#provider-select")?.focus({ preventScroll: true }));
-  });
-  $("#dismiss-banner").addEventListener("click", async () => {
-    state.settings.disclaimerSeen = true;
-    state.settings.freeRouterDismissed = true;
-    await saveSettings();
-    updateStatus();
+  $("#connect-model-button")?.addEventListener("click", () => {
+    openSettingsPanel("student-key-card");
+    requestAnimationFrame(() => $("#student-provider-keys")?.focus({ preventScroll: true }));
   });
 
   $("#add-demo-book").addEventListener("click", () => loadDemoPack());

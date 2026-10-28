@@ -51,11 +51,11 @@ Get the two keys from <https://supabase.com/dashboard/project/dwmzbrrnqxzdoxrxbr
 
 ## 4. Use a real local AI — or add your own free keys
 
-**No API keys are bundled.** Public, leaked or shared keys are not safe: they can expose private data, exhaust someone else's quota, and create surprise bills. Generate keys from your own provider accounts and paste only the secret value into Render → Environment. The app's **Settings → Official free-tier API keys** panel links directly to every official key page.
+**No API keys are bundled.** Public, leaked or shared keys are not safe: they can expose private data, exhaust someone else's quota, and create surprise bills. Generate keys from your own provider accounts and paste only the secret value into Render → Environment. The app's **Settings → Advanced settings → Official free-tier API keys** panel links directly to every official key page.
 
 ### 4a. Keyless local model (recommended for offline)
 
-The app bundles WebLLM and a Web Worker. In **Settings → Real local model**, choose Meta Llama 3.2 1B, SmolLM2, or Qwen2.5, then press **Download & enable**. The first download needs internet; after that the model is cached in the browser and answers, quizzes, flashcards, grading and verification run on the device with Vignan's textbook rules. WebGPU is required; Ollama (`ollama pull llama3.2:1b`) and the cited-excerpt engine are the fallbacks. See `LOCAL_AI.md`.
+The app bundles WebLLM and a Web Worker. In **Settings → Real local model** (always visible), choose Meta Llama 3.2 1B, SmolLM2, or Qwen2.5, then press **Download & enable**. The first download needs internet; after that the model is cached in the browser and answers, quizzes, flashcards, grading and verification run on the device with Vignan's textbook rules. WebGPU is required; Ollama (`ollama pull llama3.2:1b`) and the cited-excerpt engine are the fallbacks. See `LOCAL_AI.md`.
 
 ### 4b. Optional server free router with multiple keys
 
@@ -77,7 +77,7 @@ Key values never appear in `/api/health`, logs, errors, exports or the public le
 
 ### 4c. Student-owned keys in account settings
 
-When every official Render key is over, students can open **Settings → Your own API keys** (also reachable from **Progress → My AI keys** or the **Add my key** banner button). They choose a provider, optionally adjust its official endpoint/model, and paste one or more keys. The keys are:
+When every official Render key is over, students can open **Settings → Advanced settings → Your own API keys** (also reachable from **Progress → My AI keys** or the **Add keys** button on the Ask screen). They choose a provider, optionally adjust its official endpoint/model, and paste one or more keys. The keys are:
 
 - stored only in that browser's local settings, not in Supabase accounts;
 - sent per request to this site's own `/api/ai` proxy, never to another origin chosen by arbitrary URL input;
@@ -121,7 +121,7 @@ supabase secrets set STUDY_AI_GEMINI_KEYS='key1,key2' STUDY_AI_GROQ_KEYS='key3,k
 
 The Edge Function uses the same comma/newline-separated key pools and student BYOK payload as the Render server. Because Edge Functions are stateless, its quota cooldowns are per request rather than in-memory between requests.
 
-Then set the `server` provider endpoint in **Settings → Provider setup** to:
+Then set the `server` provider endpoint in **Settings → Advanced settings → Provider setup** to:
 
 ```
 https://dwmzbrrnqxzdoxrxbrna.supabase.co/functions/v1/vignan-ai
