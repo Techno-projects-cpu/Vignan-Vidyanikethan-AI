@@ -4,9 +4,9 @@
  * Bundled fonts, the QR code and the optional synth beat stay on this device.
  */
 
-import { clamp, easeOut, truncate } from "./util.js?v=12";
-import { startEditBeat } from "./edit-audio.js?v=12";
-import { qrcode } from "../vendor/qr/qrcode.js?v=12";
+import { clamp, easeOut, truncate } from "./util.js?v=13";
+import { startEditBeat } from "./edit-audio.js?v=13";
+import { qrcode } from "../vendor/qr/qrcode.js?v=13";
 
 const WIDTH = 1080;
 const HEIGHT = 1920;

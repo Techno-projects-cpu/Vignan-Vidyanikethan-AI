@@ -3,9 +3,10 @@
  * a student logs in, registers, or chooses guest mode. Guest mode is available
  * even when the account server is asleep or the device is offline.
  */
-import { clearReferral, getSession, login, register } from "./auth.js?v=12";
-import { newPasswordProblem } from "./password-policy.js?v=12";
-import { setupStartup } from "./startup.js?v=12";
+import { clearReferral, getSession, login, register } from "./auth.js?v=13";
+import { newPasswordProblem } from "./password-policy.js?v=13";
+import { setupStartup } from "./startup.js?v=13";
+import { showToast } from "./ui.js?v=13";
 
 const GUEST_SESSION_KEY = "vignan_guest_session";
 const USERNAME_RE = /^[a-zA-Z0-9_-]{3,20}$/;
@@ -29,6 +30,7 @@ let unlocking = false;
 let gateGeneration = 0;
 let flowGeneration = 0;
 let interacted = false;
+let pendingAuth = null;
 
 // app.js can also be loaded directly in development; the entry screen owns
 // initialization when it is present.
@@ -72,6 +74,28 @@ function setBusy(button, busy, label = "Working…") {
     delete button.dataset.originalLabel;
   }
 }
+function cancelPendingAuth() {
+  const pending = pendingAuth;
+  pendingAuth = null;
+  if (pending) {
+    pending.controller.abort();
+    setBusy(pending.button, false);
+  }
+  return pending?.kind || "";
+}
+function beginAuthRequest(button, kind, label) {
+  cancelPendingAuth();
+  const controller = new AbortController();
+  pendingAuth = { controller, button, kind };
+  setBusy(button, true, label);
+  return controller;
+}
+function finishAuthRequest(controller) {
+  if (pendingAuth?.controller === controller) {
+    setBusy(pendingAuth.button, false);
+    pendingAuth = null;
+  }
+}
 function selectTab(mode, { focus = false } = {}) {
   const isRegister = mode === "register";
   loginTab.setAttribute("aria-selected", String(!isRegister));
@@ -113,7 +137,7 @@ function removeAuthParameter() {
 }
 function loadApp() {
   if (!appModulePromise) {
-    appModulePromise = import("./app.js?v=12").catch((error) => {
+    appModulePromise = import("./app.js?v=13").catch((error) => {
       appModulePromise = null;
       throw error;
     });
@@ -123,6 +147,7 @@ function loadApp() {
 function showGate(mode = "login", { focus = true } = {}) {
   gateGeneration += 1;
   flowGeneration += 1;
+  cancelPendingAuth();
   interacted = false;
   document.body.classList.add("auth-locked");
   gate.hidden = false;
@@ -135,6 +160,8 @@ function showGate(mode = "login", { focus = true } = {}) {
 async function unlock({ user = null, guest = false } = {}) {
   if (unlocking) return;
   unlocking = true;
+  const previousInert = gate.inert;
+  gate.inert = true; // Prevent a second entry choice while the workspace starts.
   gateGeneration += 1; // A late session check must never reopen the gate.
   setStatus("Preparing your study space…");
   try {
@@ -155,6 +182,7 @@ async function unlock({ user = null, guest = false } = {}) {
     showGate("login", { focus: false });
     setGlobalError("The study space couldn't start. Check your connection and try again.");
   } finally {
+    gate.inert = previousInert;
     unlocking = false;
   }
 }
@@ -165,13 +193,22 @@ function bindForms() {
   gate.addEventListener("pointerdown", markInteracted);
   gate.addEventListener("keydown", markInteracted);
 
+  function chooseTab(mode, { focus = false } = {}) {
+    const changing = mode === "register" ? registerForm.hidden : loginForm.hidden;
+    if (changing) {
+      flowGeneration += 1;
+      const cancelled = cancelPendingAuth();
+      if (cancelled) setStatus(cancelled === "register" ? "Registration may have completed; try logging in if your username is taken." : "");
+    }
+    selectTab(mode, { focus });
+  }
   for (const [tab, mode] of [[loginTab, "login"], [registerTab, "register"]]) {
-    tab.addEventListener("click", () => selectTab(mode));
+    tab.addEventListener("click", () => chooseTab(mode));
     tab.addEventListener("keydown", (event) => {
       if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
       event.preventDefault();
       const target = event.key === "Home" ? "login" : event.key === "End" ? "register" : mode === "login" ? "register" : "login";
-      selectTab(target, { focus: true });
+      chooseTab(target, { focus: true });
     });
   }
 
@@ -204,9 +241,9 @@ function bindForms() {
     }
     const submit = loginForm.querySelector('[type="submit"]');
     const flow = ++flowGeneration;
-    setBusy(submit, true, "Logging in…");
+    const controller = beginAuthRequest(submit, "login", "Logging in…");
     try {
-      const data = await login({ username: username.value.trim(), password: password.value });
+      const data = await login({ username: username.value.trim(), password: password.value }, { signal: controller.signal });
       if (flow !== flowGeneration) return;
       if (!data.user) throw new Error("The account server returned an incomplete response.");
       forgetGuest();
@@ -216,7 +253,7 @@ function bindForms() {
     } catch (error) {
       if (flow === flowGeneration) setError(loginForm, error.message || "Couldn't log in. Try again.");
     } finally {
-      setBusy(submit, false);
+      finishAuthRequest(controller);
     }
   });
 
@@ -252,12 +289,12 @@ function bindForms() {
     }
     const submit = registerForm.querySelector('[type="submit"]');
     const flow = ++flowGeneration;
-    setBusy(submit, true, "Creating account…");
+    const controller = beginAuthRequest(submit, "register", "Creating account…");
     try {
       const data = await register({
         username: username.value.trim(), password: password.value, age: years,
         gender: gender.value, guardianConsent: guardian.checked, referral: referral.value.trim(),
-      });
+      }, { signal: controller.signal });
       if (flow !== flowGeneration) return;
       if (!data.user) throw new Error("The account server returned an incomplete response.");
       forgetGuest();
@@ -267,7 +304,7 @@ function bindForms() {
     } catch (error) {
       if (flow === flowGeneration) setError(registerForm, error.message || "Couldn't create the account. Try again.");
     } finally {
-      setBusy(submit, false);
+      finishAuthRequest(controller);
     }
   });
 
@@ -275,11 +312,15 @@ function bindForms() {
   guest.addEventListener("click", async () => {
     interacted = true;
     flowGeneration += 1;
+    const cancelled = cancelPendingAuth();
     rememberGuest();
     removeAuthParameter();
     setBusy(guest, true, "Opening…");
     await unlock({ guest: true });
     setBusy(guest, false);
+    if (cancelled === "register") {
+      showToast("Registration may already have completed. Try logging in later if your username is taken.", "info", 8000);
+    }
   });
   loginForm.querySelector('[type="submit"]').disabled = false;
   registerForm.querySelector('[type="submit"]').disabled = false;

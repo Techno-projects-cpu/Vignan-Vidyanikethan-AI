@@ -380,13 +380,14 @@ styles-premium.css        Minimal workspace and study components
 styles-identity.css       Sharp identity, local fonts and startup screen
 styles-legal.css          Offline-friendly legal pages
 privacy.html, terms.html  Student-facing policies (operator review required)
-assets/                   User-supplied Nezaad logo and licensed local fonts
+assets/                   User-supplied Vignan AI/Nezaad marks and licensed local fonts
 LOCAL_AI.md               Real local WebLLM model guide
 manifest.webmanifest      PWA manifest
+robots.txt, sitemap.xml   Search-engine crawling and canonical-page sitemap
 sw.js                     Offline service worker
 precache.json             Generated offline asset list
 data/demo-textbook.txt    Original sample study notes
-icons/                    SVG + PNG app icons
+icons/                    SVG + PNG app icons (including maskable icons)
 vendor/webllm/            Vendored WebLLM 0.2.85 runtime (Apache-2.0)
 vendor/pdfjs/             Vendored PDF.js (Apache-2.0)
 vendor/qr/                Vendored on-device QR generator (MIT)
@@ -492,6 +493,14 @@ Other notes:
 - **School LAN / desktop:** run `npm start` on one machine and open `http://<lan-ip>:4173/`. With WebLLM cached or Ollama configured, no internet is needed after setup.
 - **Offline first load:** service workers require HTTP/HTTPS. Open the app once while the server is reachable; afterwards the app shell, bundled WebLLM runtime, books you added, PDF.js and cached vectors remain available offline. Model weights download separately on first use.
 - **Edit videos:** The 8-second edit and optional original synth beat are generated locally. Choose **Create my video**, keep the tab open, then tap **Download** or **Share**. MP4 and audio support vary by browser; WebM, silent recording or a PNG poster are fallbacks. 540p is the fastest option on many phones, 720p is the default and 1080p is optional. A locally generated QR linking to Zero Vast is on by default and can be disabled under **More options**. Nickname and invite code are opt-in; the score and topic appear in the video and copied caption. Reduced motion is enabled by default if the device requests it.
+
+---
+
+## Search indexing and the AI logo
+
+The supplied AI mark has been redrawn as the reusable transparent SVG at `assets/brand/vignan-ai-mark.svg`. Browser favicons and separate mask-safe installed-app icons are in `icons/` (with a legacy `favicon.ico` at the root). All are served locally.
+
+`robots.txt`, `sitemap.xml`, canonical links and social-preview metadata point to the current Render site. To request indexing, verify `https://vignanvidyanikethanai.onrender.com/` in Google Search Console and submit `https://vignanvidyanikethanai.onrender.com/sitemap.xml`. Search engines decide whether and when to index pages or refresh a favicon; submission is not a guarantee. If you move to a different public domain, update the URLs in those files and in the page metadata first.
 
 ---
 

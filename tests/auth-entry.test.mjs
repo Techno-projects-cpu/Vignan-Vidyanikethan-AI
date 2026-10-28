@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { newPasswordProblem } from "../js/password-policy.js";
+import { login, register } from "../js/auth.js?v=13";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const html = read("index.html");
@@ -27,7 +28,7 @@ test("entry screen offers login and registration before guest mode", () => {
 });
 
 test("entry boot restores signed-in sessions, offers offline guest access and initializes once", () => {
-  assert.match(html, /js\/boot\.js\?v=12/);
+  assert.match(html, /js\/boot\.js\?v=13/);
   assert.match(boot, /guestChosen\(\)/);
   assert.match(boot, /getSession\(\{ timeout: 5000 \}\)/);
   assert.match(boot, /unlock\(\{ guest: true \}\)/);
@@ -39,6 +40,56 @@ test("entry boot restores signed-in sessions, offers offline guest access and in
   assert.match(css, /#view-ask:not\(\.has-conversation\) \.chat-log \{ display: none; \}/);
   assert.match(css, /#view-ask \.mode-row \{ flex-wrap: wrap; overflow: visible; \}/);
   assert.match(html, /id="ask-input"[^>]*aria-label="Ask a question from your textbooks"/);
+});
+
+test("in-flight account requests can be cancelled before a response", async () => {
+  const oldDocument = globalThis.document;
+  const oldFetch = globalThis.fetch;
+  const controller = new AbortController();
+  let began;
+  const started = new Promise((resolve) => { began = resolve; });
+  globalThis.document = { cookie: "vignan_csrf=test-token" };
+  globalThis.fetch = (_url, options) => new Promise((_resolve, reject) => {
+    began();
+    options.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });
+  });
+  try {
+    const result = login({ username: "student", password: "example" }, { signal: controller.signal });
+    await started;
+    controller.abort();
+    await assert.rejects(result, /cancelled/);
+  } finally {
+    globalThis.document = oldDocument;
+    globalThis.fetch = oldFetch;
+  }
+});
+
+test("cancelling during CSRF bootstrap prevents registration from being sent", async () => {
+  const oldDocument = globalThis.document;
+  const oldFetch = globalThis.fetch;
+  const controller = new AbortController();
+  let finishBootstrap;
+  let calls = 0;
+  globalThis.document = { cookie: "" };
+  globalThis.fetch = () => {
+    calls += 1;
+    return new Promise((resolve) => {
+      finishBootstrap = () => {
+        globalThis.document.cookie = "vignan_csrf=test-token";
+        resolve({ ok: true, json: async () => ({ ok: true }) });
+      };
+    });
+  };
+  try {
+    const result = register({ username: "student" }, { signal: controller.signal });
+    controller.abort();
+    finishBootstrap();
+    await assert.rejects(result, /cancelled/);
+    assert.equal(calls, 1, "the register POST must not be made after cancellation");
+  } finally {
+    globalThis.document = oldDocument;
+    globalThis.fetch = oldFetch;
+  }
 });
 
 test("a closing command menu cannot steal the next tap", () => {
@@ -57,11 +108,11 @@ test("application module imports share the offline cache version", () => {
   for (const file of readdirSync(new URL("../js/", import.meta.url)).filter((name) => name.endsWith(".js"))) {
     const source = read(`js/${file}`);
     for (const match of source.matchAll(/(?:from\s+|import\()\s*["'](\.\/[^"']+\.js(?:\?v=\d+)?)["']/g)) {
-      assert.match(match[1], /\?v=12$/, `${file} imports ${match[1]} without the release version`);
+      assert.match(match[1], /\?v=13$/, `${file} imports ${match[1]} without the release version`);
       assert.ok(sw.includes(`"./js/${match[1].slice(2)}"`), `${match[1]} is precached`);
     }
   }
-  assert.ok(sw.includes('"./js/local-ai-worker.js?v=12"'));
+  assert.ok(sw.includes('"./js/local-ai-worker.js?v=13"'));
 });
 
 test("PDF reader is patched, lazily loaded, and available in the offline cache", () => {
@@ -74,11 +125,11 @@ test("PDF reader is patched, lazily loaded, and available in the offline cache",
   for (const url of ["./js/boot.js", "./js/password-policy.js", "./vendor/pdfjs/pdf.min.mjs", "./vendor/pdfjs/pdf.worker.min.mjs"]) {
     assert.ok(precache.urls.includes(url), `${url} is precached`);
   }
-  for (const url of ["./styles-premium.css?v=12", "./styles-identity.css?v=12", "./styles-legal.css?v=12", "./js/boot.js?v=12", "./js/app.js?v=12", "./js/auth.js?v=12", "./js/ingest.js?v=12", "./js/edit-studio.js?v=12", "./js/card.js?v=12", "./js/edit-audio.js?v=12", "./js/ui.js?v=12", "./js/reader.js?v=12", "./js/i18n.js?v=12", "./js/study-decks.js?v=12", "./js/startup.js?v=12", "./vendor/qr/qrcode.js?v=12", "./privacy.html", "./terms.html", "./assets/brand/nezaad-mark.png", "./assets/fonts/manrope-latin.woff2", "./assets/fonts/space-grotesk-latin.woff2"]) {
+  for (const url of ["./styles-premium.css?v=13", "./styles-identity.css?v=13", "./styles-legal.css?v=13", "./js/boot.js?v=13", "./js/app.js?v=13", "./js/auth.js?v=13", "./js/ingest.js?v=13", "./js/edit-studio.js?v=13", "./js/card.js?v=13", "./js/edit-audio.js?v=13", "./js/ui.js?v=13", "./js/reader.js?v=13", "./js/i18n.js?v=13", "./js/study-decks.js?v=13", "./js/startup.js?v=13", "./vendor/qr/qrcode.js?v=13", "./privacy.html", "./terms.html", "./assets/brand/nezaad-mark.png", "./assets/fonts/manrope-latin.woff2", "./assets/fonts/space-grotesk-latin.woff2"]) {
     assert.ok(sw.includes(`"${url}"`), `${url} is a core asset`);
   }
   assert.ok(precache.urls.includes("./js/edit-studio.js"));
   assert.ok(precache.urls.includes("./js/edit-audio.js"));
-  assert.equal(precache.version, 12);
+  assert.equal(precache.version, 13);
   assert.ok(!precache.urls.includes("./vendor/pdfjs/pdf.min.js"));
 });

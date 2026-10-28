@@ -82,6 +82,16 @@ test("account HTTP endpoints enforce CSRF, safe cookies, rate limits and preserv
   assert.doesNotMatch(csp, /frame-ancestors/); // The Arena live preview embeds the page.
   assert.equal(page.headers.get("x-content-type-options"), "nosniff");
   assert.equal((await get("/.env.example")).status, 403);
+  const sitemap = await get("/sitemap.xml");
+  assert.equal(sitemap.status, 200);
+  assert.match(sitemap.headers.get("content-type"), /^application\/xml/);
+  assert.match(await sitemap.text(), /<urlset/);
+  const robots = await get("/robots.txt");
+  assert.equal(robots.status, 200);
+  assert.match(await robots.text(), /Sitemap: https:/);
+  const icon = await get("/icons/icon.svg?v=13");
+  assert.equal(icon.status, 200);
+  assert.match(icon.headers.get("content-type"), /^image\/svg\+xml/);
 
   const initial = await get("/api/auth/me", { Origin: base });
   const initialData = await initial.json();

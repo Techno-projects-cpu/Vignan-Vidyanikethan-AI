@@ -6,18 +6,18 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=12";
-import { retrieve, retrieveChapter } from "./retrieval.js?v=12";
-import { ingestPdf, ingestText, ingestDemoPack } from "./ingest.js?v=12";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=12";
+import * as db from "./db.js?v=13";
+import { retrieve, retrieveChapter } from "./retrieval.js?v=13";
+import { ingestPdf, ingestText, ingestDemoPack } from "./ingest.js?v=13";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=13";
 import {
   answerWithModel,
   generateFlashcardsWithModel,
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=12";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=12";
+} from "./llm.js?v=13";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=13";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -29,9 +29,9 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=12";
-import { TASKS } from "./model-router.js?v=12";
-import { PROVIDERS, providerList } from "./providers.js?v=12";
+} from "./local-ai.js?v=13";
+import { TASKS } from "./model-router.js?v=13";
+import { PROVIDERS, providerList } from "./providers.js?v=13";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -40,30 +40,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=12";
-import { parseApiKeys } from "./key-pool.js?v=12";
+} from "./settings.js?v=13";
+import { parseApiKeys } from "./key-pool.js?v=13";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=12";
+} from "./student-keys.js?v=13";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=12";
+} from "./quiz.js?v=13";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=12";
+} from "./flashcards.js?v=13";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=12";
+} from "./study-decks.js?v=13";
 import {
   accuracy,
   currentStreak,
@@ -74,13 +74,13 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=12";
-import { externalSearchUrl, searchWeb } from "./web.js?v=12";
-import { openEditStudio } from "./edit-studio.js?v=12";
-import { openReader } from "./reader.js?v=12";
-import { applyTranslations, setLanguage, t } from "./i18n.js?v=12";
-import { clamp, downloadBlob, formatDate, readFileAsText, truncate, uid } from "./util.js?v=12";
-import * as ui from "./ui.js?v=12";
+} from "./progress.js?v=13";
+import { externalSearchUrl, searchWeb } from "./web.js?v=13";
+import { openEditStudio } from "./edit-studio.js?v=13";
+import { openReader } from "./reader.js?v=13";
+import { applyTranslations, setLanguage, t } from "./i18n.js?v=13";
+import { clamp, downloadBlob, formatDate, readFileAsText, truncate, uid } from "./util.js?v=13";
+import * as ui from "./ui.js?v=13";
 import {
   clearReferral,
   getLeaderboard,
@@ -90,8 +90,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=12";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=12";
+} from "./auth.js?v=13";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=13";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -99,8 +99,8 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=12";
-import { initMotion, revealVisible } from "./motion.js?v=12";
+} from "./premium-ui.js?v=13";
+import { initMotion, revealVisible } from "./motion.js?v=13";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];

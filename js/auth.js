@@ -6,9 +6,9 @@
  * a purely static export) the app continues as a guest with local progress.
  */
 
-import * as ui from "./ui.js?v=12";
-import { truncate } from "./util.js?v=12";
-import { newPasswordProblem } from "./password-policy.js?v=12";
+import * as ui from "./ui.js?v=13";
+import { truncate } from "./util.js?v=13";
+import { newPasswordProblem } from "./password-policy.js?v=13";
 
 const API_BASE = new URL("../api/", import.meta.url);
 const REQUEST_TIMEOUT = 12000;
@@ -58,9 +58,14 @@ async function ensureCsrf() {
   if (!csrfToken()) throw new Error("Cookies are needed to log in. Please enable cookies and try again.");
 }
 
-async function request(path, { method = "GET", body, timeout = REQUEST_TIMEOUT } = {}) {
+async function request(path, { method = "GET", body, timeout = REQUEST_TIMEOUT, signal } = {}) {
+  if (signal?.aborted) throw new Error("The account request was cancelled.");
   if (method !== "GET") await ensureCsrf();
+  // CSRF bootstrap can outlive the user's choice to leave the form.
+  if (signal?.aborted) throw new Error("The account request was cancelled.");
   const controller = new AbortController();
+  const cancelRequest = () => controller.abort();
+  signal?.addEventListener("abort", cancelRequest, { once: true });
   const timer = setTimeout(() => controller.abort(), timeout);
   try {
     const response = await fetch(authApiUrl(path), {
@@ -84,11 +89,14 @@ async function request(path, { method = "GET", body, timeout = REQUEST_TIMEOUT }
     }
     return data;
   } catch (error) {
-    if (error?.name === "AbortError") throw new Error("The account server did not respond. Check your connection.");
+    if (error?.name === "AbortError") {
+      throw new Error(signal?.aborted ? "The account request was cancelled." : "The account server did not respond. Check your connection.");
+    }
     if (error instanceof TypeError) throw new Error("Accounts need the Vignan Vidyanikethan AI server. You can keep studying as a guest.");
     throw error;
   } finally {
     clearTimeout(timer);
+    signal?.removeEventListener("abort", cancelRequest);
   }
 }
 
@@ -96,12 +104,12 @@ export async function getSession({ timeout = REQUEST_TIMEOUT } = {}) {
   return request("auth/me", { timeout });
 }
 
-export async function register(payload) {
-  return request("auth/register", { method: "POST", body: payload });
+export async function register(payload, { signal } = {}) {
+  return request("auth/register", { method: "POST", body: payload, signal });
 }
 
-export async function login(payload) {
-  return request("auth/login", { method: "POST", body: payload });
+export async function login(payload, { signal } = {}) {
+  return request("auth/login", { method: "POST", body: payload, signal });
 }
 
 export async function logout() {
