@@ -28,7 +28,7 @@ Open:
 
 The server binds to `0.0.0.0`, so it also works in the Arena live preview. A plain static server (`python3 -m http.server`) can serve the app too, but the optional `/api/ai`, `/api/search` and `/api/auth/*` endpoints will not exist — the offline engine and guest progress still work.
 
-On first launch the app loads a small **Demo Study Pack** so you can try questions immediately. Replace it with real class PDFs in **Library**. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one official free key from your own account, and restart the server — the app auto-detects the free router and keeps the offline engine as a fallback.
+On first launch the app loads a small **Demo Study Pack** so you can try questions immediately. Replace it with real class PDFs in **Library**. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — the app auto-detects the free router, rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback.
 
 ---
 
@@ -50,7 +50,9 @@ Instead, Vignan Vidyanikethan AI offers a **keyless local model** plus a **provi
 | **Local WebLLM** | **Real open-weight AI on the device, $0, no key** ([WebLLM](https://github.com/mlc-ai/web-llm)) | First model download needs internet and a WebGPU-capable browser. |
 | Offline engine | Truly unlimited, $0, private | Extractive answers rather than fluent generative prose. |
 
-The server tries the configured providers in order, skips 429/5xx/empty responses, and the browser falls back to its offline extractive engine if everything fails. Add keys on the server only — never in the browser. See `.env.example` and `render.yaml`. The **Settings → Official free-tier API keys** panel links to each provider's own key-creation page; **no key value is ever committed to this repository**.
+The server supports **multiple keys per provider**: paste several values into one Render secret separated by commas/newlines, or use a plural `*_KEYS` alias. Vignan builds one upstream per key, tries them in order, cools down a quota-limited key for 60 seconds, and only then tries student-owned keys. It skips 429/5xx/empty responses and falls back to the offline extractive engine if everything fails. Add school keys on the server only — never in the browser. See `.env.example`, `render.yaml` and `DEPLOY.md`. The **Settings → Official free-tier API keys** panel links to each provider's own key-creation page; **no key value is ever committed to this repository**.
+
+When all Render keys are exhausted, students can add their own keys in **Settings → Your own API keys** (also linked from the account area). Those keys stay in that browser, are sent per request only to this site's `/api/ai` proxy, are never stored in Supabase accounts or the public leaderboard, and are excluded from JSON exports. They can be tested, paused or cleared per provider.
 
 For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLLM runtime runs Meta Llama 3.2 1B / SmolLM2 / Qwen2.5 in a Web Worker with WebGPU, applies Vignan's own grounding rules, and caches the chosen model after one download. It powers answers, explanations, summaries, practice, quizzes, flashcards, short-answer grading and citation verification without a server key.
 
@@ -63,7 +65,8 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 | Grounded answers | Local hybrid retrieval (BM25 + hashed TF-IDF vectors + phrase matching) over page chunks, with `[1]` citations and a clickable page reader. |
 | Model router | Route **Answers**, **Quiz writing**, **Flashcard writing**, **Short-answer grading** and **Citation verification** to different existing AI providers. Automatic fallback to the offline engine. |
 | Real local AI | Bundled WebLLM + Web Worker runs open-weight Meta Llama 3.2 1B, SmolLM2 or Qwen2.5 on-device with Vignan's grounding rules. Download once, then use every AI task offline. |
-| Zero-budget AI runtime | Server-side **free AI router** tries Gemini, Groq, Cloudflare Workers AI, OpenRouter free models, Mistral, Cohere and an optional Arena AI workspace key in order; skips rate-limited providers and keeps keys off student devices. |
+| Zero-budget AI runtime | Server-side **free AI router** tries Gemini, Groq, Cloudflare Workers AI, OpenRouter free models, Mistral, Cohere and an optional Arena AI workspace key in order; supports multiple keys per provider, auto-rotates on quota limits, cools down exhausted keys, skips rate-limited providers and keeps school keys off student devices. |
+| Student BYOK fallback | After all Render keys are exhausted, students can add one or more of their own keys in account settings. Keys stay browser-local, are used only through the site's own proxy, and never appear in exports, accounts or leaderboards. |
 | Official key links | Settings shows safe signup links for eight free/keyless providers and explicitly warns against leaked or shared keys. |
 | Library | Upload PDF / TXT / Markdown, paste notes, use `[[page:12]]` markers, delete books, open a page reader, open the original PDF at a cited page. |
 | Quizzes | MCQ, fill-in-the-blank, short-answer and mixed quizzes; easy/medium/hard; timed or untimed; AI-written or offline-generated; instant grading with per-question review, topic breakdown and a revise list. |
@@ -74,7 +77,7 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 | Web fallback | Disabled by default. When enabled, outside results are shown only after the books fail, and are labelled **OUTSIDE YOUR TEXTBOOKS**. |
 | Offline / PWA | Service worker caches the full app shell, WebLLM runtime, local AI worker, PDF.js, CMaps and the demo pack after the first online visit. Installable manifest included. |
 | Arena-inspired UI | Dark technical workspace with a narrow left rail, 1px bounded panels, compact mono labels, warm off-white type, restrained blue links and selective coral edges. Responsive icon rail on tablets and a bottom nav on phones. |
-| Privacy | Books, vectors, chats, settings and results stay in this browser's IndexedDB. Local AI sends nothing off the device. Export excludes API keys. |
+| Privacy | Books, vectors, chats, settings and results stay in this browser's IndexedDB. Local AI sends nothing off the device. Server keys never reach the browser; student keys are excluded from exports, accounts, logs and leaderboards. |
 | Languages | English UI with a Telugu translation for the main interface. Textbook passages are never silently machine-translated. |
 
 ---
@@ -118,7 +121,7 @@ For a larger public deployment, add email verification, password reset, moderati
 Vignan Vidyanikethan AI does **not** train a model. It provides a task-based router over existing model APIs:
 
 1. Open **Settings → Real local model** for a keyless on-device model, or **Settings → Model router** for hosted / desktop providers.
-2. Pick a provider and fill in its endpoint, model name and (if needed) your own API key. For WebLLM, choose and download a model instead.
+2. Pick a provider and fill in its endpoint, model name and (if needed) one or more of your own API keys (comma/newline separated — the browser rotates to the next key on quota errors). For WebLLM, choose and download a model instead. For a safer school-wide pool, put the keys in Render instead and leave this field empty.
 3. Enable **“Use this provider for answers and quizzes now”**, or set each task's provider in the routing table (answers, quizzes, flashcards, grading, verification).
 4. Optionally route **Short-answer grading** and **Citation verification** to a different model — a cheap local model can grade while a stronger model verifies claims.
 
@@ -140,7 +143,7 @@ Supported adapters:
 | Mistral / Cohere / DeepSeek / Together | OpenAI-compatible | Mistral Free mode and Cohere trial keys are wired into the server router; bring your own model name for the others. |
 | Custom | OpenAI-compatible | Any `/chat/completions` endpoint. |
 
-> **Browser API keys:** direct browser calls to cloud providers may be blocked by CORS, and a key typed into a shared computer is visible to that browser. For a school deployment, configure the server proxy instead. Keys are stored only in this browser's IndexedDB and are excluded from exports.
+> **Browser API keys:** direct browser calls to cloud providers may be blocked by CORS, and a key typed into a shared computer is visible to that browser. For a school deployment, configure the server proxy instead. Browser provider keys and student BYOK keys are stored only in this browser's IndexedDB, are excluded from exports, and never go to the public leaderboard. Student BYOK keys are also validated against official provider hosts before the server will call them.
 
 ---
 
@@ -156,7 +159,18 @@ STUDY_AI_GEMINI_KEY='your-google-ai-studio-key' npm start
 STUDY_AI_GROQ_KEY='your-groq-key' npm start
 ```
 
-Add more keys and the router will fall through them automatically:
+Add more providers and the router will fall through them automatically. You can also add **several keys per provider** in one variable — separate them with commas or newlines, or use the plural alias. Vignan creates one upstream per key and rotates to the next one when a key is rate-limited:
+
+```bash
+STUDY_AI_GEMINI_KEY='gemini-key-1,gemini-key-2' \
+STUDY_AI_GEMINI_KEYS='gemini-key-3
+gemini-key-4' \
+STUDY_AI_GROQ_KEYS='groq-key-1,groq-key-2' \
+STUDY_AI_KEY_COOLDOWN_MS=60000 \
+npm start
+```
+
+For a full multi-provider pool:
 
 ```bash
 STUDY_AI_GEMINI_KEY='...' \
@@ -250,8 +264,11 @@ All variables also accept the new `VIGNAN_AI_` prefix as an alias, e.g. `VIGNAN_
 | `STUDY_AI_HOST` | `0.0.0.0` | Bind host. |
 | `STUDY_AI_PORT` / `PORT` | `4173` | Bind port. |
 | `STUDY_AI_FREE_ROUTER` | `true` | Set `false` to use only the first configured provider. |
-| `STUDY_AI_FREE_ROUTER_ORDER` | `gemini,groq,cloudflare,openrouter,mistral,cohere,arena,primary` | Comma-separated fallback order. |
-| `STUDY_AI_GEMINI_KEY` / `_MODEL` / `_ENDPOINT` | empty / `gemini-3.5-flash-lite` / Google endpoint | Gemini free-tier key and model. |
+| `STUDY_AI_FREE_ROUTER_ORDER` | `gemini,groq,cloudflare,openrouter,mistral,cohere,arena,primary` | Comma-separated provider fallback order. |
+| `STUDY_AI_KEY_COOLDOWN_MS` | `60000` | How long a quota-limited key is skipped before retry. |
+| `STUDY_AI_STUDENT_KEY_FALLBACK` | `true` | Set `false` to disable student-owned keys school-wide. |
+| `*_KEY` / `*_KEYS` / `*_TOKEN` / `*_TOKENS` | empty | Every key variable accepts multiple comma/newline-separated values; plural aliases are merged and deduplicated. |
+| `STUDY_AI_GEMINI_KEY` / `_MODEL` / `_ENDPOINT` | empty / `gemini-3.5-flash-lite` / Google endpoint | Gemini free-tier key pool and model. |
 | `STUDY_AI_GROQ_KEY` / `_MODEL` / `_ENDPOINT` | empty / `openai/gpt-oss-20b` / Groq endpoint | Groq free-tier key and model. |
 | `STUDY_AI_CLOUDFLARE_ACCOUNT_ID` / `_TOKEN` / `_MODEL` | empty / empty / `@cf/openai/gpt-oss-20b` | Cloudflare Workers AI free Neurons. |
 | `STUDY_AI_OPENROUTER_KEY` / `_MODEL` / `_ENDPOINT` / `_REFERER` | empty / `openrouter/free` / OpenRouter endpoint / repo URL | OpenRouter free models. |
@@ -428,7 +445,7 @@ Student browser ──WebGPU──► Bundled WebLLM open-weight model (keyless,
 
 1. **Push this branch to GitHub.** Render deploys from the repo using `render.yaml`.
 2. **Create a free Supabase project** (Mumbai/`ap-south-1` is closest to Andhra Pradesh). Run `supabase/migrations/20261027000000_vignan_ai.sql` in the SQL editor. Note that Supabase free projects pause after a week of database inactivity and have a 500 MB database ([billing docs](https://supabase.com/docs/guides/platform/billing-on-supabase)).
-3. **In Render → Environment**, add `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and optionally one free AI key generated from your own account (`STUDY_AI_GEMINI_KEY`, `STUDY_AI_GROQ_KEY`, `STUDY_AI_MISTRAL_KEY`, etc.). Set `STUDY_AI_ACCOUNTS_BACKEND=supabase` and `STUDY_AI_COOKIE_SECURE=true`. No key is required for the local WebLLM model.
+3. **In Render → Environment**, add `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and optionally one or more free AI keys generated from your own accounts (`STUDY_AI_GEMINI_KEYS`, `STUDY_AI_GROQ_KEYS`, etc. — comma/newline separated). Set `STUDY_AI_ACCOUNTS_BACKEND=supabase`, `STUDY_AI_COOKIE_SECURE=true`, `STUDY_AI_KEY_COOLDOWN_MS=60000` and `STUDY_AI_STUDENT_KEY_FALLBACK=true`. No key is required for the local WebLLM model; students can add their own keys in Settings when the Render pool is exhausted.
 4. **Reload the app.** When `/api/health` reports `ai:true`, Vignan Vidyanikethan AI can auto-select the free router for answers, quizzes, flashcards, grading and verification. Students can instead enable the local model. If all providers fail, the offline engine still answers from textbooks.
 5. **Optional:** deploy `supabase/functions/vignan-ai/` as a Supabase Edge Function and point the `server` provider endpoint at it instead of Render's `/api/ai`. This can avoid Render's cold start for AI calls; the free tier includes 500,000 function invocations/month.
 
@@ -453,7 +470,7 @@ Other notes:
 - Local WebLLM / Ollama / LM Studio modes send nothing off the device. WebLLM's first model download contacts the model CDN; the model itself then runs locally.
 - Connected cloud modes send only the short retrieved passages needed for the task. Free-tier providers may have different data-retention/training policies — check each provider before uploading sensitive or copyrighted books. OpenRouter free models in particular can have per-provider training policies.
 - Web fallback is off by default; outside results are visually separated and labelled.
-- **Settings → Export data** produces JSON without API keys. **Delete all local data** clears the database and local progress.
+- Server keys never reach the browser, health response, logs or exports. Student BYOK keys are browser-local, sent per request only to this site's proxy, and excluded from exports, accounts and leaderboards. **Settings → Export data** produces JSON without any API key values; **Delete all local data** clears the database, local progress and saved student keys.
 
 ---
 

@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildUpstreams, callFreeRouter, FREE_ROUTER_DEFAULT_ORDER } from "../server/free-router.mjs";
+import { buildUpstreams, callFreeRouter, FREE_ROUTER_DEFAULT_ORDER, resetKeyCooldownsForTests } from "../server/free-router.mjs";
+import { KeyCooldowns } from "../js/key-pool.js";
+import { buildStudentUpstreams } from "../server/student-keys.mjs";
 
 function response(ok, status, data) {
   return {
@@ -98,4 +100,111 @@ test("callFreeRouter reports a helpful error when every provider fails", async (
     callFreeRouter({ upstreams, messages: [{ role: "user", content: "Hi" }], fetchImpl }),
     /All AI providers failed.*unavailable/,
   );
+});
+
+test("buildUpstreams expands comma/newline key pools without leaking key values", () => {
+  const upstreams = buildUpstreams({
+    STUDY_AI_GEMINI_KEY: "GEM-ONE,GEM-TWO",
+    STUDY_AI_GEMINI_KEYS: "GEM-THREE\nGEM-ONE",
+    STUDY_AI_GROQ_KEYS: "GROQ-ONE,GROQ-TWO",
+  });
+  assert.deepEqual(upstreams.map((item) => item.id), ["gemini", "gemini", "gemini", "groq", "groq"]);
+  assert.deepEqual(upstreams.slice(0, 3).map((item) => item.apiKey), ["GEM-ONE", "GEM-TWO", "GEM-THREE"]);
+  assert.deepEqual(upstreams.slice(3).map((item) => item.apiKey), ["GROQ-ONE", "GROQ-TWO"]);
+  assert.equal(upstreams[0].keyCount, 3);
+  assert.equal(upstreams[0].source, "server");
+  assert.ok(upstreams.every((item) => !item.keyId.includes("GEM-")));
+  assert.ok(upstreams.every((item) => !item.label.includes("GEM-")));
+});
+
+test("callFreeRouter cools down an exhausted key and skips it on the next request", async () => {
+  resetKeyCooldownsForTests();
+  const upstreams = buildUpstreams({ STUDY_AI_GEMINI_KEY: "k1,k2", STUDY_AI_FREE_ROUTER_ORDER: "gemini" });
+  assert.equal(upstreams.length, 2);
+  const cooldowns = new KeyCooldowns({ cooldownMs: 60_000, now: () => 1000 });
+  const calls = [];
+  const firstFetch = async (_url, options) => {
+    calls.push(options.headers.Authorization);
+    if (calls.length === 1) return response(false, 429, { error: { message: "quota exceeded" } });
+    return response(true, 200, { choices: [{ message: { content: "Second key works" } }] });
+  };
+  const first = await callFreeRouter({
+    upstreams,
+    messages: [{ role: "user", content: "Why?" }],
+    fetchImpl: firstFetch,
+    cooldowns,
+    now: () => 1000,
+    cooldownMs: 60_000,
+  });
+  assert.equal(first.content, "Second key works");
+  assert.equal(first.attempts, 2);
+  assert.equal(first.fallbackUsed, true);
+  assert.equal(first.keySource, "server");
+  assert.deepEqual(calls, ["Bearer k1", "Bearer k2"]);
+
+  calls.length = 0;
+  const secondFetch = async (_url, options) => {
+    calls.push(options.headers.Authorization);
+    return response(true, 200, { choices: [{ message: { content: "Still works" } }] });
+  };
+  const second = await callFreeRouter({
+    upstreams,
+    messages: [{ role: "user", content: "Again?" }],
+    fetchImpl: secondFetch,
+    cooldowns,
+    now: () => 1000,
+    cooldownMs: 60_000,
+  });
+  assert.equal(second.attempts, 1);
+  assert.deepEqual(calls, ["Bearer k2"]);
+  assert.equal(cooldowns.status(1000).length, 1);
+});
+
+test("callFreeRouter reports ALL_KEYS_EXHAUSTED when every key is rate-limited", async () => {
+  resetKeyCooldownsForTests();
+  const upstreams = buildUpstreams({ STUDY_AI_GEMINI_KEY: "KEY-AAA,KEY-BBB", STUDY_AI_FREE_ROUTER_ORDER: "gemini" });
+  const error = await callFreeRouter({
+    upstreams,
+    messages: [{ role: "user", content: "Hi" }],
+    fetchImpl: async () => response(false, 429, { error: "rate limit" }),
+    cooldowns: new KeyCooldowns({ now: () => 5000 }),
+    now: () => 5000,
+  }).catch((failure) => failure);
+  assert.equal(error.code, "ALL_KEYS_EXHAUSTED");
+  assert.equal(error.needStudentKeys, true);
+  assert.equal(error.attempts, 2);
+  assert.equal(error.errors.length, 2);
+  assert.match(error.message, /Add a student key/);
+  assert.equal(error.exhaustedKeys.length, 2);
+  assert.ok(error.exhaustedKeys.every((keyId) => !keyId.includes("KEY-")));
+});
+
+test("student keys are tried only after every Render key is exhausted", async () => {
+  resetKeyCooldownsForTests();
+  const serverUpstreams = buildUpstreams({
+    STUDY_AI_GEMINI_KEY: "SERVER-ONE,SERVER-TWO",
+    STUDY_AI_FREE_ROUTER_ORDER: "gemini",
+  });
+  const studentUpstreams = buildStudentUpstreams([{ providerId: "gemini", keys: "STUDENT-ONE" }]);
+  const upstreams = [...serverUpstreams, ...studentUpstreams];
+  const calls = [];
+  const fetchImpl = async (_url, options) => {
+    calls.push(options.headers.Authorization);
+    if (calls.length < 3) return response(false, 429, { error: "quota exceeded" });
+    return response(true, 200, { choices: [{ message: { content: "BYOK grounded answer [1]" } }] });
+  };
+  const result = await callFreeRouter({
+    upstreams,
+    messages: [{ role: "user", content: "Explain photosynthesis" }],
+    fetchImpl,
+    cooldowns: new KeyCooldowns({ now: () => 3000 }),
+    now: () => 3000,
+  });
+  assert.deepEqual(calls, ["Bearer SERVER-ONE", "Bearer SERVER-TWO", "Bearer STUDENT-ONE"]);
+  assert.equal(result.content, "BYOK grounded answer [1]");
+  assert.equal(result.provider, "gemini");
+  assert.equal(result.attempts, 3);
+  assert.equal(result.studentKeyUsed, true);
+  assert.equal(result.keySource, "student");
+  assert.ok(!JSON.stringify(result).includes("STUDENT-ONE"));
 });

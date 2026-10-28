@@ -1,6 +1,6 @@
 /* Offline service worker for Vignan Vidyanikethan AI. */
 
-const CACHE_NAME = "vignan-vidyanikethan-ai-v5";
+const CACHE_NAME = "vignan-vidyanikethan-ai-v6";
 const CORE = [
   "./",
   "./index.html",
@@ -13,6 +13,8 @@ const CORE = [
   "./icons/icon-512.png",
   "./js/app.js",
   "./js/auth.js",
+  "./js/key-pool.js",
+  "./js/student-keys.js",
   "./js/local-ai.js",
   "./js/local-ai-worker.js",
   "./js/free-apis.js",

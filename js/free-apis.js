@@ -9,7 +9,7 @@
  */
 
 export const FREE_API_WARNING =
-  "No API keys are bundled. Create your own key from the provider below, then paste it into Render → Environment. Never use a key found in a public repo, video, or chat.";
+  "No API keys are bundled. Create your own keys, then paste one or more into each Render → Environment secret (comma/newline separated). Vignan rotates to the next key on quota limits. Students can also add their own keys below, used only after the Render pool is exhausted. Never use a key found in a public repo, video, or chat.";
 
 export const FREE_API_PROVIDERS = [
   {

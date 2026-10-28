@@ -840,6 +840,26 @@ code { font-family: var(--mono); background: var(--surface-3); color: var(--bran
   .key-card { min-height: 132px; }
 }
 
+/* Multiple-key pools and student-owned key vault. */
+.panel-head-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.student-key-card { border-color: color-mix(in srgb, var(--coral) 26%, var(--line)); }
+.student-key-card textarea { font-family: var(--mono); font-size: 12px; line-height: 1.65; }
+.student-key-card .notice code { color: var(--coral); font-size: 12px; }
+.key-vault-summary { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; min-height: 28px; }
+.vault-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface-2); color: var(--ink-2); font-size: 11px;
+}
+.vault-chip strong { color: var(--ink); font-weight: 600; }
+.vault-chip span { font-family: var(--mono); color: var(--coral); }
+.vault-empty { color: var(--muted); font-size: 12px; padding: 5px 0; }
+
+@media (max-width: 760px) {
+  .panel-head-actions { justify-content: flex-start; }
+  .student-key-card .button-row .button { flex: 1 1 150px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .key-card { transition: none; }

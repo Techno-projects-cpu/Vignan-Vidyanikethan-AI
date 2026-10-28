@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildModelRequest, parseProviderResponse, providerList, PROVIDERS, resolveProvider } from "../js/providers.js";
+import { buildModelRequest, parseProviderResponse, postModelRequest, providerList, PROVIDERS, resolveProvider } from "../js/providers.js";
 import { DEFAULT_SETTINGS, engineLabel, isModelConnected, normalizeSettings, privacyLabel } from "../js/settings.js";
 import { callRoutedModel, taskRoute, TASKS } from "../js/model-router.js";
 import { extractJson, formatContext, SYSTEM_PROMPT } from "../js/context.js";
@@ -151,4 +151,51 @@ test("parseSearchResults normalises common JSON shapes and rejects bad URLs", ()
   assert.equal(parsed[0].domain, "example.com");
   assert.match(parsed[0].snippet, /preview/);
   assert.equal(parsed[1].url, "https://openalex.org/works/W1");
+});
+
+test("direct provider rotates to the next key after a quota failure", async () => {
+  const settings = normalizeSettings(DEFAULT_SETTINGS);
+  settings.providers.openai.apiKeys = ["KEY-ONE", "KEY-TWO"];
+  const provider = resolveProvider(settings, "openai");
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (_url, options) => {
+    calls.push(options.headers.Authorization);
+    if (calls.length === 1) {
+      return {
+        ok: false,
+        status: 429,
+        text: async () => JSON.stringify({ error: { message: "quota exceeded" } }),
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ choices: [{ message: { content: "Second key answered" } }] }),
+    };
+  };
+  try {
+    const result = await postModelRequest(provider, messages);
+    assert.equal(result.content, "Second key answered");
+    assert.equal(result.keyCount, 2);
+    assert.equal(result.keyIndex, 1);
+    assert.deepEqual(calls, ["Bearer KEY-ONE", "Bearer KEY-TWO"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("server adapter forwards student keys only for an explicit BYOK test", () => {
+  const provider = resolveProvider(normalizeSettings(DEFAULT_SETTINGS), "server");
+  const request = buildModelRequest(provider, messages, {
+    maxTokens: 40,
+    studentKeyFallback: true,
+    studentKeys: [{ providerId: "gemini", endpoint: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-test", keys: ["STUDENT-KEY"] }],
+    forceStudentKeys: true,
+  });
+  assert.equal(request.url, "api/ai");
+  assert.equal(request.body.studentKeyFallback, true);
+  assert.equal(request.body.forceStudentKeys, true);
+  assert.equal(request.body.studentKeys.length, 1);
+  assert.deepEqual(request.body.studentKeys[0].keys, ["STUDENT-KEY"]);
 });

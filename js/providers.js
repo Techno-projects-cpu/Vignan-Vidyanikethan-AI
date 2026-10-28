@@ -6,7 +6,12 @@
  * recommended production path is the local server proxy: it keeps API keys off
  * student devices and avoids browser CORS limits. Direct browser calls are
  * supported for providers/endpoints that allow them.
+ *
+ * A provider config may hold multiple keys (comma/newline separated). Requests
+ * rotate to the next key on quota/auth/network failures.
  */
+
+import { isQuotaFailure, parseApiKeys, providerKeyVariants } from "./key-pool.js";
 
 export const PROVIDERS = {
   server: {
@@ -172,6 +177,7 @@ export function defaultProviderConfig(providerId) {
     endpoint: provider.endpoint,
     model: provider.model,
     apiKey: "",
+    apiKeys: [],
   };
 }
 
@@ -179,11 +185,13 @@ export function resolveProvider(settings = {}, providerId = "offline") {
   if (!providerId || providerId === "offline" || !PROVIDERS[providerId]) return null;
   const definition = PROVIDERS[providerId];
   const config = settings.providers?.[providerId] || {};
+  const apiKeys = parseApiKeys([config.apiKeys, config.apiKey].join("\n"));
   return {
     ...definition,
     endpoint: String(config.endpoint || definition.endpoint || "").trim(),
     model: String(config.model || definition.model || "").trim(),
-    apiKey: String(config.apiKey || "").trim(),
+    apiKey: apiKeys[0] || "",
+    apiKeys,
   };
 }
 
@@ -203,17 +211,26 @@ function splitSystem(messages = []) {
 }
 
 /** Build a provider-specific HTTP request without exposing secrets in URLs. */
-export function buildModelRequest(provider, messages = [], { temperature = 0.2, maxTokens = 900 } = {}) {
+export function buildModelRequest(provider, messages = [], options = {}) {
   if (!provider) throw new Error("No AI provider selected.");
+  const { temperature = 0.2, maxTokens = 900 } = options;
   const { kind, endpoint, model, apiKey, extraHeaders = {} } = provider;
   if (kind === "webllm") {
     throw new Error("WebLLM runs locally in a Web Worker; use generateWithLocalAI() instead of an HTTP request.");
   }
   if (kind === "server") {
+    const studentKeys = Array.isArray(options.studentKeys) ? options.studentKeys.filter((entry) => entry?.keys?.length) : [];
     return {
       url: pathUrl(endpoint || "api/ai", "", "api/ai"),
       headers: {},
-      body: { messages, temperature, max_tokens: maxTokens },
+      body: {
+        messages,
+        temperature,
+        max_tokens: maxTokens,
+        ...(options.studentKeyFallback ? { studentKeyFallback: true } : {}),
+        ...(options.forceStudentKeys ? { forceStudentKeys: true } : {}),
+        ...(studentKeys.length ? { studentKeys } : {}),
+      },
     };
   }
   if (kind === "ollama") {
@@ -316,26 +333,88 @@ export function parseProviderResponse(provider, data) {
   return "";
 }
 
-export async function postModelRequest(provider, messages, options = {}) {
-  const { url, headers, body } = buildModelRequest(provider, messages, options);
-  if (!url) throw new Error("The selected provider has no endpoint configured.");
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...headers },
-    body: JSON.stringify(body),
-    signal: options.signal,
-  });
-  const raw = await response.text();
-  let data;
+function modelErrorMessage(data, status) {
+  const value = data?.error?.message || data?.error || data?.message || data?.detail || `Model request failed (${status})`;
+  if (typeof value === "string") return value;
   try {
-    data = raw ? JSON.parse(raw) : {};
+    return JSON.stringify(value).slice(0, 400);
   } catch {
-    data = { content: raw };
+    return `Model request failed (${status})`;
   }
-  if (!response.ok) {
-    const message =
-      data.error?.message || data.error || data.message || data.detail || `Model request failed (${response.status})`;
-    throw new Error(typeof message === "string" ? message : JSON.stringify(message));
+}
+
+function modelRequestError(data, status) {
+  const error = new Error(modelErrorMessage(data, status));
+  error.status = status;
+  error.code = data?.code || (isQuotaFailure(status, error.message) ? "ALL_KEYS_EXHAUSTED" : "MODEL_REQUEST_FAILED");
+  error.needStudentKeys = Boolean(data?.needStudentKeys) || error.code === "ALL_KEYS_EXHAUSTED";
+  return error;
+}
+
+/** Try each configured key in order; quota/auth/network failures roll over. */
+export async function postModelRequest(provider, messages, options = {}) {
+  const variants = providerKeyVariants(provider);
+  if (!variants.length) throw new Error("Add at least one API key for this provider in Settings.");
+  let lastError = null;
+  let quotaFailures = 0;
+
+  for (const variant of variants) {
+    const { url, headers, body } = buildModelRequest(variant, messages, options);
+    if (!url) {
+      lastError = new Error("The selected provider has no endpoint configured.");
+      continue;
+    }
+    let response;
+    let raw;
+    let data = {};
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify(body),
+        signal: options.signal,
+      });
+      raw = await response.text();
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        data = { content: raw };
+      }
+    } catch (error) {
+      if (error?.name === "AbortError") throw error;
+      lastError = new Error(`Could not reach ${provider.label || "the provider"}: ${error.message}`);
+      lastError.code = "PROVIDER_UNREACHABLE";
+      continue;
+    }
+    if (!response.ok) {
+      lastError = modelRequestError(data, response.status);
+      if (isQuotaFailure(response.status, lastError.message)) quotaFailures += 1;
+      if (variants.length > 1) continue;
+      throw lastError;
+    }
+    const content = parseProviderResponse(variant, data);
+    if (!content) {
+      lastError = new Error("The model returned an empty answer.");
+      lastError.code = "EMPTY_MODEL_RESPONSE";
+      continue;
+    }
+    return {
+      data,
+      content,
+      usage: data.usage || null,
+      keyIndex: variant.keyIndex,
+      keyCount: variant.keyCount,
+      keyId: variant.keyId,
+      keySource: variant.source || "local",
+    };
   }
-  return { data, content: parseProviderResponse(provider, data), usage: data.usage || null };
+
+  if (lastError) {
+    if (variants.length > 1 && quotaFailures >= variants.length) {
+      lastError.code = "ALL_KEYS_EXHAUSTED";
+      lastError.needStudentKeys = true;
+    }
+    throw lastError;
+  }
+  throw new Error("No usable API key or endpoint is configured for this provider.");
 }

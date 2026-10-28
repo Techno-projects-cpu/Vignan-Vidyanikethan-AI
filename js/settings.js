@@ -2,6 +2,8 @@
 
 import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js";
 import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js";
+import { parseApiKeys } from "./key-pool.js";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -21,6 +23,8 @@ export const DEFAULT_SETTINGS = {
   },
   fallback: "offline",
   providers: DEFAULT_PROVIDER_CONFIGS,
+  studentKeyFallback: true,
+  studentKeys: defaultStudentKeyVault(),
   activeProvider: "webllm",
   localAIModel: DEFAULT_LOCAL_MODEL_ID,
   localAIAutoEnable: true,
@@ -36,10 +40,12 @@ export const DEFAULT_SETTINGS = {
 };
 
 function cleanProviderConfig(config = {}, fallback = {}) {
+  const keys = parseApiKeys([config.apiKeys, config.apiKey, fallback.apiKeys, fallback.apiKey].join("\n")).slice(0, 12);
   return {
     endpoint: String(config.endpoint ?? fallback.endpoint ?? "").trim(),
     model: String(config.model ?? fallback.model ?? "").trim(),
-    apiKey: String(config.apiKey ?? "").trim(),
+    apiKey: keys[0] || "",
+    apiKeys: keys,
   };
 }
 
@@ -75,6 +81,8 @@ export function normalizeSettings(value = {}) {
   for (const id of PROVIDER_IDS) {
     merged.providers[id] = cleanProviderConfig(raw.providers?.[id], DEFAULT_PROVIDER_CONFIGS[id]);
   }
+  merged.studentKeyFallback = raw.studentKeyFallback !== false;
+  merged.studentKeys = cleanStudentKeyVault(raw.studentKeys);
   const candidateLocalModel = raw.localAIModel || raw.providers?.webllm?.model || DEFAULT_LOCAL_MODEL_ID;
   merged.localAIModel = LOCAL_MODELS.some((model) => model.id === candidateLocalModel)
     ? candidateLocalModel
@@ -113,8 +121,12 @@ export function engineLabel(settings) {
 
 export function privacyLabel(settings) {
   const providers = connectedProviders(settings);
-  if (!providers.length) return "Nothing leaves this device";
+  const hasStudentKeys =
+    settings?.studentKeyFallback !== false &&
+    Object.values(settings?.studentKeys || {}).some((entry) => parseApiKeys(entry?.keys).length > 0);
+  if (!providers.length && !hasStudentKeys) return "Nothing leaves this device";
   const allPrivate = providers.every((id) => PROVIDERS[id]?.private);
+  if (hasStudentKeys) return "Short passages go to configured AIs; your keys stay in this browser";
   return allPrivate
     ? "Short passages go only to your local models"
     : "Short passages go to your configured AI provider(s)";
@@ -132,7 +144,16 @@ export async function serverHealth({ timeout = 1500 } = {}) {
     if (!response.ok) throw new Error(`Health check failed (${response.status})`);
     return await response.json();
   } catch {
-    return { ok: false, ai: false, aiProviders: [], freeRouter: false, search: false, accountsBackend: "local", offlineReady: false };
+    return {
+      ok: false,
+      ai: false,
+      aiProviders: [],
+      freeRouter: false,
+      search: false,
+      accountsBackend: "local",
+      offlineReady: false,
+      keyPool: { serverKeys: 0, coolingKeys: 0, cooldownMs: 60000, studentKeyFallback: true },
+    };
   } finally {
     clearTimeout(timer);
   }

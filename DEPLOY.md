@@ -43,6 +43,8 @@ SUPABASE_ANON_KEY=<Project Settings → API → anon>
 SUPABASE_SERVICE_ROLE_KEY=<Project Settings → API → service_role>
 STUDY_AI_FREE_ROUTER=true
 STUDY_AI_FREE_ROUTER_ORDER=gemini,groq,cloudflare,openrouter,mistral,cohere,arena,primary
+STUDY_AI_KEY_COOLDOWN_MS=60000
+STUDY_AI_STUDENT_KEY_FALLBACK=true
 ```
 
 Get the two keys from <https://supabase.com/dashboard/project/dwmzbrrnqxzdoxrxbrna/settings/api>.
@@ -55,20 +57,35 @@ Get the two keys from <https://supabase.com/dashboard/project/dwmzbrrnqxzdoxrxbr
 
 The app bundles WebLLM and a Web Worker. In **Settings → Real local model**, choose Meta Llama 3.2 1B, SmolLM2, or Qwen2.5, then press **Download & enable**. The first download needs internet; after that the model is cached in the browser and answers, quizzes, flashcards, grading and verification run on the device with Vignan's textbook rules. WebGPU is required; Ollama (`ollama pull llama3.2:1b`) and the cited-excerpt engine are the fallbacks. See `LOCAL_AI.md`.
 
-### 4b. Optional server free router
+### 4b. Optional server free router with multiple keys
 
-Add one or more of these. The router tries them in order, skips 429/5xx/empty responses, and falls back to the offline engine if all fail.
+Add one or more of these. **A single env var may contain several keys** — separate them with commas or newlines. Alternatively use the plural alias (`STUDY_AI_GEMINI_KEYS`, `STUDY_AI_GROQ_KEYS`, `STUDY_AI_CLOUDFLARE_TOKENS`, etc.). Vignan deduplicates the values, creates one internal upstream per key, tries them in order, and pauses a quota-limited key for `STUDY_AI_KEY_COOLDOWN_MS` (default 60 s). If all Render keys are exhausted, student keys from Settings are tried next; if those also fail, the offline engine answers.
 
 ```dotenv
-STUDY_AI_GEMINI_KEY=<Google AI Studio key>
-STUDY_AI_GROQ_KEY=<Groq key>
+STUDY_AI_GEMINI_KEY=<key1>,<key2>
+STUDY_AI_GEMINI_KEYS=<key3>\n<key4>
+STUDY_AI_GROQ_KEY=<Groq keys comma/newline separated>
 STUDY_AI_OPENROUTER_KEY=<OpenRouter key>
 STUDY_AI_CLOUDFLARE_ACCOUNT_ID=<Cloudflare account id>
-STUDY_AI_CLOUDFLARE_TOKEN=<Cloudflare API token>
-STUDY_AI_MISTRAL_KEY=<Mistral free-mode key>
-STUDY_AI_COHERE_KEY=<Cohere trial key>
+STUDY_AI_CLOUDFLARE_TOKEN=<Cloudflare token 1>,<Cloudflare token 2>
+STUDY_AI_MISTRAL_KEY=<Mistral free-mode keys>
+STUDY_AI_COHERE_KEY=<Cohere trial keys>
 STUDY_AI_ARENA_KEY=<Arena workspace API key, optional>
 ```
+
+Key values never appear in `/api/health`, logs, errors, exports or the public leaderboard. Health only reports counts such as `keyPool.serverKeys`.
+
+### 4c. Student-owned keys in account settings
+
+When every official Render key is over, students can open **Settings → Your own API keys** (also reachable from **Progress → My AI keys** or the **Add my key** banner button). They choose a provider, optionally adjust its official endpoint/model, and paste one or more keys. The keys are:
+
+- stored only in that browser's local settings, not in Supabase accounts;
+- sent per request to this site's own `/api/ai` proxy, never to another origin chosen by arbitrary URL input;
+- excluded from JSON exports and the public leaderboard;
+- tried only after the Render pool, or during the explicit **Test my keys** button;
+- clearable per provider, and removable by **Delete all local data**.
+
+`STUDY_AI_STUDENT_KEY_FALLBACK=false` disables this school-wide. Warn students not to add keys on shared computers. Direct browser provider keys also rotate, but the server proxy remains the safer production path.
 
 Free-tier reality (Oct 2026):
 
@@ -87,6 +104,7 @@ There is no legitimate “free unlimited AI API”. The local open-weight model 
 curl https://<your-render-service>.onrender.com/api/health
 # {"ok":true,"brand":"Vignan Vidyanikethan AI","ai":true,
 #  "aiProviders":["gemini","groq"],"freeRouter":true,
+#  "keyPool":{"serverKeys":4,"coolingKeys":0,"cooldownMs":60000,"studentKeyFallback":true},
 #  "accountsBackend":"supabase","offlineReady":true,"localAI":{"bundled":true},...}
 ```
 
@@ -98,8 +116,10 @@ Open the root URL. When `/api/health` reports `ai:true`, Vignan Vidyanikethan AI
 
 ```bash
 supabase functions deploy vignan-ai --no-verify-jwt
-supabase secrets set STUDY_AI_GEMINI_KEY=... STUDY_AI_GROQ_KEY=...
+supabase secrets set STUDY_AI_GEMINI_KEYS='key1,key2' STUDY_AI_GROQ_KEYS='key3,key4'
 ```
+
+The Edge Function uses the same comma/newline-separated key pools and student BYOK payload as the Render server. Because Edge Functions are stateless, its quota cooldowns are per request rather than in-memory between requests.
 
 Then set the `server` provider endpoint in **Settings → Provider setup** to:
 

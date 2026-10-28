@@ -41,6 +41,13 @@ import {
   providerConfig,
   serverHealth,
 } from "./settings.js";
+import { parseApiKeys } from "./key-pool.js";
+import {
+  STUDENT_KEY_PROVIDERS,
+  cleanStudentEndpoint,
+  cleanStudentKeyVault,
+  studentKeySummary,
+} from "./student-keys.js";
 import {
   generateQuiz,
   gradeQuiz,
@@ -129,9 +136,10 @@ const state = {
   flashIndex: 0,
   flashFlipped: false,
   studyProgress: readStudyProgress(),
-  serverHealth: { ok: false, ai: false, aiProviders: [], freeRouter: false, search: false, accountsBackend: "local" },
+  serverHealth: { ok: false, ai: false, aiProviders: [], freeRouter: false, search: false, accountsBackend: "local", keyPool: { serverKeys: 0, studentKeyFallback: true, cooldownMs: 60000 } },
   localAI: getLocalAIState(),
   localStatusRequested: false,
+  studentKeyProvider: STUDENT_KEY_PROVIDERS[0]?.id || "gemini",
   account: null,
   authAvailable: false,
   serverLeaderboard: [],
@@ -274,12 +282,16 @@ function updateStatus() {
   $("#connect-banner").classList.toggle("hidden", connected || state.settings.disclaimerSeen);
   const health = state.serverHealth;
   const providerList = (health.aiProviders || []).slice(0, 4).join(" → ");
+  const serverKeys = health.keyPool?.serverKeys || 0;
+  const keyLabel = serverKeys ? ` · ${serverKeys} key${serverKeys === 1 ? "" : "s"}` : "";
   $("#server-status").textContent = health.ai
     ? health.freeRouter
-      ? `Free AI router · ${providerList || "configured"}`
-      : `Server AI ready · ${health.aiModel || "configured"}`
+      ? `Free AI router · ${providerList || "configured"}${keyLabel}`
+      : `Server AI ready · ${health.aiModel || "configured"}${keyLabel}`
     : health.ok
-      ? "Server online · no free AI keys yet"
+      ? health.keyPool?.studentKeyFallback
+        ? "Server online · add your key or use offline AI"
+        : "Server online · no free AI keys yet"
       : "No local server model";
   renderQuizEngineNote();
   renderLocalAIStatus(state.localAI);
@@ -444,13 +456,16 @@ function renderAccount() {
     const manage = ui.element("button", "button ghost small", "My account");
     manage.type = "button";
     manage.addEventListener("click", () => openAccountModal());
+    const keys = ui.element("button", "button ghost small", "My AI keys");
+    keys.type = "button";
+    keys.addEventListener("click", () => openSettingsPanel("student-key-card"));
     const leave = ui.element("button", "button ghost small danger", "Log out");
     leave.type = "button";
     leave.addEventListener("click", signOut);
     const inviteAgain = ui.element("button", "button ghost small", "Invite more friends");
     inviteAgain.type = "button";
     inviteAgain.addEventListener("click", () => copyInvite(link));
-    actions.append(manage, inviteAgain, leave);
+    actions.append(manage, keys, inviteAgain, leave);
     body.appendChild(actions);
   } else {
     const hero = ui.element("div", "account-hero");
@@ -474,7 +489,10 @@ function renderAccount() {
     const login = ui.element("button", "button ghost small", "I already have an account");
     login.type = "button";
     login.addEventListener("click", () => openAccountModal("login"));
-    actions.append(join, login);
+    const keys = ui.element("button", "button ghost small", "Add my AI key");
+    keys.type = "button";
+    keys.addEventListener("click", () => openSettingsPanel("student-key-card"));
+    actions.append(join, login, keys);
     body.appendChild(actions);
     body.appendChild(
       ui.element(
@@ -689,6 +707,7 @@ async function handleAsk(event) {
         ? "Model unavailable — cited excerpts shown"
         : "Offline engine — cited excerpts";
       answer.verification = { enabled: false };
+      showKeyExhaustedToast(modelError);
     }
     answer.webSources = webResults;
     state.lastAnswer = answer;
@@ -1152,6 +1171,7 @@ async function generateQuizHandler() {
         }
       } catch (error) {
         ui.showToast(`AI writer unavailable — offline quiz used. ${error.message}`, "warning");
+        showKeyExhaustedToast(error);
       }
     }
     if (!quiz) {
@@ -1337,8 +1357,9 @@ async function submitQuiz() {
             item.status = grade.awarded >= 1 ? "correct" : grade.awarded >= 0.5 ? "partial" : "wrong";
             item.feedback = grade.feedback;
           }
-        } catch {
+        } catch (error) {
           // Keep the deterministic grade if the AI grader is unavailable.
+          showKeyExhaustedToast(error);
         }
       }
       result = recomputeResult(result);
@@ -1639,6 +1660,7 @@ async function generateFlashcardsHandler() {
         });
       } catch (error) {
         ui.showToast(`AI writer unavailable — offline cards used. ${error.message}`, "warning");
+        showKeyExhaustedToast(error);
       }
     }
     if (!cards.length) cards = buildFlashcards(retrieval.hits, count);
@@ -1826,6 +1848,19 @@ async function resetProgressHandler() {
 
 /* --------------------------------------------------------------- settings */
 
+let lastKeyToastAt = 0;
+function showKeyExhaustedToast(error) {
+  if (error?.code !== "ALL_KEYS_EXHAUSTED" && !error?.needStudentKeys) return;
+  const now = Date.now();
+  if (now - lastKeyToastAt < 60_000) return;
+  lastKeyToastAt = now;
+  ui.showToast(
+    "All school AI keys are exhausted. Add your own in Settings → Your own API keys, or keep using offline answers.",
+    "warning",
+    9000,
+  );
+}
+
 function renderSettings() {
   renderRoutingTable();
   renderProviderEditor();
@@ -1834,6 +1869,7 @@ function renderSettings() {
   renderStorageSummary();
   renderLocalAISettings();
   renderFreeAPILinks();
+  renderStudentKeySettings();
   updateStatus();
   if (!state.localStatusRequested) {
     state.localStatusRequested = true;
@@ -1926,6 +1962,151 @@ function renderFreeAPILinks() {
   }
 }
 
+function selectedStudentProvider() {
+  return STUDENT_KEY_PROVIDERS.find((provider) => provider.id === state.studentKeyProvider) || STUDENT_KEY_PROVIDERS[0];
+}
+
+function renderStudentKeySummary() {
+  const container = $("#student-key-summary");
+  const chip = $("#student-key-chip");
+  const summary = studentKeySummary(state.settings);
+  if (chip) {
+    chip.textContent = !summary.enabled
+      ? "Paused"
+      : summary.keys
+        ? `${summary.keys} local key${summary.keys === 1 ? "" : "s"}`
+        : "Local only";
+  }
+  if (!container) return;
+  container.replaceChildren();
+  if (!summary.keys) {
+    container.appendChild(ui.element("span", "vault-empty", "No student keys saved on this device yet."));
+    return;
+  }
+  for (const entry of summary.entries.filter((item) => item.count > 0)) {
+    const badge = ui.element("span", "vault-chip");
+    badge.appendChild(ui.element("strong", "", entry.label));
+    badge.appendChild(ui.element("span", "", `${entry.count} key${entry.count === 1 ? "" : "s"}`));
+    container.appendChild(badge);
+  }
+}
+
+function renderStudentKeySettings() {
+  const select = $("#student-provider-select");
+  const provider = selectedStudentProvider();
+  if (!select || !provider) return;
+  select.replaceChildren();
+  for (const item of STUDENT_KEY_PROVIDERS) {
+    select.appendChild(ui.option(item.id, item.label, item.id === provider.id));
+  }
+  select.value = provider.id;
+  const vault = cleanStudentKeyVault(state.settings.studentKeys);
+  const entry = vault[provider.id];
+  $("#student-provider-endpoint").value = entry.endpoint;
+  $("#student-provider-model").value = entry.model;
+  $("#student-provider-keys").value = entry.keys.join("\n");
+  $("#student-key-enabled").checked = state.settings.studentKeyFallback !== false;
+  const cooldown = Math.round((state.serverHealth?.keyPool?.cooldownMs || 60_000) / 1000);
+  $("#student-key-status").textContent =
+    "Keys are tried one by one after the Render pool. A rate-limited key is paused for about " +
+    `${cooldown}s. Keys never appear in exports, leaderboards or account data.`;
+  renderStudentKeySummary();
+}
+
+function handleStudentProviderChange(event) {
+  state.studentKeyProvider = event.target.value;
+  renderStudentKeySettings();
+}
+
+async function handleStudentKeyToggle(event) {
+  state.settings.studentKeyFallback = event.target.checked;
+  await saveSettings();
+  renderStudentKeySummary();
+  renderStorageSummary();
+  ui.showToast(
+    state.settings.studentKeyFallback
+      ? "Your keys will be used only after Render keys are exhausted."
+      : "Student key fallback paused. Your saved keys remain on this device.",
+    "success",
+  );
+}
+
+async function saveStudentKeys() {
+  const provider = selectedStudentProvider();
+  if (!provider) return;
+  const vault = cleanStudentKeyVault(state.settings.studentKeys);
+  vault[provider.id] = {
+    endpoint: cleanStudentEndpoint($("#student-provider-endpoint").value, provider.endpoint),
+    model: $("#student-provider-model").value.trim().slice(0, 120) || provider.model,
+    keys: parseApiKeys($("#student-provider-keys").value)
+      .map((key) => key.slice(0, 512))
+      .slice(0, 12),
+  };
+  state.settings.studentKeys = vault;
+  state.settings.studentKeyFallback = $("#student-key-enabled").checked;
+  await saveSettings();
+  renderStudentKeySettings();
+  renderStorageSummary();
+  $("#student-key-status").textContent = `Saved ${vault[provider.id].keys.length} key(s) for ${provider.label} on this device only.`;
+  ui.showToast("Student keys saved locally. They are excluded from exports.", "success");
+}
+
+async function clearStudentKeys() {
+  const provider = selectedStudentProvider();
+  if (!provider) return;
+  const confirmed = await ui.confirmDialog({
+    title: "Clear your saved keys?",
+    message: `This removes all saved ${provider.label} API keys from this browser. Your account, books and progress are not affected.`,
+    confirmLabel: "Clear keys",
+    danger: true,
+  });
+  if (!confirmed) return;
+  const vault = cleanStudentKeyVault(state.settings.studentKeys);
+  vault[provider.id].keys = [];
+  state.settings.studentKeys = vault;
+  await saveSettings();
+  renderStudentKeySettings();
+  renderStorageSummary();
+  $("#student-key-status").textContent = `No saved keys remain for ${provider.label}.`;
+  ui.showToast("Student keys cleared from this device.", "success");
+}
+
+async function testStudentKeys(event) {
+  const provider = selectedStudentProvider();
+  const keys = parseApiKeys($("#student-provider-keys").value);
+  if (!provider || !keys.length) {
+    ui.showToast("Paste at least one API key before testing.", "warning");
+    return;
+  }
+  const vault = cleanStudentKeyVault(state.settings.studentKeys);
+  vault[provider.id] = {
+    endpoint: cleanStudentEndpoint($("#student-provider-endpoint").value, provider.endpoint),
+    model: $("#student-provider-model").value.trim().slice(0, 120) || provider.model,
+    keys: keys.map((key) => key.slice(0, 512)).slice(0, 12),
+  };
+  const draft = normalizeSettings({
+    ...state.settings,
+    studentKeyFallback: true,
+    studentKeys: vault,
+    activeProvider: "server",
+  });
+  const button = event.currentTarget;
+  const status = $("#student-key-status");
+  ui.setBusy(button, true, "Testing…");
+  status.textContent = "Testing your keys through this site's /api/ai proxy…";
+  try {
+    const reply = await testModel(draft, "server", { forceStudentKeys: true });
+    status.textContent = `Success. ${provider.label} replied: ${reply}`;
+    ui.showToast("Your student key works.", "success");
+  } catch (error) {
+    status.textContent = `Test failed: ${error.message}`;
+    ui.showToast(`Student key test failed: ${error.message}`, "error", 7000);
+    showKeyExhaustedToast(error);
+  } finally {
+    ui.setBusy(button, false);
+  }
+}
+
 function renderRoutingTable() {
   const table = $("#routing-table");
   table.replaceChildren();
@@ -1956,7 +2137,7 @@ function renderProviderEditor() {
   const config = providerConfig(state.settings);
   $("#provider-endpoint").value = config.endpoint || "";
   $("#provider-model").value = config.model || "";
-  $("#provider-key").value = config.apiKey || "";
+  $("#provider-key").value = (config.apiKeys?.length ? config.apiKeys : parseApiKeys(config.apiKey)).join("\n");
   const definition = PROVIDERS[state.settings.activeProvider];
   const isWebLLM = definition?.kind === "webllm";
   $("#provider-endpoint").disabled = isWebLLM;
@@ -1965,7 +2146,7 @@ function renderProviderEditor() {
     isWebLLM
       ? " Choose and download the model in the Real local model panel above."
       : definition?.needsKey
-        ? " For production, prefer the local server proxy so keys never reach student browsers."
+        ? " Paste one or more keys (comma/newline separated); Vignan rotates to the next key on quota errors. For production, prefer the local server proxy so keys never reach student browsers."
         : " No API key is needed for local/private providers."
   }`;
 
@@ -1994,10 +2175,14 @@ function renderAppearanceSettings() {
 
 async function renderStorageSummary() {
   const summary = await db.storageSummary();
+  const vault = studentKeySummary(state.settings);
   const usage = summary.quota ? `${(summary.quota.usage / 1024 / 1024).toFixed(1)} MB used` : "Storage estimate unavailable";
   $("#storage-summary").textContent = [
     `${summary.mode === "indexeddb" ? "Browser database" : "Temporary memory"} · ${usage}`,
     `${summary.books} books · ${summary.chunks} cached passages · ${summary.results} results · ${summary.messages} chat messages`,
+    vault.keys
+      ? `${vault.keys} student key${vault.keys === 1 ? "" : "s"} across ${vault.providers} provider${vault.providers === 1 ? "" : "s"} · excluded from exports`
+      : "No student API keys saved on this device",
     privacyLabel(state.settings),
   ].join("\n");
 }
@@ -2025,7 +2210,7 @@ async function saveProvider() {
   const isLocal = definition.kind === "webllm";
   const endpoint = isLocal ? definition.endpoint : $("#provider-endpoint").value.trim();
   const model = $("#provider-model").value.trim() || (isLocal ? definition.model : "");
-  const apiKey = isLocal ? "" : $("#provider-key").value.trim();
+  const apiKeys = isLocal ? [] : parseApiKeys($("#provider-key").value).map((key) => key.slice(0, 512)).slice(0, 12);
   if (definition.kind !== "server" && !isLocal && !endpoint) {
     ui.showToast("Add an endpoint for this provider.", "warning");
     return;
@@ -2039,7 +2224,7 @@ async function saveProvider() {
     return;
   }
   state.settings.activeProvider = id;
-  state.settings.providers[id] = { endpoint, model, apiKey };
+  state.settings.providers[id] = { endpoint, model, apiKey: apiKeys[0] || "", apiKeys };
   if (isLocal) {
     state.settings.localAIModel = model;
     state.settings.providers.webllm.model = model;
@@ -2064,6 +2249,7 @@ async function resetProvider() {
     endpoint: definition.endpoint,
     model: definition.model,
     apiKey: "",
+    apiKeys: [],
   };
   if (definition.kind === "webllm") state.settings.localAIModel = definition.model;
   state.settings.freeRouterDismissed = true;
@@ -2084,6 +2270,7 @@ async function testProviderConnection() {
         endpoint: $("#provider-endpoint").value.trim(),
         model: $("#provider-model").value.trim(),
         apiKey: $("#provider-key").value.trim(),
+        apiKeys: parseApiKeys($("#provider-key").value),
       },
     },
   });
@@ -2312,12 +2499,14 @@ function bindEvents() {
   $("#use-local-ai-button").addEventListener("click", () => openSettingsPanel("local-ai-panel"));
   $("#sidebar-local-ai").addEventListener("click", () => openSettingsPanel("local-ai-panel"));
   $("#free-keys-button").addEventListener("click", () => openSettingsPanel("free-api-card"));
+  $("#add-my-key-button").addEventListener("click", () => openSettingsPanel("student-key-card"));
+  $("#open-student-keys").addEventListener("click", () => openSettingsPanel("student-key-card"));
   $("#use-free-ai-button").addEventListener("click", async () => {
     if (!state.serverHealth.ai) {
       ui.showToast(
-        "No free AI keys are configured on this server yet. Generate your own key below and add it in Render → Environment, then reload.",
+        "No Render AI keys are configured yet. Generate a free key for Render, or add your own key in Settings → Your own API keys, then reload.",
         "warning",
-        7000,
+        8000,
       );
       openSettingsPanel("free-api-card");
       return;
@@ -2399,6 +2588,11 @@ function bindEvents() {
   $("#provider-save").addEventListener("click", saveProvider);
   $("#provider-reset").addEventListener("click", resetProvider);
   $("#provider-test").addEventListener("click", testProviderConnection);
+  $("#student-provider-select").addEventListener("change", handleStudentProviderChange);
+  $("#student-key-enabled").addEventListener("change", handleStudentKeyToggle);
+  $("#student-key-save").addEventListener("click", saveStudentKeys);
+  $("#student-key-clear").addEventListener("click", clearStudentKeys);
+  $("#student-key-test").addEventListener("click", testStudentKeys);
   $("#web-save").addEventListener("click", saveWebSettings);
   $("#appearance-save").addEventListener("click", saveAppearance);
   $("#export-data").addEventListener("click", exportData);

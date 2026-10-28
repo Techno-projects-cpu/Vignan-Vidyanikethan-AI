@@ -9,12 +9,14 @@
  * - Provides student accounts backed by a local JSON file or Supabase, plus
  *   progress sync and a privacy-safe public leaderboard.
  *
- * No API key is ever sent to the browser. Free-tier keys stay on the server.
+ * No server key is ever sent to the browser. Free-tier keys stay on the server,
+ * and a single env var may contain several comma/newline-separated keys. Student
+ * BYOK keys are per-request only and are never persisted or logged.
  * Passwords are scrypt-hashed (local mode) or handled by Supabase Auth.
  *
  * Quick start:
  *   npm start
- *   STUDY_AI_GEMINI_KEY=... STUDY_AI_GROQ_KEY=... npm start
+ *   STUDY_AI_GEMINI_KEYS='key1,key2' STUDY_AI_GROQ_KEY=... npm start
  */
 
 import http from "node:http";
@@ -23,7 +25,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash, randomBytes } from "node:crypto";
 import { parseSearchResults } from "./js/web.js";
-import { buildUpstreams, callFreeRouter } from "./server/free-router.mjs";
+import { buildUpstreams, callFreeRouter, getKeyCooldownStatus } from "./server/free-router.mjs";
+import { buildStudentUpstreams } from "./server/student-keys.mjs";
 import { createSupabaseAccountStore } from "./server/supabase-accounts.mjs";
 import { ValidationError, cleanUsername, createAccountStore, publicUser, validatePassword, validateUsername } from "./server/accounts.mjs";
 
@@ -40,8 +43,13 @@ const rateBuckets = new Map();
 const sessionKey = (token) => createHash("sha256").update(token).digest("hex");
 
 const AI_UPSTREAMS = buildUpstreams(process.env);
-const AI_PROVIDER_IDS = AI_UPSTREAMS.map((upstream) => upstream.id);
+const AI_PROVIDER_IDS = [...new Set(AI_UPSTREAMS.map((upstream) => upstream.id))];
 const FREE_ROUTER = AI_UPSTREAMS.length > 1;
+const KEY_COOLDOWN_MS = Math.min(
+  3_600_000,
+  Math.max(1_000, Number(env("KEY_COOLDOWN_MS") || 60_000) || 60_000),
+);
+const STUDENT_KEY_FALLBACK = String(env("STUDENT_KEY_FALLBACK") || "true").toLowerCase() !== "false";
 const SEARCH_URL = env("SEARCH_URL");
 const SEARCH_TOKEN = env("SEARCH_TOKEN");
 const SEARCH_TOKEN_HEADER = env("SEARCH_TOKEN_HEADER") || "Authorization";
@@ -143,8 +151,8 @@ function sendJson(response, status, data, { api = false, extraHeaders = {}, cors
   response.end(body);
 }
 
-function sendError(response, status, message, options = {}) {
-  sendJson(response, status, { ok: false, error: message }, { api: true, ...options });
+function sendError(response, status, message, options = {}, details = {}) {
+  sendJson(response, status, { ok: false, error: message, ...details }, { api: true, ...options });
 }
 
 async function readJson(request) {
@@ -369,28 +377,41 @@ async function handleProgress(request, response) {
 }
 
 async function handleAi(request, response) {
-  if (!AI_UPSTREAMS.length) {
-    sendError(
-      response,
-      503,
-      "No free AI provider is configured on this server. Add STUDY_AI_GEMINI_KEY, STUDY_AI_GROQ_KEY, Cloudflare, OpenRouter or Arena keys in the server environment, or keep using the offline engine.",
-    );
-    return;
-  }
   const body = await readJson(request);
   const messages = cleanMessages(body.messages);
   if (!messages.length) {
     sendError(response, 400, "A messages array is required.");
     return;
   }
+
+  // Student keys are per-request only: never written to disk, accounts or logs.
+  // They are appended after all official Render keys, or used alone by the
+  // explicit "test my keys" button in Settings.
+  const allowStudentKeys = STUDENT_KEY_FALLBACK && body.studentKeyFallback !== false;
+  const studentUpstreams = allowStudentKeys ? buildStudentUpstreams(body.studentKeys) : [];
+  const upstreams = body.forceStudentKeys ? studentUpstreams : [...AI_UPSTREAMS, ...studentUpstreams];
+  if (!upstreams.length) {
+    sendError(
+      response,
+      503,
+      "No AI keys are available. Add one or more official free-tier keys to Render, add your own in Settings, or keep using the offline engine.",
+      {},
+      { code: "NO_AI_KEYS", needStudentKeys: STUDENT_KEY_FALLBACK, studentKeyFallback: STUDENT_KEY_FALLBACK },
+    );
+    return;
+  }
+
   try {
     const result = await callFreeRouter({
-      upstreams: AI_UPSTREAMS,
+      upstreams,
       messages,
       temperature: clampNumber(body.temperature, 0, 2, 0.2),
       maxTokens: clampNumber(body.max_tokens ?? body.maxTokens, 1, 4096, 900),
+      cooldownMs: KEY_COOLDOWN_MS,
     });
-    console.info(`[vignan-ai] AI answer via ${result.provider} (attempt ${result.attempts}/${AI_UPSTREAMS.length})`);
+    console.info(
+      `[vignan-ai] AI answer via ${result.provider}/${result.keySource} (attempt ${result.attempts}/${upstreams.length})`,
+    );
     sendJson(
       response,
       200,
@@ -404,11 +425,26 @@ async function handleAi(request, response) {
         attempts: result.attempts,
         fallbackUsed: result.fallbackUsed,
         freeRouter: FREE_ROUTER,
+        keySource: result.keySource,
+        studentKeyUsed: result.studentKeyUsed,
+        keyCount: result.keyCount,
       },
       { api: true },
     );
   } catch (error) {
-    sendError(response, 502, error.message || "Could not reach any AI provider.");
+    const status = error.code === "ALL_KEYS_EXHAUSTED" ? 429 : 502;
+    sendError(
+      response,
+      status,
+      error.message || "Could not reach any AI provider.",
+      {},
+      {
+        code: error.code || "AI_UNAVAILABLE",
+        needStudentKeys: Boolean(error.needStudentKeys) && STUDENT_KEY_FALLBACK,
+        attempts: error.attempts || 0,
+        studentKeysTried: studentUpstreams.length,
+      },
+    );
   }
 }
 
@@ -474,12 +510,18 @@ async function handleSearch(request, response) {
 function health() {
   return {
     ok: true,
-    version: "1.1.0",
+    version: "1.2.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,
     aiModel: AI_UPSTREAMS[0]?.model || null,
     freeRouter: FREE_ROUTER,
+    keyPool: {
+      serverKeys: AI_UPSTREAMS.length,
+      coolingKeys: getKeyCooldownStatus().length,
+      cooldownMs: KEY_COOLDOWN_MS,
+      studentKeyFallback: STUDENT_KEY_FALLBACK,
+    },
     search: Boolean(SEARCH_URL),
     accounts: true,
     accountsBackend,

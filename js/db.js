@@ -5,6 +5,8 @@
  * (some private windows), an in-memory backend keeps the session usable.
  */
 
+import { maskStudentKeyVault } from "./student-keys.js";
+
 const DB_NAME = "vignan-study-ai";
 const DB_VERSION = 1;
 const STORES = ["books", "chunks", "settings", "messages", "results"];
@@ -266,10 +268,22 @@ export async function exportData() {
       const providers = Object.fromEntries(
         Object.entries(entry.value.providers).map(([id, config]) => [
           id,
-          { ...config, apiKey: config?.apiKey ? "[stored locally]" : "" },
+          {
+            ...config,
+            apiKey: config?.apiKey ? "[stored locally]" : "",
+            apiKeys: (config?.apiKeys || []).map(() => "[stored locally]"),
+          },
         ]),
       );
-      return { ...entry, value: { ...entry.value, providers, searchToken: "" } };
+      return {
+        ...entry,
+        value: {
+          ...entry.value,
+          providers,
+          studentKeys: maskStudentKeyVault(entry.value.studentKeys),
+          searchToken: "",
+        },
+      };
     });
   return {
     format: "vignan-vidyanikethan-ai-export",

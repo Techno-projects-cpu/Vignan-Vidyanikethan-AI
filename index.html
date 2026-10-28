@@ -84,12 +84,13 @@
               <div class="connect-banner" id="connect-banner">
                 <div class="connect-copy">
                   <strong>Choose your Vignan Vidyanikethan AI engine</strong>
-                  <p>Every answer stays grounded in your textbooks. Run a real open-weight model on this device with WebGPU, use official free-tier keys on the server, or keep the private cited-excerpt engine. No public or leaked keys are bundled.</p>
+                  <p>Every answer stays grounded in your textbooks. Run a real open-weight model on this device with WebGPU, use multiple official free-tier keys on the server, add your own key when those are exhausted, or keep the private cited-excerpt engine. No public or leaked keys are bundled.</p>
                 </div>
                 <div class="connect-actions">
                   <button type="button" class="button primary small" id="use-local-ai-button">Use local AI</button>
                   <button type="button" class="button ghost small" id="use-free-ai-button">Use free AI</button>
                   <button type="button" class="button ghost small" id="free-keys-button">Get free keys</button>
+                  <button type="button" class="button ghost small" id="add-my-key-button">Add my key</button>
                   <button type="button" class="button ghost small" id="connect-model-button">Choose a model</button>
                   <button type="button" class="button ghost small" id="dismiss-banner">Later</button>
                 </div>
@@ -272,9 +273,28 @@
             </section>
 
             <section class="card settings-card span-2" id="free-api-card">
-              <div class="panel-head"><div><span class="eyebrow">FREE KEYS</span><h2><svg class="panel-icon"><use href="#i-key"></use></svg>Official free-tier API keys</h2><p class="hint">Generate your own keys. Put them in Render → Environment, never in Git.</p></div><span class="chip">$0 budget</span></div>
+              <div class="panel-head"><div><span class="eyebrow">FREE KEYS</span><h2><svg class="panel-icon"><use href="#i-key"></use></svg>Official free-tier API keys</h2><p class="hint">Generate your own keys. Put them in Render → Environment, never in Git. You can paste several keys into one variable.</p></div><div class="panel-head-actions"><span class="chip">$0 budget</span><button type="button" class="button ghost small" id="open-student-keys">Add my own key</button></div></div>
               <div class="notice warning-notice" id="free-api-warning"></div>
               <div class="key-grid" id="free-api-links"></div>
+            </section>
+
+            <section class="card settings-card span-2 student-key-card" id="student-key-card">
+              <div class="panel-head"><div><span class="eyebrow">STUDENT KEYS</span><h2><svg class="panel-icon"><use href="#i-key"></use></svg>Your own API keys</h2><p class="hint">Optional bring-your-own-key fallback. Used only after the school's Render keys are exhausted.</p></div><span class="chip" id="student-key-chip">Local only</span></div>
+              <div class="notice warning-notice"><strong>Private by default.</strong> Your keys stay in this browser. They are sent to this site's <code>/api/ai</code> only for the current request, never saved to your account, leaderboard or data exports. Do not add keys on a shared computer unless you clear them afterwards.</div>
+              <label class="switch-label block"><input type="checkbox" id="student-key-enabled" checked><span>Use my keys when all Render keys are exhausted</span></label>
+              <div class="form-grid three">
+                <label><span>Provider</span><select id="student-provider-select" aria-label="Student key provider"></select></label>
+                <label class="span-2"><span>Endpoint</span><input type="text" id="student-provider-endpoint" spellcheck="false" autocomplete="off"></label>
+                <label><span>Model name</span><input type="text" id="student-provider-model" spellcheck="false" autocomplete="off"></label>
+                <label class="span-2"><span>API keys (one per line or comma-separated)</span><textarea id="student-provider-keys" rows="4" spellcheck="false" autocomplete="off" placeholder="key-one&#10;key-two"></textarea></label>
+              </div>
+              <div class="button-row wrap">
+                <button type="button" class="button primary" id="student-key-save">Save keys for this provider</button>
+                <button type="button" class="button ghost" id="student-key-test">Test my keys</button>
+                <button type="button" class="button ghost danger" id="student-key-clear">Clear this provider</button>
+              </div>
+              <div class="key-vault-summary" id="student-key-summary" aria-live="polite"></div>
+              <p class="hint" id="student-key-status" aria-live="polite"></p>
             </section>
 
             <section class="card settings-card span-2">
@@ -287,7 +307,7 @@
                   <label><span>Provider</span><select id="provider-select"></select></label>
                   <label class="span-2"><span data-i18n="settings.endpoint">Endpoint</span><input type="text" id="provider-endpoint" spellcheck="false"></label>
                   <label><span data-i18n="settings.model">Model name</span><input type="text" id="provider-model" spellcheck="false"></label>
-                  <label class="span-2"><span data-i18n="settings.apiKey">API key (stored only in this browser)</span><input type="password" id="provider-key" autocomplete="off" spellcheck="false"></label>
+                  <label class="span-2"><span data-i18n="settings.apiKey">API keys (stored only in this browser)</span><textarea id="provider-key" rows="3" autocomplete="off" spellcheck="false" placeholder="key-one&#10;key-two"></textarea></label>
                   <label><span>Fallback provider</span><select id="fallback-provider"></select></label>
                   <label class="checkbox-row span-2"><input type="checkbox" id="provider-use-now" checked><span>Use this provider for answers and quizzes now</span></label>
                 </div>
@@ -312,7 +332,7 @@
               <p class="hint" data-i18n="settings.privacyHelp">Books, chats and results are stored in this browser only.</p>
               <div class="storage-summary" id="storage-summary">Checking storage…</div>
               <div class="button-row wrap"><button type="button" class="button ghost" id="export-data" data-i18n="settings.export">Export data (JSON)</button><button type="button" class="button ghost" id="clear-chat-data">Clear chat</button><button type="button" class="button ghost danger" id="delete-all" data-i18n="settings.deleteAll">Delete all local data</button></div>
-              <p class="hint">API keys are never included in exports.</p>
+              <p class="hint">Server keys never reach this browser. Student keys and provider keys are never included in exports.</p>
             </section>
 
             <section class="card settings-card">

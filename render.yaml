@@ -17,6 +17,12 @@ services:
         value: "true"
       - key: STUDY_AI_FREE_ROUTER_ORDER
         value: gemini,groq,cloudflare,openrouter,mistral,cohere,arena,primary
+      # A quota-limited key is paused for one minute; student keys are tried
+      # only after every Render key has failed.
+      - key: STUDY_AI_KEY_COOLDOWN_MS
+        value: "60000"
+      - key: STUDY_AI_STUDENT_KEY_FALLBACK
+        value: "true"
       - key: STUDY_AI_ACCOUNTS_BACKEND
         value: supabase
       - key: STUDY_AI_COOKIE_SECURE
@@ -39,6 +45,8 @@ services:
         value: students.vignanvidyanikethan.org
 
       # Secrets: paste these in Render → Environment. Never commit them.
+      # Paste one OR many keys into each singular secret (comma/newline separated),
+      # or use the optional plural aliases below. Vignan rotates automatically.
       - key: STUDY_AI_GEMINI_KEY
         sync: false
       - key: STUDY_AI_GROQ_KEY
@@ -54,6 +62,22 @@ services:
       - key: STUDY_AI_COHERE_KEY
         sync: false
       - key: STUDY_AI_ARENA_KEY
+        sync: false
+      # Optional plural aliases. Leave empty if you used comma-separated values
+      # in the singular secrets above.
+      - key: STUDY_AI_GEMINI_KEYS
+        sync: false
+      - key: STUDY_AI_GROQ_KEYS
+        sync: false
+      - key: STUDY_AI_CLOUDFLARE_TOKENS
+        sync: false
+      - key: STUDY_AI_OPENROUTER_KEYS
+        sync: false
+      - key: STUDY_AI_MISTRAL_KEYS
+        sync: false
+      - key: STUDY_AI_COHERE_KEYS
+        sync: false
+      - key: STUDY_AI_ARENA_KEYS
         sync: false
       - key: STUDY_AI_OPENROUTER_REFERER
         sync: false

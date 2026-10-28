@@ -15,6 +15,8 @@ import {
 } from "./context.js";
 import { postModelRequest, resolveProvider } from "./providers.js";
 import { generateWithLocalAI } from "./local-ai.js";
+import { providerKeyVariants } from "./key-pool.js";
+import { studentKeyPayload } from "./student-keys.js";
 import { clamp, truncate } from "./util.js";
 
 export const TASKS = [
@@ -68,6 +70,7 @@ export async function callProvider({
   temperature = 0.2,
   maxTokens = 900,
   signal,
+  forceStudentKeys = false,
 } = {}) {
   const provider = resolveProvider(settings, providerId);
   if (!provider) return offlineResult();
@@ -91,19 +94,32 @@ export async function callProvider({
       error: null,
     };
   }
-  if (provider.needsKey && !provider.apiKey && provider.kind !== "server") {
-    throw new Error(`Add an API key for ${provider.label} in Settings.`);
+  if (provider.needsKey && provider.kind !== "server" && !providerKeyVariants(provider).length) {
+    throw new Error(`Add at least one API key for ${provider.label} in Settings.`);
   }
-  const result = await postModelRequest(provider, messages, { temperature, maxTokens, signal });
+  const studentKeys = studentKeyPayload(settings, { force: forceStudentKeys });
+  const result = await postModelRequest(provider, messages, {
+    temperature,
+    maxTokens,
+    signal,
+    studentKeys,
+    studentKeyFallback: forceStudentKeys || settings.studentKeyFallback !== false,
+    forceStudentKeys,
+  });
   if (!result.content) throw new Error(`${provider.label} returned an empty response.`);
   return {
     content: result.content,
     providerId,
-    model: provider.model || provider.label,
-    label: provider.label,
+    model: result.data?.model || provider.model || provider.label,
+    label: result.data?.providerLabel || provider.label,
     private: Boolean(provider.private),
     offline: false,
     usage: result.usage,
+    keyIndex: result.keyIndex,
+    keyCount: result.keyCount,
+    keySource: result.data?.keySource || result.keySource,
+    studentKeyUsed: Boolean(result.data?.studentKeyUsed),
+    freeRouter: Boolean(result.data?.freeRouter),
     error: null,
   };
 }
@@ -138,7 +154,7 @@ export async function callRoutedModel({
   return { ...offlineResult(lastError), fallbackUsed: true, task };
 }
 
-export async function testProvider(settings, providerId) {
+export async function testProvider(settings, providerId, options = {}) {
   const result = await callProvider({
     providerId,
     settings,
@@ -148,6 +164,7 @@ export async function testProvider(settings, providerId) {
     ],
     temperature: 0,
     maxTokens: 20,
+    ...options,
   });
   if (result.offline) throw new Error("Choose a provider first.");
   return result.content.slice(0, 120);

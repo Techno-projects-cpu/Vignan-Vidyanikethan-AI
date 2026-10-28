@@ -80,8 +80,8 @@ export async function answerWithModel({ query, hits, mode, history, settings, si
   return { ...result, content, verification };
 }
 
-export async function testModel(settings, providerId = settings?.activeProvider) {
-  return testProvider(settings, providerId);
+export async function testModel(settings, providerId = settings?.activeProvider, options = {}) {
+  return testProvider(settings, providerId, options);
 }
 
 export async function generateQuizWithModel({ topic, hits, count, type, difficulty, settings, signal }) {
