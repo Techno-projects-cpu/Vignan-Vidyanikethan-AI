@@ -977,7 +977,7 @@ async function handleAsk(event) {
       let searchError = null;
       if (!retrieval.grounded && webEnabled && retrieval.reason !== "too-vague") {
         try {
-          const search = await searchWeb(searchTopic(effectiveQuery), { ...state.settings, webEnabled: true });
+          const search = await searchWeb(searchTopic(effectiveQuery), { ...state.settings, webEnabled: true }, { natural: effectiveQuery });
           webResults = search.results || [];
           searchProvider = search.provider || "Web search";
           searchProviders = search.providers || [];

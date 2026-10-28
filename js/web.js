@@ -56,7 +56,7 @@ async function responseJson(response) {
   }
 }
 
-export async function searchWeb(query, settings = {}, { signal } = {}) {
+export async function searchWeb(query, settings = {}, { signal, natural = "" } = {}) {
   if (!settings.webEnabled) return { results: [], enabled: false, message: "Web fallback is off." };
   const mode = settings.webMode || "server";
   if (mode === "server") {
@@ -65,6 +65,7 @@ export async function searchWeb(query, settings = {}, { signal } = {}) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query,
+        natural: String(natural || "").slice(0, 300),
         language: LANGUAGE_CODES.includes(settings.language) ? settings.language : "en",
         read: true,
       }),

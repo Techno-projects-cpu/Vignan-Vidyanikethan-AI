@@ -714,6 +714,7 @@ async function handleSearch(request, response) {
   }
   const body = await readJson(request);
   const query = String(body.query || "").trim().slice(0, 300);
+  const natural = String(body.natural || "").trim().slice(0, 300);
   if (!query) {
     sendError(response, 400, "A query is required.");
     return;
@@ -739,7 +740,7 @@ async function handleSearch(request, response) {
     searchRequestTimes.push(now);
     activeSearches += 1;
     try {
-      const outside = await searchOutside(query, { language });
+      const outside = await searchOutside(query, { natural, language });
       let results = outside.results;
       if (body.read !== false) results = await readSearchPassages(results);
       const providers = outside.providers.length ? outside.providers : ["Wikipedia"];

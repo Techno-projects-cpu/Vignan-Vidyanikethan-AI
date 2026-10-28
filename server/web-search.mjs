@@ -158,14 +158,17 @@ export async function searchDuckDuckGo(query, { fetchImpl = fetch, signal = Abor
  * One provider failing never hides the others, and a total failure is reported
  * to the caller instead of inventing results.
  */
-export async function searchOutside(query, { language = "en", fetchImpl = fetch, timeoutMs = 12_000, includeSimpleEnglish = true } = {}) {
+export async function searchOutside(query, { natural = "", language = "en", fetchImpl = fetch, timeoutMs = 12_000, includeSimpleEnglish = true } = {}) {
   const trimmed = String(query || "").trim().slice(0, 300);
   if (!trimmed) return { results: [], providers: [], errors: ["empty-query"] };
   const signal = AbortSignal.timeout(timeoutMs);
   const edition = wikipediaLanguage(language);
+  // Wikipedia ranks keywords better; an instant-answer API understands the full
+  // question. Send each provider the query shape it works best with.
+  const spoken = String(natural || trimmed).trim().slice(0, 300) || trimmed;
   const tasks = [
     ["Wikipedia", searchWikipedia(trimmed, { fetchImpl, signal, language })],
-    ["DuckDuckGo", searchDuckDuckGo(trimmed, { fetchImpl, signal })],
+    ["DuckDuckGo", searchDuckDuckGo(spoken, { fetchImpl, signal })],
   ];
   if (edition !== "en" && includeSimpleEnglish) {
     // A non-English question benefits from an English encyclopedic article too.

@@ -140,3 +140,20 @@ test("Simple English is used only when nothing else returned", async () => {
   assert.equal(result.results.length, 1);
   assert.ok(result.providers.includes("Simple English Wikipedia"));
 });
+
+test("each provider gets the query shape it handles best", async () => {
+  const asked = [];
+  await searchOutside("vignan vidyanikethan school", {
+    natural: "Can you tell me more about Vignan Vidyanikethan school?",
+    fetchImpl: async (target) => {
+      const url = new URL(String(target));
+      if (url.hostname.includes("duckduckgo")) asked.push(["ddg", url.searchParams.get("q")]);
+      else asked.push(["wiki", url.searchParams.get("gsrsearch")]);
+      return new Response(JSON.stringify({ query: { pages: [] } }), { headers: { "content-type": "application/json" } });
+    },
+  });
+  const ddg = asked.find(([source]) => source === "ddg");
+  const wiki = asked.find(([source]) => source === "wiki");
+  assert.equal(wiki[1], "vignan vidyanikethan school");
+  assert.equal(ddg[1], "Can you tell me more about Vignan Vidyanikethan school?");
+});
