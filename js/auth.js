@@ -8,13 +8,35 @@
 
 import * as ui from "./ui.js";
 import { truncate } from "./util.js";
+import { newPasswordProblem } from "./password-policy.js";
 
 const API_BASE = new URL("../api/", import.meta.url);
-const REQUEST_TIMEOUT = 9000;
+const REQUEST_TIMEOUT = 12000;
 const USERNAME_RE = /^[a-zA-Z0-9_-]{3,20}$/;
+const CSRF_COOKIE = "vignan_csrf";
 
 export function authApiUrl(path = "") {
   return new URL(String(path || "").replace(/^\/+/, ""), API_BASE).toString();
+}
+
+function csrfToken() {
+  try {
+    for (const part of document.cookie.split(";")) {
+      const [key, ...rest] = part.trim().split("=");
+      if (key === CSRF_COOKIE) return decodeURIComponent(rest.join("="));
+    }
+  } catch {
+    // Ignore malformed cookies.
+  }
+  return "";
+}
+
+function requestHeaders(hasBody = false) {
+  const headers = { "X-Vignan-Client": "1" };
+  if (hasBody) headers["Content-Type"] = "application/json";
+  const token = csrfToken();
+  if (token) headers["X-CSRF-Token"] = token;
+  return headers;
 }
 
 export function localDay(date = new Date()) {
@@ -24,14 +46,27 @@ export function localDay(date = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
-async function request(path, { method = "GET", body } = {}) {
+let csrfRefresh = null;
+
+async function ensureCsrf() {
+  if (csrfToken()) return;
+  // Share the bootstrap request when two forms/actions start at the same time.
+  if (!csrfRefresh) {
+    csrfRefresh = request("auth/me").finally(() => { csrfRefresh = null; });
+  }
+  await csrfRefresh;
+  if (!csrfToken()) throw new Error("Cookies are needed to log in. Please enable cookies and try again.");
+}
+
+async function request(path, { method = "GET", body, timeout = REQUEST_TIMEOUT } = {}) {
+  if (method !== "GET") await ensureCsrf();
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+  const timer = setTimeout(() => controller.abort(), timeout);
   try {
     const response = await fetch(authApiUrl(path), {
       method,
       credentials: "include",
-      headers: body ? { "Content-Type": "application/json" } : {},
+      headers: requestHeaders(Boolean(body)),
       body: body ? JSON.stringify(body) : undefined,
       signal: controller.signal,
       cache: "no-store",
@@ -57,8 +92,8 @@ async function request(path, { method = "GET", body } = {}) {
   }
 }
 
-export async function getSession() {
-  return request("auth/me");
+export async function getSession({ timeout = REQUEST_TIMEOUT } = {}) {
+  return request("auth/me", { timeout });
 }
 
 export async function register(payload) {
@@ -229,8 +264,9 @@ function accountView({ account, onLogout, onViewProgress }) {
     try {
       await logout();
       ui.closeModal();
-      onLogout?.(null);
-      ui.showToast("You are studying as a guest now.", "info");
+      await onLogout?.(null);
+      ui.showToast("You have been logged out.", "info");
+      window.dispatchEvent(new CustomEvent("vignan:auth-required", { detail: { mode: "login" } }));
     } catch (error) {
       ui.showToast(error.message, "error");
     } finally {
@@ -242,7 +278,7 @@ function accountView({ account, onLogout, onViewProgress }) {
 }
 
 function formView({ initialTab, referral, onAuthenticated }) {
-  let tab = initialTab === "login" ? "login" : "register";
+  let tab = initialTab === "register" ? "register" : "login";
   const wrap = ui.element("div", "auth-modal");
   const hero = ui.element("div", "auth-hero");
   hero.appendChild(ui.element("div", "auth-avatar", "V"));
@@ -256,13 +292,13 @@ function formView({ initialTab, referral, onAuthenticated }) {
 
   const tabs = ui.element("div", "auth-tabs");
   tabs.setAttribute("role", "tablist");
-  const registerTab = ui.element("button", "auth-tab", "Register");
-  registerTab.type = "button";
-  registerTab.dataset.tab = "register";
   const loginTab = ui.element("button", "auth-tab", "Log in");
   loginTab.type = "button";
   loginTab.dataset.tab = "login";
-  tabs.append(registerTab, loginTab);
+  const registerTab = ui.element("button", "auth-tab", "Register");
+  registerTab.type = "button";
+  registerTab.dataset.tab = "register";
+  tabs.append(loginTab, registerTab);
   wrap.appendChild(tabs);
 
   const form = ui.element("form", "auth-form");
@@ -272,7 +308,7 @@ function formView({ initialTab, referral, onAuthenticated }) {
     autocomplete: "username",
   });
   const password = input("password", "auth-password", {
-    placeholder: "At least 8 characters",
+    placeholder: "At least 10 characters",
     autocomplete: "new-password",
   });
   const confirm = input("password", "auth-confirm", {
@@ -281,8 +317,8 @@ function formView({ initialTab, referral, onAuthenticated }) {
   });
   const age = input("number", "auth-age", {
     placeholder: "Your age",
-    min: 8,
-    max: 19,
+    min: 5,
+    max: 25,
     inputmode: "numeric",
   });
   const gender = ui.element("select", "auth-input");
@@ -313,10 +349,6 @@ function formView({ initialTab, referral, onAuthenticated }) {
   ref.value = referral || "";
 
   const registerFields = [
-    field("Username", username, {
-      className: "register-only",
-      hint: "3–20 letters, numbers, _ or -. This is your public name.",
-    }),
     field("Confirm password", confirm, { className: "register-only" }),
     field("Age", age, {
       className: "register-only",
@@ -326,6 +358,9 @@ function formView({ initialTab, referral, onAuthenticated }) {
     guardianLabel,
     field("Friend's invite code", ref, { className: "register-only" }),
   ];
+  form.appendChild(field("Username", username, {
+    hint: "3–20 letters, numbers, _ or -. Use a nickname.",
+  }));
   form.appendChild(field("Password", password));
   registerFields.forEach((node) => form.appendChild(node));
 
@@ -345,7 +380,7 @@ function formView({ initialTab, referral, onAuthenticated }) {
     ui.element(
       "p",
       "hint",
-      "Passwords are scrypt-hashed on the server. We never store your exact age publicly or show your gender.",
+      "Passwords are hashed. Use a unique password or passphrase. Exact age and gender stay private.",
     ),
   );
   wrap.appendChild(footer);
@@ -360,7 +395,7 @@ function formView({ initialTab, referral, onAuthenticated }) {
       if (node === guardianLabel) return;
       node.classList.toggle("hidden", !isRegister);
     });
-    username.required = isRegister;
+    username.required = true;
     confirm.required = isRegister;
     age.required = isRegister;
     gender.required = isRegister;
@@ -401,14 +436,15 @@ function formView({ initialTab, referral, onAuthenticated }) {
         confirm.focus();
         return;
       }
-      if (password.value.length < 8) {
-        error.textContent = "Choose a password with at least 8 characters.";
+      const problem = newPasswordProblem(password.value);
+      if (problem) {
+        error.textContent = problem;
         password.focus();
         return;
       }
       const years = Number(age.value);
-      if (!Number.isInteger(years) || years < 8 || years > 19) {
-        error.textContent = "Enter an age between 8 and 19.";
+      if (!Number.isInteger(years) || years < 5 || years > 25) {
+        error.textContent = "Enter an age between 5 and 25.";
         age.focus();
         return;
       }
@@ -459,7 +495,7 @@ function formView({ initialTab, referral, onAuthenticated }) {
  */
 export function openAuthModal({
   account = null,
-  mode = "register",
+  mode = "login",
   referral = "",
   onAuthenticated = () => {},
   onLogout = () => {},

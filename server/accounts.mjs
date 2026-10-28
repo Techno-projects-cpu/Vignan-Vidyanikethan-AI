@@ -13,6 +13,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
+import { newPasswordProblem } from "../js/password-policy.js";
 
 const scrypt = promisify(scryptCallback);
 const SCRYPT_OPTIONS = { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
@@ -21,11 +22,14 @@ const KEY_LENGTH = 64;
 export const GENDERS = ["prefer-not", "girl", "boy", "other"];
 export const DEFAULT_DATA_FILE = path.resolve("server/data/accounts.json");
 
+const USERNAME_RE = /^[a-z0-9_-]{3,20}$/;
+
+
 export class ValidationError extends Error {
-  constructor(message) {
+  constructor(message, status = 400) {
     super(message);
     this.name = "ValidationError";
-    this.status = 400;
+    this.status = status;
   }
 }
 
@@ -35,16 +39,24 @@ export function cleanUsername(value) {
 
 export function validateUsername(value) {
   const username = cleanUsername(value);
-  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-    throw new ValidationError("Username must be 3–20 characters: letters, numbers or underscore.");
+  if (!USERNAME_RE.test(username)) {
+    throw new ValidationError("Username must be 3–20 characters: letters, numbers, underscore or hyphen.");
   }
   return username;
 }
 
 export function validatePassword(value) {
   const password = String(value ?? "");
-  if (password.length < 8 || password.length > 128) {
-    throw new ValidationError("Password must be between 8 and 128 characters.");
+  const problem = newPasswordProblem(password);
+  if (problem) throw new ValidationError(problem);
+  return password;
+}
+
+/** Login must remain compatible with older accounts created under the previous policy. */
+export function validateLoginPassword(value) {
+  const password = String(value ?? "");
+  if (!password || password.length > 128) {
+    throw new ValidationError("Invalid username or password.");
   }
   return password;
 }
@@ -70,8 +82,8 @@ export function validateGender(value) {
 }
 
 export function validateReferral(value) {
-  const referral = cleanUsername(value);
-  return /^[a-z0-9_]{3,20}$/.test(referral) ? referral : "";
+  const referral = cleanUsername(value).replace(/^vignan-/, "");
+  return USERNAME_RE.test(referral) ? referral : "";
 }
 
 export function validateRegistration(payload = {}) {
@@ -88,6 +100,7 @@ export function validateRegistration(payload = {}) {
     age,
     ageBand: ageBand(age),
     gender,
+    guardianConsent: age < 13 && payload.guardianConsent === true,
     referral: validateReferral(payload.referral),
   };
 }
@@ -142,13 +155,14 @@ export function publicUser(account) {
   };
 }
 
-function newAccount({ username, passwordHash, ageBand: band, gender, referral }) {
+function newAccount({ username, passwordHash, ageBand: band, gender, guardianConsent, referral }) {
   return {
     id: `usr_${randomBytes(12).toString("hex")}`,
     username,
     passwordHash,
     ageBand: band,
     gender,
+    guardianConsent: Boolean(guardianConsent),
     avatarSeed: avatarSeed(username),
     xp: 0,
     streak: 0,
@@ -227,7 +241,7 @@ export function createAccountStore(filePath = DEFAULT_DATA_FILE) {
   let queue = Promise.resolve();
   const directory = path.dirname(filePath);
 
-  async function load() {
+  async function loadNow() {
     try {
       const raw = await fs.readFile(filePath, "utf8");
       const parsed = JSON.parse(raw);
@@ -245,9 +259,20 @@ export function createAccountStore(filePath = DEFAULT_DATA_FILE) {
     await fs.rename(temp, filePath);
   }
 
+  // Serialize the entire read-modify-write transaction, not just the final
+  // file write. A failed write is reported to its caller but doesn't poison
+  // the queue for subsequent requests.
+  function serial(operation) {
+    const result = queue.then(operation);
+    queue = result.then(() => undefined, () => undefined);
+    return result;
+  }
+  async function load() {
+    await queue;
+    return loadNow();
+  }
   function save(data) {
-    queue = queue.then(() => writeNow(data)).catch(() => {});
-    return queue;
+    return serial(() => writeNow(data));
   }
 
   async function find(username) {
@@ -261,38 +286,43 @@ export function createAccountStore(filePath = DEFAULT_DATA_FILE) {
     return data.users.find((user) => user.id === id) || null;
   }
 
-  async function mutate(id, updater) {
-    const data = await load();
-    const index = data.users.findIndex((user) => user.id === id);
-    if (index < 0) return null;
-    const updated = updater(data.users[index]);
-    if (!updated) return null;
-    data.users[index] = updated;
-    await save(data);
-    return updated;
+  function mutate(id, updater) {
+    return serial(async () => {
+      const data = await loadNow();
+      const index = data.users.findIndex((user) => user.id === id);
+      if (index < 0) return null;
+      const updated = updater(data.users[index]);
+      if (!updated) return null;
+      data.users[index] = updated;
+      await writeNow(data);
+      return updated;
+    });
   }
 
   async function register(payload) {
     const clean = validateRegistration(payload);
-    const data = await load();
-    if (data.users.some((user) => user.username === clean.username)) {
-      throw new ValidationError("That username is already taken.");
-    }
-    const passwordHash = await hashPassword(clean.password);
-    const account = newAccount({
-      username: clean.username,
-      passwordHash,
-      ageBand: clean.ageBand,
-      gender: clean.gender,
-      referral: clean.referral,
+    return serial(async () => {
+      const data = await loadNow();
+      if (data.users.some((user) => user.username === clean.username)) {
+        throw new ValidationError("That username is already taken.", 409);
+      }
+      const passwordHash = await hashPassword(clean.password);
+      const account = newAccount({
+        username: clean.username,
+        passwordHash,
+        ageBand: clean.ageBand,
+        gender: clean.gender,
+        guardianConsent: clean.guardianConsent,
+        referral: clean.referral,
+      });
+      data.users.push(account);
+      if (clean.referral && clean.referral !== clean.username) {
+        const referrer = data.users.find((user) => user.username === clean.referral);
+        if (referrer) referrer.referrals = (referrer.referrals || 0) + 1;
+      }
+      await writeNow(data);
+      return account;
     });
-    data.users.push(account);
-    if (clean.referral && clean.referral !== clean.username) {
-      const referrer = data.users.find((user) => user.username === clean.referral);
-      if (referrer) referrer.referrals = (referrer.referrals || 0) + 1;
-    }
-    await save(data);
-    return account;
   }
 
   async function authenticate(username, password) {

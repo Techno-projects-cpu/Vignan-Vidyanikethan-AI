@@ -93,10 +93,10 @@ test("account store registers, authenticates and rejects duplicates", async (t) 
 
 test("referral signup credits the referring student", async (t) => {
   const store = await tempStore(t);
-  await store.register({ username: "kiran", password: "password1", age: 15, gender: "prefer-not" });
+  await store.register({ username: "kiran", password: "practice-2026-one", age: 15, gender: "prefer-not" });
   await store.register({
     username: "meera",
-    password: "password2",
+    password: "practice-2026-two",
     age: 14,
     gender: "prefer-not",
     referral: "kiran",
@@ -109,7 +109,7 @@ test("referral signup credits the referring student", async (t) => {
 
 test("progress sync updates XP, streak, best score and history", async (t) => {
   const store = await tempStore(t);
-  const account = await store.register({ username: " streak ", password: "password1", age: 16, gender: "other" });
+  const account = await store.register({ username: " streak ", password: "practice-2026-one", age: 16, gender: "other" });
   const user = await store.recordResult(account.id, {
     topic: "Photosynthesis",
     percent: 80,
@@ -152,8 +152,8 @@ test("progress sync updates XP, streak, best score and history", async (t) => {
 
 test("public profile and leaderboard never expose password hashes", async (t) => {
   const store = await tempStore(t);
-  const a = await store.register({ username: "ananya", password: "password1", age: 14, gender: "girl" });
-  const b = await store.register({ username: "kiran", password: "password2", age: 15, gender: "boy" });
+  const a = await store.register({ username: "ananya", password: "practice-2026-one", age: 14, gender: "girl" });
+  const b = await store.register({ username: "kiran", password: "practice-2026-two", age: 15, gender: "boy" });
   await store.recordResult(a.id, { percent: 90, score: 9, total: 10, xp: 90, day: "2026-10-27" });
   await store.recordResult(b.id, { percent: 70, score: 7, total: 10, xp: 70, day: "2026-10-27" });
   const board = await store.leaderboard(10);
@@ -166,4 +166,45 @@ test("public profile and leaderboard never expose password hashes", async (t) =>
   const refreshed = await store.find("ananya");
   assert.equal(leaderboardFromAccounts([publicUser(refreshed)], 5).length, 1);
   assert.equal(applyResultToAccount(a, { total: 0 }).xp, 0);
+});
+
+test("new passwords allow passphrases, reject weak choices, and preserve older login passwords", async () => {
+  const { validatePassword, validateLoginPassword, validateReferral, validateUsername } = await import("../server/accounts.mjs");
+  assert.equal(validatePassword("several memorable words"), "several memorable words");
+  assert.throws(() => validatePassword("short123"), /10–128/);
+  assert.throws(() => validatePassword("Password123"), /less common/);
+  assert.equal(validateLoginPassword("oldpass1"), "oldpass1");
+  assert.equal(validateUsername("study-friend"), "study-friend");
+  assert.equal(validateReferral("VIGNAN-STUDY-FRIEND"), "study-friend");
+  const under13 = validateRegistration({
+    username: "new-student", password: "a safe long passphrase", age: 11, guardianConsent: true,
+  });
+  assert.equal(under13.guardianConsent, true);
+  assert.equal(under13.gender, "prefer-not");
+});
+
+test("parallel account mutations cannot overwrite each other or create duplicates", async (t) => {
+  const store = await tempStore(t);
+  const common = { password: "long memorable phrase 74", age: 14, gender: "prefer-not" };
+  const results = await Promise.allSettled([
+    store.register({ ...common, username: "parallel" }),
+    store.register({ ...common, username: "parallel" }),
+    store.register({ ...common, username: "another-student" }),
+  ]);
+  assert.equal(results.filter((entry) => entry.status === "fulfilled").length, 2);
+  assert.equal(results.filter((entry) => entry.status === "rejected").length, 1);
+  assert.equal((await store.load()).users.length, 2);
+  const user = await store.find("parallel");
+  const result = { topic: "Forces", score: 2, total: 3, xp: 10, day: "2026-10-28" };
+  await Promise.all([store.recordResult(user.id, result), store.recordResult(user.id, result)]);
+  assert.equal((await store.find("parallel")).quizzes, 2);
+});
+
+test("local account storage reports write errors instead of silently succeeding", async (t) => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "vignan-write-failure-"));
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const notADirectory = path.join(directory, "file");
+  await fs.writeFile(notADirectory, "not a directory");
+  const store = createAccountStore(path.join(notADirectory, "accounts.json"));
+  await assert.rejects(store.register({ username: "student", password: "long enough password", age: 14 }));
 });

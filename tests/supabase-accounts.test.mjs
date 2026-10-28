@@ -62,15 +62,16 @@ test("Supabase register creates a confirmed auth user and returns a public profi
   });
   const account = await store.register({
     username: "Ananya",
-    password: "password123",
-    age: 14,
+    password: "science-2026-safe",
+    age: 11,
     gender: "girl",
-    guardianConsent: false,
+    guardianConsent: true,
   });
   assert.equal(account.username, "ananya");
   assert.equal(calls[0].body.email, "ananya@students.vignanvidyanikethan.org");
   assert.equal(calls[0].body.email_confirm, true);
-  assert.equal(calls[0].body.user_metadata.age_band, "13-15");
+  assert.equal(calls[0].body.user_metadata.age_band, "under-13");
+  assert.equal(calls[0].body.user_metadata.guardian_consent, true);
   assert.equal(calls[0].body.user_metadata.username, "ananya");
 });
 
@@ -123,4 +124,30 @@ test("Supabase session helpers hash tokens and use RPC", async () => {
   assert.equal(session.user_id, profileRow.id);
   assert.equal(calls[0].body.p_token_hash, "hash-123");
   assert.equal(calls[2].body.p_token_hash, "hash-123");
+});
+
+test("Supabase opaque API keys are sent only as apikey; legacy JWT keys retain Bearer headers", async () => {
+  async function exercise(anonKey, serviceRoleKey) {
+    const calls = [];
+    const store = createSupabaseAccountStore({
+      url: "https://demo.supabase.co", anonKey, serviceRoleKey,
+      fetchImpl: async (url, options) => {
+        calls.push({ url, headers: options.headers });
+        if (url.includes("/auth/v1/token")) return mockResponse(true, 200, { user: { id: profileRow.id } });
+        if (url.includes("/rest/v1/profiles")) return mockResponse(true, 200, [profileRow]);
+        return mockResponse(false, 404, {});
+      },
+    });
+    const user = await store.authenticate("ananya", "oldpass1");
+    assert.equal(user.username, "ananya");
+    return calls;
+  }
+  const modern = await exercise("sb_publishable_public_test", "sb_secret_private_test");
+  assert.equal(modern[0].headers.apikey, "sb_publishable_public_test");
+  assert.ok(!("Authorization" in modern[0].headers));
+  assert.equal(modern[1].headers.apikey, "sb_secret_private_test");
+  assert.ok(!("Authorization" in modern[1].headers));
+  const legacy = await exercise("legacy-anon-jwt", "legacy-service-jwt");
+  assert.equal(legacy[0].headers.Authorization, "Bearer legacy-anon-jwt");
+  assert.equal(legacy[1].headers.Authorization, "Bearer legacy-service-jwt");
 });

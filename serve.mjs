@@ -22,13 +22,14 @@
 import http from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { isIP } from "node:net";
 import { fileURLToPath } from "node:url";
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { parseSearchResults } from "./js/web.js";
 import { buildUpstreams, callFreeRouter, getKeyCooldownStatus } from "./server/free-router.mjs";
 import { buildStudentUpstreams } from "./server/student-keys.mjs";
 import { createSupabaseAccountStore } from "./server/supabase-accounts.mjs";
-import { ValidationError, cleanUsername, createAccountStore, publicUser, validatePassword, validateUsername } from "./server/accounts.mjs";
+import { ValidationError, cleanUsername, createAccountStore, publicUser, validateLoginPassword, validateUsername } from "./server/accounts.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 const env = (name, fallback = "") => process.env[`STUDY_AI_${name}`] ?? process.env[`VIGNAN_AI_${name}`] ?? fallback;
@@ -37,6 +38,8 @@ const PORT = Number(env("PORT") || process.env.PORT || 4173);
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
 const ACCOUNTS_FILE = env("ACCOUNTS_FILE") || path.join(ROOT, "server", "data", "accounts.json");
 const SESSION_COOKIE = "vignan_session";
+const CSRF_COOKIE = "vignan_csrf";
+const CSRF_HEADER = "x-csrf-token";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const sessions = new Map();
 const rateBuckets = new Map();
@@ -50,6 +53,8 @@ const KEY_COOLDOWN_MS = Math.min(
   Math.max(1_000, Number(env("KEY_COOLDOWN_MS") || 60_000) || 60_000),
 );
 const STUDENT_KEY_FALLBACK = String(env("STUDENT_KEY_FALLBACK") || "true").toLowerCase() !== "false";
+const AI_RATE_LIMIT = Math.min(600, Math.max(1, Number(env("AI_RATE_LIMIT") || 60) || 60));
+const SEARCH_RATE_LIMIT = Math.min(600, Math.max(1, Number(env("SEARCH_RATE_LIMIT") || 30) || 30));
 const SEARCH_URL = env("SEARCH_URL");
 const SEARCH_TOKEN = env("SEARCH_TOKEN");
 const SEARCH_TOKEN_HEADER = env("SEARCH_TOKEN_HEADER") || "Authorization";
@@ -65,12 +70,21 @@ const SUPABASE_ANON_KEY = String(process.env.SUPABASE_ANON_KEY || env("SUPABASE_
 const SUPABASE_SERVICE_ROLE_KEY = String(process.env.SUPABASE_SERVICE_ROLE_KEY || env("SUPABASE_SERVICE_ROLE_KEY") || "").trim();
 const SUPABASE_EMAIL_DOMAIN = String(env("SUPABASE_EMAIL_DOMAIN") || "students.vignanvidyanikethan.org").trim();
 const requestedAccountsBackend = String(env("ACCOUNTS_BACKEND") || "local").trim().toLowerCase();
-const useSupabase =
-  requestedAccountsBackend === "supabase" &&
-  Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
-const accountsBackend = useSupabase ? "supabase" : "local";
-if (requestedAccountsBackend === "supabase" && !useSupabase) {
-  console.warn("[vignan-ai] Supabase config incomplete; using local JSON accounts instead.");
+function plausibleSupabaseUrl(value) {
+  try {
+    const url = new URL(value);
+    return ["https:", "http:"].includes(url.protocol) && !url.username && !url.password;
+  } catch { return false; }
+}
+function plausibleSupabaseKey(value) {
+  // Reject empty values, documentation placeholders and characters illegal in HTTP headers.
+  return /^[\x21-\x7e]{20,2048}$/.test(value) && !/[<>]/.test(value);
+}
+const useSupabase = requestedAccountsBackend === "supabase" && plausibleSupabaseUrl(SUPABASE_URL) &&
+  plausibleSupabaseKey(SUPABASE_ANON_KEY) && plausibleSupabaseKey(SUPABASE_SERVICE_ROLE_KEY);
+const accountsBackend = useSupabase ? "supabase" : requestedAccountsBackend === "supabase" ? "unavailable" : "local";
+if (accountsBackend === "unavailable") {
+  console.warn("[vignan-ai] Supabase configuration is missing or invalid; accounts are unavailable until it is corrected. Guest mode remains available.");
 }
 const accounts = useSupabase
   ? createSupabaseAccountStore({
@@ -79,7 +93,7 @@ const accounts = useSupabase
       serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY,
       emailDomain: SUPABASE_EMAIL_DOMAIN,
     })
-  : createAccountStore(ACCOUNTS_FILE);
+  : accountsBackend === "local" ? createAccountStore(ACCOUNTS_FILE) : null;
 
 const sessionStore = useSupabase
   ? {
@@ -100,6 +114,23 @@ const sessionStore = useSupabase
         sessions.delete(token);
       },
     };
+
+// Restrict executable content while keeping the app's offline workers, local
+// model downloads, browser-generated videos and Arena's embedded preview usable.
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data: blob:",
+  "connect-src 'self' https: http: wss: ws:",
+  "worker-src 'self' blob:",
+  "media-src 'self' data: blob:",
+  "frame-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join("; ");
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -137,13 +168,16 @@ function sendJson(response, status, data, { api = false, extraHeaders = {}, cors
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Cross-Origin-Resource-Policy": "same-origin",
   };
   if (api) {
+    headers["Vary"] = "Origin";
     if (corsOrigin !== false) {
       headers["Access-Control-Allow-Origin"] = corsOrigin || "*";
       if (corsOrigin) headers["Access-Control-Allow-Credentials"] = "true";
     }
-    headers["Access-Control-Allow-Headers"] = "Content-Type";
+    headers["Access-Control-Allow-Headers"] = "Content-Type, X-Vignan-Client, X-CSRF-Token";
     headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS";
   }
   Object.assign(headers, extraHeaders);
@@ -155,21 +189,34 @@ function sendError(response, status, message, options = {}, details = {}) {
   sendJson(response, status, { ok: false, error: message, ...details }, { api: true, ...options });
 }
 
+class RequestBodyError extends Error {
+  constructor(message, status = 400) {
+    super(message);
+    this.name = "RequestBodyError";
+    this.status = status;
+  }
+}
+
 async function readJson(request) {
   const chunks = [];
   let size = 0;
   for await (const chunk of request) {
     size += chunk.length;
-    if (size > MAX_BODY_BYTES) throw new Error("Request body is too large.");
+    if (size > MAX_BODY_BYTES) throw new RequestBodyError("Request body is too large.", 413);
     chunks.push(chunk);
   }
   if (!chunks.length) return {};
   const text = Buffer.concat(chunks).toString("utf8");
+  let value;
   try {
-    return JSON.parse(text);
+    value = JSON.parse(text);
   } catch {
-    throw new Error("Request body must be valid JSON.");
+    throw new RequestBodyError("Request body must be valid JSON.");
   }
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new RequestBodyError("Request body must be a JSON object.");
+  }
+  return value;
 }
 
 function clampNumber(value, min, max, fallback) {
@@ -188,21 +235,61 @@ function cleanMessages(messages) {
 /* ----------------------------------------------------------- student auth */
 
 function clientIp(request) {
-  const forwarded = String(request.headers["x-forwarded-for"] || "").split(",")[0].trim();
-  return forwarded || request.socket?.remoteAddress || "unknown";
+  // Only trust a forwarded address when running behind Render or an explicitly
+  // trusted proxy. Use the last appended address, not a client-supplied first hop.
+  const trustProxy = String(env("TRUST_PROXY") || process.env.RENDER || "").toLowerCase() === "true";
+  if (trustProxy) {
+    // Render's Cloudflare edge overwrites CF-Connecting-IP; never trust it on
+    // a directly exposed or untrusted proxy deployment.
+    const cloudflareIp = String(request.headers["cf-connecting-ip"] || "").trim();
+    if (String(process.env.RENDER || "").toLowerCase() === "true" && isIP(cloudflareIp)) return cloudflareIp;
+    const hops = String(request.headers["x-forwarded-for"] || "").split(",").map((value) => value.trim()).filter(Boolean);
+    const nearest = hops[hops.length - 1];
+    if (isIP(nearest)) return nearest;
+  }
+  return request.socket?.remoteAddress || "unknown";
+}
+
+function pruneRateBuckets(now = Date.now()) {
+  if (rateBuckets.size < 4000) return;
+  for (const [key, value] of rateBuckets) if (value.reset <= now) rateBuckets.delete(key);
+  // Bound memory even when an attacker creates many distinct live buckets.
+  while (rateBuckets.size >= 5000) rateBuckets.delete(rateBuckets.keys().next().value);
 }
 
 function rateLimit(request, bucket, limit = 12, windowMs = 60_000) {
   const now = Date.now();
+  pruneRateBuckets(now);
   const key = `${bucket}:${clientIp(request)}`;
   const entry = rateBuckets.get(key);
-  if (!entry || entry.reset < now) {
+  if (!entry || entry.reset <= now) {
     rateBuckets.set(key, { count: 1, reset: now + windowMs });
     return true;
   }
   if (entry.count >= limit) return false;
   entry.count += 1;
   return true;
+}
+
+function loginFailureKey(request, username) {
+  return `login-fail:${clientIp(request)}:${username}`;
+}
+function tooManyLoginFailures(request, username) {
+  const key = loginFailureKey(request, username);
+  const entry = rateBuckets.get(key);
+  if (!entry || entry.reset <= Date.now()) {
+    rateBuckets.delete(key);
+    return false;
+  }
+  return entry.count >= 6;
+}
+function recordLoginFailure(request, username) {
+  const now = Date.now();
+  pruneRateBuckets(now);
+  const key = loginFailureKey(request, username);
+  const entry = rateBuckets.get(key);
+  if (!entry || entry.reset <= now) rateBuckets.set(key, { count: 1, reset: now + 15 * 60_000 });
+  else entry.count += 1;
 }
 
 function parseCookies(request) {
@@ -212,14 +299,69 @@ function parseCookies(request) {
     if (index < 0) continue;
     const key = part.slice(0, index).trim();
     const value = part.slice(index + 1).trim();
-    if (key) output[key] = decodeURIComponent(value);
+    if (key) {
+      try { output[key] = decodeURIComponent(value); } catch { /* ignore malformed cookies */ }
+    }
   }
   return output;
 }
 
+function safeTextEqual(left, right) {
+  const a = Buffer.from(String(left ?? ""));
+  const b = Buffer.from(String(right ?? ""));
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+function tokenLike(value) {
+  return /^[a-f0-9]{64}$/.test(String(value || ""));
+}
+
+function csrfTokenFor(request) {
+  if (request.csrfToken) return request.csrfToken;
+  const existing = parseCookies(request)[CSRF_COOKIE];
+  const token = tokenLike(existing) ? existing : randomBytes(32).toString("hex");
+  request.csrfToken = token;
+  return token;
+}
+
+function cookiePolicy(request) {
+  const proto = String(request.headers["x-forwarded-proto"] || "").split(",")[0].trim().toLowerCase();
+  const secure = proto === "https" || Boolean(request.socket?.encrypted) || String(env("COOKIE_SECURE") || "").toLowerCase() === "true";
+  const host = String(request.headers.host || "").split(":")[0].trim().toLowerCase();
+  // Arena's cross-site HTTPS preview needs partitioned cookies in an iframe.
+  // Normal deployments keep stricter first-party SameSite settings.
+  return { secure, partitioned: secure && host.endsWith(".e2b.app") };
+}
+
+function csrfCookieHeader(request, token) {
+  const { secure, partitioned } = cookiePolicy(request);
+  const parts = [
+    `${CSRF_COOKIE}=${token}`,
+    "Path=/",
+    `SameSite=${partitioned ? "None" : "Strict"}`,
+    `Max-Age=${Math.floor(SESSION_TTL_MS / 1000)}`,
+  ];
+  if (secure) parts.push("Secure");
+  if (partitioned) parts.push("Partitioned");
+  return parts.join("; ");
+}
+
+function isSameOriginRequest(request) {
+  const origin = String(request.headers.origin || "").trim();
+  if (!origin) return String(request.headers["sec-fetch-site"] || "").toLowerCase() !== "cross-site";
+  return allowedOrigin(request) === origin;
+}
+
+function csrfAllowed(request) {
+  if (!isSameOriginRequest(request)) return false;
+  const headerToken = String(request.headers[CSRF_HEADER] || "").trim();
+  const cookieToken = String(parseCookies(request)[CSRF_COOKIE] || "").trim();
+  return tokenLike(headerToken) && tokenLike(cookieToken) && safeTextEqual(headerToken, cookieToken);
+}
+
 async function currentSession(request) {
   const token = parseCookies(request)[SESSION_COOKIE];
-  if (!token) return null;
+  if (!tokenLike(token)) return null;
   const session = await sessionStore.get(token);
   if (!session) return null;
   if (session.expires < Date.now()) {
@@ -236,15 +378,16 @@ async function createSession(userId) {
 }
 
 function sessionCookieHeader(request, token, { clear = false } = {}) {
-  const secure = request.headers["x-forwarded-proto"] === "https" || String(env("COOKIE_SECURE") || "").toLowerCase() === "true";
+  const { secure, partitioned } = cookiePolicy(request);
   const parts = [
     `${SESSION_COOKIE}=${clear ? "" : token}`,
     "Path=/",
     "HttpOnly",
-    "SameSite=Lax",
+    `SameSite=${partitioned ? "None" : "Lax"}`,
     `Max-Age=${clear ? 0 : Math.floor(SESSION_TTL_MS / 1000)}`,
   ];
   if (secure) parts.push("Secure");
+  if (partitioned) parts.push("Partitioned");
   return parts.join("; ");
 }
 
@@ -254,13 +397,13 @@ function allowedOrigin(request) {
   if (ALLOWED_ORIGINS.has(origin)) return origin;
   try {
     const parsed = new URL(origin);
-    const host = String(request.headers["x-forwarded-host"] || request.headers.host || "")
+    const host = String(request.headers.host || "")
       .split(",")[0]
       .trim();
     const proto = String(request.headers["x-forwarded-proto"] || (request.socket?.encrypted ? "https" : "http"))
       .split(",")[0]
       .trim();
-    if (host && parsed.host === host && (parsed.protocol === `${proto}:` || proto === "http")) return origin;
+    if (host && parsed.host === host && parsed.protocol === `${proto}:`) return origin;
   } catch {
     // Malformed Origin: do not reflect it.
   }
@@ -268,7 +411,16 @@ function allowedOrigin(request) {
 }
 
 function authOptions(request, extraHeaders = {}) {
-  return { api: true, corsOrigin: allowedOrigin(request) || false, extraHeaders };
+  const token = csrfTokenFor(request);
+  const headers = { ...extraHeaders };
+  const existing = headers["Set-Cookie"];
+  const values = Array.isArray(existing) ? existing : existing ? [existing] : [];
+  const hasCsrfCookie = values.some((value) => String(value).startsWith(`${CSRF_COOKIE}=`));
+  if (!tokenLike(parseCookies(request)[CSRF_COOKIE]) && !hasCsrfCookie) {
+    values.push(csrfCookieHeader(request, token));
+  }
+  if (values.length) headers["Set-Cookie"] = values.length === 1 ? values[0] : values;
+  return { api: true, corsOrigin: allowedOrigin(request) || false, extraHeaders: headers };
 }
 
 async function handleRegister(request, response) {
@@ -279,18 +431,24 @@ async function handleRegister(request, response) {
   const body = await readJson(request);
   try {
     const account = await accounts.register(body);
+    const oldToken = parseCookies(request)[SESSION_COOKIE];
+    if (oldToken) await sessionStore.delete(oldToken);
     const token = await createSession(account.id);
+    const csrf = randomBytes(32).toString("hex");
+    request.csrfToken = csrf;
     sendJson(
       response,
       201,
-      { ok: true, user: publicUser(account) },
-      authOptions(request, { "Set-Cookie": sessionCookieHeader(request, token) }),
+      { ok: true, user: publicUser(account), csrfToken: csrf },
+      authOptions(request, {
+        "Set-Cookie": [sessionCookieHeader(request, token), csrfCookieHeader(request, csrf)],
+      }),
     );
   } catch (error) {
     if (error instanceof ValidationError) {
       sendError(response, error.status || 400, error.message, authOptions(request));
     } else {
-      console.error("[vignan-ai] register failed", error);
+      console.error("[vignan-ai] register failed", error?.name || "Error");
       sendError(response, 500, "Could not create the account.", authOptions(request));
     }
   }
@@ -304,24 +462,36 @@ async function handleLogin(request, response) {
   const body = await readJson(request);
   try {
     const username = validateUsername(body.username);
-    const password = validatePassword(body.password);
+    const password = validateLoginPassword(body.password);
+    if (tooManyLoginFailures(request, username)) {
+      sendError(response, 429, "Too many attempts from this device. Try again in 15 minutes.", authOptions(request));
+      return;
+    }
     const account = await accounts.authenticate(username, password);
     if (!account) {
+      recordLoginFailure(request, username);
       sendError(response, 401, "Invalid username or password.", authOptions(request));
       return;
     }
+    rateBuckets.delete(loginFailureKey(request, username));
+    const oldToken = parseCookies(request)[SESSION_COOKIE];
+    if (oldToken) await sessionStore.delete(oldToken);
     const token = await createSession(account.id);
+    const csrf = randomBytes(32).toString("hex");
+    request.csrfToken = csrf;
     sendJson(
       response,
       200,
-      { ok: true, user: publicUser(account) },
-      authOptions(request, { "Set-Cookie": sessionCookieHeader(request, token) }),
+      { ok: true, user: publicUser(account), csrfToken: csrf },
+      authOptions(request, {
+        "Set-Cookie": [sessionCookieHeader(request, token), csrfCookieHeader(request, csrf)],
+      }),
     );
   } catch (error) {
     if (error instanceof ValidationError) {
       sendError(response, 401, "Invalid username or password.", authOptions(request));
     } else {
-      console.error("[vignan-ai] login failed", error);
+      console.error("[vignan-ai] login failed", error?.name || "Error");
       sendError(response, 500, "Could not log in.", authOptions(request));
     }
   }
@@ -330,26 +500,34 @@ async function handleLogin(request, response) {
 async function handleLogout(request, response) {
   const token = parseCookies(request)[SESSION_COOKIE];
   if (token) await sessionStore.delete(token);
+  const csrf = randomBytes(32).toString("hex");
+  request.csrfToken = csrf;
   sendJson(
     response,
     200,
-    { ok: true, user: null },
-    authOptions(request, { "Set-Cookie": sessionCookieHeader(request, "", { clear: true }) }),
+    { ok: true, user: null, csrfToken: csrf },
+    authOptions(request, { "Set-Cookie": [sessionCookieHeader(request, "", { clear: true }), csrfCookieHeader(request, csrf)] }),
   );
 }
 
 async function handleMe(request, response) {
+  const options = authOptions(request);
+  const csrfToken = request.csrfToken;
+  if (accountsBackend === "unavailable") {
+    sendJson(response, 200, { ok: true, user: null, guest: true, accountsAvailable: false, csrfToken }, options);
+    return;
+  }
   const session = await currentSession(request);
   if (!session) {
-    sendJson(response, 200, { ok: true, user: null, guest: true }, authOptions(request));
+    sendJson(response, 200, { ok: true, user: null, guest: true, csrfToken }, options);
     return;
   }
   const account = await accounts.findById(session.userId);
   if (!account) {
-    sendJson(response, 200, { ok: true, user: null, guest: true }, authOptions(request));
+    sendJson(response, 200, { ok: true, user: null, guest: true, csrfToken }, options);
     return;
   }
-  sendJson(response, 200, { ok: true, user: publicUser(account), guest: false }, authOptions(request));
+  sendJson(response, 200, { ok: true, user: publicUser(account), guest: false, csrfToken }, options);
 }
 
 async function handleLeaderboard(request, response) {
@@ -377,6 +555,10 @@ async function handleProgress(request, response) {
 }
 
 async function handleAi(request, response) {
+  if (!rateLimit(request, "ai", AI_RATE_LIMIT, 60_000)) {
+    sendError(response, 429, "Too many AI requests from this network. Please try again in a minute.");
+    return;
+  }
   const body = await readJson(request);
   const messages = cleanMessages(body.messages);
   if (!messages.length) {
@@ -449,6 +631,10 @@ async function handleAi(request, response) {
 }
 
 async function handleSearch(request, response) {
+  if (!rateLimit(request, "search", SEARCH_RATE_LIMIT, 60_000)) {
+    sendError(response, 429, "Too many search requests from this network. Please try again in a minute.");
+    return;
+  }
   if (!SEARCH_URL) {
     sendError(
       response,
@@ -471,7 +657,7 @@ async function handleSearch(request, response) {
     const parsed = new URL(url);
     if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("Only http(s) search endpoints are allowed.");
   } catch (error) {
-    sendError(response, 500, `Invalid STUDY_AI_SEARCH_URL: ${error.message}`);
+    sendError(response, 500, "The web search provider is not configured correctly.");
     return;
   }
   const headers = SEARCH_TOKEN
@@ -488,7 +674,7 @@ async function handleSearch(request, response) {
       return;
     }
     if (!upstream.ok) {
-      sendError(response, 502, data.error?.message || `Search provider failed (${upstream.status})`);
+      sendError(response, 502, `The search provider could not complete the request (${upstream.status}).`);
       return;
     }
     const results = parseSearchResults(data);
@@ -503,14 +689,14 @@ async function handleSearch(request, response) {
       { api: true },
     );
   } catch (error) {
-    sendError(response, 502, `Could not reach the search provider: ${error.message}`);
+    sendError(response, 502, "Could not reach the search provider. Try again later.");
   }
 }
 
 function health() {
   return {
     ok: true,
-    version: "1.4.0",
+    version: "1.5.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,
@@ -523,7 +709,7 @@ function health() {
       studentKeyFallback: STUDENT_KEY_FALLBACK,
     },
     search: Boolean(SEARCH_URL),
-    accounts: true,
+    accounts: accountsBackend !== "unavailable",
     accountsBackend,
     offlineReady: true,
     localAI: {
@@ -586,19 +772,44 @@ async function serveStatic(request, response, pathname) {
     "Cache-Control": noCache ? "no-cache" : "public, max-age=3600",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Cross-Origin-Resource-Policy": "same-origin",
+    "Content-Security-Policy": CONTENT_SECURITY_POLICY,
   };
   response.writeHead(200, headers);
   response.end(request.method === "HEAD" ? undefined : buffer);
 }
 
 const server = http.createServer(async (request, response) => {
-  const url = new URL(request.url || "/", `http://${request.headers.host || "localhost"}`);
+  let url;
+  try {
+    url = new URL(request.url || "/", `http://${request.headers.host || "localhost"}`);
+  } catch {
+    response.writeHead(400).end("Bad request");
+    return;
+  }
   const apiPath = url.pathname.replace(/^\/study-ai(?=\/api\/)/, "");
   if (request.method === "OPTIONS" && apiPath.startsWith("/api/")) {
     sendJson(response, 204, {}, { api: true, corsOrigin: allowedOrigin(request) || false });
     return;
   }
+  const unsafeApiRequest = apiPath.startsWith("/api/") && !["GET", "HEAD"].includes(request.method);
+  const accountMutation = apiPath.startsWith("/api/auth/") || apiPath === "/api/progress";
+  if (unsafeApiRequest && (!isSameOriginRequest(request) || (accountMutation && !csrfAllowed(request)))) {
+    sendError(response, 403, "Security check failed. Refresh the page and try again.", authOptions(request));
+    return;
+  }
+  if (unsafeApiRequest && accountMutation && !/^application\/json(?:\s*;|\s*$)/i.test(String(request.headers["content-type"] || ""))) {
+    sendError(response, 415, "Please send account requests as JSON.", authOptions(request));
+    return;
+  }
   try {
+    if (accountsBackend === "unavailable" &&
+        (apiPath === "/api/leaderboard" || apiPath === "/api/progress" ||
+          ["/api/auth/register", "/api/auth/login", "/api/auth/logout"].includes(apiPath))) {
+      sendError(response, 503, "Accounts are temporarily unavailable. You can continue as a guest.", authOptions(request));
+      return;
+    }
     if (apiPath === "/api/health" && request.method === "GET") {
       sendJson(response, 200, health(), { api: true });
       return;
@@ -645,20 +856,25 @@ const server = http.createServer(async (request, response) => {
     }
     await serveStatic(request, response, url.pathname);
   } catch (error) {
-    console.error("[vignan-ai]", error);
-    if (!response.headersSent) sendError(response, 500, error.message || "Server error");
+    if (error instanceof RequestBodyError && !response.headersSent) {
+      sendError(response, error.status, error.message, authOptions(request));
+      return;
+    }
+    console.error("[vignan-ai] request failed", apiPath, error?.name || "Error");
+    if (!response.headersSent) sendError(response, 500, "The server could not complete the request. Please try again.");
     else response.end();
   }
 });
 
 server.listen(PORT, HOST, () => {
   const displayHost = HOST === "0.0.0.0" ? "localhost" : HOST;
-  console.log(`Vignan Vidyanikethan AI is running at http://${displayHost}:${PORT}/`);
+  const listeningPort = server.address()?.port ?? PORT;
+  console.log(`Vignan Vidyanikethan AI is running at http://${displayHost}:${listeningPort}/`);
   console.log(
     `Free AI router: ${AI_UPSTREAMS.length ? `${AI_PROVIDER_IDS.join(" → ")} (${AI_UPSTREAMS.length} providers)` : "not configured (offline engine only)"}`,
   );
   console.log(`Web fallback: ${SEARCH_URL ? "configured" : "not configured"}`);
   console.log(
-    `Student accounts: ${accountsBackend === "supabase" ? "Supabase Auth + persistent sessions" : "local JSON store (scrypt-hashed)"}`,
+    `Student accounts: ${accountsBackend === "supabase" ? "Supabase Auth + persistent sessions" : accountsBackend === "local" ? "local JSON store (scrypt-hashed)" : "unavailable — check Supabase configuration"}`,
   );
 });

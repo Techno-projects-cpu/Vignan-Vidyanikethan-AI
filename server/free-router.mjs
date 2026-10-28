@@ -255,7 +255,7 @@ export function parseProviderResponse(provider, data) {
   return "";
 }
 
-export function errorMessage(status, data, fallback = `HTTP ${status}`) {
+export function errorMessage(status, data, fallback = `HTTP ${status}`, secrets = []) {
   const message =
     (typeof data?.error === "string" && data.error) ||
     (typeof data?.error?.message === "string" && data.error.message) ||
@@ -263,7 +263,40 @@ export function errorMessage(status, data, fallback = `HTTP ${status}`) {
     (typeof data?.msg === "string" && data.msg) ||
     (typeof data?.detail === "string" && data.detail) ||
     fallback;
-  return String(message).replace(/\s+/g, " ").trim().slice(0, 300);
+  return redactSecrets(String(message), secrets).replace(/\s+/g, " ").trim().slice(0, 300);
+}
+
+function sensitiveValues(upstreams) {
+  const values = new Set();
+  const add = (value) => {
+    const text = String(value || "").trim();
+    if (text.length >= 4) values.add(text);
+  };
+  for (const upstream of upstreams) {
+    add(upstream.apiKey);
+    for (const [name, value] of Object.entries(upstream.extraHeaders || {})) {
+      if (!/authorization|api[-_]?key|token|secret|cookie/i.test(name)) continue;
+      add(value);
+      add(String(value || "").replace(/^(?:Bearer|Basic)\s+/i, ""));
+    }
+    try {
+      const url = new URL(upstream.endpoint);
+      for (const [name, value] of url.searchParams) if (/key|token|secret/i.test(name)) add(value);
+      if (url.password) add(decodeURIComponent(url.password));
+    } catch { /* an invalid endpoint will be handled by the router */ }
+  }
+  return [...values].sort((a, b) => b.length - a.length);
+}
+
+function redactSecrets(value, secrets) {
+  if (typeof value === "string") {
+    return secrets.reduce((text, secret) => text.split(secret).join("[redacted]"), value);
+  }
+  if (Array.isArray(value)) return value.map((item) => redactSecrets(item, secrets));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [redactSecrets(key, secrets), redactSecrets(item, secrets)]));
+  }
+  return value;
 }
 
 const defaultCooldowns = new KeyCooldowns({ cooldownMs: 60_000 });
@@ -303,6 +336,7 @@ export async function callFreeRouter({
   if (!Array.isArray(messages) || !messages.length) throw new Error("No prompt messages were provided.");
 
   const active = cooldowns.select(pool, now());
+  const secrets = sensitiveValues(pool);
   const errors = [];
   const exhaustedKeys = new Set();
   let attempts = 0;
@@ -327,15 +361,15 @@ export async function callFreeRouter({
         data = { content: raw };
       }
       if (!response.ok) {
-        const message = errorMessage(response.status, data);
+        const message = errorMessage(response.status, data, `HTTP ${response.status}`, secrets);
         if (isQuotaFailure(response.status, message) && upstream.keyId) {
           cooldowns.mark(upstream.keyId, cooldownMs, now());
           exhaustedKeys.add(upstream.keyId);
         }
-        errors.push(`${label}: ${message}`);
+        errors.push(redactSecrets(`${label}: ${message}`, secrets));
         continue;
       }
-      const content = String(parse(upstream, data) || "").trim();
+      const content = redactSecrets(String(parse(upstream, data) || "").trim(), secrets);
       if (!content) {
         errors.push(`${label}: empty response`);
         continue;
@@ -344,8 +378,8 @@ export async function callFreeRouter({
         content,
         provider: upstream.id,
         providerLabel: upstream.label,
-        model: data.model || upstream.model,
-        usage: data.usage || null,
+        model: redactSecrets(data.model || upstream.model, secrets),
+        usage: redactSecrets(data.usage || null, secrets),
         attempts,
         fallbackUsed: attempts > 1,
         errors,
@@ -361,7 +395,7 @@ export async function callFreeRouter({
         cooldowns.mark(upstream.keyId, cooldownMs, now());
         exhaustedKeys.add(upstream.keyId);
       }
-      errors.push(`${label}: ${message.slice(0, 200)}`);
+      errors.push(`${label}: ${redactSecrets(message, secrets).slice(0, 200)}`);
     }
   }
 

@@ -10,9 +10,128 @@
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./styles-premium.css">
+  <link rel="stylesheet" href="./styles-premium.css?v=9">
 </head>
-<body class="minimal-ui premium-ui">
+<body class="minimal-ui premium-ui auth-locked">
+
+  <main class="auth-gate" id="auth-gate" aria-labelledby="auth-gate-title">
+    <div class="auth-gate-shell">
+      <header class="auth-gate-top">
+        <a class="auth-gate-brand" href="./">
+          <span class="auth-gate-mark" aria-hidden="true">V</span>
+          <span>VIGNAN <b>VIDYANIKETHAN AI</b></span>
+        </a>
+        <span class="auth-gate-badge">YOUR STUDY SPACE</span>
+      </header>
+
+      <div class="auth-gate-layout">
+        <div class="auth-gate-intro">
+          <span class="auth-gate-kicker"><span aria-hidden="true"></span> YOUR BOOKS. YOUR PACE.</span>
+          <h1 id="auth-gate-title">A little more<br><em>room to learn.</em></h1>
+          <p>Ask your textbooks, practise a chapter, and pick up right where you left off.</p>
+          <div class="auth-gate-features" aria-label="Study tools">
+            <span><span aria-hidden="true">↗</span> Upload a PDF</span>
+            <span><span aria-hidden="true">↗</span> Answers with sources</span>
+            <span><span aria-hidden="true">↗</span> Quizzes &amp; flashcards</span>
+          </div>
+        </div>
+
+        <div class="auth-gate-entry">
+          <div class="auth-gate-panel">
+            <div class="gate-tabs" role="tablist" aria-label="Account options">
+              <button type="button" role="tab" id="gate-login-tab" aria-selected="true" aria-controls="gate-login-form" tabindex="0">Log in</button>
+              <button type="button" role="tab" id="gate-register-tab" aria-selected="false" aria-controls="gate-register-form" tabindex="-1">Register</button>
+            </div>
+            <p class="gate-status" id="gate-status" role="status"></p>
+            <p id="gate-global-error" class="gate-global-error" role="alert" aria-live="assertive"></p>
+
+            <form class="auth-card" id="gate-login-form" role="tabpanel" aria-labelledby="gate-login-tab" method="post" action="./api/auth/login" novalidate>
+              <div class="auth-card-head"><h2>Welcome back.</h2><p>Log in to see your saved progress.</p></div>
+              <div class="gate-field">
+                <label for="gate-login-username">Username</label>
+                <input id="gate-login-username" name="username" class="gate-input" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Your username" maxlength="20" required>
+              </div>
+              <div class="gate-field">
+                <label for="gate-login-password">Password</label>
+                <div class="gate-password">
+                  <input id="gate-login-password" name="password" class="gate-input" type="password" autocomplete="current-password" placeholder="Your password" maxlength="128" required>
+                  <button class="gate-toggle" type="button" aria-label="Show password" aria-pressed="false">Show</button>
+                </div>
+              </div>
+              <div class="gate-error" id="gate-login-error" role="alert" aria-live="assertive"></div>
+              <button class="gate-submit" type="submit" disabled>Log in <span aria-hidden="true">→</span></button>
+              <p class="gate-form-note">Password recovery isn't available yet. Keep your password somewhere safe.</p>
+            </form>
+
+            <form class="auth-card" id="gate-register-form" role="tabpanel" aria-labelledby="gate-register-tab" method="post" action="./api/auth/register" novalidate hidden>
+              <div class="auth-card-head"><h2>Start your journey.</h2><p>Create a free account to save your streak and quiz progress.</p></div>
+              <div class="gate-field">
+                <label for="gate-register-username">Username <small>shown on the leaderboard</small></label>
+                <input id="gate-register-username" name="username" class="gate-input" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="3–20 letters, numbers, _ or -" maxlength="20" required>
+              </div>
+              <div class="gate-field">
+                <label for="gate-register-password">Password</label>
+                <div class="gate-password">
+                  <input id="gate-register-password" name="password" class="gate-input" type="password" autocomplete="new-password" placeholder="At least 10 characters" minlength="10" maxlength="128" aria-describedby="gate-strength-label" required>
+                  <button class="gate-toggle" type="button" aria-label="Show password" aria-pressed="false">Show</button>
+                </div>
+              </div>
+              <p class="gate-strength-label" id="gate-strength-label">Use a unique password or passphrase of 10–128 characters.</p>
+              <div class="gate-field">
+                <label for="gate-register-confirm">Confirm password</label>
+                <div class="gate-password">
+                  <input id="gate-register-confirm" name="confirm" class="gate-input" type="password" autocomplete="new-password" placeholder="Repeat your password" minlength="10" maxlength="128" required>
+                  <button class="gate-toggle" type="button" aria-label="Show password" aria-pressed="false">Show</button>
+                </div>
+              </div>
+              <div class="gate-field-row">
+                <div class="gate-field">
+                  <label for="gate-register-age">Age</label>
+                  <input id="gate-register-age" name="age" class="gate-input" type="number" min="5" max="25" inputmode="numeric" placeholder="Your age" required>
+                </div>
+                <div class="gate-field">
+                  <label for="gate-register-gender">Gender <small>optional &amp; private</small></label>
+                  <select id="gate-register-gender" name="gender" class="gate-input">
+                    <option value="prefer-not">Prefer not to say</option>
+                    <option value="girl">Girl</option>
+                    <option value="boy">Boy</option>
+                    <option value="other">Other / non-binary</option>
+                  </select>
+                </div>
+              </div>
+              <p class="gate-form-note">Only an age band is stored. Under 13? Ask a parent or guardian first.</p>
+              <label class="gate-check" id="gate-guardian-row" hidden>
+                <input id="gate-guardian" name="guardianConsent" type="checkbox">
+                <span>I have my parent or guardian's permission to join.</span>
+              </label>
+              <details class="gate-optional" id="gate-referral-details">
+                <summary>Have an invite code?</summary>
+                <div class="gate-field">
+                  <label for="gate-referral">Friend's code</label>
+                  <input id="gate-referral" name="referral" class="gate-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="32" placeholder="Optional">
+                </div>
+              </details>
+              <div class="gate-error" id="gate-register-error" role="alert" aria-live="assertive"></div>
+              <button class="gate-submit" type="submit" disabled>Create account <span aria-hidden="true">→</span></button>
+              <p class="gate-form-note">Use a nickname, not your real name. Password recovery isn't available yet.</p>
+            </form>
+          </div>
+          <div class="auth-gate-guest">
+            <span class="gate-or" aria-hidden="true">OR</span>
+            <button class="gate-guest-button" id="gate-guest-button" type="button" disabled>Continue as guest <span aria-hidden="true">→</span></button>
+            <p>Guest progress stays in this browser. You can log in later.</p>
+          </div>
+        </div>
+      </div>
+      <footer class="auth-gate-foot">
+        <span>No email needed</span><span aria-hidden="true">·</span>
+        <span>Books are stored on this device</span><span aria-hidden="true">·</span>
+        <span>On shared devices, local data remains after log out</span>
+      </footer>
+      <noscript><p class="gate-noscript">JavaScript is required to open the study workspace. Please enable it and reload.</p></noscript>
+    </div>
+  </main>
+
   <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8.6 8.6 0 0 1-3.6-.8L4 20l1.3-4A7.5 7.5 0 1 1 20 11.5Z"/><path d="M9 11h6M9 14h4"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5Z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19v5H6.5A2.5 2.5 0 0 1 4 18.5Z"/><path d="M8 7h7M8 10h5"/></symbol>
@@ -84,7 +203,7 @@
           <button type="button" class="premium-menu-button" id="command-menu-button" aria-haspopup="dialog" aria-controls="command-overlay">Menu <kbd>⌘K</kbd></button>
           <span class="chip premium-hidden" id="offline-chip"><span class="chip-dot"></span><span data-i18n="app.offlineReady">Offline ready</span></span>
           <button type="button" class="icon-button premium-icon-button" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme"><svg><use href="#i-moon"></use></svg></button>
-          <button type="button" class="profile-chip account-chip" id="profile-button" title="Account"><span id="profile-initial">S</span><span class="account-dot" id="account-dot"></span></button>
+          <button type="button" class="profile-chip account-chip" id="profile-button" aria-label="Account" title="Account"><span id="profile-initial">S</span><span class="account-dot" id="account-dot"></span></button>
           <span class="account-name hidden" id="account-name"></span>
         </div>
         <div class="premium-view-meta premium-sr-only" aria-live="polite">
@@ -102,7 +221,7 @@
         </nav>
       </header>
 
-      <main id="main" class="main">
+      <main id="main" class="main" tabindex="-1">
         <!-- ASK -->
         <section class="view active" id="view-ask" data-panel="ask">
           <section class="premium-hero" id="premium-hero" data-reveal>
@@ -134,7 +253,6 @@
                 </div>
               </div>
               <div class="chat-log" id="chat-log" aria-live="polite"></div>
-              <div class="chat-suggestions" id="chat-suggestions"></div>
               <div class="typing hidden" id="typing"><span class="spinner"></span><span>Reading your textbooks…</span></div>
               <form class="composer" id="ask-form">
                 <div class="mode-row" id="mode-row">
@@ -145,7 +263,7 @@
                   <button type="button" class="mode-chip" data-mode="flashcards" data-i18n="mode.flashcards">Flashcards</button>
                 </div>
                 <div class="composer-input-row">
-                  <textarea id="ask-input" rows="2" placeholder="Ask anything from your textbooks…" data-i18n-placeholder="ask.placeholder"></textarea>
+                  <textarea id="ask-input" rows="2" aria-label="Ask a question from your textbooks" placeholder="Ask anything from your textbooks…" data-i18n-placeholder="ask.placeholder"></textarea>
                   <button type="submit" class="send-button" id="ask-send" aria-label="Send question" data-i18n-aria="ask.send"><svg><use href="#i-send"></use></svg></button>
                 </div>
                 <div class="composer-meta">
@@ -154,6 +272,7 @@
                   <button type="button" class="text-button" id="clear-chat" data-i18n="ask.clear">Clear chat</button>
                 </div>
               </form>
+              <div class="chat-suggestions" id="chat-suggestions" role="group" aria-label="Suggested questions"></div>
             </div>
             <aside class="source-column card">
               <div class="panel-head">
@@ -460,7 +579,7 @@
           <button type="button" class="command-item" data-action="keys" data-keywords="keys api byok student own"><span class="command-index">⌘</span><span class="command-copy"><strong>Student keys</strong><small>Optional private fallback keys</small></span><span class="command-arrow">↗</span></button>
           <button type="button" class="command-item" data-action="theme" data-keywords="theme dark light invert"><span class="command-index">◐</span><span class="command-copy"><strong>Invert theme</strong><small>Switch black ↔ white</small></span><span class="command-arrow">↗</span></button>
           <button type="button" class="command-item" data-action="export" data-keywords="export data backup json privacy"><span class="command-index">↧</span><span class="command-copy"><strong>Export local data</strong><small>Keys stay out of the export</small></span><span class="command-arrow">↗</span></button>
-          <button type="button" class="command-item" data-action="account" data-keywords="account login register profile nickname"><span class="command-index">○</span><span class="command-copy"><strong>Account</strong><small>Nickname-only public profile</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-action="account" data-keywords="account login register guest profile nickname sign in"><span class="command-index">○</span><span class="command-copy"><strong>Log in or register</strong><small>Sync progress, or keep studying as a guest</small></span><span class="command-arrow">↗</span></button>
         </section>
         <div class="command-empty" id="command-empty" hidden>No matches. Try “PDF”, “quiz”, “Bolt” or “theme”.</div>
       </div>
@@ -469,7 +588,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="./vendor/pdfjs/pdf.min.js"></script>
-  <script type="module" src="./js/app.js"></script>
+  <script type="module" src="./js/boot.js?v=9"></script>
 </body>
 </html>

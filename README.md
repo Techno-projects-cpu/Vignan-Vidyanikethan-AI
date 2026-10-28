@@ -28,7 +28,7 @@ Open:
 
 The server binds to `0.0.0.0`, so it also works in the Arena live preview. A plain static server (`python3 -m http.server`) can serve the app too, but the optional `/api/ai`, `/api/search` and `/api/auth/*` endpoints will not exist — the offline engine and guest progress still work.
 
-On first launch the app loads a small **Demo Study Pack** so you can try questions immediately. Replace it with real class PDFs in **Library**. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — the app auto-detects the free router, rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback. The minimal UI keeps those controls tucked behind **Settings → Advanced settings**.
+On first launch, choose **Log in**, **Register**, or **Continue as guest** beneath the account options. Existing signed-in sessions reopen the workspace; a guest choice is remembered only in the current tab. The guest path remains available when the account server is offline. The app loads a small **Demo Study Pack** so you can try questions immediately. Replace it with real class PDFs in **Library**. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — the app auto-detects the free router, rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback. The minimal UI keeps those controls tucked behind **Settings → Advanced settings**.
 
 ---
 
@@ -89,7 +89,7 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 The public interface is intentionally sparse, inspired by [Arena.ai](https://arena.ai/): one large headline, one composer, and a command menu for everything else.
 
 - Press **Ctrl/⌘ + K** or choose **Menu** to open the command palette. It contains every section, PDF upload, quiz/flashcard actions, sources, settings, keys, theme and account.
-- The first screen has a prominent **Upload PDF** action. Students can also drag a PDF into **Library** or paste notes. PDFs are indexed locally and page numbers are preserved.
+- After the entry screen, the Ask workspace has a prominent **Upload PDF** action. Students can also drag a PDF into **Library** or paste notes. PDFs are indexed locally and page numbers are preserved.
 - **Bolt** is the built-in super-fast AI: it answers from the local textbook index with citations, requires no model download and works offline. It is the default route.
 - The AI chooser hides provider names. Students choose nicknames with their specialty underneath: **Bolt** (instant offline lookup), **Nova** (private local reasoning), **Atlas** (free cloud router), **Dash** (ultra-fast cloud), **Prism** (balanced answers), **Sage** (model variety), **Echo** (laptop model), **Any** (custom endpoint), and others. Real IDs remain in `data-provider` / select values.
 - Settings open with a single **Control room** card; the dense model, key, web, privacy and appearance panels stay hidden until **Advanced settings** is chosen.
@@ -97,16 +97,17 @@ The public interface is intentionally sparse, inspired by [Arena.ai](https://are
 
 ## Student accounts, squad invites & leaderboard
 
-Vignan Vidyanikethan AI remains fully usable as a guest. When the Node server is running, students can create a free account from the **profile button** or **Progress → Join the Vignan squad**:
+The entry screen opens to **Log in** and **Register**, with **Continue as guest** below them. An existing session is restored automatically; guests can sign in later from the profile button (also visible on phones) or Progress. Guest books, chats and progress stay in this browser and are not automatically moved to an account:
 
-- **Register** asks for a username, password, age and gender. A confirm-password field and an under-13 parent/guardian permission checkbox are shown on the client.
+- **Register** asks for a public nickname, password and age; gender is optional. New passwords must be 10–128 characters and cannot be a short list of common choices. Existing shorter passwords still work for login. Password recovery is not yet available.
+- Under-13 students are asked to confirm that they have a parent or guardian's permission. This checkbox is self-reported, not independently verified consent; schools must arrange appropriate consent and privacy safeguards before deploying to children.
 - The server stores **only an age band** (`under-13`, `13-15`, `16-18`, `19+`), never the exact age. Gender is kept in the private profile and is omitted from the public leaderboard.
-- Passwords are hashed with Node's built-in `scrypt` and a unique random salt. Plaintext passwords are never written to disk. Sessions are random tokens in `HttpOnly`, `SameSite=Lax` cookies.
+- The local demo backend hashes passwords with Node's built-in `scrypt`; Supabase Auth hashes passwords for Supabase accounts. Sessions use random `HttpOnly`, `SameSite=Lax` cookies, with `Secure` on HTTPS. Signing in again revokes the previous session cookie.
 - Each account gets a referral code such as `VIGNAN-ANANYA`. An invite link containing `?ref=VIGNAN-ANANYA&view=progress` opens the register tab and credits the referring student.
-- Quiz results sync XP, streak, best score, accuracy and recent topics to the account. The live leaderboard exposes only usernames and study stats — no password hashes, exact ages, genders, IDs or full history.
+- Quiz results sync XP, streak, best score, accuracy and recent topics to the account. The live leaderboard exposes only usernames and study stats — no password hashes, exact ages, genders, IDs or full history. Scores originate in the browser and can be manipulated, so the leaderboard is for practice rather than high-stakes assessment.
 - The result **edit video** includes the student's squad code so friends can join from a share caption.
 
-Account endpoints reflect `Origin` only for the same host/proto or origins listed in `STUDY_AI_ALLOWED_ORIGINS`; they never combine credentialed cookies with a wildcard origin.
+Account endpoints reflect `Origin` only for the same host/proto or origins listed in `STUDY_AI_ALLOWED_ORIGINS`; they never combine credentialed cookies with a wildcard origin. Account/progress POSTs require a same-origin request, a JSON body and a double-submit CSRF token. A client should first `GET /api/auth/me` with credentials, then send the `vignan_csrf` cookie's value in `X-CSRF-Token` on each account/progress POST. The browser handles this automatically. Login failure throttles are in memory per instance and reset on restart; they are not a replacement for a production distributed rate limiter.
 
 Account API (same origin; legacy `/study-ai/api/...` aliases still work):
 
@@ -123,9 +124,9 @@ Account API (same origin; legacy `/study-ai/api/...` aliases still work):
 Two backends are included:
 
 - **Local JSON (default):** dependency-free file at `server/data/accounts.json`, intended for a school demo, LAN or local prototype. It is ignored by Git and never served as a static file. Sessions are in memory, so a restart logs students out.
-- **Supabase (recommended for Render):** set `STUDY_AI_ACCOUNTS_BACKEND=supabase` plus `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`. Apply `supabase/migrations/20261027000000_vignan_ai.sql` first. Supabase Auth handles password hashing; profiles, progress, referrals and sessions live in Postgres with row-level security, so Render's ephemeral filesystem and cold starts do not erase accounts. Supabase's free tier includes 50,000 monthly active users, a 500 MB database and 500,000 Edge Function invocations ([billing docs](https://supabase.com/docs/guides/platform/billing-on-supabase)), but free projects pause after a week of database inactivity.
+- **Supabase (recommended for Render):** set `STUDY_AI_ACCOUNTS_BACKEND=supabase` plus `SUPABASE_URL`, `SUPABASE_ANON_KEY` (publishable or legacy anon) and `SUPABASE_SERVICE_ROLE_KEY` (secret or legacy service-role). Apply `supabase/migrations/20261027000000_vignan_ai.sql` first. Supabase Auth handles password hashing; profiles, progress, referrals and sessions live in Postgres with row-level security, so Render's ephemeral filesystem and cold starts do not erase accounts. Supabase's free tier includes 50,000 monthly active users, a 500 MB database and 500,000 Edge Function invocations ([billing docs](https://supabase.com/docs/guides/platform/billing-on-supabase)), but free projects pause after a week of database inactivity.
 
-For a larger public deployment, add email verification, password reset, moderation and backups. Never put the Supabase service-role key in the browser or in Git.
+When Supabase is requested but its URL or keys are missing or obviously invalid, accounts fail closed instead of silently creating non-persistent Render accounts; guest study remains available. `/api/health` reports the configured backend, not a live credential/connection test. For a larger public deployment, add verified guardian consent, account recovery, moderation, backups and distributed rate limiting. Never put the Supabase secret/service-role key in the browser, chat or Git.
 
 ---
 
@@ -293,9 +294,11 @@ All variables also accept the new `VIGNAN_AI_` prefix as an alias, e.g. `VIGNAN_
 | `STUDY_AI_ACCOUNTS_BACKEND` | `local` | `local` or `supabase`. |
 | `STUDY_AI_ACCOUNTS_FILE` | `server/data/accounts.json` | Local JSON account store path. Ignored by Git and blocked from static serving. |
 | `STUDY_AI_SUPABASE_EMAIL_DOMAIN` | `students.vignanvidyanikethan.org` | Synthetic email domain for username/password Supabase Auth. No real emails are sent. |
-| `SUPABASE_URL` / `SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` | empty | Supabase project credentials. Service-role key is server-only. |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` | empty | Supabase project URL, publishable/legacy anon key, and secret/legacy service-role key. The latter is server-only. |
 | `STUDY_AI_COOKIE_SECURE` | auto | Set `true` to force `Secure` session cookies behind HTTPS. |
 | `STUDY_AI_ALLOWED_ORIGINS` | empty | Comma-separated extra origins allowed to call account endpoints with cookies. Same-origin requests work without this. |
+| `STUDY_AI_TRUST_PROXY` | auto on Render | Set `true` only behind a trusted proxy that appends the real client address; used for in-memory rate limits. |
+| `STUDY_AI_AI_RATE_LIMIT` / `STUDY_AI_SEARCH_RATE_LIMIT` | `60` / `30` | Proxy requests per IP per minute. Limits are per instance, reset on restart and can be adjusted for shared school networks. |
 
 Local WebLLM needs **no environment variable**. The model choice is stored in the browser's IndexedDB settings; the runtime is a static file under `vendor/webllm/`.
 
@@ -373,9 +376,11 @@ icons/                    SVG + PNG app icons
 vendor/webllm/            Vendored WebLLM 0.2.85 runtime (Apache-2.0)
 vendor/pdfjs/             Vendored PDF.js (Apache-2.0)
 js/                       Browser ESM app modules
+  boot.js                 Lightweight login/register/guest entry screen
   app.js                  UI controller
-  auth.js                 Account API client + Log In / Register modal
-  ingest.js               PDF/TXT ingestion
+  auth.js                 Account API client + account modal
+  password-policy.js      Shared password checks for new accounts
+  ingest.js               Lazy-loaded PDF/TXT ingestion
   text.js                 Page parsing, sentences, chunks
   vector.js               Cached hashed TF-IDF vectors
   retrieval.js            Hybrid search + grounding decision
@@ -437,7 +442,7 @@ A free Supabase project has already been created and the schema migration applie
 - **Migration:** `20261027150656_create_vignan_ai_schema`
 - **Auth:** email signup enabled, `mailer_autoconfirm` on (no real emails are sent for synthetic student accounts)
 
-Copy `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` from **Project Settings → API** into Render. Only the service-role key is secret; never put it in the browser or Git. See `DEPLOY.md` for the exact Render environment variables and verification steps.
+Copy the **publishable** key into `SUPABASE_ANON_KEY` and the **secret** key into `SUPABASE_SERVICE_ROLE_KEY` in Render. The latter is private; never put it in a browser, chat or Git. Legacy anon/service-role JWTs are also supported for migration. See `DEPLOY.md` for setup, rotation and verification steps.
 
 ---
 
@@ -479,7 +484,8 @@ Other notes:
 - No analytics, no telemetry, no third-party scripts. Accounts are optional and off when using a plain static host.
 - With local accounts enabled, the server stores a username, scrypt password hash, age band (not exact age), private gender choice, referral count, XP/streak/quiz stats and 10 recent result summaries.
 - With Supabase accounts, Supabase Auth stores the password hash; Postgres stores the age band, private gender choice, study stats and hashed session tokens. The leaderboard strips gender, age band, IDs and history.
-- Session cookies are `HttpOnly` and `SameSite=Lax`; `Secure` can be forced with `STUDY_AI_COOKIE_SECURE=true`. No password is ever sent back to the browser or written in plaintext.
+- Session cookies are `HttpOnly` and `SameSite=Lax`; `Secure` can be forced with `STUDY_AI_COOKIE_SECURE=true`. Account mutations also check origin and a CSRF token. No password is ever sent back to the browser or written in plaintext.
+- Signing out does not remove books, chats or student keys saved in the browser; use **Settings → Delete all local data** on shared devices.
 - Local WebLLM / Ollama / LM Studio modes send nothing off the device. WebLLM's first model download contacts the model CDN; the model itself then runs locally.
 - Connected cloud modes send only the short retrieved passages needed for the task. Free-tier providers may have different data-retention/training policies — check each provider before uploading sensitive or copyrighted books. OpenRouter free models in particular can have per-provider training policies.
 - Web fallback is off by default; outside results are visually separated and labelled.
@@ -490,5 +496,5 @@ Other notes:
 ## Credits
 
 - Built for the students of **Vignan Vidyanikethan E.M. School** and the **INSPIRE MANAK** science-fair demo, with Arena.ai Agent Mode used as the development assistant.
-- PDF text extraction uses [PDF.js](https://github.com/mozilla/pdf.js) 3.11.174, vendored under `vendor/pdfjs/` with its Apache-2.0 license and font/CMaps notices.
+- PDF text extraction uses [PDF.js](https://github.com/mozilla/pdf.js) 4.2.67 (legacy build), with dynamic PDF font evaluation and XFA disabled, vendored under `vendor/pdfjs/` with its Apache-2.0 license and font/CMaps notices. This replaces the older build affected by [CVE-2024-4367](https://github.com/advisories/GHSA-wgrm-67xf-hhpq).
 - Application code is MIT licensed; see `LICENSE`. Replace the demo study pack with your own board textbooks before classroom use.

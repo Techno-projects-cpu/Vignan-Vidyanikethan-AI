@@ -14,8 +14,8 @@ const html = read("index.html");
 const css = read("styles-premium.css");
 
 test("premium shell hides navigation in a command menu and foregrounds PDF + Bolt", () => {
-  assert.match(html, /<body class="minimal-ui premium-ui">/);
-  assert.match(html, /<link rel="stylesheet" href="\.\/styles-premium\.css">/);
+  assert.match(html, /<body class="minimal-ui premium-ui(?:\s+[^"]+)?">/);
+  assert.match(html, /<link rel="stylesheet" href="\.\/styles-premium\.css(?:\?v=\d+)?">/);
   assert.match(html, /id="command-overlay"[^>]*hidden/);
   assert.match(html, /id="command-menu-button"/);
   assert.match(html, /id="premium-ai-trigger"/);

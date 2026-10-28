@@ -11,10 +11,18 @@ const PDF_BASE = new URL("../vendor/pdfjs/", import.meta.url).href;
 const MAX_PDF_PAGES = 800;
 const MAX_STORED_PDF_BYTES = 20 * 1024 * 1024;
 
-function pdfLibrary() {
-  const library = globalThis.pdfjsLib;
-  if (!library) throw new Error("PDF reader is not loaded. Refresh the page and try again.");
-  library.GlobalWorkerOptions.workerSrc = new URL("pdf.worker.min.js", PDF_BASE).href;
+let pdfLibraryPromise;
+
+/** Load the patched, vendored PDF.js legacy build only when a PDF is opened. */
+async function pdfLibrary() {
+  if (!pdfLibraryPromise) {
+    pdfLibraryPromise = import(new URL("pdf.min.mjs", PDF_BASE).href).catch((error) => {
+      pdfLibraryPromise = null;
+      throw new Error(`The PDF reader could not load. Check your connection and try again. (${error.name})`);
+    });
+  }
+  const library = await pdfLibraryPromise;
+  library.GlobalWorkerOptions.workerSrc = new URL("pdf.worker.min.mjs", PDF_BASE).href;
   return library;
 }
 
@@ -37,7 +45,7 @@ function itemsToText(items) {
 }
 
 export async function extractPdfPages(file, onProgress = () => {}) {
-  const library = pdfLibrary();
+  const library = await pdfLibrary();
   const data = new Uint8Array(await file.arrayBuffer());
   const task = library.getDocument({
     data,
@@ -46,6 +54,9 @@ export async function extractPdfPages(file, onProgress = () => {}) {
     standardFontDataUrl: new URL("standard_fonts/", PDF_BASE).href,
     useSystemFonts: true,
     disableFontFace: false,
+    // Defense in depth for untrusted textbooks: never dynamically compile PDF fonts.
+    isEvalSupported: false,
+    enableXfa: false,
   });
   const document = await task.promise;
   const originalPageCount = document.numPages;

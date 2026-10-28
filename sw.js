@@ -1,18 +1,25 @@
 /* Offline service worker for Vignan Vidyanikethan AI. */
 
-const CACHE_NAME = "vignan-vidyanikethan-ai-v8";
+const CACHE_NAME = "vignan-vidyanikethan-ai-v9";
 const CORE = [
   "./",
   "./index.html",
   "./styles.css",
   "./styles-premium.css",
+  "./styles-premium.css?v=9",
   "./manifest.webmanifest",
   "./precache.json",
   "./data/demo-textbook.txt",
   "./icons/icon.svg",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  "./js/boot.js",
+  "./js/boot.js?v=9",
   "./js/app.js",
+  "./js/app.js?v=9",
+  "./js/ingest.js?v=9",
+  "./js/auth.js?v=9",
+  "./js/password-policy.js",
   "./js/ai-nicknames.js",
   "./js/motion.js",
   "./js/premium-ui.js",
@@ -23,8 +30,8 @@ const CORE = [
   "./js/local-ai-worker.js",
   "./js/free-apis.js",
   "./vendor/webllm/web-llm.js",
-  "./vendor/pdfjs/pdf.min.js",
-  "./vendor/pdfjs/pdf.worker.min.js",
+  "./vendor/pdfjs/pdf.min.mjs",
+  "./vendor/pdfjs/pdf.worker.min.mjs",
 ];
 
 self.addEventListener("install", (event) => {

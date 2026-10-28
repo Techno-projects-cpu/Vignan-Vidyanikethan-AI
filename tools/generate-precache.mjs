@@ -25,7 +25,7 @@ async function walk(directory, prefix = "") {
     } else if (entry.isFile()) {
       if (EXCLUDED_FILES.has(entry.name)) continue;
       if (entry.name.startsWith(".")) continue;
-      if (EXCLUDED_EXT.has(path.extname(entry.name).toLowerCase())) continue;
+      if (EXCLUDED_EXT.has(path.extname(entry.name).toLowerCase()) && !relative.startsWith("vendor/pdfjs/")) continue;
       files.push(`./${relative}`);
     }
   }
@@ -34,5 +34,5 @@ async function walk(directory, prefix = "") {
 
 const files = (await walk(REPO)).sort();
 const urls = [...new Set(["./", "./index.html", ...files])];
-await fs.writeFile(OUT, `${JSON.stringify({ version: 8, generatedAt: new Date().toISOString(), urls }, null, 2)}\n`);
+await fs.writeFile(OUT, `${JSON.stringify({ version: 9, generatedAt: new Date().toISOString(), urls }, null, 2)}\n`);
 console.log(`Wrote ${urls.length} URLs to ${path.relative(REPO, OUT)}`);

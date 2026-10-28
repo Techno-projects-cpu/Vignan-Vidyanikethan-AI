@@ -8,7 +8,7 @@
 
 import * as db from "./db.js";
 import { retrieve, retrieveChapter } from "./retrieval.js";
-import { ingestPdf, ingestText, ingestDemoPack } from "./ingest.js";
+import { ingestPdf, ingestText, ingestDemoPack } from "./ingest.js?v=9";
 import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js";
 import {
   answerWithModel,
@@ -92,7 +92,7 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js";
+} from "./auth.js?v=9";
 import { aiOptionLabel, aiProfile } from "./ai-nicknames.js";
 import {
   closeCommandMenu,
@@ -157,8 +157,10 @@ const state = {
 
 /* ------------------------------------------------------------------ init */
 
-async function init() {
+async function init({ initialUser = null, guest = false, sessionKnown = false } = {}) {
   try {
+    // Local storage and the optional health check run in parallel.
+    const healthPromise = serverHealth();
     const stored = await db.getSetting("settings", null);
     state.settings = normalizeSettings(stored || DEFAULT_SETTINGS);
     state.studyProgress = readStudyProgress();
@@ -176,7 +178,7 @@ async function init() {
       renderLocalAIStatus(snapshot);
     });
     state.referral = readReferral();
-    state.serverHealth = await serverHealth();
+    state.serverHealth = await healthPromise;
     if (state.serverHealth.ai && !isModelConnected(state.settings) && !state.settings.freeRouterDismissed) {
       for (const task of TASKS) state.settings.routing[task.id] = "server";
       state.settings.fallback = "offline";
@@ -185,7 +187,17 @@ async function init() {
       await saveSettings();
       ui.showToast("Free Vignan Vidyanikethan AI router connected — answers stay grounded in your books.", "success", 5200);
     }
-    await refreshAuth();
+    if (guest) {
+      state.account = null;
+      state.authAvailable = Boolean(state.serverHealth.ok && state.serverHealth.accounts);
+      if (state.authAvailable) void refreshLeaderboard();
+    } else if (sessionKnown) {
+      state.account = initialUser;
+      state.authAvailable = true;
+      void refreshLeaderboard();
+    } else {
+      await refreshAuth();
+    }
     renderAll();
     $$(".view .card, .premium-hero, .command-group").forEach((element) => {
       if (!element.hasAttribute("data-reveal")) element.setAttribute("data-reveal", "");
@@ -201,9 +213,6 @@ async function init() {
     const requestedView = new URL(location.href).searchParams.get("view");
     setView(VIEW_META[requestedView] ? requestedView : "ask", { skipHistory: true });
     registerServiceWorker();
-    if (state.referral && !state.account && state.authAvailable) {
-      setTimeout(() => openAccountModal("register"), 450);
-    }
   } catch (error) {
     console.error("[vignan-ai] init failed", error);
     ui.showToast(`Vignan Vidyanikethan AI could not start: ${error.message}`, "error", 8000);
@@ -348,25 +357,46 @@ function renderAll() {
 
 /* ------------------------------------------------------- accounts & squad */
 
+async function refreshLeaderboard() {
+  try {
+    const board = state.authAvailable ? await getLeaderboard() : [];
+    state.serverLeaderboard = board;
+  } catch {
+    state.serverLeaderboard = [];
+  }
+  renderAccount();
+}
+
 async function refreshAuth() {
   try {
     const session = await getSession();
-    state.authAvailable = true;
+    state.authAvailable = session.accountsAvailable !== false;
     state.account = session.user || null;
   } catch {
     state.authAvailable = false;
     state.account = null;
   }
-  try {
-    state.serverLeaderboard = state.authAvailable ? await getLeaderboard() : [];
-  } catch {
-    state.serverLeaderboard = [];
+  updateStatus();
+  renderAccount();
+  void refreshLeaderboard();
+}
+
+/** Reflect a successful entry-screen login without reloading the application. */
+export async function setAccountSession(user = null, { guest = false } = {}) {
+  state.account = user || null;
+  state.authAvailable = Boolean(user) || Boolean(state.serverHealth.ok && state.serverHealth.accounts);
+  state.serverLeaderboard = [];
+  if (user) {
+    clearReferral();
+    state.referral = "";
   }
   updateStatus();
   renderAccount();
+  renderProgress();
+  if (state.authAvailable) void refreshLeaderboard();
 }
 
-function openAccountModal(mode = "register") {
+function openAccountModal(mode = "login") {
   openAuthModal({
     account: state.account,
     mode,
@@ -388,10 +418,7 @@ function openAccountModal(mode = "register") {
       renderProgress();
     },
     onLogout: async () => {
-      state.account = null;
-      state.serverLeaderboard = [];
-      await refreshAuth();
-      renderProgress();
+      await setAccountSession(null, { guest: true });
     },
     onViewProgress: () => setView("progress"),
   });
@@ -400,14 +427,12 @@ function openAccountModal(mode = "register") {
 async function signOut() {
   try {
     await logout();
+    await setAccountSession(null, { guest: true });
+    ui.showToast("You have been logged out.", "info");
+    window.dispatchEvent(new CustomEvent("vignan:auth-required", { detail: { mode: "login" } }));
   } catch {
-    // Even if the server is unreachable, forget the account locally.
+    ui.showToast("Could not log out while the account server is offline. Please reconnect and try again.", "warning", 7000);
   }
-  state.account = null;
-  state.serverLeaderboard = [];
-  await refreshAuth();
-  renderProgress();
-  ui.showToast("You are studying as a guest now.", "info");
 }
 
 function copyInvite(link) {
@@ -498,23 +523,23 @@ function renderAccount() {
       ui.element(
         "p",
         "",
-        "Create a free student account to sync streaks, join the live leaderboard and get a personal invite code.",
+        "Log in or create a free student account to sync streaks, join the live leaderboard and get a personal invite code.",
       ),
     );
     hero.appendChild(copy);
     body.appendChild(hero);
 
     const actions = ui.element("div", "account-actions");
-    const join = ui.element("button", "button primary small", "Register now");
-    join.type = "button";
-    join.addEventListener("click", () => openAccountModal("register"));
-    const login = ui.element("button", "button ghost small", "I already have an account");
+    const login = ui.element("button", "button primary small", "Log in");
     login.type = "button";
-    login.addEventListener("click", () => openAccountModal("login"));
+    login.addEventListener("click", () => window.dispatchEvent(new CustomEvent("vignan:auth-required", { detail: { mode: "login" } })));
+    const join = ui.element("button", "button ghost small", "Create an account");
+    join.type = "button";
+    join.addEventListener("click", () => window.dispatchEvent(new CustomEvent("vignan:auth-required", { detail: { mode: "register" } })));
     const keys = ui.element("button", "button ghost small", "Add my AI key");
     keys.type = "button";
     keys.addEventListener("click", () => openSettingsPanel("student-key-card"));
-    actions.append(join, login, keys);
+    actions.append(login, join, keys);
     body.appendChild(actions);
     body.appendChild(
       ui.element(
@@ -612,6 +637,7 @@ function renderSuggestions() {
 
 function renderChat() {
   const log = $("#chat-log");
+  $("#view-ask")?.classList.toggle("has-conversation", state.messages.some((message) => message.role === "user"));
   log.replaceChildren();
   for (const message of state.messages) {
     const wrapper = ui.element("div", `message ${message.role}`);
@@ -2430,7 +2456,8 @@ async function handlePremiumAction(action) {
       return;
     case "upload-pdf":
       setView("library");
-      requestAnimationFrame(() => $("#file-input")?.click());
+      // Open while the click's user gesture is active (important on phones).
+      $("#file-input")?.click();
       return;
     case "instant-ai":
       await setActiveAI("offline");
@@ -2466,7 +2493,8 @@ async function handlePremiumAction(action) {
       $("#export-data")?.click();
       return;
     case "account":
-      openAccountModal(state.account ? "account" : "register");
+      if (state.account) openAccountModal("account");
+      else window.dispatchEvent(new CustomEvent("vignan:auth-required", { detail: { mode: "login" } }));
       return;
     default:
       if (VIEW_META[action]) setView(action);
@@ -2591,7 +2619,10 @@ function bindEvents() {
   $("#theme-toggle").addEventListener("click", () =>
     setTheme(state.settings.theme === "dark" ? "light" : "dark"),
   );
-  $("#profile-button").addEventListener("click", () => openAccountModal(state.account ? "account" : "register"));
+  $("#profile-button").addEventListener("click", () => {
+    if (state.account) openAccountModal("account");
+    else window.dispatchEvent(new CustomEvent("vignan:auth-required", { detail: { mode: "login" } }));
+  });
   window.addEventListener("online", updateOfflineChip);
   window.addEventListener("offline", updateOfflineChip);
 
@@ -2707,4 +2738,16 @@ function bindEvents() {
   $("#delete-all").addEventListener("click", deleteAllData);
 }
 
-init();
+let initPromise;
+export function initApp(options = {}) {
+  if (!initPromise) {
+    initPromise = init(options).catch((error) => {
+      initPromise = null;
+      throw error;
+    });
+  }
+  return initPromise;
+}
+
+// Boot module controls startup on the live site. Direct loads still work.
+if (!globalThis.__VIGNAN_BOOT__) initApp();

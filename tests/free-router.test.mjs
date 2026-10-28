@@ -208,3 +208,36 @@ test("student keys are tried only after every Render key is exhausted", async ()
   assert.equal(result.keySource, "student");
   assert.ok(!JSON.stringify(result).includes("STUDENT-ONE"));
 });
+
+test("router redacts configured and student secrets from upstream responses and errors", async () => {
+  const upstreams = [
+    ...buildUpstreams({
+      STUDY_AI_AI_BASE_URL: "https://provider.example/v1",
+      STUDY_AI_AI_MODEL: "school-model",
+      STUDY_AI_AI_KEY: "SCHOOL-PRIVATE-KEY-42",
+      STUDY_AI_AI_EXTRA_HEADERS: '{"X-Api-Key":"HEADER-PRIVATE-42"}',
+    }),
+    ...buildStudentUpstreams([{ providerId: "gemini", keys: "STUDENT-PRIVATE-KEY-19" }]),
+  ];
+  const result = await callFreeRouter({
+    upstreams,
+    messages: [{ role: "user", content: "Study question" }],
+    fetchImpl: async () => response(true, 200, {
+      choices: [{ message: { content: "Echo SCHOOL-PRIVATE-KEY-42 / HEADER-PRIVATE-42 / STUDENT-PRIVATE-KEY-19" } }],
+      model: "SCHOOL-PRIVATE-KEY-42", usage: { token: "HEADER-PRIVATE-42" },
+    }),
+  });
+  assert.match(result.content, /\[redacted\]/);
+  assert.ok(!JSON.stringify(result).includes("SCHOOL-PRIVATE-KEY-42"));
+  assert.ok(!JSON.stringify(result).includes("HEADER-PRIVATE-42"));
+  assert.ok(!JSON.stringify(result).includes("STUDENT-PRIVATE-KEY-19"));
+  const failure = await callFreeRouter({
+    upstreams,
+    messages: [{ role: "user", content: "Study question" }],
+    fetchImpl: async () => response(false, 429, { error: { message: "quota SCHOOL-PRIVATE-KEY-42 HEADER-PRIVATE-42 STUDENT-PRIVATE-KEY-19" } }),
+    cooldowns: new KeyCooldowns(),
+  }).catch((error) => error);
+  assert.ok(!JSON.stringify({ message: failure.message, errors: failure.errors }).includes("SCHOOL-PRIVATE-KEY-42"));
+  assert.ok(!JSON.stringify({ message: failure.message, errors: failure.errors }).includes("HEADER-PRIVATE-42"));
+  assert.ok(!JSON.stringify({ message: failure.message, errors: failure.errors }).includes("STUDENT-PRIVATE-KEY-19"));
+});

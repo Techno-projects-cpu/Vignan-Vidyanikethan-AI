@@ -35,21 +35,27 @@ Render free web services sleep after inactivity and have limited instance hours;
 
 ## 3. Add Render environment variables
 
-Paste these in **Render → Environment**. The Supabase service-role key is secret — never commit it or put it in the browser.
+Add these in **Render → Environment**. The blank key values below are placeholders: copy the actual values directly from your Supabase dashboard. Never commit a secret, paste it in chat, or put it in browser code.
 
 ```dotenv
 STUDY_AI_ACCOUNTS_BACKEND=supabase
 STUDY_AI_COOKIE_SECURE=true
 SUPABASE_URL=https://dwmzbrrnqxzdoxrxbrna.supabase.co
-SUPABASE_ANON_KEY=<Project Settings → API → anon>
-SUPABASE_SERVICE_ROLE_KEY=<Project Settings → API → service_role>
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 STUDY_AI_FREE_ROUTER=true
 STUDY_AI_FREE_ROUTER_ORDER=gemini,groq,cloudflare,openrouter,mistral,cohere,arena,primary
 STUDY_AI_KEY_COOLDOWN_MS=60000
 STUDY_AI_STUDENT_KEY_FALLBACK=true
 ```
 
-Get the two keys from <https://supabase.com/dashboard/project/dwmzbrrnqxzdoxrxbrna/settings/api>.
+Get the two keys from <https://supabase.com/dashboard/project/dwmzbrrnqxzdoxrxbrna/settings/api>. Put the **publishable** key in `SUPABASE_ANON_KEY` and the **secret** key in `SUPABASE_SERVICE_ROLE_KEY`; the variable names stay the same. Legacy anon/service-role JWTs still work during migration. New secret keys can be rotated individually; see [Supabase's migration guide](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys).
+
+If a legacy service-role key was exposed, move both Render variables to the new keys, redeploy and verify registration, login and `/api/leaderboard`. Then disable legacy API keys in Supabase **only after** checking that no other application still uses them. This is a project-wide change and can interrupt other clients. Never publish either secret.
+
+The app creates student accounts through Supabase's **admin** API. For a dedicated project, consider disabling direct public Supabase signups (while leaving the email provider enabled) so students cannot bypass server-side validation. This setting affects every application using the project. After changing it, verify website registration and login before relying on it. The guardian-permission checkbox is self-attestation, not verified parental consent.
+
+If Supabase settings are missing or an obvious placeholder was pasted, `/api/health` reports `accountsBackend: "unavailable"`; account requests return 503 instead of silently creating local, ephemeral accounts. Guest study still works. A `"supabase"` health value means the settings look present, not that credentials or connectivity were tested.
 
 ## 4. Use a real local AI — or add your own free keys
 
@@ -57,7 +63,7 @@ Get the two keys from <https://supabase.com/dashboard/project/dwmzbrrnqxzdoxrxbr
 
 ### 4a. Keyless local model (recommended for offline)
 
-The app bundles WebLLM and a Web Worker. In **Settings → Real local model** (always visible), choose Meta Llama 3.2 1B, SmolLM2, or Qwen2.5, then press **Download & enable**. The first download needs internet; after that the model is cached in the browser and answers, quizzes, flashcards, grading and verification run on the device with Vignan's textbook rules. WebGPU is required; Ollama (`ollama pull llama3.2:1b`) and the cited-excerpt engine are the fallbacks. See `LOCAL_AI.md`.
+The app bundles WebLLM and a Web Worker. In **Settings → Advanced settings → Real local model**, choose Meta Llama 3.2 1B, SmolLM2, or Qwen2.5, then press **Download & enable**. The first download needs internet; after that the model is cached in the browser and answers, quizzes, flashcards, grading and verification run on the device with Vignan's textbook rules. WebGPU is required; Ollama (`ollama pull llama3.2:1b`) and the cited-excerpt engine are the fallbacks. See `LOCAL_AI.md`.
 
 ### 4b. Optional server free router with multiple keys
 

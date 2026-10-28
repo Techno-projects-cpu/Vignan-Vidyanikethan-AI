@@ -17,7 +17,7 @@ import {
   cleanUsername,
   leaderboardFromAccounts,
   publicUser,
-  validatePassword,
+  validateLoginPassword,
   validateRegistration,
   validateUsername,
 } from "./accounts.mjs";
@@ -70,10 +70,10 @@ export function createSupabaseAccountStore({
 
   async function request(path, { method = "GET", body, service = true, prefer = "" } = {}) {
     const key = service ? serviceRoleKey : anonKey;
-    const headers = {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-    };
+    // Opaque publishable/secret keys are not JWTs. Supabase's gateway accepts
+    // them on apikey only; legacy JWT keys still need the Bearer header.
+    const headers = { apikey: key };
+    if (!/^sb_(?:publishable|secret)_/.test(key)) headers.Authorization = `Bearer ${key}`;
     if (body !== undefined) headers["Content-Type"] = "application/json";
     if (prefer) headers.Prefer = prefer;
     const response = await fetchImpl(`${base}${path}`, {
@@ -150,7 +150,7 @@ export function createSupabaseAccountStore({
     let clean;
     try {
       clean = validateUsername(username);
-      validatePassword(password);
+      validateLoginPassword(password);
     } catch {
       return null;
     }
