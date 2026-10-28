@@ -11,6 +11,7 @@ import {
   videoMimeCandidates,
 } from "../js/card.js";
 import { canCreateEditBeat, startEditBeat } from "../js/edit-audio.js";
+import { resultCaption } from "../js/edit-studio.js";
 
 function fakeCanvas() {
   const gradient = { addColorStop() {} };
@@ -129,7 +130,7 @@ test("the edit has distinct intro, score reveal and final scenes, plus calm moti
   drawPerformanceCard(calm, { result, animation: 0, reducedMotion: true });
   assert.ok(calm.drawnText.includes("80%"));
   assert.ok(!calm.drawnText.includes("YOU"));
-  assert.deepEqual(Object.keys(EDIT_STYLES), ["voltage", "pop", "mono"]);
+  assert.deepEqual(Object.keys(EDIT_STYLES), ["nezaad", "voltage", "pop", "mono"]);
 });
 
 test("student nickname and invite code only appear after explicit opt-in", () => {
@@ -141,6 +142,23 @@ test("student nickname and invite code only appear after explicit opt-in", () =>
   drawPerformanceCard(publicFrame, { result, share, includeName: true, includeInvite: true, animation: 1 });
   assert.ok(publicFrame.drawnText.includes("MADE BY @ananya"));
   assert.ok(publicFrame.drawnText.includes("JOIN MY SQUAD: VIGNAN-ANANYA"));
+});
+
+test("the Zero Vast QR is optional, and captions never include an invite without opt-in", () => {
+  const withLink = fakeCanvas();
+  drawPerformanceCard(withLink, { result, animation: 1 });
+  assert.ok(withLink.drawnText.includes("SCAN FOR ZERO VAST"));
+  assert.ok(withLink.drawnText.includes("NEZAAD INDUSTRIES")); // text fallback if the image is unavailable
+  const withoutLink = fakeCanvas();
+  drawPerformanceCard(withoutLink, { result, includeLink: false, animation: 1 });
+  assert.ok(!withoutLink.drawnText.includes("SCAN FOR ZERO VAST"));
+  const share = { username: "ananya", refCode: "PRIVATE-CODE", link: "https://example.test/?ref=PRIVATE-CODE" };
+  const privateCaption = resultCaption(result, share, { includeLink: false });
+  assert.match(privateCaption, /80% on Photosynthesis/);
+  assert.doesNotMatch(privateCaption, /PRIVATE-CODE|ananya|zero-vast/i);
+  const sharedCaption = resultCaption(result, share, { includeLink: true, includeInvite: true });
+  assert.match(sharedCaption, /zero-vast\.vercel\.app/);
+  assert.match(sharedCaption, /PRIVATE-CODE/);
 });
 
 test("format selection prefers compatible MP4, otherwise VP8/Opus WebM", () => {

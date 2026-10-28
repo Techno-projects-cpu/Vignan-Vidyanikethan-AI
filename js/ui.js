@@ -94,9 +94,10 @@ let activeModal = null;
 
 export function closeModal() {
   if (!activeModal) return;
-  const { overlay, onClose, keyHandler, returnFocus } = activeModal;
+  const { overlay, onClose, keyHandler, returnFocus, inerted } = activeModal;
   document.removeEventListener("keydown", keyHandler);
   overlay.remove();
+  for (const [node, wasInert] of inerted || []) node.inert = wasInert;
   activeModal = null;
   onClose?.();
   if (!activeModal && returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
@@ -139,6 +140,11 @@ export function openModal({ title = "", content, footer, className = "", onClose
     if (event.target === overlay) closeModal();
   });
   document.body.appendChild(overlay);
+  // Keep the obscured workspace out of the tab order and accessibility tree.
+  // Preserve pre-existing inert states (for example a closing command menu).
+  const inerted = [...document.body.children]
+    .filter((node) => node !== overlay && node.id !== "toast" && node.tagName !== "SCRIPT")
+    .map((node) => { const wasInert = node.inert; node.inert = true; return [node, wasInert]; });
   const keyHandler = (event) => {
     if (event.key === "Escape") {
       event.preventDefault();
@@ -160,7 +166,7 @@ export function openModal({ title = "", content, footer, className = "", onClose
     }
   };
   document.addEventListener("keydown", keyHandler);
-  activeModal = { overlay, onClose, keyHandler, returnFocus };
+  activeModal = { overlay, onClose, keyHandler, returnFocus, inerted };
   requestAnimationFrame(() => {
     if (activeModal?.overlay !== overlay) return;
     overlay.classList.add("visible");

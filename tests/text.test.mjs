@@ -10,6 +10,13 @@ import {
 } from "../js/text.js";
 import { demoText } from "./helpers.mjs";
 
+test("a long explicitly numbered page keeps its citation number", () => {
+  const text = `[[page:12]]\n${"Important science fact. ".repeat(70)}`;
+  const pages = parsePages(text, { wordsPerPage: 20 });
+  assert.equal(pages.length, 1);
+  assert.equal(pages[0].page, 12);
+});
+
 test("parsePages keeps explicit page markers", () => {
   const pages = parsePages("[[page:1]]\n# Intro\nHello world.\n\n--- Page 7 ---\nMore text.");
   assert.equal(pages.length, 2);

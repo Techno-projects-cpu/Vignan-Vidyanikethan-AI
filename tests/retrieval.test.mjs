@@ -56,11 +56,30 @@ test("retrieve respects book scope", () => {
   assert.ok(result.hits.every((hit) => hit.bookId === "other"));
 });
 
-test("retrieveChapter returns broad context for a topic", () => {
+test("topic retrieval does not pad good matches with unrelated pages", () => {
   const hits = retrieveChapter("photosynthesis", [demoIndex()], { topK: 8 }).hits;
-  assert.equal(hits.length, 8);
   assert.ok(hits.some((hit) => hit.page === 2));
-  assert.ok(hits.every((hit) => typeof hit.text === "string" && hit.page));
+  assert.ok(hits.length < 8);
+  assert.ok(hits.every((hit) => hit.overlap > 0 && hit.score > 0));
+  assert.ok(!hits.some((hit) => [6, 7, 10, 12, 13].includes(hit.page)));
+  const answerHits = retrieve("What is friction?", [demoIndex()], { topK: 5 }).hits;
+  assert.deepEqual(answerHits.map((hit) => hit.page), [8]);
+});
+
+test("unknown topics do not silently become unrelated quizzes; blank topics sample the book", () => {
+  const index = demoIndex();
+  const missing = retrieveChapter("quantum teleportation", [index], { topK: 8 });
+  assert.equal(missing.reason, "not-in-books");
+  assert.deepEqual(missing.hits, []);
+  assert.equal(retrieveChapter("the", [index]).reason, "too-vague");
+  const partial = retrieveChapter("quantum forces", [index]);
+  assert.equal(partial.reason, "partial-topic");
+  assert.deepEqual(partial.hits, []);
+  const general = retrieveChapter("", [index], { topK: 8 });
+  assert.equal(general.reason, "general-practice");
+  assert.equal(general.hits.length, 8);
+  assert.ok(general.hits.every((hit) => hit.bookId === index.book.id));
+  assert.equal(retrieveChapter("", [], {}).reason, "empty-library");
 });
 
 test("indexFromStored reconstructs a searchable index", () => {
@@ -69,4 +88,15 @@ test("indexFromStored reconstructs a searchable index", () => {
   const result = retrieve("What is chlorophyll?", [rebuilt], { topK: 2 });
   assert.equal(result.grounded, true);
   assert.equal(result.hits[0].page, 3);
+});
+
+test("natural instructions do not overpower the student's actual topic", () => {
+  const index = demoIndex();
+  const question = "Can you explain friction with simple examples for my class?";
+  assert.equal(retrieve(question, [index]).hits[0].page, 8);
+  assert.ok(retrieve(question, [index]).hits.every((hit) => hit.page === 8));
+  assert.equal(retrieve("What is friction in simple words?", [index]).hits[0].page, 8);
+  assert.equal(retrieve("Explain quantum teleportation with simple examples for my class", [index]).grounded, false);
+  const machines = buildBookIndex({ id: "machines", title: "Machines" }, "[[page:4]]\n# Simple machines\nA simple machine changes the size or direction of a force and makes work easier.");
+  assert.equal(retrieve("simple machines", [machines]).hits[0].page, 4, "simple is retained when it is part of the subject");
 });

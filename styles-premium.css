@@ -334,7 +334,7 @@ body.premium-ui .premium-icon-button {
   font-family: var(--font);
   font-size: 12px;
   font-weight: 650;
-  transition: border-color 0.25s var(--p-ease), background 0.25s var(--p-ease), transform 0.25s var(--p-ease);
+  transition: border-color 0.25s var(--p-ease), transform 0.25s var(--p-ease);
 }
 
 body.premium-ui .premium-menu-button:hover,
@@ -1578,3 +1578,66 @@ body.premium-ui .main { overscroll-behavior-y: contain; }
 /* A fading-out command menu must not steal the next tap on a phone. */
 body.premium-ui .command-overlay { pointer-events: none; }
 body.premium-ui .command-overlay.open { pointer-events: auto; }
+
+/* A calmer, continuous study loop: answer → quiz → revision. */
+body.premium-ui .message-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+body.premium-ui .message-action {
+  min-height: 36px; padding: 7px 11px; border: 1px solid var(--p-line-strong); border-radius: 999px;
+  background: transparent; color: var(--p-ink-2); font-size: 11px; font-weight: 650;
+}
+body.premium-ui .message-action:hover { background: var(--p-surface-3); color: var(--p-ink); }
+body.premium-ui .saved-decks { margin-bottom: 14px; }
+body.premium-ui .saved-decks-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+body.premium-ui .saved-decks-head h3, body.premium-ui .study-next h3, body.premium-ui .deck-complete h3 { margin: 5px 0; font-size: 19px; letter-spacing: -.025em; }
+body.premium-ui .saved-decks-head p, body.premium-ui .study-next p, body.premium-ui .deck-complete p { margin: 0; color: var(--p-muted); font-size: 12px; line-height: 1.55; }
+body.premium-ui .study-kicker { color: var(--p-muted); font-size: 10px; font-weight: 750; letter-spacing: .11em; text-transform: uppercase; }
+body.premium-ui .deck-stats { flex: 0 0 auto; padding: 6px 10px; border: 1px solid var(--p-line); border-radius: 999px; color: var(--p-ink-2); font-size: 11px; font-weight: 650; white-space: nowrap; }
+body.premium-ui .saved-decks-controls { display: flex; align-items: end; gap: 10px; margin-top: 17px; }
+body.premium-ui .saved-decks-controls label { flex: 1; min-width: 0; }
+body.premium-ui .saved-decks-controls select { width: 100%; min-height: 46px; }
+body.premium-ui .saved-decks-controls .button { min-height: 46px; }
+body.premium-ui .deck-create > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 58px; padding: 14px 18px;
+  border: 1px solid var(--p-line); border-radius: 18px; background: var(--p-surface); color: var(--p-ink);
+  cursor: pointer; list-style: none; font-size: 13px; font-weight: 700;
+}
+body.premium-ui .deck-create > summary::-webkit-details-marker { display: none; }
+body.premium-ui .deck-create > summary > span:last-child { color: var(--p-muted); font-size: 11px; font-weight: 500; }
+body.premium-ui .deck-create > summary > span:last-child span { margin-left: 8px; color: var(--p-ink); font-size: 18px; }
+body.premium-ui .deck-create[open] > summary { border-radius: 18px 18px 0 0; }
+body.premium-ui .deck-create[open] .deck-setup { border-top: 0 !important; border-radius: 0 0 18px 18px; }
+body.premium-ui .deck-create-hint, body.premium-ui .quiz-run-note { margin: 11px 0 0; color: var(--p-muted); font-size: 11px; line-height: 1.5; }
+body.premium-ui .flashcard { display: block; padding: 0; border: 0; border-radius: 22px; background: transparent; color: inherit; font: inherit; }
+body.premium-ui .flashcard:focus-visible { outline: 2px solid var(--p-ink); outline-offset: 4px; }
+body.premium-ui .flashcard-face { padding: 24px 24px 46px; overflow: hidden; }
+body.premium-ui .flashcard-text { max-width: 100%; max-height: 190px; overflow: auto; overflow-wrap: anywhere; font-size: clamp(16px, 2.2vw, 20px); }
+body.premium-ui .flashcard-source { max-width: calc(100% - 30px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.premium-ui .deck-source { min-height: 40px; max-width: min(620px, 100%); overflow-wrap: anywhere; text-align: center; }
+body.premium-ui .deck-complete { width: min(620px, 100%); text-align: center; padding: 30px 22px; }
+body.premium-ui .deck-complete .button { min-height: 44px; margin-top: 16px; }
+body.premium-ui .deck-complete small { display: block; margin-top: 10px; color: var(--p-muted); font-size: 11px; }
+body.premium-ui .study-next { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+body.premium-ui .study-next .button { flex: 0 0 auto; min-height: 46px; }
+body.premium-ui .recent-review { flex: 0 0 auto; min-height: 40px; }
+body.premium-ui .reader-search { display: block; margin-bottom: 10px; }
+body.premium-ui .reader-search input { width: 100%; min-height: 44px; }
+body.premium-ui .reader-search-status { display: block; color: var(--p-muted); font-size: 11px; line-height: 1.5; }
+body.premium-ui .reader-search-status:not(:empty) { padding-top: 6px; }
+body.premium-ui .reader-page-button[hidden] { display: none; }
+body.premium-ui .reader-page-text mark { background: var(--p-ink); color: var(--p-bg); }
+@media (max-width: 600px) {
+  body.premium-ui .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  body.premium-ui .stat-card { min-width: 0; padding: 14px; overflow-wrap: anywhere; }
+  body.premium-ui .stat-card .stat-value { font-size: clamp(22px, 6vw, 28px); }
+  body.premium-ui .stat-card .hint { font-size: 11px; }
+  body.premium-ui .saved-decks-head { gap: 8px; }
+  body.premium-ui .saved-decks-controls { align-items: stretch; flex-direction: column; }
+  body.premium-ui .saved-decks-controls .button { width: 100%; }
+  body.premium-ui .study-next { align-items: stretch; flex-direction: column; }
+  body.premium-ui .study-next .button { width: 100%; }
+  body.premium-ui .deck-create > summary > span:last-child { font-size: 10px; white-space: nowrap; }
+  body.premium-ui .flashcard-face { padding: 18px 18px 42px; }
+  body.premium-ui .reader { min-height: 0; }
+  body.premium-ui .reader-page-button { min-height: 40px; }
+  body.premium-ui .message-action { min-height: 44px; }
+}

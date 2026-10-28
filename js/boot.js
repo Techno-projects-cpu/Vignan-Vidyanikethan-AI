@@ -3,8 +3,9 @@
  * a student logs in, registers, or chooses guest mode. Guest mode is available
  * even when the account server is asleep or the device is offline.
  */
-import { clearReferral, getSession, login, register } from "./auth.js?v=11";
-import { newPasswordProblem } from "./password-policy.js";
+import { clearReferral, getSession, login, register } from "./auth.js?v=12";
+import { newPasswordProblem } from "./password-policy.js?v=12";
+import { setupStartup } from "./startup.js?v=12";
 
 const GUEST_SESSION_KEY = "vignan_guest_session";
 const USERNAME_RE = /^[a-zA-Z0-9_-]{3,20}$/;
@@ -14,6 +15,14 @@ const loginForm = document.getElementById("gate-login-form");
 const registerForm = document.getElementById("gate-register-form");
 const loginTab = document.getElementById("gate-login-tab");
 const registerTab = document.getElementById("gate-register-tab");
+let startupStorage = null;
+try { startupStorage = globalThis.sessionStorage; } catch { /* Private browsing can block the getter. */ }
+const startup = setupStartup({
+  screen: document.getElementById("startup-screen"), gate,
+  enter: document.getElementById("startup-enter"), skip: document.getElementById("startup-skip"),
+  focusTarget: () => document.getElementById(registerForm.hidden ? "gate-login-username" : "gate-register-username"),
+  storage: startupStorage,
+});
 let appModulePromise;
 let appStarted = false;
 let unlocking = false;
@@ -104,7 +113,7 @@ function removeAuthParameter() {
 }
 function loadApp() {
   if (!appModulePromise) {
-    appModulePromise = import("./app.js?v=11").catch((error) => {
+    appModulePromise = import("./app.js?v=12").catch((error) => {
       appModulePromise = null;
       throw error;
     });
@@ -267,6 +276,7 @@ function bindForms() {
     interacted = true;
     flowGeneration += 1;
     rememberGuest();
+    removeAuthParameter();
     setBusy(guest, true, "Opening…");
     await unlock({ guest: true });
     setBusy(guest, false);
@@ -297,10 +307,18 @@ async function boot() {
       const session = await getSession({ timeout: 5000 });
       if (generation !== gateGeneration) return;
       if (session.user && !interacted) await unlock({ user: session.user });
-      else setStatus(session.accountsAvailable === false ? "Accounts are unavailable right now. You can continue as a guest." : "");
+      else {
+        setStatus(session.accountsAvailable === false ? "Accounts are unavailable right now. You can continue as a guest." : "");
+        if (!interacted) startup.show();
+      }
     } catch {
-      if (generation === gateGeneration && !interacted) setStatus("Accounts may be offline. Guest mode is still available.");
+      if (generation === gateGeneration && !interacted) {
+        setStatus("Accounts may be offline. Guest mode is still available.");
+        startup.show();
+      }
     }
+  } else {
+    startup.show();
   }
 
   // Prefetch only on devices that have not requested data savings. No app

@@ -3,8 +3,8 @@
  * Cards are derived from retrieved passages and always carry a page citation.
  */
 
-import { localDay, truncate, uid } from "./util.js";
-import { splitSentences, tokenize } from "./text.js";
+import { localDay, truncate, uid } from "./util.js?v=12";
+import { splitSentences, tokenize } from "./text.js?v=12";
 
 const PROGRESS_KEY = "vignan-study-ai.flashcards.v1";
 const INTERVALS = [0, 1, 3, 7, 16, 35];
@@ -113,11 +113,11 @@ export function dueCards(cards, progress, today = localDay()) {
   });
 }
 
-export function deckStats(cards, progress) {
+export function deckStats(cards, progress, today = localDay()) {
   const stats = { due: 0, learning: 0, mastered: 0, reviews: 0 };
   for (const card of cards) {
     const state = progress[card.id];
-    if (!state || state.due <= localDay()) stats.due += 1;
+    if (!state || !state.due || state.due <= today) stats.due += 1;
     if (!state || state.box <= 1) stats.learning += 1;
     else stats.mastered += 1;
     stats.reviews += state?.reviews || 0;
@@ -125,17 +125,19 @@ export function deckStats(cards, progress) {
   return stats;
 }
 
-export function readProgress(storage = globalThis.localStorage) {
+export function readProgress(storage) {
   try {
-    return JSON.parse(storage?.getItem(PROGRESS_KEY) || "{}");
+    const target = storage === undefined ? globalThis.localStorage : storage;
+    return JSON.parse(target?.getItem(PROGRESS_KEY) || "{}");
   } catch {
     return {};
   }
 }
 
-export function writeProgress(progress, storage = globalThis.localStorage) {
+export function writeProgress(progress, storage) {
   try {
-    storage?.setItem(PROGRESS_KEY, JSON.stringify(progress));
+    const target = storage === undefined ? globalThis.localStorage : storage;
+    target?.setItem(PROGRESS_KEY, JSON.stringify(progress));
   } catch {
     // Storage may be disabled; the in-memory copy still works for this session.
   }

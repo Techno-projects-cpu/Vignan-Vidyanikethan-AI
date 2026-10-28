@@ -6,7 +6,7 @@
  * The app ships with web fallback OFF and no third-party search provider.
  */
 
-import { safeUrl, truncate } from "./util.js";
+import { safeUrl, truncate } from "./util.js?v=12";
 
 function firstArray(data) {
   if (Array.isArray(data)) return data;

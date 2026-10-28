@@ -1,19 +1,27 @@
 /**
  * Result edit studio: an original, locally rendered 9:16 story. It never
- * changes the student's score and does not need a server, music file or font.
- * The optional synth soundtrack is made on this device with Web Audio.
+ * changes the student's score and does not need a server or music download.
+ * Bundled fonts, the QR code and the optional synth beat stay on this device.
  */
 
-import { clamp, easeOut, truncate } from "./util.js";
-import { startEditBeat } from "./edit-audio.js";
+import { clamp, easeOut, truncate } from "./util.js?v=12";
+import { startEditBeat } from "./edit-audio.js?v=12";
+import { qrcode } from "../vendor/qr/qrcode.js?v=12";
 
 const WIDTH = 1080;
 const HEIGHT = 1920;
-const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+const FONT = '"Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif';
 const frameCache = new WeakMap();
 export const EDIT_DURATION = 8000;
+export const PROJECT_LINK = "https://zero-vast.vercel.app/";
+
+// Generated once, locally. The four-module quiet zone is drawn around it.
+const projectQR = qrcode(0, "M");
+projectQR.addData(PROJECT_LINK);
+projectQR.make();
 
 export const EDIT_STYLES = Object.freeze({
+  nezaad: { label: "Nezaad", description: "Sharp & monochrome", bg: "#080808", glow: "#303030", accent: "#ffffff", second: "#aaaaaa", ink: "#fafafa", muted: "#aaaaaa" },
   voltage: { label: "Voltage", description: "Electric & bold", bg: "#080a09", glow: "#344619", accent: "#d9ff55", second: "#c6a9ff", ink: "#f7f8f3", muted: "#a6aaa0" },
   pop: { label: "Pop", description: "Playful & bright", bg: "#100914", glow: "#4a1e45", accent: "#ff91c2", second: "#8be6ee", ink: "#fff8fc", muted: "#c4aebb" },
   mono: { label: "Mono", description: "Clean & classic", bg: "#080808", glow: "#343434", accent: "#ffffff", second: "#bdbdbd", ink: "#fafafa", muted: "#aaaaaa" },
@@ -120,7 +128,7 @@ function backdrop(ctx, palette, time, reducedMotion) {
 function topLine(ctx, palette, page) {
   star(ctx, 91, 167, 16, palette.accent, Math.PI / 4);
   text(ctx, "VIGNAN AI", 126, 177, { size: 27, weight: 850, color: palette.ink });
-  text(ctx, "THE STUDY CLUB", 990, 177, { size: 19, weight: 750, color: palette.muted, align: "right" });
+  text(ctx, "INSPIRE / MANAK", 990, 177, { size: 19, weight: 750, color: palette.muted, align: "right" });
   line(ctx, 78, 208, 1002, 208, "rgba(255,255,255,0.2)", 2);
   text(ctx, page, 1001, 250, { size: 18, weight: 700, color: palette.muted, align: "right" });
 }
@@ -199,9 +207,41 @@ function stat(ctx, x, y, label, value, palette) {
   text(ctx, value, x + 22, y + 100, { size: 45, weight: 850, color: palette.ink, maxWidth: 245 });
 }
 
+function drawProjectQR(ctx, palette) {
+  const count = projectQR.getModuleCount();
+  const moduleSize = 5;
+  const quiet = 4;
+  const x = 800;
+  const y = 265;
+  const size = (count + quiet * 2) * moduleSize;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(x, y, size, size);
+  ctx.fillStyle = "#000000";
+  for (let row = 0; row < count; row += 1) {
+    for (let column = 0; column < count; column += 1) {
+      if (projectQR.isDark(row, column)) ctx.fillRect(x + (column + quiet) * moduleSize, y + (row + quiet) * moduleSize, moduleSize, moduleSize);
+    }
+  }
+  text(ctx, "SCAN FOR ZERO VAST", x + size / 2, y + size + 25, { size: 14, weight: 800, color: palette.ink, align: "center", maxWidth: size });
+}
+
+function drawBrand(ctx, palette, image) {
+  if (image?.complete && image.naturalWidth && "filter" in ctx) {
+    try {
+      ctx.save();
+      ctx.filter = "invert(1)"; // The supplied logo is black on transparent.
+      ctx.drawImage(image, 80, 1793, 185, 185 * image.naturalHeight / image.naturalWidth);
+      ctx.restore();
+      return;
+    } catch { ctx.restore(); /* Text fallback below. */ }
+  }
+  text(ctx, "NEZAAD INDUSTRIES", 80, 1822, { size: 22, weight: 800, color: palette.ink });
+}
+
 function finalScene(ctx, palette, result, progress, share, options, time) {
   const percent = scorePercent(result.percent);
   badge(ctx, 80, 260, 260, "QUIZ COMPLETE", palette, { fill: true });
+  if (options.includeLink !== false) drawProjectQR(ctx, palette);
   text(ctx, "GOOD", 74, 438, { size: 123, weight: 900, color: palette.ink });
   text(ctx, "STUFF.", 74, 558, { size: 123, weight: 900, color: palette.accent });
   text(ctx, truncate(result.topic || "Chapter quiz", 52), 84, 618, { size: 31, weight: 600, color: palette.muted, maxWidth: 850 });
@@ -246,6 +286,8 @@ function finalScene(ctx, palette, result, progress, share, options, time) {
   text(ctx, name ? `MADE BY @${name}` : "MADE WITH VIGNAN AI", 80, 1708, { size: 22, weight: 800, color: palette.ink, maxWidth: 650 });
   text(ctx, "STUDY • PRACTISE • REPEAT", 80, 1750, { size: 19, weight: 700, color: palette.muted });
   if (invite) text(ctx, `JOIN MY SQUAD: ${invite}`, 1000, 1750, { size: 18, weight: 800, color: palette.accent, align: "right", maxWidth: 440 });
+  drawBrand(ctx, palette, options.brandImage);
+  text(ctx, "STUDENT PROJECT / INSPIRE MANAK", 1000, 1822, { size: 17, weight: 750, color: palette.muted, align: "right", maxWidth: 570 });
   star(ctx, 963, 1696, 24, palette.accent, Math.PI / 4);
 }
 
@@ -265,7 +307,9 @@ function cachedLayers(canvas, { width, height, palette, result, progress, share,
   const key = JSON.stringify([
     width, options.style, result.percent, result.score, result.total, result.xp, result.topic,
     (result.perQuestion || []).slice(0, 10).map((item) => item.awarded), result.reviseList?.[0]?.topic,
-    progress.current, options.includeName, options.includeInvite, share.username, share.refCode,
+    progress.current, options.includeName, options.includeInvite, options.includeLink !== false, share.username, share.refCode,
+    Boolean(options.brandImage?.complete && options.brandImage?.naturalWidth),
+    globalThis.document?.fonts?.check?.('700 32px "Space Grotesk"') ?? false,
   ]);
   const previous = frameCache.get(canvas);
   if (previous?.key === key) return previous;
@@ -300,7 +344,7 @@ function cachedLayers(canvas, { width, height, palette, result, progress, share,
 export function drawPerformanceCard(canvas, options = {}) {
   if (!canvas) throw new Error("A canvas is required to draw the edit video frame.");
   const { result = {}, progress = {}, profile = "Student", account = null, share = {}, animation = 1, renderWidth = WIDTH, reducedMotion = false } = options;
-  const palette = EDIT_STYLES[options.style] || EDIT_STYLES.voltage;
+  const palette = EDIT_STYLES[options.style] || EDIT_STYLES.nezaad;
   const width = Math.round(clamp(Number(renderWidth) || WIDTH, 270, WIDTH));
   const height = Math.round(width * HEIGHT / WIDTH);
   if (canvas.width !== width) canvas.width = width;
@@ -351,8 +395,11 @@ export function drawPerformanceCard(canvas, options = {}) {
     ctx.save();
     ctx.globalAlpha = 0.8;
     const pulse = 1 + 0.12 * Math.sin(time * Math.PI * 32);
-    star(ctx, 945, 490, 24 * pulse, palette.second, time * 4);
+    star(ctx, 965, 670, 24 * pulse, palette.second, time * 4);
     star(ctx, 133, 1120, 14 * pulse, palette.accent, -time * 3);
+    // A subtle timeline makes the three scenes feel like one continuous edit.
+    ctx.fillStyle = palette.accent;
+    ctx.fillRect(78, 207, 924 * time, 4);
     ctx.restore();
   }
   ctx.restore();
@@ -526,7 +573,7 @@ function recordOnce({ canvas, frameOptions, duration, onProgress, signal, beat, 
 }
 
 /** Record in real time. Sound is optional; unsupported audio falls back to silence. */
-export async function createPerformanceVideo({ canvas, result, progress, profile, account, share, style = "voltage", includeName = false, includeInvite = false, reducedMotion = false, renderWidth = 720, music = true, duration = EDIT_DURATION, onProgress = () => {}, onRetry = () => {}, signal } = {}) {
+export async function createPerformanceVideo({ canvas, result, progress, profile, account, share, style = "nezaad", includeName = false, includeInvite = false, includeLink = true, brandImage = null, reducedMotion = false, renderWidth = 720, music = true, duration = EDIT_DURATION, onProgress = () => {}, onRetry = () => {}, signal } = {}) {
   if (!globalThis.MediaRecorder || !canvas?.captureStream) {
     throw new Error("Video recording is not supported here. Download the PNG poster instead.");
   }
@@ -552,7 +599,7 @@ export async function createPerformanceVideo({ canvas, result, progress, profile
       try {
         const recorded = await recordOnce({
           canvas, duration: length, onProgress, signal, beat, excludedMimes,
-          frameOptions: { result, progress, profile, account, share, style, includeName, includeInvite, reducedMotion, renderWidth },
+          frameOptions: { result, progress, profile, account, share, style, includeName, includeInvite, includeLink, brandImage, reducedMotion, renderWidth },
         });
         const extension = videoExtension(recorded.mime);
         return { ...recorded, extension, filename: `vignan-ai-edit-${new Date().toISOString().slice(0, 10)}.${extension}` };

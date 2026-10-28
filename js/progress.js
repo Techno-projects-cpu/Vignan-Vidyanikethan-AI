@@ -3,7 +3,7 @@
  * No accounts and no server: profiles are just names typed on this device.
  */
 
-import { localDay, truncate } from "./util.js";
+import { localDay, truncate } from "./util.js?v=12";
 
 const PROGRESS_KEY = "vignan-study-ai.progress.v1";
 
@@ -21,18 +21,20 @@ export function defaultProgress() {
   };
 }
 
-export function readProgress(storage = globalThis.localStorage) {
+export function readProgress(storage) {
   try {
-    const parsed = JSON.parse(storage?.getItem(PROGRESS_KEY) || "null");
+    const target = storage === undefined ? globalThis.localStorage : storage;
+    const parsed = JSON.parse(target?.getItem(PROGRESS_KEY) || "null");
     return parsed ? { ...defaultProgress(), ...parsed, history: parsed.history || [] } : defaultProgress();
   } catch {
     return defaultProgress();
   }
 }
 
-export function writeProgress(state, storage = globalThis.localStorage) {
+export function writeProgress(state, storage) {
   try {
-    storage?.setItem(PROGRESS_KEY, JSON.stringify(state));
+    const target = storage === undefined ? globalThis.localStorage : storage;
+    target?.setItem(PROGRESS_KEY, JSON.stringify(state));
   } catch {
     // Storage may be disabled; keep the in-memory state for this session.
   }
@@ -84,11 +86,18 @@ export function accuracy(state = defaultProgress()) {
   return state.totalQuestions ? Math.round((state.totalCorrect / state.totalQuestions) * 100) : 0;
 }
 
-export function streakMessage(state = defaultProgress()) {
-  if (!state.current) return "Finish a quiz to start your streak.";
-  if (state.current === 1) return "Day 1 — come back tomorrow to keep it going.";
-  if (state.current >= 7) return `${state.current}-day streak. That is exam-week energy!`;
-  return `${state.current}-day streak. Keep it alive tomorrow.`;
+/** The stored streak expires if no quiz was completed today or yesterday. */
+export function currentStreak(state = defaultProgress(), today = localDay()) {
+  if (!state.lastDay || !Number.isFinite(dayDifference(today, state.lastDay))) return 0;
+  const difference = dayDifference(today, state.lastDay);
+  return difference >= 0 && difference <= 1 ? Math.max(0, Number(state.current) || 0) : 0;
+}
+
+export function streakMessage(state = defaultProgress(), today = localDay()) {
+  const current = currentStreak(state, today);
+  if (!current) return state.current ? "Your streak ended. Finish a quiz to start again." : "Finish a quiz to start your streak.";
+  if (dayDifference(today, state.lastDay) === 1) return `Finish a quiz today to keep your ${current}-day streak.`;
+  return `Quiz completed today · ${current}-day streak. Come back tomorrow.`;
 }
 
 /** Aggregate per-topic percentages from saved quiz results. */
@@ -126,7 +135,7 @@ export function leaderboard(results = [], { limit = 8 } = {}) {
     .slice(0, limit);
 }
 
-export function resetProgress(storage = globalThis.localStorage) {
+export function resetProgress(storage) {
   const fresh = defaultProgress();
   writeProgress(fresh, storage);
   return fresh;

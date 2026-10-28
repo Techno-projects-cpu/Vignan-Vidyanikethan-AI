@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   accuracy,
+  currentStreak,
   defaultProgress,
   leaderboard,
   readProgress,
@@ -45,7 +46,7 @@ test("recordResult starts a streak and accumulates XP", () => {
   assert.equal(progress.totalQuizzes, 1);
   assert.equal(progress.history[0].profile, "Ananya");
   assert.equal(accuracy(progress), 80);
-  assert.match(streakMessage(progress), /Day 1/);
+  assert.match(streakMessage(progress, "2026-10-27"), /1-day streak/);
 });
 
 test("streak increments on consecutive days and resets after a gap", () => {
@@ -58,6 +59,15 @@ test("streak increments on consecutive days and resets after a gap", () => {
   progress = recordResult(progress, result({ id: "r4" }), { day: "2026-11-02" });
   assert.equal(progress.current, 1);
   assert.equal(progress.best, 2);
+});
+
+test("displayed streak expires after a missed day without waiting for another quiz", () => {
+  const progress = recordResult(defaultProgress(), result(), { day: "2026-10-27" });
+  assert.equal(currentStreak(progress, "2026-10-27"), 1);
+  assert.equal(currentStreak(progress, "2026-10-28"), 1);
+  assert.match(streakMessage(progress, "2026-10-28"), /today/i);
+  assert.equal(currentStreak(progress, "2026-10-29"), 0);
+  assert.match(streakMessage(progress, "2026-10-29"), /ended/i);
 });
 
 test("progress persists to an injected storage", () => {
@@ -92,4 +102,23 @@ test("leaderboard ranks local profiles without a server", () => {
   assert.equal(board[0].quizzes, 2);
   assert.equal(board[0].average, 85);
   assert.equal(board[1].name, "Kiran");
+});
+
+test("progress works in memory when the browser blocks localStorage access", async () => {
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  Object.defineProperty(globalThis, "localStorage", { configurable: true, get() { throw new Error("blocked"); } });
+  try {
+    assert.equal(readProgress().xp, 0);
+    assert.equal(writeProgress({ xp: 12 }).xp, 12);
+    assert.equal(resetProgress().xp, 0);
+    const flash = await import("../js/flashcards.js");
+    assert.deepEqual(flash.readProgress(), {});
+    assert.doesNotThrow(() => flash.writeProgress({}));
+    const i18n = await import("../js/i18n.js");
+    assert.equal(i18n.setLanguage("en", { root: null }), "en");
+    assert.equal(i18n.initLanguage({ root: null }), "en");
+  } finally {
+    if (descriptor) Object.defineProperty(globalThis, "localStorage", descriptor);
+    else delete globalThis.localStorage;
+  }
 });

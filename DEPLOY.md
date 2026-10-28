@@ -55,6 +55,8 @@ If a legacy service-role key was exposed, move both Render variables to the new 
 
 The app creates student accounts through Supabase's **admin** API. For a dedicated project, consider disabling direct public Supabase signups (while leaving the email provider enabled) so students cannot bypass server-side validation. This setting affects every application using the project. After changing it, verify website registration and login before relying on it. The guardian-permission checkbox is self-attestation, not verified parental consent.
 
+Before inviting students, the operator should review `privacy.html` and `terms.html` with appropriate legal guidance, add a real contact channel, decide server-side retention and deletion procedures, and arrange any required guardian consent. Deleting local data does not delete an account or downloaded files, and there is currently no self-service account deletion.
+
 If Supabase settings are missing or an obvious placeholder was pasted, `/api/health` reports `accountsBackend: "unavailable"`; account requests return 503 instead of silently creating local, ephemeral accounts. Guest study still works. A `"supabase"` health value means the settings look present, not that credentials or connectivity were tested.
 
 ## 4. Use a real local AI — or add your own free keys

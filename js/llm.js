@@ -13,15 +13,15 @@ import {
   SYSTEM_PROMPT,
   extractJson,
   formatContext,
-} from "./context.js";
+} from "./context.js?v=12";
 import {
   callProvider,
   callRoutedModel,
   gradeShortWithModel,
   testProvider,
   verifyAnswer,
-} from "./model-router.js";
-import { truncate, uid } from "./util.js";
+} from "./model-router.js?v=12";
+import { truncate, uid } from "./util.js?v=12";
 
 export {
   FLASHCARD_SCHEMA,

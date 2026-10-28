@@ -121,7 +121,7 @@ const EN = {
   "flashcards.gotIt": "Got it",
   "flashcards.empty": "Generate a deck from your books to start reviewing.",
   "flashcards.due": "due now",
-  "progress.streak": "Study streak",
+  "progress.streak": "Quiz streak",
   "progress.xp": "XP earned",
   "progress.quizzes": "Quizzes finished",
   "progress.accuracy": "Accuracy",
@@ -262,7 +262,7 @@ const TE = {
   "flashcards.gotIt": "అర్థమైంది",
   "flashcards.empty": "సమీక్ష కోసం మీ పుస్తకాల నుంచి కార్డులు తయారు చేయండి.",
   "flashcards.due": "ఇప్పుడు చేయాల్సినవి",
-  "progress.streak": "చదువు స్ట్రీక్",
+  "progress.streak": "క్విజ్ స్ట్రీక్",
   "progress.xp": "సంపాదించిన XP",
   "progress.quizzes": "పూర్తి చేసిన క్విజ్\u200cలు",
   "progress.accuracy": "ఖచ్చితత్వం",
@@ -325,11 +325,12 @@ export function applyTranslations(root = globalThis.document) {
   });
 }
 
-export function setLanguage(language, { storage = globalThis.localStorage, root = globalThis.document } = {}) {
+export function setLanguage(language, { storage, root = globalThis.document } = {}) {
   current = LANGUAGES[language] ? language : "en";
   if (root?.documentElement) root.documentElement.lang = current;
   try {
-    storage?.setItem(LANGUAGE_KEY, current);
+    const target = storage === undefined ? globalThis.localStorage : storage;
+    target?.setItem(LANGUAGE_KEY, current);
   } catch {
     // Ignore storage errors.
   }
@@ -337,10 +338,11 @@ export function setLanguage(language, { storage = globalThis.localStorage, root 
   return current;
 }
 
-export function initLanguage({ storage = globalThis.localStorage, root = globalThis.document } = {}) {
+export function initLanguage({ storage, root = globalThis.document } = {}) {
   let language = "en";
   try {
-    language = storage?.getItem(LANGUAGE_KEY) || globalThis.navigator?.language?.slice(0, 2) || "en";
+    const target = storage === undefined ? globalThis.localStorage : storage;
+    language = target?.getItem(LANGUAGE_KEY) || globalThis.navigator?.language?.slice(0, 2) || "en";
   } catch {
     language = "en";
   }

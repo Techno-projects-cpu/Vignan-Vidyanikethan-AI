@@ -34,6 +34,7 @@ test("cleanStudentKeyVault strips endpoint query secrets and deduplicates keys",
   assert.equal(vault.gemini.model, "gemini-test");
   assert.deepEqual(vault.gemini.keys, ["KEY-ALPHA", "KEY-BETA"]);
   assert.equal(cleanStudentEndpoint("http://localhost:1234/v1", "https://api.openai.com/v1"), "https://api.openai.com/v1");
+  assert.equal(cleanStudentEndpoint("https://user:SECRET@api.openai.com/v1?token=SECRET"), "https://api.openai.com/v1");
 });
 
 test("studentKeyPayload respects the fallback switch and summary counts", () => {
@@ -97,6 +98,13 @@ test("buildStudentUpstreams allows an official Cloudflare account path on the of
   assert.equal(upstreams[0].apiKey, "CF-STUDENT");
 });
 
+test("student endpoints reject nonstandard ports and discard URL credentials", () => {
+  const [credentialed] = buildStudentUpstreams([{ providerId: "gemini", keys: ["KEY"], endpoint: "https://name:SECRET@generativelanguage.googleapis.com/v1?token=SECRET" }]);
+  assert.equal(credentialed.endpoint, "https://generativelanguage.googleapis.com/v1");
+  const [nonstandard] = buildStudentUpstreams([{ providerId: "gemini", keys: ["KEY"], endpoint: "https://generativelanguage.googleapis.com:4444/v1" }]);
+  assert.equal(nonstandard.endpoint, "https://generativelanguage.googleapis.com/v1beta/openai");
+});
+
 test("db.exportData masks provider keys, student keys and search tokens", async () => {
   await db.clearAllData();
   const settings = normalizeSettings({
@@ -116,4 +124,33 @@ test("db.exportData masks provider keys, student keys and search tokens", async 
   assert.deepEqual(stored.value.providers.openai.apiKeys, ["[stored locally]"]);
   assert.deepEqual(stored.value.studentKeys.gemini.keys, ["[stored locally]"]);
   assert.equal(stored.value.searchToken, "");
+});
+
+test("export removes legacy keys, URL credentials and unrecognised provider headers", async () => {
+  await db.clearAllData();
+  await db.setSetting("settings", {
+    engine: "custom", apiKey: "OLD-SECRET", apiKeys: ["OTHER-SECRET"], customApiKey: "CUSTOM-SECRET",
+    endpoint: "https://user:PASS-SECRET@example.test/v1?api_key=URL-SECRET#frag",
+    searchEndpoint: "https://name:PASS-SECRET@example.test/search?key=SEARCH-SECRET",
+    providers: { custom: { endpoint: "https://user:PASS-SECRET@example.test/v1?token=URL-SECRET", apiKey: "PROVIDER-SECRET", extraHeaders: { Authorization: "HEADER-SECRET" } } },
+    studentKeys: { gemini: { endpoint: "https://user:PASS-SECRET@generativelanguage.googleapis.com/v1?key=URL-SECRET", keys: ["STUDENT-SECRET"] } },
+  });
+  await db.setSetting("apiKey", "STANDALONE-SECRET");
+  const exported = await db.exportData();
+  const serialized = JSON.stringify(exported);
+  for (const secret of ["OLD-SECRET", "OTHER-SECRET", "CUSTOM-SECRET", "PASS-SECRET", "URL-SECRET", "SEARCH-SECRET", "PROVIDER-SECRET", "HEADER-SECRET", "STUDENT-SECRET", "STANDALONE-SECRET"]) {
+    assert.ok(!serialized.includes(secret), `${secret} must not be exported`);
+  }
+  assert.match(serialized, /https:\/\/example\.test\/v1/);
+  await db.clearAllData();
+});
+
+test("data export masks student keys even when older settings lack providers", async () => {
+  await db.clearAllData();
+  await db.setSetting("settings", { studentKeys: { gemini: { keys: ["STUDENT-SECRET"] } }, searchToken: "SEARCH-SECRET" });
+  const exported = await db.exportData();
+  const serialized = JSON.stringify(exported);
+  assert.ok(!serialized.includes("STUDENT-SECRET"));
+  assert.ok(!serialized.includes("SEARCH-SECRET"));
+  await db.clearAllData();
 });

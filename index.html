@@ -10,9 +10,35 @@
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./styles-premium.css?v=11">
+  <link rel="stylesheet" href="./styles-premium.css?v=12">
+  <link rel="stylesheet" href="./styles-identity.css?v=12">
 </head>
 <body class="minimal-ui premium-ui auth-locked">
+
+  <section class="startup-screen" id="startup-screen" role="dialog" aria-modal="true" aria-labelledby="startup-title" hidden>
+    <div class="startup-frame">
+      <header class="startup-top">
+        <span class="startup-wordmark">VIGNAN<span> / AI</span></span>
+        <div class="startup-top-right"><span class="startup-edition">A STUDENT PROJECT &nbsp; / &nbsp; 01</span><button type="button" id="startup-skip">Skip intro ↗</button></div>
+      </header>
+      <div class="startup-body">
+        <div class="startup-side" aria-hidden="true"><span>INSPIRE MANAK</span><span>01 — 03</span></div>
+        <div class="startup-copy">
+          <span class="startup-kicker"><span aria-hidden="true">✦</span> BUILT TO LEARN DIFFERENTLY</span>
+          <h1 id="startup-title">YOUR BOOKS.<br><em>YOUR EDGE.</em></h1>
+          <p>Turn the pages you already have into answers, quizzes, and your next big breakthrough.</p>
+          <div class="startup-actions">
+            <button type="button" id="startup-enter" class="startup-enter">Enter study space <span aria-hidden="true">↗</span></button>
+            <a href="https://zero-vast.vercel.app/" target="_blank" rel="noopener noreferrer">Explore Zero Vast <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
+      <footer class="startup-footer">
+        <div><span>CREATED BY A STUDENT OF</span><strong>Vignan Vidyanikethan English Medium High School</strong><small>For the INSPIRE-MANAK science fair</small></div>
+        <img class="nezaad-logo" src="./assets/brand/nezaad-mark.png" alt="Nezaad Industries" width="927" height="192">
+      </footer>
+    </div>
+  </section>
 
   <main class="auth-gate" id="auth-gate" aria-labelledby="auth-gate-title">
     <div class="auth-gate-shell">
@@ -29,6 +55,7 @@
           <span class="auth-gate-kicker"><span aria-hidden="true"></span> YOUR BOOKS. YOUR PACE.</span>
           <h1 id="auth-gate-title">A little more<br><em>room to learn.</em></h1>
           <p>Ask your textbooks, practise a chapter, and pick up right where you left off.</p>
+          <p class="project-attribution">Created by a student of Vignan Vidyanikethan English Medium High School for the INSPIRE-MANAK science fair.</p>
           <div class="auth-gate-features" aria-label="Study tools">
             <span><span aria-hidden="true">↗</span> Upload a PDF</span>
             <span><span aria-hidden="true">↗</span> Answers with sources</span>
@@ -127,6 +154,7 @@
         <span>No email needed</span><span aria-hidden="true">·</span>
         <span>Books are stored on this device</span><span aria-hidden="true">·</span>
         <span>On shared devices, local data remains after log out</span>
+        <span aria-hidden="true">·</span><a href="./privacy.html" target="_blank" rel="noopener">Privacy</a><span aria-hidden="true">·</span><a href="./terms.html" target="_blank" rel="noopener">Terms</a><span aria-hidden="true">·</span><a href="https://zero-vast.vercel.app/" target="_blank" rel="noopener noreferrer">Zero Vast ↗</a>
       </footer>
       <noscript><p class="gate-noscript">JavaScript is required to open the study workspace. Please enable it and reload.</p></noscript>
     </div>
@@ -226,13 +254,14 @@
         <section class="view active" id="view-ask" data-panel="ask">
           <section class="premium-hero" id="premium-hero" data-reveal>
             <div class="premium-hero-eyebrow"><span class="premium-hero-dot"></span> BUILT-IN INSTANT AI</div>
-            <h2>Ask your books.</h2>
+            <h2>Ask your books<span class="hero-period">.</span></h2>
             <p>Upload a textbook, ask anything, and get page-cited answers. Bolt is already inside — no download, no key.</p>
             <div class="premium-hero-actions">
               <button type="button" class="premium-button primary" data-premium-action="upload-pdf">Upload PDF <span aria-hidden="true">↗</span></button>
               <button type="button" class="premium-button" data-premium-action="instant-ai">Use Bolt</button>
               <button type="button" class="premium-button quiet" data-premium-action="menu">Explore <kbd>⌘K</kbd></button>
             </div>
+            <div class="premium-project-line"><span>STUDENT BUILT</span> Vignan Vidyanikethan English Medium High School · INSPIRE-MANAK</div>
             <div class="premium-hero-meta">
               <span>Private by default</span>
               <span>Answers with page numbers</span>
@@ -280,9 +309,9 @@
                 <span class="count-badge" id="source-count">0</span>
               </div>
               <div class="confidence-box hidden" id="confidence-box">
-                <div class="confidence-top"><span>Grounding confidence</span><strong id="confidence-value">0%</strong></div>
+                <div class="confidence-top"><span>Textbook match estimate</span><strong id="confidence-value">0%</strong></div>
                 <div class="meter"><span id="confidence-bar"></span></div>
-                <p id="confidence-label"></p>
+                <p id="confidence-label"></p><p class="confidence-explainer">A search estimate, not a guarantee. Check the cited pages.</p>
               </div>
               <div class="verification-box hidden" id="verification-box"></div>
               <div class="source-list" id="source-list"></div>
@@ -344,10 +373,11 @@
               <label class="quiz-type-field"><span data-i18n="quiz.typeLabel">Question type</span><select id="quiz-type"><option value="mcq" data-i18n="quiz.typeMcq">Multiple choice</option><option value="fill" data-i18n="quiz.typeFill">Fill in the blank</option><option value="short" data-i18n="quiz.typeShort">Short answer</option><option value="mix" data-i18n="quiz.typeMix">Mixed</option></select></label>
               <label class="checkbox-row"><input type="checkbox" id="quiz-use-model" checked><span>Use connected AI writer when available</span></label>
             </div>
+            <p class="deck-create-hint">Leave the topic blank for general practice from the selected book.</p>
             <div class="setup-actions"><button type="button" class="button primary" id="quiz-generate" data-i18n="quiz.generate">Generate quiz</button><span class="hint" id="quiz-engine-note"></span></div>
           </div>
           <div class="card quiz-runner hidden" id="quiz-runner">
-            <div class="quiz-header"><div><span class="eyebrow" id="quiz-progress-label">Question 1 of 5</span><h2 id="quiz-topic-title">Chapter quiz</h2></div><div class="timer hidden" id="quiz-timer">--:--</div></div>
+            <div class="quiz-header"><div><span class="eyebrow" id="quiz-progress-label">Question 1 of 5</span><h2 id="quiz-topic-title">Chapter quiz</h2><p class="quiz-run-note" id="quiz-run-note"></p></div><div class="timer hidden" id="quiz-timer">--:--</div></div>
             <div class="meter"><span id="quiz-progress-bar"></span></div>
             <div id="quiz-question" class="quiz-question"></div>
             <div class="quiz-actions"><button type="button" class="button ghost" id="quiz-prev" data-i18n="quiz.previous">Previous</button><button type="button" class="button primary" id="quiz-next" data-i18n="quiz.next">Next</button><button type="button" class="button primary hidden" id="quiz-submit" data-i18n="quiz.submit">Submit quiz</button></div>
@@ -360,18 +390,28 @@
           <div class="section-toolbar">
             <div class="section-copy"><span class="eyebrow" data-i18n="view.flashcards.kicker">RECALL</span><h2 data-i18n="view.flashcards.title">Flashcards</h2><p data-i18n="view.flashcards.subtitle">Review with spaced repetition, one card at a time.</p></div>
           </div>
-          <div class="card deck-setup">
-            <div class="form-grid three">
-              <label class="span-2"><span data-i18n="flashcards.topicLabel">Topic</span><input type="text" id="flash-topic" placeholder="e.g. photosynthesis"></label>
-              <label><span>Book</span><select id="flash-book-scope"></select></label>
-              <label><span>Cards</span><select id="flash-count"><option>6</option><option selected>10</option><option>15</option></select></label>
+          <section class="card saved-decks" id="saved-decks" hidden>
+            <div class="saved-decks-head"><div><span class="study-kicker">YOUR REVISION</span><h3>Saved decks</h3><p id="deck-storage-note">Cards and review dates stay on this device.</p></div><span id="deck-stats" class="deck-stats" aria-live="polite"></span></div>
+            <div class="saved-decks-controls">
+              <label><span>Current deck</span><select id="flash-deck-select" aria-label="Current flashcard deck"></select></label>
+              <button type="button" class="button ghost" id="flash-deck-delete">Delete deck</button>
             </div>
-            <div class="setup-actions">
-              <label class="checkbox-row inline"><input type="checkbox" id="flash-use-model" checked><span>Use AI writer when available</span></label>
-              <button type="button" class="button primary" id="flash-generate" data-i18n="flashcards.generate">Make flashcards</button>
-              <span class="hint" id="deck-stats"></span>
+          </section>
+          <details class="deck-create" id="deck-create" open>
+            <summary><span>Make a new deck</span><span>From your books <span aria-hidden="true">+</span></span></summary>
+            <div class="card deck-setup">
+              <div class="form-grid three">
+                <label class="span-2"><span data-i18n="flashcards.topicLabel">Topic</span><input type="text" id="flash-topic" placeholder="e.g. photosynthesis"></label>
+                <label><span>Book</span><select id="flash-book-scope"></select></label>
+                <label><span>Cards</span><select id="flash-count"><option>6</option><option selected>10</option><option>15</option></select></label>
+              </div>
+              <p class="deck-create-hint">Leave the topic blank for general practice from the selected book.</p>
+              <div class="setup-actions">
+                <label class="checkbox-row inline"><input type="checkbox" id="flash-use-model" checked><span>Use AI writer when available</span></label>
+                <button type="button" class="button primary" id="flash-generate" data-i18n="flashcards.generate">Make flashcards</button>
+              </div>
             </div>
-          </div>
+          </details>
           <div id="flashcard-area" class="flashcard-area"></div>
         </section>
 
@@ -380,6 +420,10 @@
           <div class="section-toolbar">
             <div class="section-copy"><span class="eyebrow" data-i18n="view.progress.kicker">MOMENTUM</span><h2 data-i18n="view.progress.title">Your progress</h2><p data-i18n="view.progress.subtitle">Streaks, topic mastery and a local class leaderboard.</p></div>
           </div>
+          <section class="card study-next" aria-labelledby="study-next-title">
+            <div><span class="study-kicker">A LITTLE EVERY DAY</span><h3 id="study-next-title">Your next step</h3><p id="study-next-copy">Choose a small place to begin.</p></div>
+            <button type="button" class="button primary" id="study-next-action">Start a quiz</button>
+          </section>
           <div class="stat-grid" id="stat-grid"></div>
           <section class="card account-card" id="account-card">
             <div class="panel-head">
@@ -502,7 +546,8 @@
               <p class="hint minimal-hide" data-i18n="settings.privacyHelp">Books, chats and results are stored in this browser only.</p>
               <div class="storage-summary" id="storage-summary">Checking storage…</div>
               <div class="button-row wrap"><button type="button" class="button ghost" id="export-data" data-i18n="settings.export">Export data (JSON)</button><button type="button" class="button ghost" id="clear-chat-data">Clear chat</button><button type="button" class="button ghost danger" id="delete-all" data-i18n="settings.deleteAll">Delete all local data</button></div>
-              <p class="hint minimal-hide">Server keys never reach this browser. Student keys and provider keys are never included in exports.</p>
+              <p class="hint">The JSON export includes decks, history and book details, but not textbook pages or PDF files. API keys are excluded.</p>
+              <p class="legal-links"><a href="./privacy.html" target="_blank" rel="noopener">Privacy policy ↗</a><a href="./terms.html" target="_blank" rel="noopener">Terms of use ↗</a></p>
             </section>
 
             <section class="card settings-card">
@@ -582,12 +627,17 @@
           <button type="button" class="command-item" data-action="account" data-keywords="account login register guest profile nickname sign in"><span class="command-index">○</span><span class="command-copy"><strong>Log in or register</strong><small>Sync progress, or keep studying as a guest</small></span><span class="command-arrow">↗</span></button>
         </section>
         <div class="command-empty" id="command-empty" hidden>No matches. Try “PDF”, “quiz”, “Bolt” or “theme”.</div>
+        <aside class="command-project">
+          <img class="nezaad-logo" src="./assets/brand/nezaad-mark.png" alt="Nezaad Industries" width="927" height="192" loading="lazy">
+          <p>A student-built project from Vignan Vidyanikethan English Medium High School for the INSPIRE-MANAK science fair.</p>
+          <div><a href="https://zero-vast.vercel.app/" target="_blank" rel="noopener noreferrer">Zero Vast ↗</a><a href="./privacy.html" target="_blank" rel="noopener">Privacy ↗</a><a href="./terms.html" target="_blank" rel="noopener">Terms ↗</a></div>
+        </aside>
       </div>
       <div class="command-foot"><span><kbd>↑</kbd><kbd>↓</kbd> browse</span><span><kbd>↵</kbd> open</span><span><kbd>⌘K</kbd> toggle</span></div>
     </div>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./js/boot.js?v=11"></script>
+  <script type="module" src="./js/boot.js?v=12"></script>
 </body>
 </html>

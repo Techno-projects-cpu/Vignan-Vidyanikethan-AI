@@ -1,26 +1,38 @@
 /** Page-level textbook reader used by every citation. */
 
-import { element, openModal, qs, showToast } from "./ui.js?v=11";
-import { truncate } from "./util.js";
+import { element, openModal, qs, showToast } from "./ui.js?v=12";
+import { truncate } from "./util.js?v=12";
+
+/** Resolve a cited page number, which may not equal its position in pasted notes. */
+export function pageIndexForCitation(pages = [], pageNumber = 1) {
+  if (!pages.length) return 0;
+  const requested = Number(pageNumber) || 1;
+  const match = pages.findIndex((page) => Number(page.page) === requested);
+  if (match >= 0) return match;
+  // Legacy pages without labels use their position; a missing explicit page
+  // must not silently open a different page at the end of the book.
+  if (pages.some((page) => page.page != null)) return 0;
+  return Math.min(Math.max(0, requested - 1), pages.length - 1);
+}
+
+export function findHighlight(text, highlight) {
+  const target = String(highlight || "").replace(/\s+/g, " ").trim().slice(0, 140);
+  if (!target) return null;
+  const source = String(text || "").replace(/\s+/g, " ");
+  const index = source.toLocaleLowerCase().indexOf(target.toLocaleLowerCase());
+  return index < 0 ? null : { source, index, length: target.length };
+}
 
 function appendHighlighted(container, text, highlight) {
-  const needle = String(highlight || "").replace(/\s+/g, " ").trim();
-  if (!needle) {
+  const found = findHighlight(text, highlight);
+  if (!found) {
     container.textContent = text;
     return;
   }
-  const source = String(text || "").replace(/\s+/g, " ");
-  const target = needle.slice(0, 140).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = source.match(new RegExp(target, "i"));
-  if (!match || match.index === undefined) {
-    container.textContent = text;
-    return;
-  }
-  const before = source.slice(0, match.index);
-  const after = source.slice(match.index + match[0].length);
-  container.append(document.createTextNode(before));
-  container.appendChild(element("mark", "", match[0]));
-  container.append(document.createTextNode(after));
+  const { source, index, length } = found;
+  container.append(document.createTextNode(source.slice(0, index)));
+  container.appendChild(element("mark", "", source.slice(index, index + length)));
+  container.append(document.createTextNode(source.slice(index + length)));
 }
 
 export function openReader({ book, pages = [], initialPage = 1, highlight = "" } = {}) {
@@ -29,7 +41,8 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
     showToast("No page text is stored for this book.", "warning");
     return;
   }
-  let current = Math.min(Math.max(1, Number(initialPage) || 1), pageList.length);
+  const initialIndex = pageIndexForCitation(pageList, initialPage);
+  let current = initialIndex + 1;
   let pdfUrl = null;
   if (book?.fileBlob) {
     try {
@@ -54,9 +67,17 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
   if (!pdfUrl) openPdf.classList.add("hidden");
   controls.append(previous, pageLabel, next, openPdf);
   toolbar.append(title, controls);
+  const searchWrap = element("label", "reader-search");
+  const search = document.createElement("input");
+  search.type = "search";
+  search.placeholder = "Find words in this book";
+  search.setAttribute("aria-label", "Find words in this book");
+  const searchStatus = element("span", "reader-search-status", "");
+  searchStatus.setAttribute("role", "status");
+  searchWrap.append(search, searchStatus);
   const pageText = element("div", "reader-page-text");
   const sourceNote = element("div", "reader-note");
-  content.append(toolbar, pageText, sourceNote);
+  content.append(toolbar, searchWrap, pageText, sourceNote);
   wrapper.append(sidebar, content);
 
   const pageButtons = pageList.map((page, index) => {
@@ -67,20 +88,20 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
     );
     button.type = "button";
     button.dataset.page = String(index + 1);
-    button.addEventListener("click", () => render(index + 1));
+    button.addEventListener("click", () => render(index + 1, search.value));
     sidebar.appendChild(button);
     return button;
   });
 
-  function render(pageNumber) {
+  function render(pageNumber, searchText = "") {
     current = Math.min(Math.max(1, pageNumber), pageList.length);
     const page = pageList[current - 1];
     title.textContent = `${book?.title || "Book"} · ${page.heading && page.heading !== "Notes" ? page.heading : "Page"}`.slice(0, 90);
-    pageLabel.textContent = `${current} / ${pageList.length}`;
+    pageLabel.textContent = `Page ${page.page || current} · ${current} of ${pageList.length}`;
     previous.disabled = current <= 1;
     next.disabled = current >= pageList.length;
     pageText.replaceChildren();
-    appendHighlighted(pageText, page.text || "", current === Number(initialPage) ? highlight : "");
+    appendHighlighted(pageText, page.text || "", searchText || (current === initialIndex + 1 ? highlight : ""));
     sourceNote.textContent = book?.demo
       ? "Demo study pack — original sample notes, not an official board textbook."
       : `${book?.subject || "Textbook"}${book?.board ? ` · ${book.board}` : ""}${book?.grade ? ` · Class ${book.grade}` : ""}`;
@@ -89,8 +110,25 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
     qs(".reader-pages", wrapper)?.querySelector(".active")?.scrollIntoView({ block: "nearest" });
   }
 
-  previous.addEventListener("click", () => render(current - 1));
-  next.addEventListener("click", () => render(current + 1));
+  search.addEventListener("input", () => {
+    const query = search.value.trim().toLocaleLowerCase();
+    let matches = 0;
+    pageButtons.forEach((button, index) => {
+      const page = pageList[index];
+      const haystack = `${page.page || index + 1} ${page.heading || ""} ${page.text || ""}`.toLocaleLowerCase();
+      button.hidden = Boolean(query) && !haystack.includes(query);
+      if (!button.hidden) matches += 1;
+    });
+    searchStatus.textContent = query ? `${matches} ${matches === 1 ? "page" : "pages"} found · press Enter to open the first` : "";
+  });
+  search.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    const firstMatch = pageButtons.findIndex((button) => !button.hidden);
+    if (firstMatch >= 0) render(firstMatch + 1, search.value);
+  });
+  previous.addEventListener("click", () => render(current - 1, search.value));
+  next.addEventListener("click", () => render(current + 1, search.value));
   render(current);
 
   openModal({

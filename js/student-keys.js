@@ -7,8 +7,8 @@
  * server-side free-tier keys have been tried (or during an explicit test).
  */
 
-import { PROVIDERS } from "./providers.js";
-import { parseApiKeys } from "./key-pool.js";
+import { PROVIDERS } from "./providers.js?v=12";
+import { parseApiKeys } from "./key-pool.js?v=12";
 
 const STUDENT_KEY_PROVIDER_IDS = [
   "gemini",
@@ -49,6 +49,8 @@ export function cleanStudentEndpoint(value, fallback = "https://api.openai.com/v
   try {
     const url = new URL(String(value || fallback).trim());
     if (url.protocol !== "https:") return fallback;
+    url.username = "";
+    url.password = "";
     url.search = "";
     url.hash = "";
     return url.toString().replace(/\/$/, "");

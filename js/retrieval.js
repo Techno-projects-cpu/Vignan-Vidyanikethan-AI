@@ -6,13 +6,24 @@
  * with a light MMR pass so the model sees more than one page of context.
  */
 
-import { bigrams, chunkPages, parsePages, tokenize } from "./text.js";
-import { clamp } from "./util.js";
-import { computeStats, cosine, queryVector, vectorize } from "./vector.js";
+import { bigrams, chunkPages, parsePages, tokenize } from "./text.js?v=12";
+import { clamp } from "./util.js?v=12";
+import { computeStats, cosine, queryVector, vectorize } from "./vector.js?v=12";
 
 const K1 = 1.5;
 const B = 0.75;
 export const GROUNDING_THRESHOLD = 0.155;
+
+/** Remove common instructions, not subject terms, before matching passages. */
+export function cleanStudyQuery(query) {
+  return String(query || "")
+    .replace(/\b(?:with|using|give|provide|include)\s+(?:(?:some|a few|few|simple|easy|real[- ]life|everyday)\s+)*examples?\b/gi, " ")
+    .replace(/\b(?:in|using|with)\s+(?:(?:very|really)\s+)?(?:simple|easy|plain|everyday)\s+(?:words?|language|terms?)\b/gi, " ")
+    .replace(/\b(?:for|to)\s+(?:my|our|the)\s+class\b/gi, " ")
+    .replace(/\bstep[- ]by[- ]step\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 /**
  * @param {object} meta book metadata (at least id, title, subject, grade)
@@ -159,13 +170,14 @@ export function retrieve(query, indexes, { topK = 5, threshold = GROUNDING_THRES
   if (!active.length) {
     return { hits: [], confidence: 0, grounded: false, reason: "empty-library", bestScore: 0 };
   }
-  const queryWords = tokenize(query);
+  const cleanedQuery = cleanStudyQuery(query);
+  const queryWords = tokenize(cleanedQuery);
   if (!queryWords.length) {
     return { hits: [], confidence: 0, grounded: false, reason: "too-vague", bestScore: 0 };
   }
 
   const candidates = active
-    .flatMap((index) => scoreBook(index, query, { topK }))
+    .flatMap((index) => scoreBook(index, cleanedQuery, { topK }))
     .sort((a, b) => b.score - a.score);
   if (!candidates.length) {
     return { hits: [], confidence: 0, grounded: false, reason: "not-in-books", bestScore: 0 };
@@ -177,7 +189,12 @@ export function retrieve(query, indexes, { topK = 5, threshold = GROUNDING_THRES
   const confidence = clamp(best.score * 0.88 + margin * 0.5);
   const overlapOkay = best.overlap >= 0.25 || best.bm25 >= 0.22;
   const grounded = best.score >= threshold && overlapOkay;
-  const hits = diverseSelection(candidates, topK);
+  // Do not pad a good match with unrelated zero-score pages. Those pages used
+  // to leak into cited answers and topic-specific quizzes as if they matched.
+  const scoreFloor = Math.max(0.045, best.score * 0.22);
+  const overlapFloor = Math.min(best.overlap, Math.max(0.25, best.overlap * 0.55));
+  const relevant = candidates.filter((candidate) => candidate.score >= scoreFloor && candidate.overlap >= overlapFloor);
+  const hits = diverseSelection(relevant, topK);
 
   return {
     hits: grounded ? hits : [],
@@ -189,14 +206,19 @@ export function retrieve(query, indexes, { topK = 5, threshold = GROUNDING_THRES
   };
 }
 
-/** Retrieve broad context for a whole chapter/quiz even without a precise question. */
+/** Search a named topic; only an intentionally blank topic samples general material. */
 export function retrieveChapter(topic, indexes, { topK = 10, bookIds = [] } = {}) {
-  const result = retrieve(topic || "important definitions and key ideas", indexes, {
-    topK,
-    threshold: 0.06,
-    bookIds,
-  });
-  if (result.hits.length) return result;
+  const requested = String(topic || "").trim();
+  if (requested) {
+    const result = retrieve(requested, indexes, { topK, threshold: 0.06, bookIds });
+    // A shared generic word alone should not turn an unrelated topic into a
+    // confident-looking quiz. Ask the student to narrow the wording instead.
+    if (result.hits.length && new Set(tokenize(cleanStudyQuery(requested))).size > 1 && result.hits[0].overlap < 0.6) {
+      return { ...result, hits: [], grounded: false, confidence: 0, reason: "partial-topic" };
+    }
+    return result;
+  }
+
   const active = indexes.filter(
     (index) => index?.chunks?.length && (!bookIds.length || bookIds.includes(index.book.id)),
   );
@@ -204,15 +226,15 @@ export function retrieveChapter(topic, indexes, { topK = 10, bookIds = [] } = {}
     index.chunks
       .filter((_, order) => order % Math.max(1, Math.floor(index.chunks.length / topK)) === 0)
       .slice(0, topK)
-      .map((chunk) => ({ ...indexToHit(index, chunk), score: 0.1, overlap: 0 })),
+      .map((chunk) => ({ ...indexToHit(index, chunk), score: 0, overlap: 0 })),
   );
   return {
     hits: chunks.slice(0, topK),
     allHits: chunks,
-    confidence: 0.35,
+    confidence: 0,
     grounded: chunks.length > 0,
-    reason: chunks.length ? "ok" : "empty-library",
-    bestScore: 0.1,
+    reason: chunks.length ? "general-practice" : "empty-library",
+    bestScore: 0,
   };
 }
 

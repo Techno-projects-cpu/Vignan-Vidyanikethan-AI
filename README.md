@@ -1,6 +1,6 @@
 # Vignan Vidyanikethan AI
 
-A textbook-grounded study assistant for Vignan Vidyanikethan E.M. School — built as an **orchestrator around existing AI models**, not as a newly trained model.
+A textbook-grounded study assistant made by a **student of Vignan Vidyanikethan English Medium High School for the INSPIRE-MANAK science fair** — built as an **orchestrator around existing AI models**, not as a newly trained model. The project features the supplied Nezaad Industries logo and links to [Zero Vast](https://zero-vast.vercel.app/).
 
 This repository now contains only the Vignan Vidyanikethan AI app. The old school-website files were removed so the project can be deployed directly from the repository root.
 
@@ -28,7 +28,7 @@ Open:
 
 The server binds to `0.0.0.0`, so it also works in the Arena live preview. A plain static server (`python3 -m http.server`) can serve the app too, but the optional `/api/ai`, `/api/search` and `/api/auth/*` endpoints will not exist — the offline engine and guest progress still work.
 
-On first launch, choose **Log in**, **Register**, or **Continue as guest** beneath the account options. Existing signed-in sessions reopen the workspace; a guest choice is remembered only in the current tab. The guest path remains available when the account server is offline. The app loads a small **Demo Study Pack** so you can try questions immediately. Replace it with real class PDFs in **Library**. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — the app auto-detects the free router, rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback. The minimal UI keeps those controls tucked behind **Settings → Advanced settings**.
+A first-time visitor can enter or skip the branded startup screen, then choose **Log in**, **Register**, or **Continue as guest** beneath the account options. The intro is remembered for the current tab when session storage is available. Existing signed-in sessions and a guest choice reopen the workspace; the guest choice is remembered only in the current tab. The guest path remains available when the account server is offline. The app loads a small **Demo Study Pack** so you can try questions immediately. Replace it with real class PDFs in **Library**. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — the app auto-detects the free router, rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback. The minimal UI keeps those controls tucked behind **Settings → Advanced settings**.
 
 ---
 
@@ -62,7 +62,7 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 
 | Area | What it does |
 | --- | --- |
-| Premium minimal interface | A monochrome black/grey/white workspace with a centered Arena-inspired hero, one composer, a command menu (`Ctrl/⌘ + K`) and an AI nickname chooser. Most navigation, settings, key and model controls are hidden until requested. All original IDs and event hooks remain wired. |
+| Premium minimal interface | A skippable Nezaad-branded intro, sharp-edged monochrome workspace, locally bundled Space Grotesk and Manrope fonts, one composer, a keyboard-accessible command menu (`Ctrl/⌘ + K`) and an AI nickname chooser. Most navigation and advanced controls stay tucked away. |
 | Built-in fast AI | **Bolt** is the instant offline textbook engine: no download, no key, page-cited answers from the local book index. Optional **Nova** (WebLLM), **Atlas** (free router) and other nicknamed routes are available from the chooser. |
 | Grounded answers | Local hybrid retrieval (BM25 + hashed TF-IDF vectors + phrase matching) over page chunks, with `[1]` citations and a clickable page reader. |
 | Model router | Route **Answers**, **Quiz writing**, **Flashcard writing**, **Short-answer grading** and **Citation verification** to different existing AI providers. Automatic fallback to the offline engine. |
@@ -72,36 +72,45 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 | Official key links | Settings shows safe signup links for eight free/keyless providers and explicitly warns against leaked or shared keys. |
 | Library | Upload PDF / TXT / Markdown, paste notes, use `[[page:12]]` markers, delete books, open a page reader, open the original PDF at a cited page. |
 | Quizzes | MCQ, fill-in-the-blank, short-answer and mixed quizzes; easy/medium/hard; timed or untimed; AI-written or offline-generated; instant grading with per-question review, topic breakdown and a revise list. |
-| Flashcards | AI-written or offline definition / cloze cards generated from cited sentences, with a Leitner spaced-repetition scheduler. |
-| Progress | Local streak, XP, accuracy, topic mastery, recent results, an on-device leaderboard and an optional live class leaderboard for logged-in students. |
+| Flashcards | Create multiple device-local cited decks, switch between them, review due cards with a Leitner schedule, or practise without altering that schedule. Missed quiz questions can become a revision deck. |
+| Progress | A recommended next step, local streak, XP, accuracy, topic mastery and reviewable recent results, plus an optional live class leaderboard. Full decks and question-by-question reviews remain on the device. |
 | Student accounts | Roblox-inspired Log In / Register with username, password, age band and private gender; local scrypt hashes or Supabase Auth, persistent Supabase sessions, under-13 guardian consent, referral codes and squad invites. |
-| Funky edit video | An 8-second story with animated score reveal, three visual vibes, replayable preview, an optional original on-device synth beat, honest points, streak, XP, question bars and a revision prompt. Choose 540p, 720p or 1080p; MP4 is preferred, WebM is the fallback, and a 1080×1920 PNG is available. Nickname and invite code are opt-in. |
+| Funky edit video | An 8-second story with four visual vibes, a branded Nezaad style, score reveal, replayable preview, original on-device synth beat, question bars and revision prompt. An optional on-device QR links to Zero Vast; a caption can be copied separately. Choose 540p, 720p or 1080p; MP4 is preferred, WebM and a 1080×1920 PNG are fallbacks. Nickname and invite code are opt-in. |
 | Web fallback | Disabled by default. When enabled, outside results are shown only after the books fail, and are labelled **OUTSIDE YOUR TEXTBOOKS**. |
 | Offline / PWA | Service worker caches the full app shell, WebLLM runtime, local AI worker, PDF.js, CMaps and the demo pack after the first online visit. Installable manifest included. |
 | Responsive study workspace | Monochrome, prompt-first design with a compact menu, comfortable touch targets, adaptive quiz layouts and a mobile-friendly edit studio. |
-| Privacy | Books, vectors, chats, settings and results stay in this browser's IndexedDB. Local AI sends nothing off the device. Server keys never reach the browser; student keys are excluded from exports, accounts, logs and leaderboards. |
+| Privacy | Books, chats, decks and results are stored locally; optional connected AI and web search may send questions and relevant excerpts to external services. Student keys are excluded from exports and account/leaderboard records. [Privacy policy](./privacy.html) and [terms](./terms.html) are available before entry and in the app. |
 | Languages | English UI with a Telugu translation for the main interface. Textbook passages are never silently machine-translated. |
 
 ---
 
 ## Premium minimal shell
 
-The public interface is intentionally sparse, inspired by [Arena.ai](https://arena.ai/): one large headline, one composer, and a command menu for everything else.
+The public interface is intentionally sparse: a skippable student-project intro, sharp-edged controls, one large headline, one composer, and a command menu for everything else. Its prompt-first layout was informed by [Arena.ai](https://arena.ai/).
 
-- Press **Ctrl/⌘ + K** or choose **Menu** to open the command palette. It contains every section, PDF upload, quiz/flashcard actions, sources, settings, keys, theme and account.
+- Press **Ctrl/⌘ + K** or choose **Menu** to open the command palette. It contains every section, PDF upload, quiz/flashcard actions, sources, settings, keys, theme, account, credits and policy links. Use arrow keys to browse, Enter to open and Escape to close.
 - After the entry screen, the Ask workspace has a prominent **Upload PDF** action. Students can also drag a PDF into **Library** or paste notes. PDFs are indexed locally and page numbers are preserved.
 - **Bolt** is the built-in super-fast AI: it answers from the local textbook index with citations, requires no model download and works offline. It is the default route.
 - The AI chooser hides provider names. Students choose nicknames with their specialty underneath: **Bolt** (instant offline lookup), **Nova** (private local reasoning), **Atlas** (free cloud router), **Dash** (ultra-fast cloud), **Prism** (balanced answers), **Sage** (model variety), **Echo** (laptop model), **Any** (custom endpoint), and others. Real IDs remain in `data-provider` / select values.
 - Settings open with a single **Control room** card; the dense model, key, web, privacy and appearance panels stay hidden until **Advanced settings** is chosen.
-- The palette is strictly black/grey/white in both dark and light themes. Motion is original, dependency-free and reduced-motion aware; see [OPEN_SOURCE_CREDITS.md](./OPEN_SOURCE_CREDITS.md).
+- The interface palette is black/grey/white in both themes. Fonts are bundled locally, motion respects reduced-motion preferences, and the score studio offers additional colourful styles. See [OPEN_SOURCE_CREDITS.md](./OPEN_SOURCE_CREDITS.md).
+
+## Study loop
+
+1. Import a PDF or notes in **Library**, or start with the demo pack. Ask a question and open a citation to verify its actual page; the reader can search within the book.
+2. Use the actions beneath a cited answer to copy it with sources or create a quiz using those passages. A named topic that does not match the books is not silently replaced with unrelated questions.
+3. Finish the quiz, review each answer and make a cited flashcard deck from missed questions. The result studio, retry/practice action and past results remain accessible from Progress.
+4. Return to **Flashcards** to switch decks and review cards due today. Practice-all does not change the review schedule. **Progress** suggests a useful next step.
+
+Decks, detailed reviews and results remain in the browser, not in the account; only quiz summary statistics sync. The app warns when browser storage is unavailable or a write fails. JSON export includes saved decks, review schedules, history and book details, but excludes textbook pages, original PDFs and keys; keep originals separately.
 
 ## Student accounts, squad invites & leaderboard
 
-The entry screen opens to **Log in** and **Register**, with **Continue as guest** below them. An existing session is restored automatically; guests can sign in later from the profile button (also visible on phones) or Progress. Guest books, chats and progress stay in this browser and are not automatically moved to an account:
+After the intro, the entry screen offers **Log in** and **Register**, with **Continue as guest** below them. An existing session is restored automatically; guests can sign in later from the profile button (also visible on phones) or Progress. Guest books, chats, decks and detailed reviews stay in this browser and are not automatically moved to an account:
 
 - **Register** asks for a public nickname, password and age; gender is optional. New passwords must be 10–128 characters and cannot be a short list of common choices. Existing shorter passwords still work for login. Password recovery is not yet available.
 - Under-13 students are asked to confirm that they have a parent or guardian's permission. This checkbox is self-reported, not independently verified consent; schools must arrange appropriate consent and privacy safeguards before deploying to children.
-- The server stores **only an age band** (`under-13`, `13-15`, `16-18`, `19+`), never the exact age. Gender is kept in the private profile and is omitted from the public leaderboard.
+- Registration sends the entered age to the server, which stores **only an age band** (`under-13`, `13-15`, `16-18`, `19+`), not the exact age. Gender is kept in the private profile and is omitted from the public leaderboard.
 - The local demo backend hashes passwords with Node's built-in `scrypt`; Supabase Auth hashes passwords for Supabase accounts. Sessions use random `HttpOnly`, `SameSite=Lax` cookies, with `Secure` on HTTPS. Signing in again revokes the previous session cookie.
 - Each account gets a referral code such as `VIGNAN-ANANYA`. An invite link containing `?ref=VIGNAN-ANANYA&view=progress` opens the register tab and credits the referring student.
 - Quiz results sync XP, streak, best score, accuracy and recent topics to the account. The live leaderboard exposes only usernames and study stats — no password hashes, exact ages, genders, IDs or full history. Scores originate in the browser and can be manipulated, so the leaderboard is for practice rather than high-stakes assessment.
@@ -366,7 +375,12 @@ A separate DOM smoke run (jsdom + fake IndexedDB) was used during development to
 
 ```
 index.html                Vignan Vidyanikethan AI app shell / PWA entry
-styles.css                Arena-inspired responsive dark/light UI
+styles.css                Base responsive dark/light UI
+styles-premium.css        Minimal workspace and study components
+styles-identity.css       Sharp identity, local fonts and startup screen
+styles-legal.css          Offline-friendly legal pages
+privacy.html, terms.html  Student-facing policies (operator review required)
+assets/                   User-supplied Nezaad logo and licensed local fonts
 LOCAL_AI.md               Real local WebLLM model guide
 manifest.webmanifest      PWA manifest
 sw.js                     Offline service worker
@@ -375,7 +389,9 @@ data/demo-textbook.txt    Original sample study notes
 icons/                    SVG + PNG app icons
 vendor/webllm/            Vendored WebLLM 0.2.85 runtime (Apache-2.0)
 vendor/pdfjs/             Vendored PDF.js (Apache-2.0)
+vendor/qr/                Vendored on-device QR generator (MIT)
 js/                       Browser ESM app modules
+  startup.js              Skippable once-per-tab intro and focus handling
   boot.js                 Lightweight login/register/guest entry screen
   app.js                  UI controller
   auth.js                 Account API client + account modal
@@ -394,6 +410,7 @@ js/                       Browser ESM app modules
   llm.js                  Answer / quiz / flashcard model orchestration
   quiz.js                 Quiz writer and grader
   flashcards.js           Cards + Leitner scheduler
+  study-decks.js          Persistent decks, mistake cards and next steps
   progress.js             Streaks, mastery, leaderboard
   web.js                  Optional labelled web fallback
   card.js                 Funky edit video / PNG poster canvas
@@ -474,20 +491,22 @@ Other notes:
 - **Static hosting / GitHub Pages:** the offline app works from the site root, but the server API will not exist; use the local WebLLM model, direct provider endpoints (with CORS support), the Supabase Edge Function, or the offline engine.
 - **School LAN / desktop:** run `npm start` on one machine and open `http://<lan-ip>:4173/`. With WebLLM cached or Ollama configured, no internet is needed after setup.
 - **Offline first load:** service workers require HTTP/HTTPS. Open the app once while the server is reachable; afterwards the app shell, bundled WebLLM runtime, books you added, PDF.js and cached vectors remain available offline. Model weights download separately on first use.
-- **Edit videos:** The 8-second edit and optional original synth beat are generated locally. Choose **Create my video**, keep the tab open, then tap **Download** or **Share**. MP4 and audio support vary by browser; WebM, silent recording or a PNG poster are fallbacks. 540p is the fastest option on many phones, 720p is the default and 1080p is optional. Nickname and invite code are opt-in; the score and topic are visible when shared. Reduced motion is enabled by default if the device requests it.
+- **Edit videos:** The 8-second edit and optional original synth beat are generated locally. Choose **Create my video**, keep the tab open, then tap **Download** or **Share**. MP4 and audio support vary by browser; WebM, silent recording or a PNG poster are fallbacks. 540p is the fastest option on many phones, 720p is the default and 1080p is optional. A locally generated QR linking to Zero Vast is on by default and can be disabled under **More options**. Nickname and invite code are opt-in; the score and topic appear in the video and copied caption. Reduced motion is enabled by default if the device requests it.
 
 ---
 
 ## Privacy
 
-- Books, page text, vectors, chat history, settings and quiz results stay in the browser's IndexedDB (with an in-memory fallback for restricted private windows).
-- No analytics, no telemetry, no third-party scripts. Accounts are optional and off when using a plain static host.
+The in-app [privacy policy](./privacy.html) and [terms of use](./terms.html) are accessible before registration and from Settings and the menu. **Before a public deployment, the operator should review both with appropriate legal guidance, add a real contact channel, set retention/deletion procedures, and arrange any required parental consent.** The current under-13 checkbox is self-attested and there is no self-service account deletion.
+
+- Books, page text, vectors, chat history, saved decks, settings and quiz results stay in the browser's IndexedDB (with an in-memory fallback for restricted private windows).
+- No analytics tracker or externally loaded third-party script is included. Vendored libraries run locally. Accounts are optional and off when using a plain static host; hosting providers can receive ordinary request metadata.
 - With local accounts enabled, the server stores a username, scrypt password hash, age band (not exact age), private gender choice, referral count, XP/streak/quiz stats and 10 recent result summaries.
 - With Supabase accounts, Supabase Auth stores the password hash; Postgres stores the age band, private gender choice, study stats and hashed session tokens. The leaderboard strips gender, age band, IDs and history.
 - Session cookies are `HttpOnly` and `SameSite=Lax`; `Secure` can be forced with `STUDY_AI_COOKIE_SECURE=true`. Account mutations also check origin and a CSRF token. No password is ever sent back to the browser or written in plaintext.
-- Signing out does not remove books, chats or student keys saved in the browser; use **Settings → Delete all local data** on shared devices.
-- Local WebLLM / Ollama / LM Studio modes send nothing off the device. WebLLM's first model download contacts the model CDN; the model itself then runs locally.
-- Connected cloud modes send only the short retrieved passages needed for the task. Free-tier providers may have different data-retention/training policies — check each provider before uploading sensitive or copyrighted books. OpenRouter free models in particular can have per-provider training policies.
+- Signing out does not remove books, chats or student keys saved in the browser; use **Settings → Delete all local data** on shared devices. This does not delete account records, downloaded files, browser caches or separately cached models.
+- WebLLM runs on the device after its first model download contacts the model host. Ollama / LM Studio requests go to the endpoint configured by the user, which may be on the device or another machine.
+- Connected cloud modes send the question, instructions and short retrieved passages needed for the task. Free-tier providers may have different data-retention/training policies — check each provider before uploading sensitive or copyrighted books. OpenRouter free models in particular can have per-provider training policies.
 - Web fallback is off by default; outside results are visually separated and labelled.
 - Server keys never reach the browser, health response, logs or exports. Student BYOK keys are browser-local, sent per request only to this site's proxy, and excluded from exports, accounts and leaderboards. **Settings → Export data** produces JSON without any API key values; **Delete all local data** clears the database, local progress and saved student keys.
 
@@ -495,6 +514,6 @@ Other notes:
 
 ## Credits
 
-- Built for the students of **Vignan Vidyanikethan E.M. School** and the **INSPIRE MANAK** science-fair demo, with Arena.ai Agent Mode used as the development assistant.
+- Made by a student of **Vignan Vidyanikethan English Medium High School** for the **INSPIRE-MANAK** science fair, with Arena.ai Agent Mode used as a development assistant. Nezaad Industries logo supplied by the project owner; [Zero Vast](https://zero-vast.vercel.app/).
 - PDF text extraction uses [PDF.js](https://github.com/mozilla/pdf.js) 4.2.67 (legacy build), with dynamic PDF font evaluation and XFA disabled, vendored under `vendor/pdfjs/` with its Apache-2.0 license and font/CMaps notices. This replaces the older build affected by [CVE-2024-4367](https://github.com/advisories/GHSA-wgrm-67xf-hhpq).
 - Application code is MIT licensed; see `LICENSE`. Replace the demo study pack with your own board textbooks before classroom use.

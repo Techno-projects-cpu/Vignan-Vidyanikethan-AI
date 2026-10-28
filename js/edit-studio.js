@@ -1,9 +1,16 @@
 /** Responsive result-edit studio. Everything is rendered and recorded locally. */
 
-import * as ui from "./ui.js?v=11";
-import { downloadBlob } from "./util.js";
-import { canCreateEditBeat, startEditBeat } from "./edit-audio.js";
-import { EDIT_DURATION, EDIT_STYLES, createPerformanceVideo, createPoster, drawPerformanceCard, scorePercent } from "./card.js?v=11";
+import * as ui from "./ui.js?v=12";
+import { downloadBlob, truncate } from "./util.js?v=12";
+import { canCreateEditBeat, startEditBeat } from "./edit-audio.js?v=12";
+import { EDIT_DURATION, EDIT_STYLES, PROJECT_LINK, createPerformanceVideo, createPoster, drawPerformanceCard, scorePercent } from "./card.js?v=12";
+
+/** Text is only copied/shared after a student explicitly chooses that action. */
+export function resultCaption(result = {}, share = {}, { includeLink = true, includeInvite = false } = {}) {
+  const topic = truncate(String(result.topic || "a chapter quiz").trim() || "a chapter quiz", 80);
+  const invite = includeInvite && share.refCode ? ` Join my squad: ${share.refCode}${share.link ? ` ${share.link}` : ""}` : "";
+  return `I scored ${scorePercent(result.percent)}% on ${topic}! #VignanAI #StudyStreak${includeLink ? ` ${PROJECT_LINK}` : ""}${invite}`;
+}
 
 function button(label, className = "") {
   const node = ui.element("button", className, label);
@@ -53,14 +60,16 @@ export function openEditStudio({ result = {}, progress = {}, profile = "Student"
   const styles = ui.element("fieldset", "studio-styles");
   styles.appendChild(ui.element("legend", "", "Choose your vibe"));
   const styleButtons = ui.element("div", "studio-style-buttons");
-  const symbols = { voltage: "✳", pop: "✦", mono: "◐" };
-  let selectedStyle = "voltage";
+  const symbols = { nezaad: "↗", voltage: "✳", pop: "✦", mono: "◐" };
+  let selectedStyle = "nezaad";
   for (const [id, style] of Object.entries(EDIT_STYLES)) {
     const choice = button("", "studio-style-option");
     choice.dataset.style = id;
     choice.setAttribute("aria-pressed", String(id === selectedStyle));
     choice.setAttribute("aria-label", `${style.label}: ${style.description}`);
-    choice.append(ui.element("span", "studio-style-icon", symbols[id]), ui.element("span", "", style.label));
+    const symbol = ui.element("span", "studio-style-icon", symbols[id]);
+    symbol.setAttribute("aria-hidden", "true");
+    choice.append(symbol, ui.element("span", "", style.label));
     styleButtons.appendChild(choice);
   }
   styles.appendChild(styleButtons);
@@ -86,7 +95,8 @@ export function openEditStudio({ result = {}, progress = {}, profile = "Student"
   const showName = switchRow("Include my nickname", "Your name is hidden unless you choose it.");
   const showInvite = switchRow("Include invite code", share.refCode ? "Add your squad code to the edit." : "Log in to get a squad code.");
   showInvite.input.disabled = !share.refCode;
-  extra.append(qualityLabel, calm.label, showName.label, showInvite.label);
+  const showLink = switchRow("Include Zero Vast QR", "Links to the external Zero Vast site.", true);
+  extra.append(qualityLabel, calm.label, showName.label, showInvite.label, showLink.label);
   more.appendChild(extra);
   controls.appendChild(more);
 
@@ -115,8 +125,14 @@ export function openEditStudio({ result = {}, progress = {}, profile = "Student"
   const shareButton = button("Share video", "button ghost studio-share");
   shareButton.disabled = true;
   const poster = button("Save PNG poster", "button ghost studio-poster");
-  actions.append(create, shareButton, poster);
-  controls.append(actions, ui.element("p", "studio-privacy", "Your score and chapter appear in the edit. Share only if you want to."));
+  const copyCaption = button("Copy share caption", "button ghost studio-copy");
+  const captionBox = ui.element("textarea", "studio-caption");
+  captionBox.readOnly = true;
+  captionBox.rows = 3;
+  captionBox.hidden = true;
+  captionBox.setAttribute("aria-label", "Caption to copy");
+  actions.append(create, shareButton, poster, copyCaption);
+  controls.append(actions, captionBox, ui.element("p", "studio-privacy", "Your score and chapter appear in the edit and caption. Nickname and invite are optional. Share only if you want to."));
   layout.append(stage, controls);
   content.appendChild(layout);
 
@@ -129,6 +145,13 @@ export function openEditStudio({ result = {}, progress = {}, profile = "Student"
   let controller = null;
   let closed = false;
   let disabledBeforeRecording = [];
+  let brandImage = null;
+  const logo = new Image();
+  logo.addEventListener("load", () => {
+    brandImage = logo;
+    if (!closed && !recording && !previewPlaying) drawPreview();
+  });
+  logo.src = new URL("../assets/brand/nezaad-mark.png", import.meta.url).href;
 
   function options() {
     return {
@@ -137,6 +160,8 @@ export function openEditStudio({ result = {}, progress = {}, profile = "Student"
       reducedMotion: calm.input.checked,
       includeName: showName.input.checked,
       includeInvite: showInvite.input.checked && Boolean(share.refCode),
+      includeLink: showLink.input.checked,
+      brandImage,
       renderWidth: Number(quality.value),
       music: sound.input.checked && audioAvailable,
     };
@@ -171,7 +196,7 @@ export function openEditStudio({ result = {}, progress = {}, profile = "Student"
     recording = busy;
     content.setAttribute("aria-busy", String(busy));
     if (busy) {
-      disabledBeforeRecording = [...content.querySelectorAll("button, input, select")].map((node) => [node, node.disabled]);
+      disabledBeforeRecording = [...content.querySelectorAll("button, input, select, textarea")].map((node) => [node, node.disabled]);
       disabledBeforeRecording.forEach(([node]) => { node.disabled = true; });
       more.classList.add("is-disabled");
       more.setAttribute("aria-disabled", "true");
@@ -192,7 +217,7 @@ export function openEditStudio({ result = {}, progress = {}, profile = "Student"
     [...styleButtons.children].forEach((node) => node.setAttribute("aria-pressed", String(node === choice)));
     invalidate();
   });
-  for (const input of [sound.input, calm.input, showName.input, showInvite.input, quality]) input.addEventListener("change", invalidate);
+  for (const input of [sound.input, calm.input, showName.input, showInvite.input, showLink.input, quality]) input.addEventListener("change", invalidate);
 
   preview.addEventListener("click", () => {
     if (previewPlaying) {
@@ -298,6 +323,27 @@ export function openEditStudio({ result = {}, progress = {}, profile = "Student"
     }
   });
 
+  copyCaption.addEventListener("click", async () => {
+    if (recording) return;
+    const caption = resultCaption(result, share, options());
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(caption);
+      if (closed) return;
+      captionBox.hidden = true;
+      status.textContent = "Caption copied. It includes your score and chapter.";
+      ui.showToast("Caption copied.", "success");
+    } catch {
+      if (closed) return;
+      // A readonly field lets students copy manually when clipboard access is blocked.
+      captionBox.value = caption;
+      captionBox.hidden = false;
+      captionBox.focus();
+      captionBox.select();
+      status.textContent = "Copy the selected caption manually; it includes your score and chapter.";
+    }
+  });
+
   shareButton.addEventListener("click", async () => {
     if (!lastVideo || recording) return;
     try {
@@ -307,7 +353,7 @@ export function openEditStudio({ result = {}, progress = {}, profile = "Student"
         await navigator.share({
           files: [file],
           title: "My Vignan AI edit",
-          text: `I scored ${scorePercent(result.percent)}% in my quiz. #VignanAI #StudyStreak${lastOptions?.includeInvite ? ` Join my squad: ${share.refCode}${share.link ? ` ${share.link}` : ""}` : ""}`,
+          text: resultCaption(result, share, lastOptions || {}),
         });
       } else {
         downloadBlob(lastVideo.blob, lastVideo.filename);

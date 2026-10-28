@@ -23,7 +23,9 @@ function safeEndpoint(value, fallback) {
   try {
     const expected = new URL(fallback);
     const url = new URL(String(value || fallback).trim());
-    if (url.protocol !== "https:" || url.hostname !== expected.hostname) return fallback;
+    if (url.protocol !== "https:" || url.hostname !== expected.hostname || url.port !== expected.port) return fallback;
+    url.username = "";
+    url.password = "";
     url.search = "";
     url.hash = "";
     return url.toString().replace(/\/$/, "");

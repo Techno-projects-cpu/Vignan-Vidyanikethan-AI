@@ -5,7 +5,7 @@
  * (some private windows), an in-memory backend keeps the session usable.
  */
 
-import { maskStudentKeyVault } from "./student-keys.js";
+import { maskStudentKeyVault } from "./student-keys.js?v=12";
 
 const DB_NAME = "vignan-study-ai";
 const DB_VERSION = 1;
@@ -248,6 +248,21 @@ export async function storageSummary() {
   };
 }
 
+/** Drop credentials and query strings from endpoints in a shareable export. */
+function safeExportEndpoint(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  try {
+    if (!/^[a-z][a-z\d+.-]*:/i.test(raw)) return raw.split(/[?#]/, 1)[0];
+    const url = new URL(raw);
+    url.username = "";
+    url.password = "";
+    url.search = "";
+    url.hash = "";
+    return url.toString().replace(/\/$/, "");
+  } catch { return ""; }
+}
+
 /** Export metadata and study history. PDF binaries are intentionally excluded. */
 export async function exportData() {
   const db = await backend();
@@ -262,25 +277,32 @@ export async function exportData() {
     pageCount: pages?.length || book.pageCount,
   }));
   const safeSettings = settings
-    .filter((entry) => entry.key !== "customApiKey")
+    .filter((entry) => !["customApiKey", "apiKey", "apiKeys", "studentKeys", "searchToken"].includes(entry.key))
     .map((entry) => {
-      if (entry.key !== "settings" || !entry.value?.providers) return entry;
+      if (entry.key !== "settings") return entry;
+      if (!entry.value || typeof entry.value !== "object") return { ...entry, value: {} };
+      const raw = entry.value;
+      const permitted = ["routing", "fallback", "studentKeyFallback", "activeProvider", "localAIModel", "localAIAutoEnable", "webEnabled", "webMode", "language", "theme", "profile", "disclaimerSeen", "freeRouterDismissed", "engine", "model"];
+      const value = Object.fromEntries(permitted.filter((key) => Object.hasOwn(raw, key)).map((key) => [key, raw[key]]));
       const providers = Object.fromEntries(
-        Object.entries(entry.value.providers).map(([id, config]) => [
+        Object.entries(raw.providers || {}).map(([id, config]) => [
           id,
           {
-            ...config,
+            endpoint: safeExportEndpoint(config?.endpoint),
+            model: String(config?.model || ""),
             apiKey: config?.apiKey ? "[stored locally]" : "",
-            apiKeys: (config?.apiKeys || []).map(() => "[stored locally]"),
+            apiKeys: (Array.isArray(config?.apiKeys) ? config.apiKeys : []).map(() => "[stored locally]"),
           },
         ]),
       );
       return {
         ...entry,
         value: {
-          ...entry.value,
+          ...value,
+          endpoint: safeExportEndpoint(raw.endpoint),
+          searchEndpoint: safeExportEndpoint(raw.searchEndpoint),
           providers,
-          studentKeys: maskStudentKeyVault(entry.value.studentKeys),
+          studentKeys: maskStudentKeyVault(raw.studentKeys),
           searchToken: "",
         },
       };

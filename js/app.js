@@ -6,18 +6,18 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js";
-import { retrieve, retrieveChapter } from "./retrieval.js";
-import { ingestPdf, ingestText, ingestDemoPack } from "./ingest.js?v=9";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js";
+import * as db from "./db.js?v=12";
+import { retrieve, retrieveChapter } from "./retrieval.js?v=12";
+import { ingestPdf, ingestText, ingestDemoPack } from "./ingest.js?v=12";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=12";
 import {
   answerWithModel,
   generateFlashcardsWithModel,
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js";
+} from "./llm.js?v=12";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=12";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -29,9 +29,9 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js";
-import { TASKS } from "./model-router.js";
-import { PROVIDERS, providerList } from "./providers.js";
+} from "./local-ai.js?v=12";
+import { TASKS } from "./model-router.js?v=12";
+import { PROVIDERS, providerList } from "./providers.js?v=12";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -40,30 +40,33 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js";
-import { parseApiKeys } from "./key-pool.js";
+} from "./settings.js?v=12";
+import { parseApiKeys } from "./key-pool.js?v=12";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js";
+} from "./student-keys.js?v=12";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js";
+} from "./quiz.js?v=12";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
-  readProgress as readFlashProgress,
-  reviewCard,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js";
+} from "./flashcards.js?v=12";
+import {
+  STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
+  nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
+} from "./study-decks.js?v=12";
 import {
   accuracy,
+  currentStreak,
   leaderboard,
   readProgress as readStudyProgress,
   recordResult,
@@ -71,13 +74,13 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js";
-import { externalSearchUrl, searchWeb } from "./web.js";
-import { openEditStudio } from "./edit-studio.js?v=11";
-import { openReader } from "./reader.js?v=11";
-import { applyTranslations, setLanguage, t } from "./i18n.js?v=11";
-import { clamp, downloadBlob, formatDate, readFileAsText, truncate, uid } from "./util.js";
-import * as ui from "./ui.js?v=11";
+} from "./progress.js?v=12";
+import { externalSearchUrl, searchWeb } from "./web.js?v=12";
+import { openEditStudio } from "./edit-studio.js?v=12";
+import { openReader } from "./reader.js?v=12";
+import { applyTranslations, setLanguage, t } from "./i18n.js?v=12";
+import { clamp, downloadBlob, formatDate, readFileAsText, truncate, uid } from "./util.js?v=12";
+import * as ui from "./ui.js?v=12";
 import {
   clearReferral,
   getLeaderboard,
@@ -87,8 +90,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=11";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js";
+} from "./auth.js?v=12";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=12";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -96,8 +99,8 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js";
-import { initMotion, revealVisible } from "./motion.js";
+} from "./premium-ui.js?v=12";
+import { initMotion, revealVisible } from "./motion.js?v=12";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -130,14 +133,21 @@ const state = {
   quiz: null,
   quizResponses: {},
   quizIndex: 0,
+  quizContext: null,
   quizTimer: null,
   quizDeadline: null,
+  quizSubmitting: false,
+  quizSubmissionPrompt: false,
   result: null,
+  studyDecks: emptyDeckCollection(),
+  storageMode: "indexeddb",
   flashcards: [],
   flashDeck: [],
   flashProgress: {},
   flashIndex: 0,
   flashFlipped: false,
+  flashPracticeAll: false,
+  deckStorageError: false,
   studyProgress: readStudyProgress(),
   serverHealth: { ok: false, ai: false, aiProviders: [], freeRouter: false, search: false, accountsBackend: "local", keyPool: { serverKeys: 0, studentKeyFallback: true, cooldownMs: 60000 } },
   localAI: getLocalAIState(),
@@ -159,9 +169,13 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     const stored = await db.getSetting("settings", null);
     state.settings = normalizeSettings(stored || DEFAULT_SETTINGS);
     state.studyProgress = readStudyProgress();
-    state.flashProgress = readFlashProgress();
+    state.storageMode = await db.getStorageMode();
+    state.studyDecks = normalizeDeckCollection(await db.getSetting(STUDY_DECKS_KEY, null));
+    syncActiveDeck();
+    $("#deck-create").open = !state.studyDecks.decks.length;
     state.results = await db.getResults();
     state.messages = await db.getMessages(100);
+    state.lastAnswer = [...state.messages].reverse().find((message) => message.role === "assistant" && (message.sources?.length || message.webSources?.length)) || {};
     setLanguage(state.settings.language);
     setTheme(state.settings.theme, { save: false });
     await reloadIndexes();
@@ -208,6 +222,9 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     const requestedView = new URL(location.href).searchParams.get("view");
     setView(VIEW_META[requestedView] ? requestedView : "ask", { skipHistory: true });
     registerServiceWorker();
+    if (state.storageMode === "memory") {
+      ui.showToast("This browser blocked storage. Your work will last only until this tab closes.", "warning", 9000);
+    }
   } catch (error) {
     console.error("[vignan-ai] init failed", error);
     ui.showToast(`Vignan Vidyanikethan AI could not start: ${error.message}`, "error", 8000);
@@ -330,9 +347,11 @@ function renderQuizEngineNote() {
   const label =
     route === "offline" || !useModel
       ? t("common.offlineQuiz") || "Offline quiz writer"
-      : `AI writer: ${PROVIDERS[route]?.label || route}`;
+      : `AI writer: ${aiProfile(route).nickname}`;
   const note = $("#quiz-engine-note");
-  if (note) note.textContent = label;
+  const context = state.quizContext;
+  const usingAnswer = context && $("#quiz-topic")?.value.trim() === context.topic && $("#quiz-book-scope")?.value === context.bookScope;
+  if (note) note.textContent = `${label}${usingAnswer ? " · using cited answer pages" : ""}`;
 }
 
 function renderAll() {
@@ -609,6 +628,26 @@ function addWelcomeMessage() {
   });
 }
 
+async function prepareQuizFromText(topic = "", bookId = "", sources = []) {
+  if (state.quizSubmitting) { ui.showToast("Please wait while your quiz is graded.", "info"); return; }
+  if (state.quiz && !state.result) {
+    const confirmed = await ui.confirmDialog({
+      title: "Start a different quiz?",
+      message: "Your current unfinished quiz will be discarded.",
+      confirmLabel: "Start a new quiz",
+    });
+    if (!confirmed) return;
+  }
+  newQuizHandler();
+  renderBookScopes();
+  $("#quiz-topic").value = topic;
+  const select = $("#quiz-book-scope");
+  select.value = [...select.options].some((option) => option.value === bookId) ? bookId : "all";
+  if (sources.length) state.quizContext = { topic, bookScope: select.value, sources };
+  setView("quiz");
+  $("#quiz-topic").focus({ preventScroll: true });
+}
+
 function renderSuggestions() {
   const container = $("#chat-suggestions");
   container.classList.toggle("hidden", state.messages.some((message) => message.role === "user"));
@@ -618,8 +657,7 @@ function renderSuggestions() {
     button.type = "button";
     button.addEventListener("click", () => {
       if (suggestion.view === "quiz") {
-        $("#quiz-topic").value = suggestion.prompt;
-        setView("quiz");
+        void prepareQuizFromText(suggestion.prompt);
         return;
       }
       $("#ask-input").value = suggestion.prompt;
@@ -634,12 +672,14 @@ function renderChat() {
   const log = $("#chat-log");
   $("#view-ask")?.classList.toggle("has-conversation", state.messages.some((message) => message.role === "user"));
   log.replaceChildren();
+  let lastQuestion = "";
   for (const message of state.messages) {
     const wrapper = ui.element("div", `message ${message.role}`);
     const avatar = ui.element("div", "message-avatar", message.role === "user" ? "S" : "V");
     const body = ui.element("div", "message-body");
     if (message.role === "user") {
       body.textContent = message.content;
+      lastQuestion = message.content;
     } else {
       ui.renderRichText(body, message.content, {
         sources: message.sources,
@@ -649,11 +689,27 @@ function renderChat() {
       });
       const meta = ui.element("div", "message-meta");
       if (message.meta) meta.appendChild(ui.element("span", "", message.meta));
-      if (message.confidence) meta.appendChild(ui.element("span", "", `${Math.round(message.confidence * 100)}% grounding`));
+      if (message.confidence) meta.appendChild(ui.element("span", "", `${Math.round(message.confidence * 100)}% text match`));
       if (message.verification?.enabled && message.verification.supported) {
-        meta.appendChild(ui.element("span", "", "✓ AI-verified"));
+        meta.appendChild(ui.element("span", "", "✓ Second AI check"));
       }
       if (meta.childNodes.length) body.appendChild(meta);
+      if (lastQuestion) {
+        const actions = ui.element("div", "message-actions");
+        const copy = ui.element("button", "message-action", "Copy answer");
+        copy.type = "button";
+        copy.addEventListener("click", () => copyText(formatAnswerForCopy(message), "Answer and citations copied."));
+        actions.appendChild(copy);
+        if (message.sources?.length) {
+          const question = lastQuestion;
+          const ids = [...new Set(message.sources.map((source) => source.bookId).filter(Boolean))];
+          const quiz = ui.element("button", "message-action", "Quiz me on this");
+          quiz.type = "button";
+          quiz.addEventListener("click", () => prepareQuizFromText(question, ids.length === 1 ? ids[0] : "", message.sources));
+          actions.appendChild(quiz);
+        }
+        body.appendChild(actions);
+      }
     }
     wrapper.append(avatar, body);
     log.appendChild(wrapper);
@@ -719,7 +775,7 @@ async function handleAsk(event) {
             grounded: true,
             confidence: retrieval.confidence,
             verification: model.verification,
-            meta: `${model.label || "AI"} · ${model.model || "model"}${model.fallbackUsed ? " (fallback)" : ""}`,
+            meta: `${aiProfile(model.engine).nickname} · AI answer${model.fallbackUsed ? " (fallback)" : ""}`,
             flashcards: [],
           };
         } else if (model.error) {
@@ -742,11 +798,14 @@ async function handleAsk(event) {
       });
       answer.meta = modelError
         ? "Model unavailable — cited excerpts shown"
-        : "Offline engine — cited excerpts";
+        : "Bolt · cited textbook excerpts";
       answer.verification = { enabled: false };
       showKeyExhaustedToast(modelError);
     }
     answer.webSources = webResults;
+    if (state.mode === "flashcards" && hits.length && !answer.flashcards?.length) {
+      answer.flashcards = buildFlashcards(hits, 6);
+    }
     state.lastAnswer = answer;
 
     addMessage({
@@ -762,11 +821,8 @@ async function handleAsk(event) {
     renderSources(answer);
 
     if (answer.flashcards?.length) {
-      state.flashcards = answer.flashcards;
-      state.flashIndex = 0;
-      state.flashFlipped = false;
-      renderFlashcards();
-      ui.showToast(`${answer.flashcards.length} flashcards are ready in Flashcards.`, "success");
+      const { saved } = await saveNewDeck({ cards: answer.flashcards, topic: query, bookIds: hits.map((hit) => hit.bookId) });
+      if (saved) ui.showToast(state.storageMode === "memory" ? "Cited cards are ready for this session." : "A cited revision deck was saved in Flashcards.", "success");
     }
     if (webResults.length) {
       ui.showToast("Outside sources are labelled separately — they are not textbook answers.", "warning");
@@ -916,10 +972,16 @@ function openWebSource(source) {
   if (source?.url) window.open(source.url, "_blank", "noopener,noreferrer");
 }
 
-async function copyText(text) {
+function formatAnswerForCopy(message) {
+  const references = (message.sources || []).map((source, index) => `[${source.n || index + 1}] ${source.title || "Textbook"} · page ${source.page || "?"}`);
+  const outside = (message.webSources || []).map((source, index) => `[W${index + 1}] ${source.title || "Outside source"} — ${source.url || ""}`);
+  return [message.content || "", ...(references.length ? ["", "Textbook sources:", ...references] : []), ...(outside.length ? ["", "Outside sources:", ...outside] : [])].join("\n");
+}
+
+async function copyText(text, successMessage = "Quote copied.") {
   try {
     await navigator.clipboard.writeText(text || "");
-    ui.showToast("Quote copied.", "success");
+    ui.showToast(successMessage, "success");
   } catch {
     ui.showToast("Clipboard is not available here.", "warning");
   }
@@ -941,6 +1003,13 @@ function renderBookScopes() {
 function scopeIds(selector) {
   const value = $(selector)?.value || "all";
   return value === "all" ? [] : [value];
+}
+
+function topicSearchMessage(reason) {
+  if (reason === "empty-library") return "Add a textbook or choose a book with readable text first.";
+  if (reason === "too-vague") return "Name a topic, or leave it blank for general practice.";
+  if (reason === "partial-topic") return "Only part of that topic matched. Try a shorter, more specific topic or another book.";
+  return "That topic wasn't found in the selected books. Try another topic or add the right chapter.";
 }
 
 function renderLibrary() {
@@ -1139,10 +1208,7 @@ async function handleBookAction(event) {
     setView("ask");
     $("#ask-input").focus();
   } else if (action === "quiz") {
-    renderBookScopes();
-    $("#quiz-book-scope").value = book.id;
-    $("#quiz-topic").value = book.subject || "";
-    setView("quiz");
+    await prepareQuizFromText("", book.id);
   } else if (action === "read") {
     openReader({ book, pages: book.pages || [], initialPage: 1 });
   } else if (action === "delete") {
@@ -1175,9 +1241,24 @@ async function generateQuizHandler() {
   ui.setBusy(button, true, "Writing questions…");
 
   try {
-    const retrieval = retrieveChapter(topic, state.indexes, { topK: Math.max(12, count * 2), bookIds });
+    const context = state.quizContext;
+    const usingAnswer = context && topic === context.topic && $("#quiz-book-scope").value === context.bookScope;
+    let retrieval;
+    if (usingAnswer) {
+      const hits = context.sources.filter((source) => {
+        const index = state.indexes.find((entry) => entry.book.id === source.bookId);
+        return source.text && index?.chunks?.some((chunk) => chunk.id === source.chunkId);
+      });
+      if (!hits.length) {
+        ui.showToast("Those cited pages are no longer in your library. Choose another book or topic.", "warning", 6500);
+        return;
+      }
+      retrieval = { hits, reason: "answer-sources" };
+    } else {
+      retrieval = retrieveChapter(topic, state.indexes, { topK: Math.max(12, count * 2), bookIds });
+    }
     if (!retrieval.hits.length) {
-      ui.showToast("Add a textbook first, then generate a quiz.", "warning");
+      ui.showToast(topicSearchMessage(retrieval.reason), "warning", 6500);
       return;
     }
     let quiz = null;
@@ -1235,8 +1316,10 @@ async function generateQuizHandler() {
     $("#quiz-results").classList.add("hidden");
     $("#quiz-runner").classList.remove("hidden");
     $("#quiz-topic-title").textContent = quiz.title;
-    $("#quiz-engine-note").textContent =
-      engine === "model" ? `Generated by ${PROVIDERS[state.settings.routing.quiz]?.label || "connected AI"}` : "Generated offline from your books";
+    // The model router may have fallen back to another provider; this API
+    // returns questions, not the final route, so do not mislabel the writer.
+    $("#quiz-run-note").textContent = `${quiz.questions.length} ${quiz.questions.length === 1 ? "question" : "questions"} · ${engine === "model" ? "AI writer · from your books" : "Bolt · from your books"}`;
+    if (quiz.questions.length < count) ui.showToast(`Found enough material for ${quiz.questions.length} of the ${count} requested questions.`, "info", 5000);
     startQuizTimer();
     renderQuizQuestion();
   } catch (error) {
@@ -1351,7 +1434,7 @@ function startQuizTimer() {
     if (remaining <= 0) {
       clearQuizTimer();
       ui.showToast("Time is up — submitting your quiz.", "warning");
-      submitQuiz();
+      submitQuiz({ auto: true });
     }
   };
   update();
@@ -1369,8 +1452,24 @@ function formatTime(seconds) {
   return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
 }
 
-async function submitQuiz() {
-  if (!state.quiz) return;
+async function submitQuiz(options = {}) {
+  if (!state.quiz || state.quizSubmitting || state.result) return;
+  const quiz = state.quiz;
+  const auto = options.auto === true;
+  const unanswered = quiz.questions.filter((question) => !String(state.quizResponses[question.id] ?? "").trim()).length;
+  if (!auto && unanswered) {
+    state.quizSubmissionPrompt = true;
+    const confirmed = await ui.confirmDialog({
+      title: "Submit with unanswered questions?",
+      message: `${unanswered} ${unanswered === 1 ? "question is" : "questions are"} blank and will receive no points.`,
+      confirmLabel: "Submit anyway",
+    });
+    state.quizSubmissionPrompt = false;
+    if (!confirmed || state.quiz !== quiz || state.quizSubmitting || state.result) return;
+  }
+  state.quizSubmitting = true;
+  // A timed quiz can expire while the unanswered-question prompt is open.
+  if (auto && state.quizSubmissionPrompt) ui.closeModal();
   clearQuizTimer();
   const button = $("#quiz-submit");
   ui.setBusy(button, true, "Grading…");
@@ -1405,13 +1504,14 @@ async function submitQuiz() {
     state.result = result;
     state.studyProgress = recordResult(state.studyProgress, result, { profile: result.profile });
     writeStudyProgress(state.studyProgress);
-    await db.addResult(result);
+    let savedLocally = state.storageMode !== "memory";
+    try { await db.addResult(result); } catch (error) { savedLocally = false; console.error("Could not save quiz result", error); }
     state.results.unshift(result);
     renderQuizResults(result);
     renderProgress();
     $("#quiz-runner").classList.add("hidden");
     $("#quiz-results").classList.remove("hidden");
-    ui.showToast(`Quiz complete — ${result.percent}% · +${result.xp} XP`, "success");
+    ui.showToast(savedLocally ? `Quiz complete — ${result.percent}% · +${result.xp} XP` : `Quiz complete — ${result.percent}%. This result could not be saved on this device.`, savedLocally ? "success" : "warning", 6000);
     if (state.account && state.authAvailable) {
       syncProgress(result)
         .then(async (user) => {
@@ -1424,12 +1524,13 @@ async function submitQuiz() {
           updateStatus();
           renderAccount();
         })
-        .catch(() => ui.showToast("Saved locally. Live squad sync will retry after your next quiz.", "warning", 3200));
+        .catch(() => ui.showToast(savedLocally ? "Your result is on this device, but its score could not be added to your account." : "The result is only in this tab, and its score could not be added to your account.", "warning", 6000));
     }
   } catch (error) {
     console.error(error);
     ui.showToast(error.message || "Could not grade the quiz.", "error");
   } finally {
+    state.quizSubmitting = false;
     ui.setBusy(button, false);
   }
 }
@@ -1454,7 +1555,6 @@ function renderQuizResults(result) {
   hero.appendChild(ui.element("p", "hint", streakMessage(state.studyProgress)));
   const card = ui.element("button", "result-edit-cta");
   card.type = "button";
-  card.setAttribute("aria-label", "Make my result edit video");
   const cardIcon = ui.element("span", "result-edit-icon", "✳");
   cardIcon.setAttribute("aria-hidden", "true");
   const cardCopy = ui.element("span", "result-edit-copy");
@@ -1467,9 +1567,27 @@ function renderQuizResults(result) {
   const actions = ui.element("div", "result-actions");
   const newQuiz = ui.element("button", "button ghost small", t("quiz.newQuiz"));
   newQuiz.addEventListener("click", newQuizHandler);
-  const retake = ui.element("button", "button ghost small", t("quiz.retake"));
-  retake.addEventListener("click", retakeQuiz);
+  const canRetake = Boolean(state.quiz && state.quiz.id === result.quizId);
+  const retake = ui.element("button", "button ghost small", canRetake ? t("quiz.retake") : "Practice this topic");
+  retake.type = "button";
+  retake.addEventListener("click", () => {
+    if (canRetake) return retakeQuiz();
+    newQuizHandler();
+    $("#quiz-topic").value = result.topic === "Chapter quiz" ? "" : (result.topic || "");
+    const bookId = result.perQuestion?.find((item) => item.question?.source?.bookId)?.question.source.bookId;
+    if (bookId && [...$("#quiz-book-scope").options].some((option) => option.value === bookId)) $("#quiz-book-scope").value = bookId;
+    $("#quiz-topic").focus();
+  });
   actions.append(newQuiz, retake);
+  if ((result.perQuestion || []).some((item) => item.question?.prompt && Number(item.awarded || 0) < 1)) {
+    const reviseCards = ui.element("button", "button ghost small result-revise-cards", "Make cards from mistakes");
+    reviseCards.type = "button";
+    reviseCards.addEventListener("click", async () => {
+      reviseCards.disabled = true;
+      try { await reviewMistakes(result); } finally { reviseCards.disabled = false; }
+    });
+    actions.appendChild(reviseCards);
+  }
   hero.appendChild(actions);
   root.appendChild(hero);
 
@@ -1523,6 +1641,7 @@ function renderQuizResults(result) {
 
 function newQuizHandler() {
   clearQuizTimer();
+  state.quizContext = null;
   state.quiz = null;
   state.result = null;
   state.quizResponses = {};
@@ -1543,15 +1662,7 @@ function retakeQuiz() {
 }
 
 function openQuestionSource(source) {
-  if (!source) return;
-  const index = state.indexes.find((entry) => entry.book.id === source.bookId);
-  if (!index) return;
-  openReader({
-    book: index.book,
-    pages: index.book.pages || [],
-    initialPage: source.page || 1,
-    highlight: source.quote || "",
-  });
+  openSource(source);
 }
 
 /* ------------------------------------------------------- performance card */
@@ -1562,10 +1673,93 @@ function openPerformanceCard(result) {
     link: state.account ? inviteLink(state.account.refCode) : "",
     username: state.account?.username || state.settings.profile || "Student",
   };
-  openEditStudio({ result, progress: state.studyProgress, profile: share.username, account: state.account, share });
+  openEditStudio({ result, progress: { ...state.studyProgress, current: currentStreak(state.studyProgress) }, profile: share.username, account: state.account, share });
 }
 
 /* ------------------------------------------------------------- flashcards */
+
+let deckWriteQueue = Promise.resolve();
+
+function syncActiveDeck() {
+  const deck = activeDeck(state.studyDecks);
+  state.flashcards = deck?.cards || [];
+  state.flashProgress = deck?.progress || {};
+}
+
+function updateDeckStorageNote() {
+  const note = $("#deck-storage-note");
+  if (!note) return;
+  note.textContent = state.storageMode === "memory"
+    ? "Storage is blocked; these decks last only for this tab."
+    : state.deckStorageError
+      ? "The latest changes could not be saved and are only available in this tab."
+      : "Cards and review dates stay on this device; they do not sync to your account.";
+}
+
+async function persistStudyDecks() {
+  const snapshot = state.studyDecks;
+  const write = deckWriteQueue.catch(() => {}).then(() => db.setSetting(STUDY_DECKS_KEY, snapshot));
+  deckWriteQueue = write;
+  try {
+    await write;
+    state.deckStorageError = false;
+    updateDeckStorageNote();
+    return true;
+  } catch (error) {
+    state.deckStorageError = true;
+    updateDeckStorageNote();
+    console.error("Could not save revision decks", error);
+    ui.showToast("Your deck changes could not be saved; they are only available in this tab.", "warning", 7000);
+    return false;
+  }
+}
+
+async function saveNewDeck({ cards, topic = "", title = "", bookIds = [], originResultId = "" }) {
+  const deck = makeStudyDeck({ cards, topic, title, bookIds, originResultId });
+  state.studyDecks = addDeck(state.studyDecks, deck);
+  syncActiveDeck();
+  state.flashIndex = 0;
+  state.flashFlipped = false;
+  state.flashPracticeAll = false;
+  $("#deck-create").open = false;
+  renderFlashcards();
+  renderStudyNext();
+  const saved = await persistStudyDecks();
+  return { deck, saved };
+}
+
+function openSavedDeck(deckId) {
+  state.studyDecks = selectDeck(state.studyDecks, deckId);
+  syncActiveDeck();
+  state.flashIndex = 0;
+  state.flashFlipped = false;
+  state.flashPracticeAll = false;
+  void persistStudyDecks();
+  setView("flashcards");
+}
+
+async function reviewMistakes(result) {
+  const cards = cardsFromMistakes(result);
+  if (!cards.length) {
+    ui.showToast("No missed questions to turn into cards yet.", "info");
+    return;
+  }
+  const existing = state.studyDecks.decks.find((deck) => deck.originResultId && deck.originResultId === result.id);
+  if (existing) {
+    openSavedDeck(existing.id);
+    ui.showToast("Opened your existing revision deck.", "info");
+    return;
+  }
+  const { saved } = await saveNewDeck({
+    cards,
+    topic: result.topic || "Quiz review",
+    title: `Revise: ${result.topic || "Quiz"}`,
+    bookIds: cards.map((card) => card.source?.bookId).filter(Boolean),
+    originResultId: result.id || "",
+  });
+  setView("flashcards");
+  if (saved) ui.showToast(state.storageMode === "memory" ? "Revision cards are ready for this session." : "Missed questions saved as a revision deck.", "success");
+}
 
 async function generateFlashcardsHandler() {
   const topic = $("#flash-topic").value.trim();
@@ -1576,6 +1770,10 @@ async function generateFlashcardsHandler() {
   ui.setBusy(button, true, "Writing cards…");
   try {
     const retrieval = retrieveChapter(topic, state.indexes, { topK: Math.max(12, count), bookIds });
+    if (!retrieval.hits.length) {
+      ui.showToast(topicSearchMessage(retrieval.reason), "warning", 6500);
+      return;
+    }
     let cards = [];
     if (useModel && state.settings.routing.flashcards !== "offline" && retrieval.hits.length) {
       try {
@@ -1595,12 +1793,12 @@ async function generateFlashcardsHandler() {
       ui.showToast("Not enough readable sentences for flashcards. Try another topic.", "warning");
       return;
     }
-    state.flashcards = cards;
-    state.flashProgress = readFlashProgress();
-    state.flashIndex = 0;
-    state.flashFlipped = false;
-    renderFlashcards();
-    ui.showToast(`${cards.length} flashcards generated from cited pages.`, "success");
+    const { saved } = await saveNewDeck({ cards, topic, bookIds: bookIds.length ? bookIds : retrieval.hits.map((hit) => hit.bookId) });
+    if (saved) {
+      const message = state.storageMode === "memory" ? "ready for this session" : "saved on this device";
+      const fewer = cards.length < count ? ` (${cards.length} of ${count} requested)` : "";
+      ui.showToast(`${cards.length} cited cards ${message}${fewer}.`, "success", 5000);
+    }
   } catch (error) {
     console.error(error);
     ui.showToast(error.message || "Could not make flashcards.", "error");
@@ -1611,45 +1809,67 @@ async function generateFlashcardsHandler() {
 
 function renderFlashcards() {
   const area = $("#flashcard-area");
-  area.replaceChildren();
+  const savedPanel = $("#saved-decks");
+  const select = $("#flash-deck-select");
+  const deck = activeDeck(state.studyDecks);
+  savedPanel.hidden = !state.studyDecks.decks.length;
+  // This panel starts hidden, so it must not remain transparent while waiting
+  // for an IntersectionObserver after the first deck is created.
+  savedPanel.classList.add("is-revealed");
+  updateDeckStorageNote();
+  select.replaceChildren();
+  for (const entry of state.studyDecks.decks) {
+    const dueCount = dueCards(entry.cards, entry.progress).length;
+    select.appendChild(ui.option(entry.id, `${truncate(entry.title, 54)} · ${dueCount} due`, entry.id === deck?.id));
+  }
   const stats = deckStats(state.flashcards, state.flashProgress);
-  $("#deck-stats").textContent = state.flashcards.length
-    ? `${stats.due} ${t("flashcards.due")} · ${stats.mastered} mastered · ${stats.reviews} reviews`
-    : "";
+  $("#deck-stats").textContent = deck ? `${stats.due} due · ${state.flashcards.length} cards` : "";
+  area.replaceChildren();
   if (!state.flashcards.length) {
-    area.appendChild(ui.emptyState("◇", t("flashcards.title"), t("flashcards.empty")));
+    area.appendChild(ui.emptyState("◇", "No decks yet", "Make a deck from a topic or turn quiz mistakes into cards."));
     return;
   }
+
   const due = dueCards(state.flashcards, state.flashProgress);
-  state.flashDeck = due.length ? due : state.flashcards;
+  if (!due.length && !state.flashPracticeAll) {
+    const complete = ui.element("div", "card deck-complete");
+    complete.appendChild(ui.element("span", "study-kicker", "NICE WORK"));
+    complete.appendChild(ui.element("h3", "", "You're all caught up."));
+    const nextDay = Object.values(state.flashProgress).map((item) => item?.due).filter(Boolean).sort()[0];
+    complete.appendChild(ui.element("p", "", nextDay ? `Next review: ${nextDay}.` : "Your next review will appear here."));
+    const practice = ui.element("button", "button ghost", "Practice anyway");
+    practice.type = "button";
+    practice.dataset.action = "practice-all";
+    complete.appendChild(practice);
+    complete.appendChild(ui.element("small", "", "Practice mode does not change your review schedule."));
+    area.appendChild(complete);
+    return;
+  }
+
+  state.flashDeck = state.flashPracticeAll ? state.flashcards : due;
   state.flashIndex = clamp(state.flashIndex, 0, state.flashDeck.length - 1);
   const card = state.flashDeck[state.flashIndex];
-
-  const flashcard = ui.element("div", `flashcard${state.flashFlipped ? " flipped" : ""}`);
+  const flashcard = ui.element("button", `flashcard${state.flashFlipped ? " flipped" : ""}`);
+  flashcard.type = "button";
   flashcard.dataset.cardId = card.id;
   const inner = ui.element("div", "flashcard-inner");
   const front = ui.element("div", "flashcard-face flashcard-front");
-  front.appendChild(ui.element("div", "flashcard-kicker", `${t("flashcards.flip")} · ${state.flashIndex + 1}/${state.flashDeck.length}`));
+  front.appendChild(ui.element("div", "flashcard-kicker", `Tap or press to reveal · ${state.flashIndex + 1}/${state.flashDeck.length}`));
   front.appendChild(ui.element("div", "flashcard-text", card.front));
-  front.appendChild(ui.element("div", "flashcard-source", `${card.source.title} · page ${card.source.page}`));
+  front.appendChild(ui.element("div", "flashcard-source", `${card.source?.title || "Textbook"} · page ${card.source?.page || "?"}`));
   const back = ui.element("div", "flashcard-face flashcard-back");
-  back.appendChild(ui.element("div", "flashcard-kicker", "Answer"));
-  back.appendChild(ui.element("div", "flashcard-text", card.back));
-  const sourceButton = ui.element("button", "text-button", `Open page ${card.source.page} ↗`);
-  sourceButton.type = "button";
-  sourceButton.dataset.action = "source";
-  sourceButton.addEventListener("click", (event) => {
-    event.stopPropagation();
-    openQuestionSource(card.source);
-  });
-  back.appendChild(sourceButton);
+  const plainBack = card.back.replace(/\*\*(.*?)\*\*/g, "$1");
+  back.appendChild(ui.element("div", "flashcard-kicker", "Answer · press to see question"));
+  back.appendChild(ui.element("div", "flashcard-text", plainBack));
   inner.append(front, back);
   flashcard.appendChild(inner);
-  flashcard.addEventListener("click", () => {
-    state.flashFlipped = !state.flashFlipped;
-    flashcard.classList.toggle("flipped", state.flashFlipped);
-  });
   area.appendChild(flashcard);
+
+  const sourceButton = ui.element("button", "text-button deck-source", `Open ${card.source?.title || "textbook"} · page ${card.source?.page || "?"} ↗`);
+  sourceButton.type = "button";
+  sourceButton.disabled = !card.source?.bookId;
+  sourceButton.addEventListener("click", () => openQuestionSource(card.source));
+  area.appendChild(sourceButton);
 
   const progress = ui.element("div", "deck-progress");
   const meter = ui.element("div", "meter");
@@ -1660,34 +1880,150 @@ function renderFlashcards() {
   area.appendChild(progress);
 
   const controls = ui.element("div", "flash-controls");
-  const again = ui.element("button", "button ghost", t("flashcards.again"));
-  again.dataset.action = "again";
-  again.dataset.cardId = card.id;
-  const gotIt = ui.element("button", "button primary", t("flashcards.gotIt"));
-  gotIt.dataset.action = "got";
-  gotIt.dataset.cardId = card.id;
-  controls.append(again, gotIt, ui.element("span", "flash-hint", due.length ? `${due.length} due now` : "All caught up — reviewing anyway"));
+  let again = null;
+  let gotIt = null;
+  if (state.flashPracticeAll) {
+    const next = ui.element("button", "button primary", "Next card");
+    next.type = "button";
+    next.dataset.action = "practice-next";
+    const backToDue = ui.element("button", "button ghost", "Back to schedule");
+    backToDue.type = "button";
+    backToDue.dataset.action = "practice-done";
+    controls.append(next, backToDue, ui.element("span", "flash-hint", "Practice only · schedule unchanged"));
+  } else {
+    again = ui.element("button", "button ghost", t("flashcards.again"));
+    again.type = "button";
+    again.dataset.action = "again";
+    again.dataset.cardId = card.id;
+    gotIt = ui.element("button", "button primary", t("flashcards.gotIt"));
+    gotIt.type = "button";
+    gotIt.dataset.action = "got";
+    gotIt.dataset.cardId = card.id;
+    controls.append(again, gotIt, ui.element("span", "flash-hint", `${due.length} due · reveal, then rate your recall`));
+  }
   area.appendChild(controls);
+
+  function updateFlip() {
+    flashcard.classList.toggle("flipped", state.flashFlipped);
+    flashcard.setAttribute("aria-pressed", String(state.flashFlipped));
+    front.setAttribute("aria-hidden", String(state.flashFlipped));
+    back.setAttribute("aria-hidden", String(!state.flashFlipped));
+    if (again) again.disabled = !state.flashFlipped;
+    if (gotIt) gotIt.disabled = !state.flashFlipped;
+  }
+  flashcard.addEventListener("click", () => { state.flashFlipped = !state.flashFlipped; updateFlip(); });
+  updateFlip();
 }
 
 function handleFlashAction(event) {
   const button = event.target.closest("button[data-action]");
-  if (!button || !["again", "got"].includes(button.dataset.action)) return;
-  const remembered = button.dataset.action === "got";
-  state.flashProgress = reviewCard(state.flashProgress, button.dataset.cardId, remembered);
-  writeFlashProgress(state.flashProgress);
-  state.flashIndex = state.flashDeck.length ? (state.flashIndex + 1) % state.flashDeck.length : 0;
+  if (!button) return;
+  const action = button.dataset.action;
+  if (action === "practice-all" || action === "practice-done") {
+    state.flashPracticeAll = action === "practice-all";
+    state.flashIndex = 0;
+    state.flashFlipped = false;
+    renderFlashcards();
+    if (event.detail === 0) $(".flashcard, .deck-complete button", $("#flashcard-area"))?.focus({ preventScroll: true });
+    return;
+  }
+  if (action === "practice-next") {
+    state.flashIndex = (state.flashIndex + 1) % state.flashDeck.length;
+    state.flashFlipped = false;
+    renderFlashcards();
+    if (event.detail === 0) $(".flashcard", $("#flashcard-area"))?.focus({ preventScroll: true });
+    return;
+  }
+  if (!["again", "got"].includes(action) || !state.flashFlipped) return;
+  const deck = activeDeck(state.studyDecks);
+  const cardId = button.dataset.cardId;
+  if (!deck || state.flashDeck[state.flashIndex]?.id !== cardId) return;
+  const before = state.flashDeck;
+  state.studyDecks = reviewDeck(state.studyDecks, deck.id, cardId, action === "got");
+  syncActiveDeck();
+  const after = dueCards(state.flashcards, state.flashProgress);
+  state.flashIndex = nextReviewIndex(before, cardId, after);
   state.flashFlipped = false;
   renderFlashcards();
+  renderStudyNext();
+  void persistStudyDecks();
+  if (event.detail === 0) $(".flashcard, .deck-complete button", $("#flashcard-area"))?.focus({ preventScroll: true });
+}
+
+async function deleteActiveDeck() {
+  const deck = activeDeck(state.studyDecks);
+  if (!deck) return;
+  const confirmed = await ui.confirmDialog({
+    title: "Delete this deck?",
+    message: `“${deck.title}” and its review dates will be removed from this device. Your books and quiz results stay.`,
+    confirmLabel: "Delete deck",
+    danger: true,
+  });
+  if (!confirmed) return;
+  state.studyDecks = removeDeck(state.studyDecks, deck.id);
+  syncActiveDeck();
+  state.flashIndex = 0;
+  state.flashFlipped = false;
+  state.flashPracticeAll = false;
+  if (!state.studyDecks.decks.length) $("#deck-create").open = true;
+  renderFlashcards();
+  renderStudyNext();
+  if (await persistStudyDecks()) ui.showToast("Deck deleted from this device.", "success");
 }
 
 /* --------------------------------------------------------------- progress */
 
+function renderStudyNext() {
+  const step = nextStudyStep(state.studyDecks, state.results);
+  const copy = $("#study-next-copy");
+  const action = $("#study-next-action");
+  if (!copy || !action) return;
+  action.disabled = false;
+  if (step.kind === "due") {
+    copy.textContent = `${step.count} ${step.count === 1 ? "card is" : "cards are"} ready for a quick review.`;
+    action.textContent = "Review due cards  →";
+    action.onclick = () => openSavedDeck(step.deckId);
+  } else if (step.kind === "mistakes") {
+    copy.textContent = `${step.count} ${step.count === 1 ? "question" : "questions"} from a recent quiz could use another look.`;
+    action.textContent = "Make review cards  →";
+    action.onclick = async () => {
+      const result = state.results.find((entry) => entry.id === step.resultId);
+      if (!result) return;
+      action.disabled = true;
+      try { await reviewMistakes(result); } finally { action.disabled = false; }
+    };
+  } else {
+    copy.textContent = state.results.length ? "Keep your momentum going with a short quiz." : "Start with a short quiz from your books.";
+    action.textContent = "Start a quiz  →";
+    action.onclick = () => setView("quiz");
+  }
+}
+
+async function openSavedQuizResult(result) {
+  if (state.quizSubmitting) { ui.showToast("Please wait while your quiz is graded.", "info"); return; }
+  if (state.quiz && !state.result) {
+    const confirmed = await ui.confirmDialog({
+      title: "Leave your current quiz?",
+      message: "Opening a past result will discard this unfinished quiz.",
+      confirmLabel: "Open past result",
+    });
+    if (!confirmed) return;
+  }
+  clearQuizTimer();
+  state.quiz = null;
+  state.quizResponses = {};
+  state.quizIndex = 0;
+  state.result = result;
+  setView("quiz");
+}
+
 function renderProgress() {
+  renderStudyNext();
   const grid = $("#stat-grid");
   grid.replaceChildren();
+  const streak = currentStreak(state.studyProgress);
   const cards = [
-    { label: t("progress.streak"), value: `${state.studyProgress.current || 0} 🔥`, sub: streakMessage(state.studyProgress) },
+    { label: t("progress.streak"), value: `${streak} ${streak === 1 ? "day" : "days"}`, sub: streakMessage(state.studyProgress) },
     { label: t("progress.xp"), value: String(state.studyProgress.xp || 0), sub: `${state.studyProgress.best || 0} day best streak` },
     { label: t("progress.quizzes"), value: String(state.studyProgress.totalQuizzes || 0), sub: `${state.results.length} saved results` },
     { label: t("progress.accuracy"), value: `${accuracy(state.studyProgress)}%`, sub: `${state.studyProgress.totalCorrect || 0} / ${state.studyProgress.totalQuestions || 0} marks` },
@@ -1741,7 +2077,12 @@ function renderProgress() {
     const main = ui.element("div", "list-row-main");
     main.appendChild(ui.element("strong", "", truncate(result.topic || "Chapter quiz", 48)));
     main.appendChild(ui.element("span", "", `${formatDate(result.date)} · ${result.profile || "Student"}`));
-    row.append(main, ui.element("span", "list-row-value", `${result.percent}%`));
+    const score = ui.element("span", "list-row-value", `${result.percent}%`);
+    const review = ui.element("button", "button ghost small recent-review", "Review");
+    review.type = "button";
+    review.setAttribute("aria-label", `Review result: ${result.topic || "Chapter quiz"}, ${result.percent}%`);
+    review.addEventListener("click", () => openSavedQuizResult(result));
+    row.append(main, score, review);
     recent.appendChild(row);
   }
   $("#profile-name").value = state.settings.profile || "Student";
@@ -1756,9 +2097,10 @@ async function saveProfile() {
 }
 
 async function resetProgressHandler() {
+  if (state.quizSubmitting) { ui.showToast("Please wait while your quiz is graded.", "info"); return; }
   const confirmed = await ui.confirmDialog({
     title: "Reset study progress?",
-    message: "This clears streaks, XP and saved quiz results on this device. Your books stay in the library.",
+    message: "This clears streaks, XP and saved quiz results on this device. Your books and flashcard decks stay.",
     confirmLabel: "Reset progress",
     danger: true,
   });
@@ -1768,6 +2110,8 @@ async function resetProgressHandler() {
   state.results = [];
   state.result = null;
   state.quiz = null;
+  state.quizContext = null;
+  clearQuizTimer();
   renderProgress();
   renderQuizState();
   ui.showToast("Local progress reset. Your squad account stats stay on the server.", "success");
@@ -2249,20 +2593,32 @@ async function saveAppearance() {
 }
 
 async function exportData() {
-  const data = await db.exportData();
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  downloadBlob(blob, `vignan-vidyanikethan-ai-export-${new Date().toISOString().slice(0, 10)}.json`);
-  ui.showToast("Data exported without API keys.", "success");
+  try {
+    await deckWriteQueue.catch(() => {});
+    const data = await db.exportData();
+    // Include the current in-memory decks even if a recent disk write failed.
+    data.settings = data.settings.filter((entry) => entry.key !== STUDY_DECKS_KEY);
+    data.settings.push({ key: STUDY_DECKS_KEY, value: state.studyDecks });
+    data.localProgress = state.studyProgress;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    downloadBlob(blob, `vignan-vidyanikethan-ai-export-${new Date().toISOString().slice(0, 10)}.json`);
+    ui.showToast("Study data exported. Textbook pages and PDF files are not included.", "success", 6000);
+  } catch (error) {
+    console.error("Could not export study data", error);
+    ui.showToast("Could not export your study data on this device.", "error");
+  }
 }
 
 async function deleteAllData() {
+  if (state.quizSubmitting) { ui.showToast("Please wait while your quiz is graded.", "info"); return; }
   const confirmed = await ui.confirmDialog({
     title: "Delete all local data?",
-    message: "Books, chats, quiz results, settings and cached passages will be removed from this device. This cannot be undone.",
+    message: "Books, chats, flashcard decks, quiz results, settings and cached passages will be removed from this device. This cannot be undone.",
     confirmLabel: t("settings.deleteAll"),
     danger: true,
   });
   if (!confirmed) return;
+  await deckWriteQueue.catch(() => {});
   await db.clearAllData();
   state.studyProgress = resetProgress();
   writeFlashProgress({});
@@ -2273,8 +2629,13 @@ async function deleteAllData() {
   state.quiz = null;
   state.result = null;
   state.quizResponses = {};
+  state.quizContext = null;
+  state.studyDecks = emptyDeckCollection();
+  state.deckStorageError = false;
   state.flashcards = [];
   state.flashProgress = {};
+  state.flashPracticeAll = false;
+  $("#deck-create").open = true;
   state.lastAnswer = {};
   clearQuizTimer();
   await reloadIndexes();
@@ -2354,11 +2715,11 @@ async function handlePremiumAction(action) {
       openSettingsPanel("local-ai-panel");
       return;
     case "quiz":
-      setView("quiz");
-      requestAnimationFrame(() => $("#quiz-topic")?.focus({ preventScroll: true }));
+      await prepareQuizFromText();
       return;
     case "flashcards":
       setView("flashcards");
+      $("#deck-create").open = true;
       requestAnimationFrame(() => $("#flash-topic")?.focus({ preventScroll: true }));
       return;
     case "sources":
@@ -2578,6 +2939,8 @@ function bindEvents() {
 
   $("#quiz-generate").addEventListener("click", generateQuizHandler);
   $("#quiz-use-model").addEventListener("change", renderQuizEngineNote);
+  $("#quiz-topic").addEventListener("input", renderQuizEngineNote);
+  $("#quiz-book-scope").addEventListener("change", renderQuizEngineNote);
   $("#quiz-prev").addEventListener("click", () => {
     state.quizIndex -= 1;
     renderQuizQuestion();
@@ -2589,6 +2952,16 @@ function bindEvents() {
   $("#quiz-submit").addEventListener("click", submitQuiz);
 
   $("#flash-generate").addEventListener("click", generateFlashcardsHandler);
+  $("#flash-deck-select").addEventListener("change", (event) => {
+    state.studyDecks = selectDeck(state.studyDecks, event.target.value);
+    syncActiveDeck();
+    state.flashIndex = 0;
+    state.flashFlipped = false;
+    state.flashPracticeAll = false;
+    renderFlashcards();
+    void persistStudyDecks();
+  });
+  $("#flash-deck-delete").addEventListener("click", deleteActiveDeck);
   $("#flashcard-area").addEventListener("click", handleFlashAction);
 
   $("#save-profile").addEventListener("click", saveProfile);
