@@ -6,8 +6,8 @@
  * can show the student what to revise instead of just a score.
  */
 
-import { hashFeature } from "./vector.js?v=15";
-import { splitSentences, tokenize } from "./text.js?v=15";
+import { hashFeature } from "./vector.js?v=16";
+import { splitSentences, tokenize } from "./text.js?v=16";
 import {
   clamp,
   levenshtein,
@@ -17,7 +17,7 @@ import {
   uid,
   unique,
   wordOverlap,
-} from "./util.js?v=15";
+} from "./util.js?v=16";
 
 const FILLER = new Set(
   `about above after again against because before being below between could during each every first following from have into itself more most other second should some such than that their these those through where which while would your textbook chapter page section notes`.split(

@@ -1,8 +1,9 @@
 /** Clearly labelled, extractive answers from outside the student's books. */
-import { retrieve } from "./retrieval.js?v=15";
-import { linkTopic, searchTopic } from "./conversation.js?v=15";
-import { salientSentences, splitSentences, tokenize } from "./text.js?v=15";
-import { truncate } from "./util.js?v=15";
+import { retrieve } from "./retrieval.js?v=16";
+import { linkTopic, searchTopic } from "./conversation.js?v=16";
+import { salientSentences, splitSentences, tokenize } from "./text.js?v=16";
+import { truncate } from "./util.js?v=16";
+import { t } from "./i18n.js?v=16";
 
 function quoteFrom(text, query, { opening = false } = {}) {
   const raw = opening ? splitSentences(text).slice(0, 2) : salientSentences(text, query, 2);
@@ -10,28 +11,45 @@ function quoteFrom(text, query, { opening = false } = {}) {
   return truncate(quote, 600);
 }
 
-/** Results without any topic overlap remain links, not asserted answers. */
-export function composeWebAnswer({ query = "", results = [], provider = "Web search" } = {}) {
+/**
+ * Compose an outside-the-books answer from real source text.
+ *
+ * Results that the server could read carry a `passage`; encyclopedic results
+ * carry a long snippet. Either is quoted with a [W1]-style label so the student
+ * can see exactly which sentence came from which source. Results with no topic
+ * overlap are dropped rather than presented as an answer.
+ */
+export function composeWebAnswer({ query = "", results = [], provider = "Web search", providers = [] } = {}) {
   const words = new Set(tokenize(searchTopic(query)));
+  const sourceLabel = [...new Set(providers.length ? providers : [provider])].filter(Boolean).join(" + ") || "Web search";
   const relevant = results.filter((result) => {
-    if (!result?.url || !result.snippet || result.snippet === "Open this source to read more.") return false;
-    const textWords = new Set(tokenize(`${result.title} ${result.snippet}`));
+    if (!result?.url) return false;
+    const body = `${result.passage || ""} ${result.snippet || ""}`.trim();
+    if (!body || result.snippet === "Open this source to read more.") return false;
+    const textWords = new Set(tokenize(`${result.title} ${body}`));
     return words.size && [...words].some((word) => textWords.has(word));
   }).slice(0, 2);
   if (!relevant.length) return null;
-  const lines = relevant.map((result, index) => `- “${quoteFrom(result.snippet, query)}” — **${result.title}** [W${index + 1}]`);
+  const lines = relevant.map((result, index) => {
+    const body = String(result.passage || result.snippet || "").trim();
+    const quote = quoteFrom(body, query, { opening: !result.passage });
+    return `- “${quote}” — **${result.title}** (${result.domain || new URL(result.url).hostname}) [W${index + 1}]`;
+  });
   return {
     text: [
-      "**I could not find this in your textbooks.**",
-      `**Outside your textbooks · ${provider === "Wikipedia" ? "Wikipedia" : "web search"}**`,
-      "Here are short source excerpts, not independently verified answers:",
+      "**I could not find this in your textbooks, so this answer comes from outside sources.**",
+      `**${t("knowledge.outsideTitle")} · ${sourceLabel}**`,
+      "Here is what those sources actually say:",
       ...lines,
-      "_Open the linked sources and verify them before relying on them._",
+      `_${t("knowledge.verifyNote")}_`,
     ].join("\n\n"),
     sources: [], webSources: relevant, flashcards: [], grounded: false, confidence: 0,
-    meta: "Bolt · outside-source excerpts", verification: { enabled: false },
+    meta: `Bolt · outside sources (${sourceLabel})`, verification: { enabled: false },
   };
 }
+
+/** Alias used by newer call sites: the same labelled outside-source answer. */
+export const composeOutsideAnswer = composeWebAnswer;
 
 /**
  * A supplied link is searched separately from the library. A PDF retains its

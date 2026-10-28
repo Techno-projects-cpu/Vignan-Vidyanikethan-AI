@@ -36,7 +36,9 @@ test("public link endpoint enforces same-origin, SSRF checks, headers and rate l
   const base = await server(t);
   const health = await (await fetch(`${base}/api/health`)).json();
   assert.equal(health.search, true);
-  assert.equal(health.searchProvider, "Wikipedia");
+  assert.equal(health.searchProvider, "Wikipedia + DuckDuckGo");
+  assert.deepEqual(health.searchSources, ["Wikipedia", "DuckDuckGo"]);
+  assert.ok(health.languages.includes("ur"));
   assert.equal(health.linkReading, true);
   const post = (url, origin = base) => fetch(`${base}/api/fetch`, {
     method: "POST", headers: { Origin: origin, "Content-Type": "application/json" }, body: JSON.stringify({ url }),

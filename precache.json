@@ -1,6 +1,6 @@
 {
-  "version": 15,
-  "generatedAt": "2026-10-28T16:13:40.094Z",
+  "version": 16,
+  "generatedAt": "2026-10-28T16:46:38.413Z",
   "urls": [
     "./",
     "./index.html",
@@ -40,6 +40,8 @@
     "./js/i18n.js",
     "./js/ingest.js",
     "./js/key-pool.js",
+    "./js/knowledge.js",
+    "./js/languages.js",
     "./js/link-reader.js",
     "./js/llm.js",
     "./js/local-ai-worker.js",
@@ -61,6 +63,7 @@
     "./js/student-keys.js",
     "./js/study-decks.js",
     "./js/text.js",
+    "./js/translations-core.js",
     "./js/ui.js",
     "./js/util.js",
     "./js/vector.js",

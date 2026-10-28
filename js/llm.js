@@ -9,19 +9,22 @@
 import {
   FLASHCARD_SCHEMA,
   MODE_INSTRUCTION,
+  OUTSIDE_SYSTEM_PROMPT,
   QUIZ_SCHEMA,
   SYSTEM_PROMPT,
   extractJson,
   formatContext,
-} from "./context.js?v=15";
+  formatOutsideContext,
+} from "./context.js?v=16";
+import { languageName } from "./i18n.js?v=16";
 import {
   callProvider,
   callRoutedModel,
   gradeShortWithModel,
   testProvider,
   verifyAnswer,
-} from "./model-router.js?v=15";
-import { truncate, uid } from "./util.js?v=15";
+} from "./model-router.js?v=16";
+import { truncate, uid } from "./util.js?v=16";
 
 export {
   FLASHCARD_SCHEMA,
@@ -36,11 +39,17 @@ export {
   verifyAnswer,
 };
 
-const LANGUAGE_INSTRUCTION = {
-  en: "Respond in English.",
-  te: "Respond in Telugu. Keep source names and citation numbers as written; faithfully translate only what the passages support.",
-  hi: "Respond in Hindi. Keep source names and citation numbers as written; faithfully translate only what the passages support.",
-};
+/**
+ * Every catalogue language gets a prompt line, so a connected model answers in
+ * the language the student chose instead of defaulting to English.
+ */
+function languageInstruction(language = "en") {
+  const name = languageName(language);
+  if (!name || name === "English") return "Respond in English.";
+  return `Respond in ${name} (${languageName(language, { native: true })}). Write the whole answer, including headings, in ${name}. Keep source names, URLs and citation numbers as written; faithfully translate only what the passages support.`;
+}
+
+
 
 export function buildMessages({ query, hits, mode = "answer", history = [], language = "en" }) {
   const context = formatContext(hits);
@@ -50,7 +59,21 @@ export function buildMessages({ query, hits, mode = "answer", history = [], lang
     ...recent,
     {
       role: "user",
-      content: `${MODE_INSTRUCTION[mode] || MODE_INSTRUCTION.answer}\n${LANGUAGE_INSTRUCTION[language] || LANGUAGE_INSTRUCTION.en}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}\n\nQUESTION: ${query}\n\nRemember: cite [n] after each claim. If the passages are insufficient, say you could not find it in the library.`,
+      content: `${MODE_INSTRUCTION[mode] || MODE_INSTRUCTION.answer}\n${languageInstruction(language)}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}\n\nQUESTION: ${query}\n\nRemember: cite [n] after each claim. If the passages are insufficient, say you could not find it in the library.`,
+    },
+  ];
+}
+
+/** Prompt for a labelled outside-source answer built from web results. */
+export function buildOutsideMessages({ query, results = [], history = [], language = "en" }) {
+  const context = formatOutsideContext(results);
+  const recent = history.slice(-4).map(({ role, content }) => ({ role, content: truncate(content, 500) }));
+  return [
+    { role: "system", content: OUTSIDE_SYSTEM_PROMPT },
+    ...recent,
+    {
+      role: "user",
+      content: `${languageInstruction(language)}\n\nOUTSIDE SOURCES (web search results, not textbooks):\n${context}\n\nQUESTION: ${query}\n\nAnswer only from these sources, cite [W1] and so on, and say clearly what is missing if they do not answer everything.`,
     },
   ];
 }
@@ -67,6 +90,35 @@ export async function callModel({ settings, messages, temperature = 0.2, maxToke
     offline: result.offline,
     fallbackUsed: result.fallbackUsed,
     error: result.error,
+  };
+}
+
+/**
+ * Ask a connected model to answer an outside question from labelled web
+ * sources. Returns `offline: true` when no model is available so the caller can
+ * fall back to the extractive outside answer.
+ */
+export async function answerOutsideWithModel({ query, results = [], history = [], settings, signal } = {}) {
+  const messages = buildOutsideMessages({ query, results, history, language: settings?.language });
+  const result = await callModel({ settings, messages, task: "answer", signal, temperature: 0.2, maxTokens: 700 });
+  if (result.offline) return { ...result, verification: { enabled: false } };
+  let content = String(result.content || "").trim();
+  if (content) {
+    const label = "This is not from your textbooks — it comes from outside sources.";
+    if (!content.includes(label)) content = `${label}\n\n${content}`;
+    if (!/\[W\d+\]/.test(content)) {
+      content += "\n\n_Verification note: this answer did not carry source labels. Read the linked sources below before relying on it._";
+    }
+  }
+  return {
+    ...result,
+    content,
+    sources: [],
+    webSources: results,
+    grounded: false,
+    confidence: 0,
+    meta: "Bolt · outside sources (AI summary)",
+    verification: { enabled: false },
   };
 }
 
@@ -99,7 +151,7 @@ export async function generateQuizWithModel({ topic, hits, count, type, difficul
     { role: "system", content: `${SYSTEM_PROMPT}\n\nYou are writing a quiz. ${QUIZ_SCHEMA}` },
     {
       role: "user",
-      content: `Topic: ${topic || "this chapter"}\nDifficulty: ${difficulty}\nNumber of questions: ${count}\nPreferred type: ${type}\n${LANGUAGE_INSTRUCTION[settings?.language] || LANGUAGE_INSTRUCTION.en}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}`,
+      content: `Topic: ${topic || "this chapter"}\nDifficulty: ${difficulty}\nNumber of questions: ${count}\nPreferred type: ${type}\n${languageInstruction(settings?.language)}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}`,
     },
   ];
   const result = await callModel({ settings, messages, task: "quiz", temperature: 0.5, maxTokens: 1800, signal });
@@ -147,7 +199,7 @@ export async function generateFlashcardsWithModel({ topic, hits = [], count = 10
     { role: "system", content: `${SYSTEM_PROMPT}\n\nYou are writing revision flashcards. ${FLASHCARD_SCHEMA}` },
     {
       role: "user",
-      content: `Topic: ${topic || "this chapter"}\nNumber of cards: ${count}\n${LANGUAGE_INSTRUCTION[settings?.language] || LANGUAGE_INSTRUCTION.en}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}`,
+      content: `Topic: ${topic || "this chapter"}\nNumber of cards: ${count}\n${languageInstruction(settings?.language)}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}`,
     },
   ];
   const result = await callModel({ settings, messages, task: "flashcards", temperature: 0.45, maxTokens: 1600, signal });

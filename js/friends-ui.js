@@ -5,8 +5,8 @@
  * and tabs that scroll sideways instead of wrapping.
  */
 
-import * as ui from "./ui.js?v=15";
-import { onSocialChange, social, socialState, syncSocial } from "./social.js?v=15";
+import * as ui from "./ui.js?v=16";
+import { onSocialChange, social, socialState, syncSocial } from "./social.js?v=16";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];

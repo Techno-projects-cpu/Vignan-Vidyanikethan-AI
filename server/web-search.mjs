@@ -1,23 +1,35 @@
-/** Keyless Wikipedia fallback. Search results are outside the student's books. */
-import { parseSearchResults } from "../js/web.js?v=14";
+/**
+ * Keyless outside-the-books search.
+ *
+ * Wikipedia is only one of the sources now. A question first goes to the
+ * Wikipedia edition for the interface language, then to the DuckDuckGo Instant
+ * Answer API (abstracts, definitions and related pages), with a Simple English
+ * Wikipedia pass when the English edition has nothing. Results from all
+ * providers are merged, de-duplicated and clearly labelled as outside sources.
+ * Every endpoint is fixed and allowlisted; nothing is scraped from arbitrary
+ * URLs here.
+ */
 
-const WIKI_LANGUAGES = new Set(["en", "te", "hi"]);
-const wikiLanguage = (value) => WIKI_LANGUAGES.has(value) ? value : "en";
+import { parseSearchResults } from "../js/web.js?v=16";
+import { wikipediaLanguage } from "../js/languages.js?v=16";
+
 const MAX_SEARCH_BYTES = 1024 * 1024;
-const USER_AGENT = "VignanVidyanikethanAI/1.9.0 (+https://github.com/Techno-projects-cpu/Vignan-Vidyanikethan-AI/issues)";
+const USER_AGENT =
+  "VignanVidyanikethanAI/2.0.0 (+https://github.com/Techno-projects-cpu/Vignan-Vidyanikethan-AI/issues)";
 
-export function wikipediaSearchUrl(query, language = "en") {
-  const url = new URL(`https://${wikiLanguage(language)}.wikipedia.org/w/api.php`);
+export function wikipediaSearchUrl(query, language = "en", { host = null, limit = 4, chars = 1800 } = {}) {
+  const edition = host || wikipediaLanguage(language);
+  const url = new URL(`https://${edition}.wikipedia.org/w/api.php`);
   for (const [key, value] of Object.entries({
     action: "query", generator: "search", gsrsearch: String(query || "").trim().slice(0, 300),
-    gsrlimit: "4", gsrnamespace: "0", prop: "extracts|info", exintro: "1", explaintext: "1",
-    exchars: "1000", exlimit: "max", inprop: "url", format: "json", formatversion: "2",
+    gsrlimit: String(limit), gsrnamespace: "0", prop: "extracts|info", exintro: "1", explaintext: "1",
+    exchars: String(chars), exlimit: "max", inprop: "url", format: "json", formatversion: "2",
   })) url.searchParams.set(key, value);
   return url.href;
 }
 
-export function parseWikipediaResults(data, language = "en") {
-  const hostLanguage = wikiLanguage(language);
+export function parseWikipediaResults(data, language = "en", { host = null } = {}) {
+  const hostLanguage = host || wikipediaLanguage(language);
   const pages = Array.isArray(data?.query?.pages) ? data.query.pages : [];
   const entries = pages
     .filter((page) => page && !page.missing && typeof page.title === "string")
@@ -29,9 +41,64 @@ export function parseWikipediaResults(data, language = "en") {
         title,
         url: `https://${hostLanguage}.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`,
         snippet: String(page.extract || "").trim(),
+        provider: "Wikipedia",
       };
     });
   return parseSearchResults(entries);
+}
+
+export function duckDuckGoUrl(query) {
+  const url = new URL("https://api.duckduckgo.com/");
+  url.searchParams.set("q", String(query || "").trim().slice(0, 300));
+  url.searchParams.set("format", "json");
+  url.searchParams.set("no_html", "1");
+  url.searchParams.set("skip_disambig", "1");
+  url.searchParams.set("t", "vignanvidyanikethanai");
+  return url.href;
+}
+
+/** DDG returns an abstract plus a tree of related topics; flatten it safely. */
+export function parseDuckDuckGo(data = {}) {
+  const entries = [];
+  const abstract = String(data.AbstractText || "").trim();
+  const heading = String(data.Heading || "").trim();
+  if (abstract && data.AbstractURL) {
+    entries.push({
+      title: heading || "DuckDuckGo summary",
+      url: data.AbstractURL,
+      snippet: abstract,
+      provider: "DuckDuckGo",
+    });
+  }
+  const collect = (topics = []) => {
+    for (const topic of Array.isArray(topics) ? topics : []) {
+      if (topic?.Topics) { collect(topic.Topics); continue; }
+      const text = String(topic?.Text || "").trim();
+      const url = String(topic?.FirstURL || "").trim();
+      if (!text || !url) continue;
+      const [label] = text.split(" - ");
+      entries.push({ title: label || text.slice(0, 80), url, snippet: text, provider: "DuckDuckGo" });
+      if (entries.length >= 6) return;
+    }
+  };
+  collect(data.RelatedTopics);
+  return parseSearchResults(entries);
+}
+
+/** Merge provider lists, keeping the first (best) copy of each URL. */
+export function mergeSearchResults(lists = [], limit = 6) {
+  const merged = [];
+  const seen = new Set();
+  for (const list of lists) {
+    for (const result of Array.isArray(list) ? list : []) {
+      const url = String(result?.url || "").trim();
+      if (!url || seen.has(url.split("#")[0])) continue;
+      seen.add(url.split("#")[0]);
+      merged.push(result);
+      if (merged.length >= limit) return merged;
+    }
+  }
+  return merged;
 }
 
 async function limitedText(response, maxBytes = MAX_SEARCH_BYTES) {
@@ -60,17 +127,77 @@ async function limitedText(response, maxBytes = MAX_SEARCH_BYTES) {
   return new TextDecoder().decode(bytes);
 }
 
-export async function searchWikipedia(query, { fetchImpl = fetch, signal = AbortSignal.timeout(10_000), language = "en" } = {}) {
-  const response = await fetchImpl(wikipediaSearchUrl(query, language), {
-    headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
+async function getJson(url, { fetchImpl = fetch, signal = AbortSignal.timeout(10_000), accept = "application/json" } = {}) {
+  const response = await fetchImpl(url, {
+    headers: { "User-Agent": USER_AGENT, Accept: accept },
     signal,
     redirect: "error",
   });
-  if (!response.ok) throw new Error(`Wikipedia returned HTTP ${response.status}`);
+  if (!response.ok) throw new Error(`Search source returned HTTP ${response.status}`);
   const text = await limitedText(response);
-  const data = JSON.parse(text);
-  if (data.error) throw new Error("Wikipedia search was unavailable");
-  return parseWikipediaResults(data, language);
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error("Search source did not return JSON");
+  }
 }
 
-export { limitedText };
+export async function searchWikipedia(query, { fetchImpl = fetch, signal = AbortSignal.timeout(10_000), language = "en", host = null } = {}) {
+  const data = await getJson(wikipediaSearchUrl(query, language, { host }), { fetchImpl, signal });
+  if (data.error) throw new Error("Wikipedia search was unavailable");
+  return parseWikipediaResults(data, language, { host });
+}
+
+export async function searchDuckDuckGo(query, { fetchImpl = fetch, signal = AbortSignal.timeout(9_000) } = {}) {
+  const data = await getJson(duckDuckGoUrl(query), { fetchImpl, signal });
+  return parseDuckDuckGo(data);
+}
+
+/**
+ * Run the keyless providers in parallel and keep whatever answers came back.
+ * One provider failing never hides the others, and a total failure is reported
+ * to the caller instead of inventing results.
+ */
+export async function searchOutside(query, { language = "en", fetchImpl = fetch, timeoutMs = 12_000, includeSimpleEnglish = true } = {}) {
+  const trimmed = String(query || "").trim().slice(0, 300);
+  if (!trimmed) return { results: [], providers: [], errors: ["empty-query"] };
+  const signal = AbortSignal.timeout(timeoutMs);
+  const edition = wikipediaLanguage(language);
+  const tasks = [
+    ["Wikipedia", searchWikipedia(trimmed, { fetchImpl, signal, language })],
+    ["DuckDuckGo", searchDuckDuckGo(trimmed, { fetchImpl, signal })],
+  ];
+  if (edition !== "en" && includeSimpleEnglish) {
+    // A non-English question benefits from an English encyclopedic article too.
+    tasks.push(["Wikipedia (English)", searchWikipedia(trimmed, { fetchImpl, signal, language: "en" })]);
+  }
+  const settled = await Promise.allSettled(tasks.map(([, promise]) => promise));
+  const lists = [];
+  const providers = [];
+  const errors = [];
+  settled.forEach((outcome, index) => {
+    const [label] = tasks[index];
+    if (outcome.status === "fulfilled" && outcome.value.length) {
+      lists.push(outcome.value.filter((result) => result.provider !== "DuckDuckGo"));
+      lists.push(outcome.value.filter((result) => result.provider === "DuckDuckGo"));
+      if (!providers.includes(label.split(" (")[0])) providers.push(label.split(" (")[0]);
+    } else if (outcome.status === "rejected") {
+      errors.push(`${label}: ${outcome.reason?.message || "unavailable"}`);
+    }
+  });
+  let results = mergeSearchResults(lists, 6);
+  if (!results.length && includeSimpleEnglish && edition !== "simple") {
+    try {
+      const simple = await searchWikipedia(trimmed, { fetchImpl, signal, host: "simple" });
+      if (simple.length) {
+        results = simple;
+        providers.push("Simple English Wikipedia");
+      }
+    } catch (error) {
+      errors.push(`Simple English Wikipedia: ${error.message}`);
+    }
+  }
+  return { results, providers, errors };
+}
+
+export { limitedText, MAX_SEARCH_BYTES, USER_AGENT };

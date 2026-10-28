@@ -6,24 +6,26 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=15";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=15";
-import { ingestPdf, ingestText } from "./ingest.js?v=15";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=15";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=15";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=15";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=15";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=15";
-import { composeLinkAnswer, composeWebAnswer } from "./external-answer.js?v=15";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=15";
+import * as db from "./db.js?v=16";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=16";
+import { ingestPdf, ingestText } from "./ingest.js?v=16";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=16";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=16";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=16";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=16";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=16";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=16";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=16";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=16";
 import {
+  answerOutsideWithModel,
   answerWithModel,
   generateFlashcardsWithModel,
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=15";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=15";
+} from "./llm.js?v=16";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=16";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -35,9 +37,9 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=15";
-import { TASKS } from "./model-router.js?v=15";
-import { PROVIDERS, providerList } from "./providers.js?v=15";
+} from "./local-ai.js?v=16";
+import { TASKS } from "./model-router.js?v=16";
+import { PROVIDERS, providerList } from "./providers.js?v=16";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -46,30 +48,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=15";
-import { parseApiKeys } from "./key-pool.js?v=15";
+} from "./settings.js?v=16";
+import { parseApiKeys } from "./key-pool.js?v=16";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=15";
+} from "./student-keys.js?v=16";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=15";
+} from "./quiz.js?v=16";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=15";
+} from "./flashcards.js?v=16";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=15";
+} from "./study-decks.js?v=16";
 import {
   accuracy,
   currentStreak,
@@ -80,13 +82,14 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=15";
-import { externalSearchUrl, searchWeb } from "./web.js?v=15";
-import { openEditStudio } from "./edit-studio.js?v=15";
-import { openReader } from "./reader.js?v=15";
-import { applyTranslations, setLanguage, t } from "./i18n.js?v=15";
-import { clamp, downloadBlob, formatDate, truncate, uid } from "./util.js?v=15";
-import * as ui from "./ui.js?v=15";
+} from "./progress.js?v=16";
+import { externalSearchUrl, searchWeb } from "./web.js?v=16";
+import { openEditStudio } from "./edit-studio.js?v=16";
+import { openReader } from "./reader.js?v=16";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=16";
+import { languageLabel, languageGroups } from "./languages.js?v=16";
+import { clamp, downloadBlob, formatDate, truncate, uid } from "./util.js?v=16";
+import * as ui from "./ui.js?v=16";
 import {
   clearReferral,
   getLeaderboard,
@@ -96,8 +99,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=15";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=15";
+} from "./auth.js?v=16";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=16";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -105,12 +108,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=15";
-import { initMotion, revealVisible } from "./motion.js?v=15";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=15";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=15";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=15";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=15";
+} from "./premium-ui.js?v=16";
+import { initMotion, revealVisible } from "./motion.js?v=16";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=16";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=16";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=16";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=16";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -960,18 +963,26 @@ async function handleAsk(event) {
     } else {
       state.linkContext = null;
       const effectiveQuery = contextualQuery(query, history);
+      const schoolAnswer = knowledgeTopicAnswer(effectiveQuery, language) || knowledgeTopicAnswer(query, language);
+      if (schoolAnswer) {
+        answer = schoolAnswer;
+      } else {
       const bookIds = scopeIds("#ask-book-scope");
       const retrieval = retrievePreferBooks(effectiveQuery, state.indexes, { topK: 5, bookIds });
       hits = retrieval.hits;
       const webEnabled = Boolean(state.settings.webEnabled);
       let webResults = [];
       let searchProvider = "Web search";
+      let searchProviders = [];
+      let searchError = null;
       if (!retrieval.grounded && webEnabled && retrieval.reason !== "too-vague") {
         try {
           const search = await searchWeb(searchTopic(effectiveQuery), { ...state.settings, webEnabled: true });
           webResults = search.results || [];
           searchProvider = search.provider || "Web search";
+          searchProviders = search.providers || [];
         } catch (error) {
+          searchError = error;
           ui.showToast(`Web fallback failed: ${error.message}`, "warning");
         }
       }
@@ -1002,7 +1013,49 @@ async function handleAsk(event) {
         } catch (error) { modelError = error; }
       }
       if (!answer && !hits.length && webResults.length) {
-        answer = composeWebAnswer({ query: effectiveQuery, results: webResults, provider: searchProvider });
+        // A connected model writes the outside answer from labelled source text;
+        // the extractive composer is the no-key fallback.
+        if (connected) {
+          try {
+            const model = await answerOutsideWithModel({
+              query: effectiveQuery,
+              results: webResults,
+              history: history.slice(-4).map(({ role, content }) => ({ role, content })),
+              settings: state.settings,
+            });
+            if (!model.offline && model.content) {
+              answer = {
+                text: model.content,
+                sources: [], webSources: webResults.slice(0, 2), flashcards: [],
+                grounded: false, confidence: 0, meta: model.meta,
+                verification: { enabled: false },
+              };
+            } else if (model.error) modelError = model.error;
+          } catch (error) { modelError = error; }
+        }
+        if (!answer) {
+          answer = composeOutsideAnswer({ query: effectiveQuery, results: webResults, provider: searchProvider, providers: searchProviders })
+            || composeWebAnswer({ query: effectiveQuery, results: webResults, provider: searchProvider });
+        }
+      }
+      if (!answer) {
+        // No library page, no usable web text: fall back to the built-in fact pack.
+        answer = knowledgeFactAnswer(effectiveQuery, language) || knowledgeFactAnswer(query, language);
+      }
+      if (!answer && !hits.length && webEnabled && !webResults.length
+        && retrieval.reason !== "too-vague") {
+        const query$ = searchTopic(effectiveQuery) || effectiveQuery;
+        answer = {
+          text: [
+            `**${t("knowledge.notFound")}**`,
+            t("knowledge.outsideHelp"),
+            `- [DuckDuckGo](${externalSearchUrl(query$, "duckduckgo")})`,
+            `- [Google](${externalSearchUrl(query$, "google")})`,
+            searchError ? `_${searchError.message}_` : t("knowledge.webEmpty"),
+          ].join("\n\n"),
+          sources: [], webSources: [], flashcards: [], grounded: false, confidence: 0,
+          meta: "Bolt · outside search unavailable", verification: { enabled: false },
+        };
       }
       if (!answer) {
         answer = composeGroundedAnswer({
@@ -1012,10 +1065,14 @@ async function handleAsk(event) {
         answer.meta = modelError ? "Model unavailable — cited excerpts shown"
           : hits.length ? "Bolt · cited library excerpts" : "Bolt · no matching source";
         answer.verification = { enabled: false };
+        if (!hits.length && !webEnabled) {
+          answer.text = `${answer.text}\n\n_${t("knowledge.webOff")}_`;
+        }
         showKeyExhaustedToast(modelError);
       }
       if (requestMode === "flashcards" && hits.length && !answer.flashcards?.length) {
         answer.flashcards = buildFlashcards(hits, 6, { language: state.settings.language });
+      }
       }
     }
     state.lastAnswer = answer;
@@ -2817,7 +2874,47 @@ function renderWebSettings() {
   $("#settings-web-token").value = state.settings.searchToken || "";
 }
 
+/** Build the grouped language picker from the catalogue (33 languages). */
+function renderLanguageOptions() {
+  const select = $("#settings-language");
+  if (!select) return;
+  const selected = state.settings.language;
+  select.replaceChildren();
+  for (const group of languageGroups()) {
+    const optgroup = document.createElement("optgroup");
+    optgroup.label = t(group.labelKey);
+    if (!t(group.labelKey) || t(group.labelKey) === group.labelKey) optgroup.label = group.label;
+    for (const language of group.languages) {
+      const option = document.createElement("option");
+      option.value = language.code;
+      option.textContent = languageLabel(language.code);
+      option.lang = language.code;
+      if (language.dir === "rtl") option.dir = "rtl";
+      optgroup.appendChild(option);
+    }
+    select.appendChild(optgroup);
+  }
+  select.value = selected;
+  const name = languageName(state.settings.language, { native: true });
+  const chip = $("#language-chip");
+  if (chip) chip.textContent = name;
+  const answers = $("#language-answers");
+  if (answers) answers.textContent = t("settings.answersIn", { language: name });
+}
+
+async function handleLanguageChange() {
+  const select = $("#settings-language");
+  if (!select) return;
+  state.settings.language = select.value;
+  setLanguage(state.settings.language);
+  await saveSettings();
+  renderAll();
+  renderLanguageOptions();
+  ui.showToast(t("settings.answersIn", { language: languageName(state.settings.language, { native: true }) }), "success", 4000);
+}
+
 function renderAppearanceSettings() {
+  renderLanguageOptions();
   $("#settings-language").value = state.settings.language;
   $("#settings-theme").value = state.settings.theme;
   $("#settings-profile").value = state.settings.profile;
@@ -3389,6 +3486,7 @@ function bindEvents() {
   $("#student-key-test").addEventListener("click", testStudentKeys);
   $("#web-save").addEventListener("click", saveWebSettings);
   $("#appearance-save").addEventListener("click", saveAppearance);
+  $("#settings-language").addEventListener("change", handleLanguageChange);
   $("#export-data").addEventListener("click", exportData);
   $("#clear-chat-data").addEventListener("click", async () => {
     await clearChat();

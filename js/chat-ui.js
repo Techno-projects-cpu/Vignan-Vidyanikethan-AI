@@ -6,9 +6,9 @@
  * the sender is a friend or the room is the shared Study Hall.
  */
 
-import * as ui from "./ui.js?v=15";
-import { onSocialChange, setActiveThread, social, socialState, syncSocial } from "./social.js?v=15";
-import { relativeTime } from "./friends-ui.js?v=15";
+import * as ui from "./ui.js?v=16";
+import { onSocialChange, setActiveThread, social, socialState, syncSocial } from "./social.js?v=16";
+import { relativeTime } from "./friends-ui.js?v=16";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const POLL_MS = 4000;

@@ -29,7 +29,9 @@ import { parseSearchResults } from "./js/web.js";
 import { buildUpstreams, callFreeRouter, getKeyCooldownStatus } from "./server/free-router.mjs";
 import { buildStudentUpstreams } from "./server/student-keys.mjs";
 import { fetchPublicResource, PublicFetchError } from "./server/safe-fetch.mjs";
-import { limitedText, searchWikipedia } from "./server/web-search.mjs";
+import { limitedText, searchOutside } from "./server/web-search.mjs";
+import { extractHtmlText } from "./js/files.js";
+import { LANGUAGE_CODES } from "./js/languages.js";
 import { createSupabaseAccountStore } from "./server/supabase-accounts.mjs";
 import { ValidationError, cleanUsername, createAccountStore, publicUser, validateLoginPassword, validateUsername } from "./server/accounts.mjs";
 import { createLocalSocialStore, createSupabaseSocialStore } from "./server/social-store.mjs";
@@ -63,9 +65,10 @@ const AI_RATE_LIMIT = Math.min(600, Math.max(1, Number(env("AI_RATE_LIMIT") || 6
 const SEARCH_RATE_LIMIT = Math.min(600, Math.max(1, Number(env("SEARCH_RATE_LIMIT") || 30) || 30));
 const SEARCH_URL = env("SEARCH_URL");
 const WIKIPEDIA_SEARCH = String(env("WIKIPEDIA_SEARCH", "true")).toLowerCase() !== "false";
-const wikiCache = new Map();
-const wikiRequestTimes = [];
-let activeWikiSearches = 0;
+const searchCache = new Map();
+const searchRequestTimes = [];
+let activeSearches = 0;
+const SEARCH_READ_PAGES = Math.min(4, Math.max(0, Number(env("SEARCH_READ_PAGES") || 2) || 2));
 let activePageFetches = 0;
 const SEARCH_TOKEN = env("SEARCH_TOKEN");
 const SEARCH_TOKEN_HEADER = env("SEARCH_TOKEN_HEADER") || "Authorization";
@@ -671,6 +674,39 @@ async function handleAi(request, response) {
   }
 }
 
+/**
+ * Read the top non-encyclopedic results so the answer is built from a real
+ * passage instead of a two-line search snippet. Wikipedia already returns a
+ * long extract, so it is skipped. Failures are ignored: the snippet stays.
+ */
+async function readSearchPassages(results = [], limit = SEARCH_READ_PAGES) {
+  if (!limit) return results;
+  const candidates = results
+    .filter((result) => {
+      try {
+        const host = new URL(result.url).hostname.replace(/^www\./, "");
+        return !/(^|\.)wikipedia\.org$/.test(host) && String(result.snippet || "").length < 700;
+      } catch {
+        return false;
+      }
+    })
+    .slice(0, limit);
+  await Promise.allSettled(candidates.map(async (result) => {
+    try {
+      const resource = await fetchPublicResource(result.url, { maxBytes: 400 * 1024, timeoutMs: 5500 });
+      const type = String(resource.contentType || "").toLowerCase();
+      if (!/^(?:text\/html|application\/xhtml\+xml|text\/plain)/.test(type)) return;
+      const raw = new TextDecoder("utf-8").decode(resource.bytes);
+      const text = type.startsWith("text/plain") ? raw : extractHtmlText(raw).text;
+      const passage = text.replace(/\s+/g, " ").trim().slice(0, 3200);
+      if (passage.length > 240) result.passage = passage;
+    } catch {
+      // Keep the snippet when a page cannot be read.
+    }
+  }));
+  return results;
+}
+
 async function handleSearch(request, response) {
   if (!rateLimit(request, "search", SEARCH_RATE_LIMIT, 60_000)) {
     sendError(response, 429, "Too many search requests from this network. Please try again in a minute.");
@@ -687,32 +723,47 @@ async function handleSearch(request, response) {
       sendError(response, 503, "Web search is disabled on this server.");
       return;
     }
-    const language = ["en", "te", "hi"].includes(body.language) ? body.language : "en";
+    const language = LANGUAGE_CODES.includes(String(body.language || "")) ? String(body.language) : "en";
     const key = `${language}:${query.toLowerCase()}`;
     const now = Date.now();
-    const cached = wikiCache.get(key);
+    const cached = searchCache.get(key);
     if (cached && cached.expires > now) {
-      sendJson(response, 200, { ok: true, results: cached.results, provider: "Wikipedia", message: "" }, { api: true });
+      sendJson(response, 200, { ok: true, results: cached.results, provider: cached.provider, providers: cached.providers, message: "" }, { api: true });
       return;
     }
-    while (wikiRequestTimes.length && wikiRequestTimes[0] <= now - 60_000) wikiRequestTimes.shift();
-    if (activeWikiSearches >= 4 || wikiRequestTimes.length >= 60) {
+    while (searchRequestTimes.length && searchRequestTimes[0] <= now - 60_000) searchRequestTimes.shift();
+    if (activeSearches >= 4 || searchRequestTimes.length >= 60) {
       sendError(response, 429, "Web search is busy. Please try again shortly.");
       return;
     }
-    wikiRequestTimes.push(now);
-    activeWikiSearches += 1;
+    searchRequestTimes.push(now);
+    activeSearches += 1;
     try {
-      const results = await searchWikipedia(query, { language });
-      const entry = { results, expires: Date.now() + 5 * 60_000 };
-      wikiCache.set(key, entry);
-      const expiry = setTimeout(() => { if (wikiCache.get(key) === entry) wikiCache.delete(key); }, 5 * 60_000);
+      const outside = await searchOutside(query, { language });
+      let results = outside.results;
+      if (body.read !== false) results = await readSearchPassages(results);
+      const providers = outside.providers.length ? outside.providers : ["Wikipedia"];
+      const provider = providers.join(" + ");
+      const entry = { results, provider, providers, expires: Date.now() + 5 * 60_000 };
+      searchCache.set(key, entry);
+      const expiry = setTimeout(() => { if (searchCache.get(key) === entry) searchCache.delete(key); }, 5 * 60_000);
       expiry.unref?.();
-      while (wikiCache.size > 100) wikiCache.delete(wikiCache.keys().next().value);
-      sendJson(response, 200, { ok: true, results, provider: "Wikipedia", message: results.length ? "" : "No Wikipedia results found for this question." }, { api: true });
-    } catch {
-      sendError(response, 502, "Wikipedia search could not be reached. Check your connection or try again later.");
-    } finally { activeWikiSearches -= 1; }
+      while (searchCache.size > 120) searchCache.delete(searchCache.keys().next().value);
+      sendJson(
+        response,
+        200,
+        {
+          ok: true,
+          results,
+          provider,
+          providers,
+          message: results.length ? "" : "No outside results were found for this question yet.",
+        },
+        { api: true },
+      );
+    } catch (error) {
+      sendError(response, 502, `Web search could not be reached (${error.message || "unknown error"}). Check your connection or try again later.`);
+    } finally { activeSearches -= 1; }
     return;
   }
   let url;
@@ -750,6 +801,8 @@ async function handleSearch(request, response) {
       {
         ok: true,
         results,
+        provider: "configured",
+        providers: ["configured"],
         message: results.length ? "" : "No outside results found for this question.",
       },
       { api: true },
@@ -802,7 +855,7 @@ async function handleFetch(request, response) {
 function health() {
   return {
     ok: true,
-    version: "1.9.0",
+    version: "2.0.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,
@@ -815,7 +868,9 @@ function health() {
       studentKeyFallback: STUDENT_KEY_FALLBACK,
     },
     search: Boolean(SEARCH_URL || WIKIPEDIA_SEARCH),
-    searchProvider: SEARCH_URL ? "configured" : WIKIPEDIA_SEARCH ? "Wikipedia" : null,
+    searchProvider: SEARCH_URL ? "configured" : WIKIPEDIA_SEARCH ? "Wikipedia + DuckDuckGo" : null,
+    searchSources: SEARCH_URL ? ["configured"] : WIKIPEDIA_SEARCH ? ["Wikipedia", "DuckDuckGo"] : [],
+    languages: LANGUAGE_CODES,
     linkReading: true,
     accounts: accountsBackend !== "unavailable",
     accountsBackend,
@@ -1001,7 +1056,7 @@ server.listen(PORT, HOST, () => {
   console.log(
     `Free AI router: ${AI_UPSTREAMS.length ? `${AI_PROVIDER_IDS.join(" → ")} (${AI_UPSTREAMS.length} providers)` : "not configured (offline engine only)"}`,
   );
-  console.log(`Web fallback: ${SEARCH_URL ? "configured provider" : WIKIPEDIA_SEARCH ? "Wikipedia (no key)" : "disabled"}`);
+  console.log(`Web fallback: ${SEARCH_URL ? "configured provider" : WIKIPEDIA_SEARCH ? "Wikipedia + DuckDuckGo (no key)" : "disabled"}`);
   console.log(
     `Student accounts: ${accountsBackend === "supabase" ? "Supabase Auth + persistent sessions" : accountsBackend === "local" ? "local JSON store (scrypt-hashed)" : "unavailable — check Supabase configuration"}`,
   );

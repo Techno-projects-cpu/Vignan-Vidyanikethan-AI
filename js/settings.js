@@ -1,10 +1,11 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=15";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=15";
-import { parseApiKeys } from "./key-pool.js?v=15";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=15";
-import { aiProfile } from "./ai-nicknames.js?v=15";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=16";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=16";
+import { parseApiKeys } from "./key-pool.js?v=16";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=16";
+import { aiProfile } from "./ai-nicknames.js?v=16";
+import { LANGUAGE_CODES } from "./languages.js?v=16";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -100,7 +101,7 @@ export function normalizeSettings(value = {}) {
   if (!PROVIDERS[merged.activeProvider]) merged.activeProvider = "server";
   if (!["server", "custom"].includes(merged.webMode)) merged.webMode = "server";
   if (!["light", "dark"].includes(merged.theme)) merged.theme = "light";
-  if (!["en", "te", "hi"].includes(merged.language)) merged.language = "en";
+  if (!LANGUAGE_CODES.includes(merged.language)) merged.language = "en";
   merged.freeRouterDismissed = Boolean(raw.freeRouterDismissed);
   merged.profile = String(merged.profile || "Student").slice(0, 32);
   return merged;
@@ -129,7 +130,7 @@ export function privacyLabel(settings) {
     settings?.studentKeyFallback !== false &&
     Object.values(settings?.studentKeys || {}).some((entry) => parseApiKeys(entry?.keys).length > 0);
   const web = settings?.webEnabled
-    ? "When books have no match, the search query goes to Wikipedia or your chosen search provider."
+    ? "When books have no match, the search query goes to Wikipedia, DuckDuckGo or your chosen search provider, and the top result pages may be read to build a labelled outside answer."
     : "Web fallback is off.";
   const links = "Links you explicitly request are sent to the site server and the linked website.";
   if (!providers.length && !hasStudentKeys) return `Book lookup stays on this device. ${web} ${links}`;

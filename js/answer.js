@@ -7,9 +7,10 @@
  * labelled as being outside the textbooks.
  */
 
-import { salientSentences, splitSentences } from "./text.js?v=15";
-import { truncate } from "./util.js?v=15";
-import { buildFlashcards } from "./flashcards.js?v=15";
+import { salientSentences, splitSentences } from "./text.js?v=16";
+import { truncate } from "./util.js?v=16";
+import { buildFlashcards } from "./flashcards.js?v=16";
+import { t } from "./i18n.js?v=16";
 
 export function sourcesFromHits(hits = []) {
   return hits.map((hit, index) => ({
@@ -43,6 +44,7 @@ function intro(query, mode, language = "en") {
   const topic = truncate(query.replace(/[?.!]+$/, ""), 90);
   if (language === "te") return `**మీ పుస్తకాల నుండి — ${topic}**`;
   if (language === "hi") return `**आपकी किताबों से — ${topic}**`;
+  if (language !== "en") return `**${t("view.ask.title")} — ${topic}**`;
   if (mode === "summarize") return `**Revision summary — ${topic}**`;
   if (mode === "explain") return `**Step-by-step from your library — ${topic}**`;
   if (mode === "practice") return `**Practice questions — ${topic}**`;
@@ -76,6 +78,13 @@ export function notFoundMessage(reason, webResults = [], webEnabled = false, lan
       web: "वेब खोज से परिणाम नहीं मिले। अपना कनेक्शन जाँचें।",
     };
     return `${messages[reason] || messages.other}${webEnabled && !webResults.length ? `\n\n${messages.web}` : ""}${webBlock(webResults)}`;
+  }
+  if (language !== "en" && reason !== "empty-library" && reason !== "too-vague") {
+    const parts = [t("knowledge.notFound"), t("knowledge.notFoundHint")];
+    if (webEnabled && !webResults.length) parts.push(t("knowledge.webEmpty"));
+    const block = webBlock(webResults);
+    if (block) parts.push(block);
+    return parts.filter(Boolean).join("\n\n");
   }
   let headline;
   if (reason === "empty-library") {

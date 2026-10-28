@@ -79,12 +79,12 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 | Progress | A recommended next step, local streak, XP, accuracy, topic mastery and reviewable recent results, plus an optional live class leaderboard. Full decks and question-by-question reviews remain on the device. |
 | Student accounts | Roblox-inspired Log In / Register with username, password, age band and private gender; local scrypt hashes or Supabase Auth, persistent Supabase sessions, under-13 guardian consent, referral codes and squad invites. |
 | Funky edit video | An 8-second story with four visual vibes, a branded Nezaad style, score reveal, replayable preview, original on-device synth beat, question bars and revision prompt. An optional on-device QR links to Zero Vast; a caption can be copied separately. Choose 540p, 720p or 1080p; MP4 is preferred, WebM and a 1080×1920 PNG are fallbacks. Nickname and invite code are opt-in. |
-| Web fallback | New installs use a no-key Wikipedia search when the books fail; the composer can turn it off and stored opt-outs are preserved. Short excerpts are labelled **OUTSIDE YOUR TEXTBOOKS** and are not independently verified. Wikipedia is encyclopedic, not whole-web search. |
+| Web fallback | New installs use a no-key, multi-source search when the books fail: the Wikipedia edition for the chosen language, the DuckDuckGo Instant Answer API, and Simple English Wikipedia as a last resort, plus a small built-in reference for the school, the project and evergreen facts. The server reads up to two result pages so answers quote real passages. The composer can turn it off and stored opt-outs are preserved. Everything outside your books is labelled **OUTSIDE YOUR TEXTBOOKS · not independently verified**. |
 | Conversation and links | Bolt carries a bounded recent topic into follow-ups, answers creator questions directly, and can quote a supplied public webpage or PDF with `[Wn]` citations. It is an extractive lookup engine, not a generative chatbot. |
 | Offline / PWA | Service worker caches the full app shell, WebLLM runtime, local AI worker, PDF.js and CMaps after the first online visit. Installable manifest included. |
 | Responsive study workspace | Monochrome, prompt-first design with a compact menu, comfortable touch targets, adaptive quiz layouts and a mobile-friendly edit studio. |
 | Privacy | Books, chats, decks and results are stored locally; optional connected AI and web search may send questions and relevant excerpts to external services. Student keys are excluded from exports and account/leaderboard records. [Privacy policy](./privacy.html) and [terms](./terms.html) are available before entry and in the app. |
-| Languages | Core interface and common chat commands support English, Telugu and Hindi; untranslated controls fall back to English. Indic combining marks are preserved in retrieval and grading; older book indexes are rebuilt in memory without deleting the originals. Offline Bolt quotes the source language and does not translate. A connected AI is asked to respond in the selected language, but its translations and citations need checking. |
+| Languages | **33 languages.** 13 Indian languages (English, हिन्दी, বাংলা, मराठी, తెలుగు, தமிழ், ગુજરાતી, ಕನ್ನಡ, മലയാളം, ਪੰਜਾਬੀ, ଓଡ଼ିଆ, অসমীয়া, اردو) plus Nepali, العربية, فارسی, Français, Deutsch, Español, Português, Italiano, Nederlands, Polski, Русский, Українська, Türkçe, 中文, 日本語, 한국어, Bahasa Indonesia, Tiếng Việt, ไทย and Kiswahili. Core labels, screen titles, the composer, language-aware search and connected-model instructions all follow the choice; Urdu, Arabic and Persian switch the layout to right-to-left. Untranslated long help text falls back to English. Indic combining marks are preserved in retrieval and grading; older book indexes are rebuilt in memory without deleting the originals. Offline Bolt quotes the source language and does not translate. A connected AI is asked to respond in the selected language, but its translations and citations need checking. |
 
 ---
 
@@ -106,7 +106,7 @@ The public interface is intentionally sparse: a skippable student-project intro,
 3. Finish the quiz, review each answer and make a cited flashcard deck from missed questions. The result studio, retry/practice action and past results remain accessible from Progress.
 4. Return to **Flashcards** to switch decks and review cards due today. Practice-all does not change the review schedule. **Progress** suggests a useful next step.
 5. For a model paper, upload text-selectable past papers in **Library**, open **Make a model question paper**, choose the sources and build. Review the source pages before downloading or printing. The preview lasts for the current tab; downloads are separate files.
-6. Choose English, తెలుగు or हिन्दी under **Settings → Advanced settings → Appearance**. Offline Bolt does not translate a book from one language to another; a connected model can be asked to translate, with possible mistakes.
+6. Choose any of the 33 languages in the **Language** card at the top of **Settings** (Indian languages first, then world languages). Offline Bolt does not translate a book from one language to another; a connected model can be asked to answer in the chosen language, with possible mistakes.
 
 Decks, detailed reviews and results remain in the browser, not in the account; only quiz summary statistics sync. The app warns when browser storage is unavailable or a write fails. JSON export includes saved decks, review schedules, history and book details, but excludes textbook pages, original PDFs and keys; keep originals separately.
 
@@ -272,7 +272,7 @@ STUDY_AI_AI_EXTRA_HEADERS='{"HTTP-Referer":"https://school.example","X-Title":"V
 
 ### Web fallback and public links
 
-For new installations, the composer’s **Search the web if needed** switch is on. If local books have no match, `/api/search` queries the public English, Telugu or Hindi Wikipedia API according to the selected interface language, without a key, and shows short, unverified excerpts with `[Wn]` links. This is an encyclopedic fallback, **not a search of the whole web**, and it can fail, rate-limit or return irrelevant/incomplete material. A recent conversational topic may be included in the search query. The student can switch this off in the composer; existing stored choices are not overridden. Questions that match textbooks stay local unless a connected AI was explicitly configured. Avoid entering personal or sensitive information.
+For new installations, the composer’s **Search the web if needed** switch is on. If local books have no match, `/api/search` queries, without any key, the Wikipedia edition for the selected interface language (any of the 33 offered languages that has an edition), the DuckDuckGo Instant Answer API and, as a last resort, Simple English Wikipedia. The server then reads up to two result pages (`STUDY_AI_SEARCH_READ_PAGES`, default 2) so the answer can quote a real passage instead of a two-line snippet; every result is shown with a `[Wn]` link and the providers that produced it. This is still an outside fallback, **not a verified answer key**, and it can fail, rate-limit or return irrelevant/incomplete material. A recent conversational topic may be included in the search query. The student can switch this off in the composer; existing stored choices are not overridden. Questions that match textbooks stay local unless a connected AI was explicitly configured. Avoid entering personal or sensitive information.
 
 Operators can set `STUDY_AI_WIKIPEDIA_SEARCH=false` to disable the built-in provider, or configure an optional JSON endpoint with a `{q}` placeholder. A configured `STUDY_AI_SEARCH_URL` takes precedence and can use `STUDY_AI_SEARCH_TOKEN` / `STUDY_AI_SEARCH_TOKEN_HEADER`. The server normalises common JSON shapes and caps search response size. The public provider may have its own use and privacy policies; check them before classroom deployment.
 
@@ -333,7 +333,7 @@ Hybrid retrieval (top-k passages with page numbers)
                          answer + [n] citations ──► verifier model (optional)
 ```
 
-The system prompt forbids answering from memory, requires `[n]` citations and treats passages as data, not instructions. User-imported web sources retain their origin and are labelled. On a miss, optional Wikipedia excerpts use separate `[Wn]` links. Recent follow-ups reuse a bounded prior student topic; Bolt does not generate or remember like a large language model.
+The system prompt forbids answering from memory, requires `[n]` citations and treats passages as data, not instructions. User-imported web sources retain their origin and are labelled. On a miss, optional outside excerpts (Wikipedia in the chosen language, DuckDuckGo, Simple English Wikipedia) use separate `[Wn]` links, and questions about the school or the project are answered from a small built-in reference instead of being refused. Recent follow-ups reuse a bounded prior student topic; Bolt does not generate or remember like a large language model.
 
 A retrieval example using a test-only synthetic fixture (not included in the app):
 
@@ -425,7 +425,10 @@ js/                       Browser ESM app modules
   card.js                 Funky edit video / PNG poster canvas
   db.js                   IndexedDB persistence
   settings.js             Defaults and health checks
-  i18n.js                 English / Telugu UI strings
+  i18n.js                 Interface dictionary loader and long-form English/Telugu/Hindi text
+  languages.js            33-language catalogue, RTL flags and Wikipedia mapping
+  translations-core.js    Core labels for every catalogue language
+  knowledge.js            Built-in answers about the school, the project and evergreen facts
   ui.js, reader.js        DOM helpers and page reader
 tests/                    Node test suite
 serve.mjs                 Zero-dependency static + free AI/search/account server

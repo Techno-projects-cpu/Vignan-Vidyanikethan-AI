@@ -1,8 +1,17 @@
 /**
- * Core UI localisation in English, Telugu and Hindi. Untranslated interface
- * strings fall back to English. Offline textbook excerpts remain in the
- * source language — citations always point at the original passage.
+ * Interface localisation.
+ *
+ * English, Telugu and Hindi have the long tail of help text. Every other
+ * language in `js/languages.js` ships the core strings in
+ * `js/translations-core.js` (navigation, screen titles, the ask composer,
+ * appearance settings and outside-source labels). Anything a language has not
+ * translated yet falls back to English, so the interface is never blank.
+ * Offline textbook excerpts stay in the source language — citations always
+ * point at the original passage.
  */
+
+import { CORE_STRINGS } from "./translations-core.js?v=16";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=16";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 
@@ -89,7 +98,7 @@ const EN = {
   "ask.clear": "Clear chat",
   "ask.webFallback": "Search the web if needed",
   "ask.webOn": "On", "ask.webOff": "Off",
-  "ask.webPrivacy": "Books first. If there's no match, your question goes to Wikipedia or your chosen search provider. Don't share private information.",
+  "ask.webPrivacy": "Books first. If there's no match, your question goes to Wikipedia, DuckDuckGo (or your chosen search provider) and the top result pages may be read. Don't share private information.",
   "ask.answerStyle": "Answer style",
   "ask.sources": "Sources & verification",
   "ask.sourcesEmpty": "Ask a question and the cited pages will appear here.",
@@ -166,10 +175,10 @@ const EN = {
   "settings.model": "Model name",
   "settings.apiKey": "API keys (stored only in this browser)",
   "settings.test": "Test connection",
-  "settings.webTitle": "Web search",
+  "settings.webTitle": "Web search (Wikipedia + DuckDuckGo)",
   "settings.webEnable": "Enable web search when books have no answer",
   "settings.webMode": "Search source",
-  "settings.webServer": "Built-in Wikipedia / server provider",
+  "settings.webServer": "Built-in Wikipedia + DuckDuckGo / server provider",
   "settings.webCustom": "Custom JSON endpoint",
   "settings.webEndpoint": "Endpoint with {q} placeholder",
   "settings.webToken": "Optional bearer token",
@@ -184,6 +193,10 @@ const EN = {
   "settings.themeDark": "Dark",
   "settings.helpTitle": "How this works",
   "settings.helpBody": "Your books are split into page-preserving passages. A local hybrid search finds evidence; the offline engine quotes it with citations. If you connect a model, only those short passages are sent. Web results are labelled as outside your textbooks.",
+  "knowledge.notFound": "I could not find this in your textbooks. I will not invent an answer.",
+  "knowledge.notFoundHint": "Try different words, add the chapter in Library, or keep web search on for a clearly labelled outside answer.",
+  "knowledge.webEmpty": "Web search returned nothing this time. Check your connection and try again.",
+  "knowledge.outsideHelp": "I could not reach an outside source for this one. You can search it directly:",
 };
 
 const TE = {
@@ -338,11 +351,15 @@ const TE = {
   "settings.export": "డేటా ఎగుమతి (JSON)",
   "settings.deleteAll": "స్థానిక డేటా అంతా తొలగించు",
   "settings.language": "ఇంటర్\u200cఫేస్ భాష",
-  "settings.languageNote": "ముఖ్యమైన ఇంటర్‌ఫేస్, చాట్ ఆదేశాలు తెలుగు, ఇంగ్లీషు, హిందీలో అందుబాటులో ఉన్నాయి. ఆఫ్‌లైన్ Bolt మూల పాఠ్యాన్ని అనువదించదు. కనెక్ట్ చేసిన AI అనువాదంలో తప్పులు ఉండవచ్చు.",
+  "settings.languageNote": "ఇంటర్‌ఫేస్ లేబుళ్లు, చాట్ ఆదేశాలు, AI సమాధానాలు ఈ భాషను అనుసరిస్తాయి. ఆఫ్‌లైన్ Bolt మూల పాఠ్యాన్ని అనువదించదు. కనెక్ట్ చేసిన AI అనువాదంలో తప్పులు ఉండవచ్చు.",
   "settings.theme": "థీమ్",
   "settings.themeLight": "లైట్",
   "settings.themeDark": "డార్క్",
   "settings.helpTitle": "ఇది ఎలా పనిచేస్తుంది",
+  "knowledge.notFound": "మీ పుస్తకాలలో దీనికి సమాధానం దొరకలేదు. నేను సమాధానాన్ని కల్పించను.",
+  "knowledge.notFoundHint": "వేరే పదాలతో అడగండి, Library లో ఆ అధ్యాయాన్ని చేర్చండి, లేదా స్పష్టంగా గుర్తించిన బయటి సమాధానం కోసం వెబ్ శోధన ఆన్‌లో ఉంచండి.",
+  "knowledge.webEmpty": "ఈసారి వెబ్ శోధనలో ఫలితాలు రాలేదు. కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.",
+  "knowledge.outsideHelp": "దీనికి బయటి మూలం అందుబాటులో లేదు. మీరే నేరుగా వెతకవచ్చు:",
 };
 
 const HI = {
@@ -414,17 +431,56 @@ const HI = {
   "settings.aiTitle": "AI इंजन", "settings.webTitle": "वेब खोज", "settings.webEnable": "किताबों में उत्तर न मिले तो वेब खोजें",
   "settings.privacyTitle": "निजता और डेटा", "settings.export": "डेटा निर्यात (JSON)", "settings.deleteAll": "स्थानीय डेटा हटाएँ",
   "settings.language": "इंटरफ़ेस भाषा", "settings.theme": "थीम", "settings.themeLight": "हल्का", "settings.themeDark": "गहरा",
-  "settings.languageNote": "मुख्य इंटरफ़ेस और चैट आदेश अंग्रेज़ी, तेलुगु और हिंदी में हैं। ऑफ़लाइन Bolt मूल स्रोत का अनुवाद नहीं करता। जुड़े AI का अनुवाद गलत हो सकता है।",
+  "settings.languageNote": "इंटरफ़ेस लेबल, चैट आदेश और AI उत्तर इस भाषा का अनुसरण करते हैं। ऑफ़लाइन Bolt मूल स्रोत का अनुवाद नहीं करता। जुड़े AI का अनुवाद गलत हो सकता है।",
   "settings.helpTitle": "यह कैसे काम करता है",
+  "knowledge.notFound": "मुझे यह आपकी किताबों में नहीं मिला। मैं उत्तर बनाकर नहीं बताऊँगा।",
+  "knowledge.notFoundHint": "दूसरे शब्दों में पूछें, Library में अध्याय जोड़ें, या स्पष्ट रूप से चिह्नित बाहरी उत्तर के लिए वेब खोज चालू रखें।",
+  "knowledge.webEmpty": "इस बार वेब खोज से कुछ नहीं मिला। कनेक्शन जाँचकर फिर कोशिश करें।",
+  "knowledge.outsideHelp": "इसके लिए कोई बाहरी स्रोत नहीं मिला। आप सीधे खोज सकते हैं:",
 };
 
-export const LANGUAGES = { en: EN, te: TE, hi: HI };
-export const LANGUAGE_NAMES = { en: "English", te: "తెలుగు", hi: "हिन्दी" };
+const FULL_DICTIONARIES = { en: EN, te: TE, hi: HI };
+
+/** Every catalogue language, with its core strings merged over English. */
+export const LANGUAGES = Object.fromEntries(
+  LANGUAGE_CATALOGUE.map(({ code }) => {
+    const core = CORE_STRINGS[code] || {};
+    const full = FULL_DICTIONARIES[code] || {};
+    return [code, code === "en" ? { ...core, ...full } : { ...core, ...full }];
+  }),
+);
+
+export const LANGUAGE_NAMES = Object.fromEntries(
+  LANGUAGE_CATALOGUE.map(({ code, native }) => [code, native]),
+);
+
+export const SUPPORTED_LANGUAGES = LANGUAGE_CODES;
 
 let current = "en";
 
 export function currentLanguage() {
   return current;
+}
+
+export function currentLanguageMeta() {
+  return languageMeta(current);
+}
+
+/** Language names for prompts and pickers. */
+export function languageName(code, { native = false } = {}) {
+  const meta = languageMeta(code);
+  return native ? meta.native : meta.name;
+}
+
+/** Apply `lang`/`dir` to the document element (RTL for Urdu, Arabic, Persian). */
+export function applyLanguageDirection(root = globalThis.document) {
+  if (!root?.documentElement) return;
+  root.documentElement.lang = current;
+  root.documentElement.dir = isRtlLanguage(current) ? "rtl" : "ltr";
+}
+
+export function isCurrentLanguageRtl() {
+  return isRtlLanguage(current);
 }
 
 export function t(key, vars = {}) {
@@ -454,7 +510,7 @@ export function applyTranslations(root = globalThis.document) {
 
 export function setLanguage(language, { storage, root = globalThis.document } = {}) {
   current = LANGUAGES[language] ? language : "en";
-  if (root?.documentElement) root.documentElement.lang = current;
+  applyLanguageDirection(root);
   try {
     const target = storage === undefined ? globalThis.localStorage : storage;
     target?.setItem(LANGUAGE_KEY, current);

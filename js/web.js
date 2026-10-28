@@ -7,7 +7,8 @@
  * can turn it off; configured JSON search providers remain optional.
  */
 
-import { safeUrl, truncate } from "./util.js?v=15";
+import { safeUrl, truncate } from "./util.js?v=16";
+import { LANGUAGE_CODES } from "./languages.js?v=16";
 
 function firstArray(data) {
   if (Array.isArray(data)) return data;
@@ -32,11 +33,14 @@ export function parseSearchResults(data, limit = 5) {
     const title = String(entry?.title || entry?.name || entry?.Text || new URL(url).hostname).trim();
     const snippet = String(entry?.snippet || entry?.description || entry?.content || entry?.Text || "").trim();
     if (results.some((result) => result.url === url)) continue;
+    const entryPassage = typeof entry?.passage === "string" ? entry.passage.trim() : "";
     results.push({
       title: truncate(title || new URL(url).hostname, 120),
       url,
       domain: new URL(url).hostname.replace(/^www\./, ""),
       snippet: truncate(snippet || "Open this source to read more.", 1000),
+      ...(entryPassage.length > 200 ? { passage: truncate(entryPassage, 3200) } : {}),
+      ...(entry?.provider ? { provider: String(entry.provider).slice(0, 40) } : {}),
     });
     if (results.length >= limit) break;
   }
@@ -59,12 +63,25 @@ export async function searchWeb(query, settings = {}, { signal } = {}) {
     const response = await fetch("api/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, language: ["en", "te", "hi"].includes(settings.language) ? settings.language : "en" }),
+      body: JSON.stringify({
+        query,
+        language: LANGUAGE_CODES.includes(settings.language) ? settings.language : "en",
+        read: true,
+      }),
       signal,
     });
     const data = await responseJson(response);
     if (!response.ok) throw new Error(data.error || `Search failed (${response.status})`);
-    return { results: parseSearchResults(data.results || data), enabled: true, provider: data.provider === "Wikipedia" ? "Wikipedia" : "Web search", message: data.message || "" };
+    const providers = Array.isArray(data.providers) && data.providers.length
+      ? data.providers.map(String).slice(0, 4)
+      : data.provider ? [String(data.provider)] : [];
+    return {
+      results: parseSearchResults(data.results || data),
+      enabled: true,
+      provider: data.provider || "Web search",
+      providers,
+      message: data.message || "",
+    };
   }
 
   const endpoint = String(settings.searchEndpoint || "").trim();

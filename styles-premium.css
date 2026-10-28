@@ -1623,3 +1623,80 @@ body.premium-ui .reader-page-text mark { background: var(--p-ink); color: var(--
   body.premium-ui .reader-page-button { min-height: 40px; }
   body.premium-ui .message-action { min-height: 44px; }
 }
+
+/* ------------------------------------------------------------------------- */
+/* Right-to-left languages (Urdu, Arabic, Persian) and non-Latin scripts.    */
+/* The document element carries dir="rtl"; these rules fix the few controls  */
+/* that were written with explicit physical directions.                      */
+/* ------------------------------------------------------------------------- */
+
+/* Keep each paragraph's own direction: Urdu/Arabic/Persian text flows right to
+   left, while English labels quoted inside it stay readable. */
+html[dir="rtl"] body.premium-ui p,
+html[dir="rtl"] body.premium-ui li,
+html[dir="rtl"] body.premium-ui label,
+html[dir="rtl"] .message-body,
+html[dir="rtl"] .message-text,
+html[dir="rtl"] .hint,
+html[dir="rtl"] .section-copy p {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+html[dir="rtl"] body.premium-ui .composer-meta,
+html[dir="rtl"] body.premium-ui .ask-toolbar {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] body.premium-ui .source-page,
+html[dir="rtl"] body.premium-ui .composer-meta .text-button {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+html[dir="rtl"] body.premium-ui .message-row.mine {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] body.premium-ui .help-list,
+html[dir="rtl"] .rich-list {
+  padding-left: 0;
+  padding-right: 20px;
+}
+
+html[dir="rtl"] body.premium-ui .topbar .topbar-actions {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] body.premium-ui .social-bell-count {
+  right: auto;
+  left: 2px;
+}
+
+html[dir="rtl"] body.premium-ui .game-card-actions,
+html[dir="rtl"] body.premium-ui .button-row {
+  flex-direction: row-reverse;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Language card: always visible at the top of Settings.                     */
+/* ------------------------------------------------------------------------- */
+
+body.premium-ui .language-card { display: grid; gap: 12px; }
+body.premium-ui .language-card .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+body.premium-ui .language-card .panel-head h2 { margin: 4px 0 0; }
+body.premium-ui .language-select-row { display: block; }
+body.premium-ui .language-card select {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  border: 1px solid var(--p-line-strong);
+  border-radius: 0;
+  background: var(--p-surface-2);
+  color: var(--p-ink);
+  font: 600 15px var(--font);
+}
+body.premium-ui .language-card select:focus-visible { outline: 2px solid var(--p-ink); outline-offset: 2px; }
+body.premium-ui .language-card optgroup { background: var(--p-bg); color: var(--p-muted); font-weight: 700; }
+body.premium-ui .language-card option { background: var(--p-surface); color: var(--p-ink); font-weight: 500; }
+body.premium-ui .language-answers { margin: 0; color: var(--p-muted); font: 600 11px var(--mono); letter-spacing: 0.04em; text-transform: uppercase; }
