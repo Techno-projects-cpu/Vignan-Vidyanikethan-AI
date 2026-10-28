@@ -1,0 +1,457 @@
+/**
+ * Friends, requests, people search and the notification feed.
+ *
+ * Rendered into #view-friends. Mobile first: large tap targets, one column,
+ * and tabs that scroll sideways instead of wrapping.
+ */
+
+import * as ui from "./ui.js?v=15";
+import { onSocialChange, social, socialState, syncSocial } from "./social.js?v=15";
+
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+const TABS = ["friends", "requests", "find", "alerts"];
+let activeTab = "friends";
+let searchResults = [];
+let searchTerm = "";
+let searchBusy = false;
+let initialised = false;
+let lastSignature = "";
+
+const openView = (view) => window.dispatchEvent(new CustomEvent("vignan:view", { detail: { view } }));
+const openChat = (detail) => window.dispatchEvent(new CustomEvent("vignan:open-chat", { detail }));
+const openGame = (gameId) => window.dispatchEvent(new CustomEvent("vignan:open-game", { detail: { gameId } }));
+
+export function relativeTime(value) {
+  const time = Date.parse(value || "");
+  if (!Number.isFinite(time)) return "";
+  const seconds = Math.round((Date.now() - time) / 1000);
+  if (seconds < 45) return "just now";
+  if (seconds < 3600) return `${Math.round(seconds / 60)} min ago`;
+  if (seconds < 86400) return `${Math.round(seconds / 3600)} h ago`;
+  if (seconds < 604800) return `${Math.round(seconds / 86400)} d ago`;
+  return new Date(time).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
+
+export function avatarLetter(name) {
+  return String(name || "V").trim().charAt(0).toUpperCase() || "V";
+}
+
+function avatar(name, online = false, size = "") {
+  const node = ui.element("span", `social-avatar${size ? ` ${size}` : ""}`, avatarLetter(name));
+  if (online) node.classList.add("online");
+  return node;
+}
+
+function presence(row) {
+  const bits = [];
+  bits.push(row.online ? "Online" : "Offline");
+  if (row.streak) bits.push(`${row.streak} day streak`);
+  if (row.xp) bits.push(`${row.xp} XP`);
+  return bits.join(" · ");
+}
+
+function personRow({ name, subtitle, online, actions = [], avatarNode = null }) {
+  const row = ui.element("div", "social-row");
+  row.appendChild(avatarNode || avatar(name, online));
+  const copy = ui.element("div", "social-row-copy");
+  copy.appendChild(ui.element("strong", "", name));
+  copy.appendChild(ui.element("small", "", subtitle));
+  row.appendChild(copy);
+  if (actions.length) {
+    const tools = ui.element("div", "social-row-actions");
+    for (const action of actions) tools.appendChild(action);
+    row.appendChild(tools);
+  }
+  return row;
+}
+
+function button(label, className, onClick, { ariaLabel = "", action = "" } = {}) {
+  const node = ui.element("button", className, label);
+  node.type = "button";
+  if (ariaLabel) node.setAttribute("aria-label", ariaLabel);
+  if (action) node.dataset.action = action;
+  node.addEventListener("click", onClick);
+  return node;
+}
+
+function requireLogin(container) {
+  const box = ui.element("div", "social-gate");
+  box.appendChild(ui.element("span", "social-gate-mark", "✦"));
+  box.appendChild(ui.element("h3", "", "Friends need a student account"));
+  box.appendChild(ui.element(
+    "p",
+    "",
+    "Log in to add classmates, send messages and play chess or quiz duels. Guest mode keeps working for asking, quizzes and flashcards.",
+  ));
+  const actions = ui.element("div", "social-gate-actions");
+  actions.appendChild(button("Log in or register", "button primary", () => openView("progress")));
+  box.appendChild(actions);
+  container.appendChild(box);
+}
+
+function renderTabs(root) {
+  const data = socialState().data;
+  const wrap = ui.element("div", "social-tabs");
+  wrap.setAttribute("role", "tablist");
+  wrap.setAttribute("aria-label", "Friends sections");
+  const labels = {
+    friends: `Friends${data?.friends?.length ? ` ${data.friends.length}` : ""}`,
+    requests: "Requests",
+    find: "Find people",
+    alerts: "Alerts",
+  };
+  for (const tab of TABS) {
+    const id = `friends-tab-${tab}`;
+    const node = ui.element("button", `social-tab${activeTab === tab ? " active" : ""}`, labels[tab]);
+    node.type = "button";
+    node.id = id;
+    node.dataset.tab = tab;
+    node.setAttribute("role", "tab");
+    node.setAttribute("aria-selected", String(activeTab === tab));
+    node.setAttribute("aria-controls", "friends-panel-body");
+    if (tab === "requests" && data?.requests?.incoming?.length) {
+      const badge = ui.element("span", "social-tab-badge", String(data.requests.incoming.length));
+      node.appendChild(badge);
+    }
+    if (tab === "alerts" && Number(data?.unread) > 0) {
+      const badge = ui.element("span", "social-tab-badge", data.unread > 9 ? "9+" : String(data.unread));
+      node.appendChild(badge);
+    }
+    node.addEventListener("click", () => {
+      activeTab = tab;
+      if (tab === "alerts" && Number(socialState().data?.unread) > 0) {
+        social.markRead().then(() => syncSocial()).catch(() => {});
+      }
+      renderFriends();
+      // Switching tabs is a natural moment to pick up a new request or friend.
+      syncSocial().catch(() => {});
+    });
+    wrap.appendChild(node);
+  }
+  root.appendChild(wrap);
+}
+
+function renderFriendsTab(body, data) {
+  const friends = data.friends || [];
+  if (!friends.length) {
+    body.appendChild(ui.emptyState("◇", "No friends yet", "Find a classmate by username and send a request. You can also share a game code from Play."));
+    if (data.requests?.outgoing?.length) {
+      body.appendChild(ui.element("p", "social-hint", `${data.requests.outgoing.length} request waiting for an answer.`));
+    }
+    return;
+  }
+  const list = ui.element("div", "social-list");
+  for (const friend of friends) {
+    const actions = [
+      button("Message", "button ghost small", () => openChat({ friendId: friend.id }), { action: "message" }),
+      button("Play", "button ghost small", () => openChat({ friendId: friend.id, play: true }), { action: "play" }),
+    ];
+    const remove = button("Remove", "social-icon-button", async () => {
+      const confirmed = await ui.confirmDialog({
+        title: `Remove ${friend.username}?`,
+        message: "You can always send a new friend request later.",
+        confirmLabel: "Remove",
+        danger: true,
+      });
+      if (!confirmed) return;
+      try {
+        await social.removeFriend(friend.id);
+        ui.showToast(`${friend.username} was removed.`, "info");
+        await syncSocial();
+      } catch (error) {
+        ui.showToast(error.message, "error");
+      }
+    }, { ariaLabel: `Remove ${friend.username}` });
+    remove.textContent = "×";
+    actions.push(remove);
+    list.appendChild(personRow({
+      name: friend.username,
+      subtitle: presence(friend),
+      online: friend.online,
+      actions,
+    }));
+  }
+  body.appendChild(list);
+  body.appendChild(ui.element("p", "social-hint", "Tap Message to open a private chat. Only friends can message you."));
+}
+
+function renderRequestsTab(body, data) {
+  const incoming = data.requests?.incoming || [];
+  const outgoing = data.requests?.outgoing || [];
+  if (!incoming.length && !outgoing.length) {
+    body.appendChild(ui.emptyState("↗", "No open requests", "When a classmate wants to connect, it will appear here."));
+    return;
+  }
+  if (incoming.length) {
+    body.appendChild(ui.element("h3", "social-subhead", "Waiting for you"));
+    const list = ui.element("div", "social-list");
+    for (const request of incoming) {
+      const actions = [
+        button("Accept", "button primary small", async () => {
+          try {
+            await social.respondFriend(request.id, true);
+            ui.showToast(`You and ${request.from.username} are now friends.`, "success");
+            await syncSocial();
+          } catch (error) {
+            ui.showToast(error.message, "error");
+          }
+        }, { action: "accept" }),
+        button("Decline", "button ghost small", async () => {
+          try {
+            await social.respondFriend(request.id, false);
+            await syncSocial();
+          } catch (error) {
+            ui.showToast(error.message, "error");
+          }
+        }, { action: "decline" }),
+      ];
+      list.appendChild(personRow({
+        name: request.from.username,
+        subtitle: `Asked ${relativeTime(request.createdAt)}`,
+        actions,
+      }));
+    }
+    body.appendChild(list);
+  }
+  if (outgoing.length) {
+    body.appendChild(ui.element("h3", "social-subhead", "You asked"));
+    const list = ui.element("div", "social-list");
+    for (const request of outgoing) {
+      list.appendChild(personRow({
+        name: request.to.username,
+        subtitle: `Sent ${relativeTime(request.createdAt)} · still waiting`,
+      }));
+    }
+    body.appendChild(list);
+  }
+}
+
+async function runSearch() {
+  searchBusy = true;
+  renderFriends();
+  try {
+    const data = await social.people(searchTerm);
+    searchResults = data.people || [];
+  } catch (error) {
+    searchResults = [];
+    ui.showToast(error.message, "error");
+  } finally {
+    searchBusy = false;
+    renderFriends();
+  }
+}
+
+function renderFindTab(body) {
+  const form = ui.element("form", "social-search");
+  const input = document.createElement("input");
+  input.type = "search";
+  input.id = "friends-search-input";
+  input.placeholder = "Search a username";
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  input.value = searchTerm;
+  input.setAttribute("aria-label", "Search students by username");
+  form.appendChild(input);
+  const submit = ui.element("button", "button primary", searchBusy ? "Searching…" : "Search");
+  submit.type = "submit";
+  submit.disabled = searchBusy;
+  form.appendChild(submit);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const value = input.value.trim().toLowerCase();
+    if (value.length < 2) {
+      ui.showToast("Type at least two letters of a username.", "warning");
+      return;
+    }
+    searchTerm = value;
+    runSearch();
+  });
+  body.appendChild(form);
+  body.appendChild(ui.element("p", "social-hint", "Usernames are public. Age, gender and exact results stay private."));
+
+  if (!searchResults.length) {
+    if (searchTerm && !searchBusy) {
+      body.appendChild(ui.emptyState("⌕", "No student found", "Check the spelling, or ask them to open Friends once so their profile appears."));
+    }
+    return;
+  }
+  const list = ui.element("div", "social-list");
+  for (const person of searchResults) {
+    let action;
+    if (person.relationship === "friend") {
+      action = button("Message", "button ghost small", () => openChat({ friendId: person.id }), { action: "message" });
+    } else if (person.relationship === "requested") {
+      action = ui.element("span", "chip", "Requested");
+    } else if (person.relationship === "incoming") {
+      action = button("Answer in Requests", "button ghost small", () => {
+        activeTab = "requests";
+        renderFriends();
+      }, { action: "answer" });
+    } else {
+      action = button("Add friend", "button primary small", async (event) => {
+        event.currentTarget.disabled = true;
+        try {
+          await social.requestFriend(person.username);
+          person.relationship = "requested";
+          ui.showToast(`Request sent to ${person.username}.`, "success");
+          await syncSocial();
+        } catch (error) {
+          ui.showToast(error.message, "error");
+          event.currentTarget.disabled = false;
+          return;
+        }
+        renderFriends();
+      }, { action: "add" });
+    }
+    list.appendChild(personRow({
+      name: person.username,
+      subtitle: presence(person),
+      online: person.online,
+      actions: [action],
+    }));
+  }
+  body.appendChild(list);
+}
+
+function notificationCopy(row) {
+  const copy = { title: row.title, text: row.body };
+  if (row.kind === "message") copy.action = "Open chat";
+  if (row.kind === "game_invite" || row.kind === "game_start" || row.kind === "game_finish") copy.action = "Open game";
+  if (row.kind === "friend_request") copy.action = "Review request";
+  return copy;
+}
+
+function renderAlertsTab(body, data) {
+  const rows = data.notifications || [];
+  if (!rows.length) {
+    body.appendChild(ui.emptyState("◌", "Nothing new", "Friend requests, messages and game invites show up here."));
+    return;
+  }
+  const head = ui.element("div", "social-alerts-head");
+  head.appendChild(ui.element("h3", "social-subhead", "Recent"));
+  const markAll = button("Mark all read", "button ghost small", async () => {
+    try {
+      await social.markRead();
+      await syncSocial();
+    } catch (error) {
+      ui.showToast(error.message, "error");
+    }
+  });
+  markAll.disabled = Number(data.unread) === 0;
+  head.appendChild(markAll);
+  body.appendChild(head);
+
+  const list = ui.element("div", "social-list");
+  for (const row of rows) {
+    const copy = notificationCopy(row);
+    const node = ui.element("button", `social-alert${row.read ? "" : " unread"}`);
+    node.type = "button";
+    const dot = ui.element("span", "social-alert-dot");
+    node.appendChild(dot);
+    const text = ui.element("span", "social-alert-copy");
+    text.appendChild(ui.element("strong", "", copy.title));
+    if (copy.text) text.appendChild(ui.element("small", "", copy.text));
+    text.appendChild(ui.element("span", "social-alert-time", relativeTime(row.createdAt)));
+    node.appendChild(text);
+    node.addEventListener("click", async () => {
+      try {
+        if (!row.read) await social.markRead([row.id]);
+      } catch {
+        // Reading is best-effort; the action still runs.
+      }
+      if (row.kind === "message" && row.data?.threadId) openChat({ threadId: row.data.threadId });
+      else if (row.data?.gameId) openGame(row.data.gameId);
+      else if (row.kind === "friend_request") {
+        activeTab = "requests";
+        renderFriends();
+      }
+      syncSocial().catch(() => {});
+    });
+    list.appendChild(node);
+  }
+  body.appendChild(list);
+}
+
+export function renderFriends() {
+  const root = $("#friends-panel");
+  if (!root) return;
+  const social_ = socialState();
+  const data = social_.data;
+  const signature = JSON.stringify({
+    signedIn: social_.signedIn,
+    loaded: social_.loaded,
+    error: social_.error,
+    tab: activeTab,
+    results: searchResults.map((row) => `${row.id}:${row.relationship}:${row.online}`),
+    term: searchTerm,
+    busy: searchBusy,
+    unread: data?.unread,
+    friends: data?.friends?.map((row) => `${row.id}:${row.online}:${row.xp}:${row.streak}`),
+    requests: data?.requests,
+    alerts: data?.notifications?.map((row) => `${row.id}:${row.read}`),
+  });
+  if (signature === lastSignature) return;
+  lastSignature = signature;
+
+  root.textContent = "";
+  if (!social_.signedIn) {
+    requireLogin(root);
+    return;
+  }
+  if (!data) {
+    root.appendChild(ui.element("p", "social-hint", social_.error || "Loading your friends…"));
+    return;
+  }
+  renderTabs(root);
+  const body = ui.element("div", "social-tab-body");
+  body.id = "friends-panel-body";
+  body.setAttribute("role", "tabpanel");
+  body.setAttribute("aria-labelledby", `friends-tab-${activeTab}`);
+  root.appendChild(body);
+  if (activeTab === "friends") renderFriendsTab(body, data);
+  else if (activeTab === "requests") renderRequestsTab(body, data);
+  else if (activeTab === "find") renderFindTab(body);
+  else renderAlertsTab(body, data);
+}
+
+export function initFriendsUI() {
+  if (initialised) return;
+  initialised = true;
+  onSocialChange(() => {
+    lastSignature = "";
+    renderFriends();
+    updateSocialBadges();
+  });
+  window.addEventListener("vignan:social-refresh", () => syncSocial());
+  renderFriends();
+  updateSocialBadges();
+}
+
+export function updateSocialBadges() {
+  const data = socialState().data;
+  const unread = Number(data?.unread) || 0;
+  const requests = data?.requests?.incoming?.length || 0;
+  for (const node of $$('[data-social-badge="chat"]')) {
+    node.dataset.badge = unread ? (unread > 9 ? "9+" : String(unread)) : "";
+  }
+  for (const node of $$('[data-social-badge="friends"]')) {
+    node.dataset.badge = requests ? (requests > 9 ? "9+" : String(requests)) : "";
+  }
+  const count = $("#social-bell-count");
+  if (count) {
+    count.textContent = unread > 9 ? "9+" : String(unread);
+    count.hidden = unread === 0;
+  }
+  $("#social-bell")?.classList.toggle("has-alerts", unread > 0);
+  const dot = $("#account-dot");
+  if (dot && unread > 0) dot.classList.add("has-alerts");
+  else dot?.classList.remove("has-alerts");
+}
+
+export function focusFriendsTab(tab = "friends") {
+  if (TABS.includes(tab)) activeTab = tab;
+  lastSignature = "";
+  renderFriends();
+}

@@ -32,6 +32,9 @@ import { fetchPublicResource, PublicFetchError } from "./server/safe-fetch.mjs";
 import { limitedText, searchWikipedia } from "./server/web-search.mjs";
 import { createSupabaseAccountStore } from "./server/supabase-accounts.mjs";
 import { ValidationError, cleanUsername, createAccountStore, publicUser, validateLoginPassword, validateUsername } from "./server/accounts.mjs";
+import { createLocalSocialStore, createSupabaseSocialStore } from "./server/social-store.mjs";
+import { SocialError, createSocialService } from "./server/social.mjs";
+import { createSocialRouter } from "./server/social-http.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 const env = (name, fallback = "") => process.env[`STUDY_AI_${name}`] ?? process.env[`VIGNAN_AI_${name}`] ?? fallback;
@@ -39,6 +42,7 @@ const HOST = env("HOST") || "0.0.0.0";
 const PORT = Number(env("PORT") || process.env.PORT || 4173);
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
 const ACCOUNTS_FILE = env("ACCOUNTS_FILE") || path.join(ROOT, "server", "data", "accounts.json");
+const SOCIAL_FILE = env("SOCIAL_FILE") || path.join(ROOT, "server", "data", "social.json");
 const SESSION_COOKIE = "vignan_session";
 const CSRF_COOKIE = "vignan_csrf";
 const CSRF_HEADER = "x-csrf-token";
@@ -102,6 +106,19 @@ const accounts = useSupabase
     })
   : accountsBackend === "local" ? createAccountStore(ACCOUNTS_FILE) : null;
 
+const socialStore = accountsBackend === "unavailable"
+  ? null
+  : useSupabase
+    ? createSupabaseSocialStore({ url: SUPABASE_URL, serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY })
+    : createLocalSocialStore(SOCIAL_FILE);
+const socialService = socialStore
+  ? createSocialService({
+      store: socialStore,
+      lookupByName: (username) => (accounts ? accounts.find(username) : null),
+      lookupById: (id) => (accounts ? accounts.findById(id) : null),
+    })
+  : null;
+
 const sessionStore = useSupabase
   ? {
       create: (userId, token, expires) =>
@@ -121,6 +138,22 @@ const sessionStore = useSupabase
         sessions.delete(token);
       },
     };
+
+// Friends, notifications, chat and games reuse the same session cookie, CSRF
+// token and rate limiter as accounts. Guest mode simply gets a 401.
+const socialRouter = socialService
+  ? createSocialRouter({
+      service: socialService,
+      accounts,
+      accountsBackend,
+      currentSession: (request) => currentSession(request),
+      sendJson,
+      sendError,
+      authOptions,
+      readJson,
+      rateLimit,
+    })
+  : null;
 
 // Restrict executable content while keeping the app's offline workers, local
 // model downloads, browser-generated videos and Arena's embedded preview usable.
@@ -786,6 +819,8 @@ function health() {
     linkReading: true,
     accounts: accountsBackend !== "unavailable",
     accountsBackend,
+    social: socialStore ? socialStore.backend : "unavailable",
+    games: ["chess", "quiz", "math", "word"],
     offlineReady: true,
     localAI: {
       runtime: "webllm",
@@ -869,7 +904,8 @@ const server = http.createServer(async (request, response) => {
     return;
   }
   const unsafeApiRequest = apiPath.startsWith("/api/") && !["GET", "HEAD"].includes(request.method);
-  const accountMutation = apiPath.startsWith("/api/auth/") || apiPath === "/api/progress";
+  const socialPath = apiPath.startsWith("/api/social/") || apiPath.startsWith("/api/games/");
+  const accountMutation = apiPath.startsWith("/api/auth/") || apiPath === "/api/progress" || socialPath;
   if (unsafeApiRequest && (!isSameOriginRequest(request) || (accountMutation && !csrfAllowed(request)))) {
     sendError(response, 403, "Security check failed. Refresh the page and try again.", authOptions(request));
     return;
@@ -914,6 +950,14 @@ const server = http.createServer(async (request, response) => {
       await handleProgress(request, response);
       return;
     }
+    if (socialPath) {
+      if (socialRouter) {
+        await socialRouter({ request, response, apiPath, url });
+        return;
+      }
+      sendError(response, 503, "Friends, chat and games are temporarily unavailable.", authOptions(request));
+      return;
+    }
     if (apiPath === "/api/ai" && request.method === "POST") {
       await handleAi(request, response);
       return;
@@ -936,6 +980,10 @@ const server = http.createServer(async (request, response) => {
     }
     await serveStatic(request, response, url.pathname);
   } catch (error) {
+    if (error instanceof SocialError && !response.headersSent) {
+      sendError(response, error.status || 400, error.message, authOptions(request));
+      return;
+    }
     if (error instanceof RequestBodyError && !response.headersSent) {
       sendError(response, error.status, error.message, authOptions(request));
       return;
@@ -957,4 +1005,5 @@ server.listen(PORT, HOST, () => {
   console.log(
     `Student accounts: ${accountsBackend === "supabase" ? "Supabase Auth + persistent sessions" : accountsBackend === "local" ? "local JSON store (scrypt-hashed)" : "unavailable — check Supabase configuration"}`,
   );
+  console.log(`Social layer: ${socialStore ? `friends, chat and 4 games (${socialStore.backend} store)` : "unavailable"}`);
 });

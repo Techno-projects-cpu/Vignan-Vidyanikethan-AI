@@ -107,6 +107,10 @@ import {
   toggleSources,
 } from "./premium-ui.js?v=15";
 import { initMotion, revealVisible } from "./motion.js?v=15";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=15";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=15";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=15";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=15";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -117,6 +121,9 @@ const VIEW_META = {
   quiz: { kicker: "view.quiz.kicker", title: "view.quiz.title", subtitle: "view.quiz.subtitle" },
   flashcards: { kicker: "view.flashcards.kicker", title: "view.flashcards.title", subtitle: "view.flashcards.subtitle" },
   progress: { kicker: "view.progress.kicker", title: "view.progress.title", subtitle: "view.progress.subtitle" },
+  friends: { kicker: "view.friends.kicker", title: "view.friends.title", subtitle: "view.friends.subtitle" },
+  chat: { kicker: "view.chat.kicker", title: "view.chat.title", subtitle: "view.chat.subtitle" },
+  play: { kicker: "view.play.kicker", title: "view.play.title", subtitle: "view.play.subtitle" },
   settings: { kicker: "view.settings.kicker", title: "view.settings.title", subtitle: "view.settings.subtitle" },
 };
 
@@ -221,6 +228,7 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
       onAi: (providerId) => setActiveAI(providerId),
     });
     initMotion();
+    initSocialScreens();
     const requestedView = new URL(location.href).searchParams.get("view");
     setView(VIEW_META[requestedView] ? requestedView : "ask", { skipHistory: true });
     registerServiceWorker();
@@ -301,6 +309,12 @@ function setView(view, { skipHistory = false } = {}) {
   if (view === "settings") renderSettings();
   if (view === "quiz") renderQuizState();
   if (view === "flashcards") renderFlashcards();
+  if (view === "friends" || view === "chat" || view === "play") {
+    if (state.account) syncSocial().catch(() => {});
+    if (view === "friends") renderSocialFriends();
+    if (view === "chat") renderSocialChat();
+    if (view === "play") renderSocialPlay();
+  }
   $("#main").scrollTop = 0;
   setPremiumView(view);
   requestAnimationFrame(() => revealVisible());
@@ -432,6 +446,14 @@ async function refreshAuth() {
 /** Reflect a successful entry-screen login without reloading the application. */
 export async function setAccountSession(user = null, { guest = false } = {}) {
   state.account = user || null;
+  if (user) {
+    startSocialPolling();
+    syncSocial().catch(() => {});
+  } else {
+    stopSocialPolling();
+    resetSocial();
+  }
+  updateSocialBadges();
   state.authAvailable = Boolean(user) || Boolean(state.serverHealth.ok && state.serverHealth.accounts);
   state.serverLeaderboard = [];
   if (user) {
@@ -442,6 +464,37 @@ export async function setAccountSession(user = null, { guest = false } = {}) {
   renderAccount();
   renderProgress();
   if (state.authAvailable) void refreshLeaderboard();
+}
+
+/** Friends, chat and games share the account session and boot lazily. */
+function initSocialScreens() {
+  initFriendsUI();
+  initSocialChatUI();
+  initSocialPlayUI();
+  if (state.account) {
+    startSocialPolling();
+    syncSocial().catch(() => {});
+  }
+  window.addEventListener("vignan:view", (event) => {
+    const view = event.detail?.view;
+    if (view && VIEW_META[view]) setView(view);
+  });
+  window.addEventListener("vignan:friends-tab", (event) => {
+    focusFriendsTab(event.detail?.tab || "friends");
+    setView("friends");
+  });
+  window.addEventListener("vignan:social-refresh", () => {
+    if (state.account) syncSocial().catch(() => {});
+  });
+  $("#social-bell")?.addEventListener("click", () => {
+    if (!state.account) {
+      window.dispatchEvent(new CustomEvent("vignan:auth-required", { detail: { mode: "login" } }));
+      return;
+    }
+    focusFriendsTab("alerts");
+    setView("friends");
+    syncSocial().catch(() => {});
+  });
 }
 
 function openAccountModal(mode = "login") {

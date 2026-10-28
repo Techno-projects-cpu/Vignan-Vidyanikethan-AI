@@ -41,6 +41,9 @@ export function setPremiumView(view = "ask") {
     quiz: "Quiz",
     flashcards: "Flashcards",
     progress: "Progress",
+    friends: "Friends",
+    chat: "Chat",
+    play: "Play",
     settings: "Settings",
   };
   const label = labels[view] || labels.ask;

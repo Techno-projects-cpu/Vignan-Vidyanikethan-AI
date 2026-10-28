@@ -1464,11 +1464,17 @@ body.premium-ui .studio-privacy { margin: 12px 0 0; color: var(--p-muted); font-
 body.premium-ui #view-library > .section-toolbar,
 body.premium-ui #view-quiz > .section-toolbar,
 body.premium-ui #view-flashcards > .section-toolbar,
+body.premium-ui #view-friends > .section-toolbar,
+body.premium-ui #view-chat > .section-toolbar,
+body.premium-ui #view-play > .section-toolbar,
 body.premium-ui #view-progress > .section-toolbar { display: flex !important; align-items: center; gap: 14px; margin: 0 0 20px; }
 body.premium-ui .section-toolbar .section-copy h2 { margin: 0; font-size: clamp(24px, 3vw, 34px); letter-spacing: -.045em; line-height: 1.15; }
 body.premium-ui #view-library > .section-toolbar .section-copy p,
 body.premium-ui #view-quiz > .section-toolbar .section-copy p,
 body.premium-ui #view-flashcards > .section-toolbar .section-copy p,
+body.premium-ui #view-friends > .section-toolbar .section-copy p,
+body.premium-ui #view-chat > .section-toolbar .section-copy p,
+body.premium-ui #view-play > .section-toolbar .section-copy p,
 body.premium-ui #view-progress > .section-toolbar .section-copy p { display: block !important; margin: 6px 0 0; color: var(--p-muted); font-size: 12px; }
 body.premium-ui .quiz-header #quiz-progress-label { display: block !important; margin-bottom: 5px; color: var(--p-muted); }
 body.premium-ui .option { min-height: 48px; }
@@ -1488,6 +1494,9 @@ body.premium-ui .main { overscroll-behavior-y: contain; }
   body.premium-ui #view-library > .section-toolbar,
   body.premium-ui #view-quiz > .section-toolbar,
   body.premium-ui #view-flashcards > .section-toolbar,
+  body.premium-ui #view-friends > .section-toolbar,
+  body.premium-ui #view-chat > .section-toolbar,
+  body.premium-ui #view-play > .section-toolbar,
   body.premium-ui #view-progress > .section-toolbar { align-items: flex-start; margin-bottom: 16px; }
   body.premium-ui .quiz-results { margin-top: 0; }
   body.premium-ui .result-hero { padding: 22px 18px; }
