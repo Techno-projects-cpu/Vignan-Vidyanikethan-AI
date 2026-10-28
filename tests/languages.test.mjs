@@ -106,3 +106,28 @@ test("connected models are told to answer in the chosen language, including long
   assert.match(outside.at(-1).content, /\[W1\]/);
   assert.ok(Object.keys(LANGUAGES).length >= 30);
 });
+
+test("short conversational replies and the safety message exist in every language", async () => {
+  const { LOCALE_REPLIES } = await import("../js/replies.js");
+  const { conversationReply, safetyReply, casualReply, creatorAnswer } = await import("../js/conversation.js");
+  for (const code of LANGUAGE_CODES) {
+    const entry = LOCALE_REPLIES[code];
+    assert.ok(entry, `${code} has local replies`);
+    for (const key of ["greeting", "thanks", "identity", "safety", "mood"]) {
+      // CJK and Thai lines are short but complete.
+      assert.ok(entry[key] && entry[key].trim().length >= 6, `${code}.${key}`);
+    }
+    const greeting = conversationReply("hello", code);
+    assert.ok(greeting && greeting !== conversationReply("hello", "en") || code === "en", `${code} greeting is localised`);
+    const safety = safetyReply("I want to die", code);
+    // Urdu uses ۔, Thai has no full stop; every other script ends with a stop.
+    if (code === "th") assert.ok(safety.length > 60);
+    else assert.match(safety, /[.!?।؟۔。]$/, `${code} safety message is a sentence`);
+    assert.ok(safety.length > 60, `${code} safety message is complete`);
+    assert.ok(casualReply("I feel lonely", code, 0).length > 20, `${code} supportive reply`);
+    assert.ok(conversationReply("who are you", code).includes(creatorAnswer(code).slice(0, 20)) || code !== "en", `${code} identity reply`);
+  }
+  assert.notEqual(safetyReply("I want to die", "ja"), safetyReply("I want to die", "en"));
+  assert.notEqual(conversationReply("hello", "fr"), conversationReply("hello", "en"));
+  assert.equal(safetyReply("what is photosynthesis", "ja"), "", "non-safety questions are untouched");
+});

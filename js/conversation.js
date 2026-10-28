@@ -1,7 +1,14 @@
 /** Small, bounded conversational helpers for Bolt's extractive engine. */
 import { tokenize } from "./text.js?v=16";
+import { LOCALE_REPLIES } from "./replies.js?v=16";
 
 export const CREATOR_ANSWER = "I was made by a student of Vignan Vidyanikethan English Medium High School for the INSPIRE-MANAK science fair. I use existing AI tools and textbook search; I am not a newly trained model.";
+
+/** The localised line for a short conversational reply, or "" if missing. */
+function localised(language, key) {
+  const entry = LOCALE_REPLIES[language];
+  return entry?.[key] ? entry : null;
+}
 
 export function creatorAnswer(language = "en") {
   if (language === "te") return "నన్ను Vignan Vidyanikethan English Medium High School విద్యార్థి INSPIRE-MANAK సైన్స్ ఫెయిర్ కోసం రూపొందించారు. నేను ఇప్పటికే ఉన్న AI సాధనాలు మరియు పాఠ్యపుస్తకాల శోధనను ఉపయోగిస్తాను; కొత్తగా శిక్షణ పొందిన మోడల్‌ను కాదు.";
@@ -12,23 +19,59 @@ export function creatorAnswer(language = "en") {
 /** Handle a few everyday conversational turns locally instead of searching them. */
 export function conversationReply(query = "", language = "en") {
   const text = String(query).toLowerCase().trim().replace(/[!.?।]+$/g, "").trim();
-  if (/^(?:hi+|hello+|hey+|good morning|good afternoon|good evening|नमस्ते|नमस्कार|हैलो|హాయ్|హలో|నమస్కారం)$/u.test(text)) {
-    if (language === "te") return "నమస్కారం! మీ పుస్తకాల గురించి అడగండి, పబ్లిక్ లింక్ ఇవ్వండి లేదా క్విజ్ అడగండి.";
-    if (language === "hi") return "नमस्ते! अपनी किताबों के बारे में पूछें, सार्वजनिक लिंक दें या क्विज़ बनाने को कहें।";
-    return "Hi! Ask me about your books, paste a public link, or ask a follow-up question. I’ll show you where the information came from.";
+  const greetingPattern = /^(?:hi+|hello+|hey+|good morning|good afternoon|good evening|नमस्ते|नमस्कार|हैलो|హాయ్|హలో|నమస్కారం|নমস্কার|নমস্কাৰ|ਸਤ ਸ੍ਰੀ ਅਕਾਲ|നമസ്കാരം|ನಮಸ್ಕಾರ|નમસ્તે|வணக்கம்|ନମସ୍କାର|नमस्ते|سلام|مرحبًا|مرحبا|bonjour|salut|hallo|hola|olá|ciao|hoi|cześć|привет|привіт|merhaba|你好|こんにちは|안녕하세요|halo|chào|สวัสดี|habari)$/iu;
+  if (greetingPattern.test(text)) {
+    const entry = localised(language, "greeting");
+    if (entry) return entry.greeting;
   }
-  if (/^(?:thanks|thank you|thank you so much|thank u|thx|धन्यवाद|शुक्रिया|ధన్యవాదాలు)$/u.test(text)) {
-    if (language === "te") return "సంతోషం! సిద్ధమైనప్పుడు మరో ప్రశ్న అడగండి.";
-    if (language === "hi") return "खुशी हुई! तैयार हों तो अगला सवाल पूछें।";
-    return "You’re welcome! Ask a follow-up whenever you’re ready.";
+  const thanksPattern = /^(?:thanks|thank you|thank you so much|thank u|thx|धन्यवाद|शुक्रिया|ధన్యవాదాలు|ধন্যবাদ|ধন্যবাদ|ਸ਼ੁਕਰੀਆ|നന്ദി|ಧನ್ಯವಾದ|આભાર|நன்றி|ଧନ୍ୟବାଦ|شکریہ|شكرا|merci|danke|gracias|obrigado|obrigada|grazie|bedankt|dziękuję|спасибо|дякую|teşekkürler|谢谢|ありがとう|감사합니다|terima kasih|cảm ơn|ขอบคุณ|asante)$/iu;
+  if (thanksPattern.test(text)) {
+    const entry = localised(language, "thanks");
+    if (entry) return entry.thanks;
   }
   if (/^(?:who are you|what are you|what is your name|what's your name|आप कौन हैं|तुम कौन हो|तुम्हारा नाम क्या है|నువ్వు ఎవరు|మీ పేరు ఏమిటి)$/u.test(text)) {
-    if (language === "te") return `నేను Bolt, పుస్తకాలలో మూలాలను చూపించే స్టడీ అసిస్టెంట్‌ని. ${creatorAnswer(language)}`;
-    if (language === "hi") return `मैं Bolt हूँ, किताबों के स्रोत दिखाने वाला स्टडी असिस्टेंट। ${creatorAnswer(language)}`;
-    return `I’m Bolt, the built-in study assistant. I find and cite excerpts; optional connected AI models can provide fuller explanations. ${CREATOR_ANSWER}`;
+    const entry = localised(language, "identity");
+    if (entry) return `${entry.identity} ${creatorAnswer(language)}`;
   }
   return "";
 }
+
+/** Short "let's get back to studying" lines, used after a friendly break. */
+const BACK_TO_STUDY = {
+  en: "That was a nice little break. Let’s return to studying: name a chapter or ask me for a quiz.",
+  hi: "छोटा ब्रेक अच्छा रहा! अब पढ़ाई पर लौटें: कोई अध्याय बताएँ या क्विज़ माँगें।",
+  te: "చిన్న విరామం బాగుంది! ఇప్పుడు చదువుపై దృష్టి పెడదాం: ఒక అధ్యాయం చెప్పండి లేదా క్విజ్ అడగండి.",
+  bn: "ছোট্ট বিরতি ভালো হলো! এবার পড়ায় ফিরি: একটি অধ্যায় বলো বা কুইজ চাও।",
+  mr: "छोटा विरंगुळा झाला! आता अभ्यासाकडे परतू: एखादा धडा सांग किंवा क्विझ माग.",
+  ta: "சிறிய இடைவேளை நன்றாக இருந்தது! இப்போது படிப்புக்குத் திரும்புவோம்: ஒரு பாடத்தைச் சொல்லுங்கள் அல்லது வினாடி வினா கேளுங்கள்.",
+  gu: "થોડો વિરામ સરસ રહ્યો! હવે ભણવા પર પાછા ફરીએ: કોઈ પ્રકરણ કહો અથવા ક્વિઝ માગો.",
+  kn: "ಸಣ್ಣ ವಿರಾಮ ಚೆನ್ನಾಗಿತ್ತು! ಈಗ ಓದಿಗೆ ಹಿಂತಿರುಗೋಣ: ಒಂದು ಪಾಠ ಹೇಳಿ ಅಥವಾ ರಸಪ್ರಶ್ನೆ ಕೇಳಿ.",
+  ml: "ചെറിയ വിശ്രമം നന്നായി! ഇനി പഠനത്തിലേക്ക് മടങ്ങാം: ഒരു പാഠം പറയൂ അല്ലെങ്കിൽ ക്വിസ് ആവശ്യപ്പെടൂ.",
+  pa: "ਥੋੜ੍ਹਾ ਵਿਰਾਮ ਚੰਗਾ ਰਿਹਾ! ਹੁਣ ਪੜ੍ਹਾਈ ਵੱਲ ਮੁੜੀਏ: ਕੋਈ ਅਧਿਆਇ ਦੱਸੋ ਜਾਂ ਕੁਇਜ਼ ਮੰਗੋ।",
+  or: "ଛୋଟ ବିରତି ଭଲ ରହିଲା! ଏବେ ପାଠ ଆଡ଼କୁ ଫେରିବା: ଏକ ଅଧ୍ୟାୟ କୁହନ୍ତୁ କିମ୍ବା କୁଇଜ୍ ମାଗନ୍ତୁ।",
+  as: "সৰু জিৰণি ভাল লাগিল! এতিয়া পঢ়াত ঘূৰি যাওঁ: এটা অধ্যায় কোৱা বা কুইজ বিচৰা।",
+  ur: "چھوٹا وقفہ اچھا رہا! اب پڑھائی کی طرف لوٹیں: کوئی باب بتائیں یا کوئز مانگیں۔",
+  ne: "सानो विश्राम राम्रो भयो! अब पढाइमा फर्कौं: एउटा पाठ भन्नुहोस् वा क्विज माग्नुहोस्।",
+  ar: "كان الاستراحة القصيرة جيدة! لنعد إلى الدراسة: اذكر فصلًا أو اطلب اختبارًا.",
+  fa: "استراحت کوتاه خوب بود! برگردیم به درس: یک فصل بگو یا آزمون بخواه.",
+  fr: "Cette petite pause était agréable ! Revenons au travail : nommez un chapitre ou demandez un quiz.",
+  de: "Die kleine Pause war schön! Zurück zum Lernen: Nenne ein Kapitel oder verlange ein Quiz.",
+  es: "¡Ese descanso corto estuvo bien! Volvamos al estudio: nombra un capítulo o pide un cuestionario.",
+  pt: "Essa pausa curta foi boa! Voltemos aos estudos: diga um capítulo ou peça um questionário.",
+  it: "È stata una bella pausa! Torniamo allo studio: indica un capitolo o chiedi un quiz.",
+  nl: "Dat was een leuke korte pauze! Terug naar studeren: noem een hoofdstuk of vraag een quiz.",
+  pl: "Miła krótka przerwa! Wracajmy do nauki: podaj rozdział albo poproś o quiz.",
+  ru: "Хороший был перерыв! Возвращаемся к учёбе: назовите главу или попросите тест.",
+  uk: "Гарна була перерва! Повертаємося до навчання: назвіть розділ або попросіть тест.",
+  tr: "Güzel bir kısa mola oldu! Derse dönelim: bir bölüm söyle ya da test iste.",
+  zh: "短暂休息不错！回到学习吧：说出一个章节，或让我出题。",
+  ja: "いい息抜きでした！勉強に戻りましょう：章を指定するか、クイズを頼んでください。",
+  ko: "짧은 휴식이 좋았어요! 다시 공부로 돌아가요: 단원을 말하거나 퀴즈를 요청하세요.",
+  id: "Istirahat singkatnya menyenangkan! Kembali belajar: sebutkan bab atau minta kuis.",
+  vi: "Nghỉ một chút thật dễ chịu! Quay lại học nhé: nêu một chương hoặc yêu cầu trắc nghiệm.",
+  th: "พักสั้น ๆ ดีนะ! กลับมาเรียนกันต่อ: บอกบทเรียนหรือขอแบบทดสอบ",
+  sw: "Mapumziko hayo mafupi yalifurahisha! Turudi kusoma: taja sura au omba jaribio.",
+};
 
 /** Recognise questions about this assistant, not unrelated inventors in a book. */
 export function asksAboutCreator(query = "") {
@@ -48,9 +91,8 @@ export function safetyReply(query = "", language = "en") {
   const text = String(query).toLowerCase();
   const urgent = /\b(?:suicid(?:e|al)|kill myself|end my life|want to die|hurt myself|self[ -]?harm|someone (?:is )?(?:hurting|abusing) me|being abused|not safe at home)\b|(?:आत्महत्या|खुद को मार|मरना चाहता|मरना चाहती|खुद को नुकसान|मेरे साथ दुर्व्यवहार)|(?:ఆత్మహత్య|నన్ను నేను చంపు|చనిపోవాలనుకుంటున్న|నన్ను కొడుతున్నారు)/u.test(text);
   if (!urgent) return "";
-  if (language === "te") return "మీరు ఇలా అనుభవిస్తున్నందుకు బాధగా ఉంది. మీరు ఒంటరిగా దీన్ని ఎదుర్కోవాల్సిన అవసరం లేదు. వెంటనే నమ్మకమైన పెద్దవారికి, ఉపాధ్యాయుడికి లేదా కుటుంబ సభ్యుడికి చెప్పండి. తక్షణ ప్రమాదం ఉంటే స్థానిక అత్యవసర సేవలకు కాల్ చేయండి లేదా సురక్షితమైన చోటికి వెళ్లండి. నేను అత్యవసర సహాయానికి ప్రత్యామ్నాయం కాదు.";
-  if (language === "hi") return "मुझे दुख है कि आप ऐसा महसूस कर रहे हैं। आपको इसका सामना अकेले नहीं करना है। अभी किसी भरोसेमंद वयस्क, शिक्षक या परिवार के सदस्य को बताइए। तुरंत खतरा हो तो स्थानीय आपातकालीन सेवाओं को कॉल करें या सुरक्षित जगह जाएँ। मैं आपातकालीन सहायता का विकल्प नहीं हूँ।";
-  return "I’m sorry you’re dealing with this. You don’t have to face it alone. Please tell a trusted adult, teacher or family member now. If you may be in immediate danger, call local emergency services or move to a safe place. I’m not a substitute for emergency support.";
+  return localised(language, "safety")?.safety
+    || "I’m sorry you’re dealing with this. You don’t have to face it alone. Please tell a trusted adult, teacher or family member now. If you may be in immediate danger, call local emergency services or move to a safe place. I’m not a substitute for emergency support.";
 }
 
 /** Count consecutive friendly turns; study answers reset the small break. */
@@ -73,23 +115,24 @@ export function casualReply(query = "", language = "en", turns = 0) {
     : /\b(?:how are you|how's it going|how was your day|let'?s chat|talk to me|be my friend|your friend|what do you like|i (?:really )?(?:like|love|enjoy|play)|my favou?rite|talk about (?:music|movies|games|sports|cricket|football|hobbies))\b|(?:कैसे हो|बात करो|दोस्त बन|मुझे पसंद|मेरा पसंदीदा)|(?:ఎలా ఉన్నావు|మాట్లాడు|నా స్నేహితుడు|నాకు ఇష్టం)/u.test(text) ? "chat" : "";
   if (!kind) return "";
   if (kind === "mood") {
-    if (language === "te") return "అలా అనిపించడం కష్టంగా ఉండవచ్చు. కాసేపు విరామం తీసుకోండి; నమ్మకమైన వ్యక్తితో మాట్లాడడం కూడా సహాయపడవచ్చు. సిద్ధమైనప్పుడు ఒక చిన్న స్టడీ లక్ష్యం ఎంచుకుందాం.";
-    if (language === "hi") return "ऐसा महसूस करना मुश्किल हो सकता है। थोड़ा विराम लें; किसी भरोसेमंद व्यक्ति से बात करना भी मदद कर सकता है। तैयार हों तो पढ़ाई का छोटा लक्ष्य चुनें।";
-    return "That sounds difficult. A short break may help, and you can talk to someone you trust. When you’re ready, we can pick one small study goal together.";
+    return localised(language, "mood")?.mood
+      || "That sounds difficult. A short break may help, and you can talk to someone you trust. When you’re ready, we can pick one small study goal together.";
   }
   if (turns >= 3) {
-    if (language === "te") return "చిన్న విరామం బాగుంది! ఇప్పుడు చదువుపై దృష్టి పెడదాం: ఒక అధ్యాయం చెప్పండి లేదా క్విజ్ అడగండి.";
-    if (language === "hi") return "छोटा ब्रेक अच्छा रहा! अब पढ़ाई पर लौटें: कोई अध्याय बताएँ या क्विज़ माँगें।";
-    return "That was a nice little break. Let’s return to studying: name a chapter or ask me for a quiz.";
+    return localised(language, "identity")?.identity
+      ? `${localised(language, "identity").identity} — ${BACK_TO_STUDY[language] || "That was a nice little break. Let’s return to studying: name a chapter or ask me for a quiz."}`
+      : "That was a nice little break. Let’s return to studying: name a chapter or ask me for a quiz.";
   }
   if (kind === "joke") {
-    if (language === "te") return "ఒక చిన్న నవ్వు: గణిత పుస్తకం ఎందుకు బాధపడింది? దానికి చాలా సమస్యలు ఉన్నాయి! సిద్ధమైనప్పుడు చదువుకి తిరిగి వెళ్దాం.";
-    if (language === "hi") return "एक छोटा मज़ाक: गणित की किताब परेशान क्यों थी? उसके पास बहुत सारी समस्याएँ थीं! तैयार हों तो पढ़ाई पर लौटें।";
-    return "A little joke: Why was the maths book worried? It had too many problems! When you’re ready, we can return to your studies.";
+    // A pun does not translate well; the English joke is followed by a
+    // localised invitation to get back to studying.
+    const joke = "A little joke: why was the maths book worried? It had too many problems!";
+    return `${joke} — ${BACK_TO_STUDY[language] || "When you’re ready, we can return to your studies."}`;
   }
-  if (language === "te") return "మాట్లాడటం బాగుంది! నేను Bolt అనే స్టడీ అసిస్టెంట్‌ని. చిన్న విరామం తర్వాత మీకు నచ్చిన అంశంతో చదువు కొనసాగిద్దాం.";
-  if (language === "hi") return "आपसे बात करके अच्छा लगा! मैं Bolt, एक स्टडी असिस्टेंट हूँ। छोटे ब्रेक के बाद अपने पसंद के विषय से पढ़ाई जारी रखें।";
-  return "It’s nice to chat! I’m Bolt, a study assistant. We can take a short break and then get back to a topic you want to learn.";
+  const entry = localised(language, "identity");
+  return entry
+    ? `${entry.identity} — ${BACK_TO_STUDY[language] || "We can take a short break and then get back to a topic you want to learn."}`
+    : "It’s nice to chat! I’m Bolt, a study assistant. We can take a short break and then get back to a topic you want to learn.";
 }
 
 /** Only carry a previous topic forward for an actual reference or vague follow-up. */

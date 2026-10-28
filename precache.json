@@ -1,6 +1,6 @@
 {
   "version": 16,
-  "generatedAt": "2026-10-28T16:46:38.413Z",
+  "generatedAt": "2026-10-28T16:50:50.199Z",
   "urls": [
     "./",
     "./index.html",
@@ -56,6 +56,7 @@
     "./js/providers.js",
     "./js/quiz.js",
     "./js/reader.js",
+    "./js/replies.js",
     "./js/retrieval.js",
     "./js/settings.js",
     "./js/social.js",
