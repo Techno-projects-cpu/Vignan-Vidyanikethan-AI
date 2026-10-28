@@ -11,8 +11,8 @@ const app = read("js/app.js");
 const i18n = read("js/i18n.js");
 
 test("minimal UI keeps one compact top navigation and a short Ask banner", () => {
-  assert.match(html, /<body class="minimal-ui">/);
-  const nav = html.match(/<nav class="top-nav"[\s\S]*?<\/nav>/);
+  assert.match(html, /<body class="minimal-ui premium-ui">/);
+  const nav = html.match(/<nav class="top-nav[^"]*"[\s\S]*?<\/nav>/);
   assert.ok(nav, "top navigation exists");
   assert.equal((nav[0].match(/data-view="/g) || []).length, 6);
 

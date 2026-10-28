@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0f1115">
+  <meta name="theme-color" content="#080808">
   <meta name="description" content="Vignan Vidyanikethan AI — textbook-grounded answers, custom quizzes, flashcards and offline study tools built by students.">
   <title>Vignan Vidyanikethan AI — learn from your own textbooks</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles-premium.css">
 </head>
-<body class="minimal-ui">
+<body class="minimal-ui premium-ui">
   <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8.6 8.6 0 0 1-3.6-.8L4 20l1.3-4A7.5 7.5 0 1 1 20 11.5Z"/><path d="M9 11h6M9 14h4"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5Z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H19v5H6.5A2.5 2.5 0 0 1 4 18.5Z"/><path d="M8 7h7M8 10h5"/></symbol>
@@ -62,22 +63,36 @@
     </aside>
 
     <div class="workspace">
-      <header class="topbar">
-        <div class="topbar-heading">
+      <header class="topbar premium-topbar">
+        <div class="premium-brand">
           <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home">V</a>
-          <div>
-            <div class="kicker" id="view-kicker">GROUND ANSWERS</div>
-            <h1 id="view-title">Ask your textbooks</h1>
-            <p id="view-subtitle">Every answer points back to a page you can open.</p>
-          </div>
+          <span class="premium-wordmark">VIGNAN <span>AI</span></span>
         </div>
-        <div class="topbar-actions">
-          <span class="chip" id="offline-chip"><span class="chip-dot"></span><span data-i18n="app.offlineReady">Offline ready</span></span>
-          <button type="button" class="icon-button" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme"><svg><use href="#i-moon"></use></svg></button>
+        <div class="premium-view-chip" aria-live="polite"><span class="premium-view-dot"></span><span id="premium-view-label">Ask</span></div>
+        <div class="premium-topbar-actions">
+          <div class="ai-chooser" id="ai-chooser">
+            <button type="button" class="ai-chooser-trigger" id="premium-ai-trigger" aria-expanded="false" aria-controls="ai-chooser-menu">
+              <span class="ai-chooser-dot"></span>
+              <span class="ai-chooser-copy"><strong id="premium-ai-name">Bolt</strong><small id="premium-ai-specialty">Instant offline textbook lookup</small></span>
+              <span class="ai-chooser-arrow" aria-hidden="true">⌄</span>
+            </button>
+            <div class="ai-chooser-menu" id="ai-chooser-menu" hidden>
+              <div class="ai-chooser-head"><span>Choose an AI</span><button type="button" id="premium-close-ai" aria-label="Close AI chooser">×</button></div>
+              <p class="ai-chooser-note">Nicknames hide provider names. Each specialty sits under the name.</p>
+            </div>
+          </div>
+          <button type="button" class="premium-menu-button" id="command-menu-button" aria-haspopup="dialog" aria-controls="command-overlay">Menu <kbd>⌘K</kbd></button>
+          <span class="chip premium-hidden" id="offline-chip"><span class="chip-dot"></span><span data-i18n="app.offlineReady">Offline ready</span></span>
+          <button type="button" class="icon-button premium-icon-button" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme"><svg><use href="#i-moon"></use></svg></button>
           <button type="button" class="profile-chip account-chip" id="profile-button" title="Account"><span id="profile-initial">S</span><span class="account-dot" id="account-dot"></span></button>
           <span class="account-name hidden" id="account-name"></span>
         </div>
-        <nav class="top-nav" aria-label="Vignan Vidyanikethan AI sections">
+        <div class="premium-view-meta premium-sr-only" aria-live="polite">
+          <span id="view-kicker">GROUND ANSWERS</span>
+          <h1 id="view-title">Ask your textbooks</h1>
+          <p id="view-subtitle">Every answer points back to a page you can open.</p>
+        </div>
+        <nav class="top-nav premium-hidden-nav" aria-hidden="true">
           <button type="button" class="nav-item active" data-view="ask" data-i18n="nav.ask">Ask</button>
           <button type="button" class="nav-item" data-view="library" data-i18n="nav.library">Library</button>
           <button type="button" class="nav-item" data-view="quiz" data-i18n="nav.quiz">Quiz</button>
@@ -90,6 +105,21 @@
       <main id="main" class="main">
         <!-- ASK -->
         <section class="view active" id="view-ask" data-panel="ask">
+          <section class="premium-hero" id="premium-hero" data-reveal>
+            <div class="premium-hero-eyebrow"><span class="premium-hero-dot"></span> BUILT-IN INSTANT AI</div>
+            <h2>Ask your books.</h2>
+            <p>Upload a textbook, ask anything, and get page-cited answers. Bolt is already inside — no download, no key.</p>
+            <div class="premium-hero-actions">
+              <button type="button" class="premium-button primary" data-premium-action="upload-pdf">Upload PDF <span aria-hidden="true">↗</span></button>
+              <button type="button" class="premium-button" data-premium-action="instant-ai">Use Bolt</button>
+              <button type="button" class="premium-button quiet" data-premium-action="menu">Explore <kbd>⌘K</kbd></button>
+            </div>
+            <div class="premium-hero-meta">
+              <span>Private by default</span>
+              <span>Answers with page numbers</span>
+              <button type="button" id="premium-sources-button" data-premium-action="sources" aria-expanded="false">Sources</button>
+            </div>
+          </section>
           <div class="ask-layout">
             <div class="chat-column card">
               <div class="connect-banner" id="connect-banner">
@@ -250,10 +280,21 @@
 
         <!-- SETTINGS -->
         <section class="view" id="view-settings" data-panel="settings">
-          <div class="section-toolbar">
+          <div class="section-toolbar premium-settings-toolbar">
             <div class="section-copy"><span class="eyebrow" data-i18n="view.settings.kicker">CONTROL</span><h2 data-i18n="view.settings.title">Settings</h2><p data-i18n="view.settings.subtitle">Choose a local model, free keys, fallback and privacy options.</p></div>
             <button type="button" class="button ghost small" id="toggle-advanced-settings" data-i18n="settings.advanced" aria-expanded="false" aria-controls="advanced-settings">Advanced settings</button>
           </div>
+          <section class="card premium-settings-launcher" id="premium-settings-launcher" data-reveal>
+            <div class="premium-settings-kicker">CONTROL ROOM</div>
+            <h2>Only open what you need.</h2>
+            <p>AI engines, keys, web search, privacy and appearance stay behind the menu until you ask for them.</p>
+            <div class="premium-settings-actions">
+              <button type="button" class="premium-button primary" data-premium-action="advanced">Advanced settings</button>
+              <button type="button" class="premium-button" data-premium-action="keys">Student keys</button>
+              <button type="button" class="premium-button" data-premium-action="deep-ai">Local model</button>
+              <button type="button" class="premium-button quiet" data-premium-action="theme">Invert theme</button>
+            </div>
+          </section>
           <div class="settings-grid">
             <section class="card settings-card span-2 local-ai-card" id="local-ai-panel">
               <div class="panel-head">
@@ -372,6 +413,59 @@
       <button type="button" class="mobile-nav-item" data-view="progress"><svg><use href="#i-chart"></use></svg><span data-i18n="nav.progress">Progress</span></button>
       <button type="button" class="mobile-nav-item" data-view="settings"><svg><use href="#i-settings"></use></svg><span data-i18n="nav.settings">Settings</span></button>
     </nav>
+  </div>
+
+  <div class="command-overlay" id="command-overlay" hidden aria-hidden="true">
+    <div class="command-panel" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <div class="command-head">
+        <span class="command-mark">V</span>
+        <div class="command-title-wrap">
+          <strong id="command-title">Everything, in one menu.</strong>
+          <span>Search pages, actions and AI nicknames.</span>
+        </div>
+        <button type="button" id="command-close" aria-label="Close menu">×</button>
+      </div>
+      <label class="command-search-wrap">
+        <span class="command-search-icon" aria-hidden="true">⌕</span>
+        <input type="search" id="command-search" placeholder="Search…" autocomplete="off" spellcheck="false" aria-label="Search commands">
+        <kbd>ESC</kbd>
+      </label>
+      <div class="command-body" id="command-results">
+        <section class="command-group" data-reveal>
+          <div class="command-group-title">Navigate</div>
+          <button type="button" class="command-item" data-view="ask" data-keywords="ask question chat answer"><span class="command-index">01</span><span class="command-copy"><strong>Ask</strong><small>One question, cited answers</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-view="library" data-keywords="library books pdf textbook upload"><span class="command-index">02</span><span class="command-copy"><strong>Library</strong><small>Upload PDFs and notes</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-view="quiz" data-keywords="quiz practice test questions"><span class="command-index">03</span><span class="command-copy"><strong>Quiz</strong><small>Custom questions and instant grading</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-view="flashcards" data-keywords="flashcards cards revision memory"><span class="command-index">04</span><span class="command-copy"><strong>Flashcards</strong><small>Spaced repetition</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-view="progress" data-keywords="progress streaks leaderboard account"><span class="command-index">05</span><span class="command-copy"><strong>Progress</strong><small>Streaks, XP and leaderboard</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-view="settings" data-keywords="settings preferences control"><span class="command-index">06</span><span class="command-copy"><strong>Settings</strong><small>Advanced controls</small></span><span class="command-arrow">↗</span></button>
+        </section>
+        <section class="command-group" data-reveal>
+          <div class="command-group-title">Quick actions</div>
+          <button type="button" class="command-item" data-action="upload-pdf" data-keywords="upload pdf textbook book file"><span class="command-index">↥</span><span class="command-copy"><strong>Upload a textbook PDF</strong><small>Add pages from this device</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-action="instant-ai" data-keywords="bolt instant fast ai offline textbook"><span class="command-index">⚡</span><span class="command-copy"><strong>Use Bolt</strong><small>Built-in super-fast cited answers</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-action="deep-ai" data-keywords="nova local webllm private model download"><span class="command-index">◇</span><span class="command-copy"><strong>Set up Nova</strong><small>Private local model, one download</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-action="quiz" data-keywords="make quiz generate questions"><span class="command-index">✓</span><span class="command-copy"><strong>Generate a quiz</strong><small>From a chapter or topic</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-action="flashcards" data-keywords="make flashcards deck"><span class="command-index">▤</span><span class="command-copy"><strong>Make flashcards</strong><small>Review one card at a time</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-action="sources" data-keywords="sources citations pages verification"><span class="command-index">[]</span><span class="command-copy"><strong>Sources drawer</strong><small>Show or hide cited pages</small></span><span class="command-arrow">↗</span></button>
+        </section>
+        <section class="command-group" data-reveal>
+          <div class="command-group-title">AI nicknames</div>
+          <p class="command-note">Real provider names are hidden. Choose by specialty.</p>
+          <div class="command-ai-list" id="command-ai-list"></div>
+        </section>
+        <section class="command-group" data-reveal>
+          <div class="command-group-title">Settings &amp; account</div>
+          <button type="button" class="command-item" data-action="advanced" data-keywords="advanced settings model router web privacy"><span class="command-index">⚙</span><span class="command-copy"><strong>Advanced settings</strong><small>Reveal model, key and privacy panels</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-action="keys" data-keywords="keys api byok student own"><span class="command-index">⌘</span><span class="command-copy"><strong>Student keys</strong><small>Optional private fallback keys</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-action="theme" data-keywords="theme dark light invert"><span class="command-index">◐</span><span class="command-copy"><strong>Invert theme</strong><small>Switch black ↔ white</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-action="export" data-keywords="export data backup json privacy"><span class="command-index">↧</span><span class="command-copy"><strong>Export local data</strong><small>Keys stay out of the export</small></span><span class="command-arrow">↗</span></button>
+          <button type="button" class="command-item" data-action="account" data-keywords="account login register profile nickname"><span class="command-index">○</span><span class="command-copy"><strong>Account</strong><small>Nickname-only public profile</small></span><span class="command-arrow">↗</span></button>
+        </section>
+        <div class="command-empty" id="command-empty" hidden>No matches. Try “PDF”, “quiz”, “Bolt” or “theme”.</div>
+      </div>
+      <div class="command-foot"><span><kbd>↑</kbd><kbd>↓</kbd> browse</span><span><kbd>↵</kbd> open</span><span><kbd>⌘K</kbd> toggle</span></div>
+    </div>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

@@ -11,6 +11,8 @@ This repository is now a clean, root-level Vignan Vidyanikethan AI app. The old 
 - Migration `20261027150656_create_vignan_ai_schema` applied: profiles, sessions, RLS, triggers, progress and leaderboard helpers.
 - Supabase Auth email signup is enabled and `mailer_autoconfirm` is on, so synthetic student emails do not need real delivery.
 - `render.yaml`, `.env.example`, `supabase/migrations/`, and an optional `supabase/functions/vignan-ai/` Edge Function are included.
+- The premium monochrome shell is live: command menu (`Ctrl/⌘ + K`), centered Ask hero, one-click PDF upload, built-in **Bolt** instant AI, and nicknamed AI routes with specialties instead of provider names.
+- Advanced model, key, web, privacy and appearance controls are hidden behind the command menu and **Settings → Advanced settings**.
 
 ## 1. Confirm the GitHub repo
 

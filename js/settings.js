@@ -4,6 +4,7 @@ import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js";
 import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js";
 import { parseApiKeys } from "./key-pool.js";
 import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js";
+import { aiProfile } from "./ai-nicknames.js";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -115,8 +116,9 @@ export function connectedProviders(settings) {
 
 export function engineLabel(settings) {
   const primary = settings?.routing?.answer;
-  if (!primary || primary === "offline") return "Offline engine";
-  return PROVIDERS[primary]?.label || "Connected model";
+  if (!primary || primary === "offline") return "Bolt · Instant offline engine";
+  const profile = aiProfile(PROVIDERS[primary] || primary);
+  return `${profile.nickname} · ${profile.specialty}`;
 }
 
 export function privacyLabel(settings) {

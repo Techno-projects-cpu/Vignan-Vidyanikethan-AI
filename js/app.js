@@ -93,6 +93,16 @@ import {
   readReferral,
   syncProgress,
 } from "./auth.js";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js";
+import {
+  closeCommandMenu,
+  initPremiumUI,
+  openCommandMenu,
+  setPremiumAI,
+  setPremiumView,
+  toggleSources,
+} from "./premium-ui.js";
+import { initMotion, revealVisible } from "./motion.js";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -177,6 +187,17 @@ async function init() {
     }
     await refreshAuth();
     renderAll();
+    $$(".view .card, .premium-hero, .command-group").forEach((element) => {
+      if (!element.hasAttribute("data-reveal")) element.setAttribute("data-reveal", "");
+    });
+    initPremiumUI({
+      currentAI: currentAIId(),
+      currentView: state.currentView,
+      onView: (view) => setView(view),
+      onAction: (action, dataset) => handlePremiumAction(action, dataset),
+      onAi: (providerId) => setActiveAI(providerId),
+    });
+    initMotion();
     const requestedView = new URL(location.href).searchParams.get("view");
     setView(VIEW_META[requestedView] ? requestedView : "ask", { skipHistory: true });
     registerServiceWorker();
@@ -237,6 +258,8 @@ function setView(view, { skipHistory = false } = {}) {
   if (view === "quiz") renderQuizState();
   if (view === "flashcards") renderFlashcards();
   $("#main").scrollTop = 0;
+  setPremiumView(view);
+  requestAnimationFrame(() => revealVisible());
 }
 
 function setMode(mode) {
@@ -294,6 +317,7 @@ function updateStatus() {
   renderQuizEngineNote();
   renderLocalAIStatus(state.localAI);
   updateOfflineChip();
+  setPremiumAI(currentAIId());
 }
 
 function renderQuizEngineNote() {
@@ -1938,13 +1962,18 @@ function renderFreeAPILinks() {
     link.href = provider.url;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
-    link.setAttribute("aria-label", `Open ${provider.name} key page in a new tab`);
+    const nickname = provider.nickname || provider.name;
+    const specialty = provider.specialty || provider.free;
+    link.dataset.nickname = nickname;
+    link.dataset.specialty = specialty;
+    link.setAttribute("aria-label", `Open ${nickname} key page in a new tab`);
     const head = ui.element("div", "key-card-head");
-    head.appendChild(ui.element("strong", "", provider.name));
+    head.appendChild(ui.element("strong", "", nickname));
     const badge = ui.element("span", `key-badge${provider.local ? " local" : provider.recommended ? " recommended" : ""}`,
       provider.local ? "KEYLESS" : provider.recommended ? "START HERE" : "FREE TIER");
     head.appendChild(badge);
     link.appendChild(head);
+    link.appendChild(ui.element("span", "key-specialty", specialty));
     link.appendChild(ui.element("p", "key-free", provider.free));
     const meta = ui.element("div", "key-meta");
     meta.appendChild(ui.element("code", "", provider.model));
@@ -1990,7 +2019,7 @@ function renderStudentKeySettings() {
   if (!select || !provider) return;
   select.replaceChildren();
   for (const item of STUDENT_KEY_PROVIDERS) {
-    select.appendChild(ui.option(item.id, item.label, item.id === provider.id));
+    select.appendChild(ui.option(item.id, aiOptionLabel(item), item.id === provider.id));
   }
   select.value = provider.id;
   const vault = cleanStudentKeyVault(state.settings.studentKeys);
@@ -2112,7 +2141,7 @@ function renderRoutingTable() {
     select.dataset.task = task.id;
     select.appendChild(ui.option("offline", "Offline engine (private)", state.settings.routing[task.id] === "offline"));
     for (const provider of providerList()) {
-      select.appendChild(ui.option(provider.id, provider.label, state.settings.routing[task.id] === provider.id));
+      select.appendChild(ui.option(provider.id, aiOptionLabel(provider), state.settings.routing[task.id] === provider.id));
     }
     select.value = state.settings.routing[task.id] || "offline";
     row.append(info, select);
@@ -2124,7 +2153,7 @@ function renderProviderEditor() {
   const select = $("#provider-select");
   select.replaceChildren();
   for (const provider of providerList()) {
-    select.appendChild(ui.option(provider.id, provider.label, provider.id === state.settings.activeProvider));
+    select.appendChild(ui.option(provider.id, aiOptionLabel(provider), provider.id === state.settings.activeProvider));
   }
   select.value = state.settings.activeProvider;
   const config = providerConfig(state.settings);
@@ -2147,7 +2176,7 @@ function renderProviderEditor() {
   fallback.replaceChildren();
   fallback.appendChild(ui.option("offline", "Offline engine", state.settings.fallback === "offline"));
   for (const provider of providerList()) {
-    fallback.appendChild(ui.option(provider.id, provider.label, provider.id === state.settings.fallback));
+    fallback.appendChild(ui.option(provider.id, aiOptionLabel(provider), provider.id === state.settings.fallback));
   }
   fallback.value = state.settings.fallback || "offline";
 }
@@ -2363,7 +2392,7 @@ function toggleAdvancedSettings() {
 
 function openSettingsPanel(id) {
   const target = document.getElementById(id);
-  if (target && $("#advanced-settings")?.contains(target)) {
+  if (target && ($("#advanced-settings")?.contains(target) || $("#view-settings .settings-grid")?.contains(target) || target.id === "advanced-settings")) {
     $("#view-settings")?.classList.add("show-advanced");
   }
   setView("settings");
@@ -2372,6 +2401,77 @@ function openSettingsPanel(id) {
     const reduced = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
     target?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
   });
+}
+
+function currentAIId() {
+  const routes = TASKS.map((task) => state.settings.routing[task.id]);
+  if (routes.every((route) => route === "offline")) return "offline";
+  return routes.find((route) => route !== "offline") || state.settings.activeProvider || "server";
+}
+
+async function setActiveAI(providerId) {
+  const id = providerId === "offline" ? "offline" : PROVIDERS[providerId] ? providerId : "server";
+  for (const task of TASKS) state.settings.routing[task.id] = id === "offline" ? "offline" : id;
+  state.settings.activeProvider = id === "offline" ? "server" : id;
+  state.settings.fallback = "offline";
+  state.settings.disclaimerSeen = true;
+  state.settings.freeRouterDismissed = true;
+  await saveSettings();
+  renderSettings();
+  updateStatus();
+  const profile = aiProfile(id);
+  ui.showToast(`${profile.nickname} selected — ${profile.specialty}.`, "success", 4500);
+}
+
+async function handlePremiumAction(action) {
+  switch (action) {
+    case "menu":
+      openCommandMenu();
+      return;
+    case "upload-pdf":
+      setView("library");
+      requestAnimationFrame(() => $("#file-input")?.click());
+      return;
+    case "instant-ai":
+      await setActiveAI("offline");
+      setView("ask");
+      requestAnimationFrame(() => $("#ask-input")?.focus({ preventScroll: true }));
+      return;
+    case "deep-ai":
+      await setActiveAI("webllm");
+      openSettingsPanel("local-ai-panel");
+      return;
+    case "quiz":
+      setView("quiz");
+      requestAnimationFrame(() => $("#quiz-topic")?.focus({ preventScroll: true }));
+      return;
+    case "flashcards":
+      setView("flashcards");
+      requestAnimationFrame(() => $("#flash-topic")?.focus({ preventScroll: true }));
+      return;
+    case "sources":
+      setView("ask");
+      toggleSources();
+      return;
+    case "advanced":
+      openSettingsPanel("advanced-settings");
+      return;
+    case "keys":
+      openSettingsPanel("student-key-card");
+      return;
+    case "theme":
+      setTheme(state.settings.theme === "dark" ? "light" : "dark");
+      return;
+    case "export":
+      $("#export-data")?.click();
+      return;
+    case "account":
+      openAccountModal(state.account ? "account" : "register");
+      return;
+    default:
+      if (VIEW_META[action]) setView(action);
+      else if (action === "close-menu") closeCommandMenu();
+  }
 }
 
 function selectedLocalModelId() {

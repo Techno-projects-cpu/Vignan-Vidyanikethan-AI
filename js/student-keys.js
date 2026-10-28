@@ -29,6 +29,8 @@ export const STUDENT_KEY_PROVIDERS = STUDENT_KEY_PROVIDER_IDS.filter((id) => PRO
   return {
     id,
     label: provider.label,
+    nickname: provider.nickname || provider.label,
+    specialty: provider.specialty || "Configured model",
     endpoint: provider.endpoint,
     model: provider.model,
     kind: provider.kind,

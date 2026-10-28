@@ -510,7 +510,7 @@ async function handleSearch(request, response) {
 function health() {
   return {
     ok: true,
-    version: "1.3.0",
+    version: "1.4.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,

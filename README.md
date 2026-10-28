@@ -62,7 +62,8 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 
 | Area | What it does |
 | --- | --- |
-| Minimal interface | A calm dark workspace with a compact top navigation, one main question composer, short welcome copy and progressive disclosure. Advanced model, key, web and privacy controls stay available behind **Settings → Advanced settings**; all IDs and event hooks are preserved. |
+| Premium minimal interface | A monochrome black/grey/white workspace with a centered Arena-inspired hero, one composer, a command menu (`Ctrl/⌘ + K`) and an AI nickname chooser. Most navigation, settings, key and model controls are hidden until requested. All original IDs and event hooks remain wired. |
+| Built-in fast AI | **Bolt** is the instant offline textbook engine: no download, no key, page-cited answers from the local book index. Optional **Nova** (WebLLM), **Atlas** (free router) and other nicknamed routes are available from the chooser. |
 | Grounded answers | Local hybrid retrieval (BM25 + hashed TF-IDF vectors + phrase matching) over page chunks, with `[1]` citations and a clickable page reader. |
 | Model router | Route **Answers**, **Quiz writing**, **Flashcard writing**, **Short-answer grading** and **Citation verification** to different existing AI providers. Automatic fallback to the offline engine. |
 | Real local AI | Bundled WebLLM + Web Worker runs open-weight Meta Llama 3.2 1B, SmolLM2 or Qwen2.5 on-device with Vignan's grounding rules. Download once, then use every AI task offline. |
@@ -82,6 +83,17 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 | Languages | English UI with a Telugu translation for the main interface. Textbook passages are never silently machine-translated. |
 
 ---
+
+## Premium minimal shell
+
+The public interface is intentionally sparse, inspired by [Arena.ai](https://arena.ai/): one large headline, one composer, and a command menu for everything else.
+
+- Press **Ctrl/⌘ + K** or choose **Menu** to open the command palette. It contains every section, PDF upload, quiz/flashcard actions, sources, settings, keys, theme and account.
+- The first screen has a prominent **Upload PDF** action. Students can also drag a PDF into **Library** or paste notes. PDFs are indexed locally and page numbers are preserved.
+- **Bolt** is the built-in super-fast AI: it answers from the local textbook index with citations, requires no model download and works offline. It is the default route.
+- The AI chooser hides provider names. Students choose nicknames with their specialty underneath: **Bolt** (instant offline lookup), **Nova** (private local reasoning), **Atlas** (free cloud router), **Dash** (ultra-fast cloud), **Prism** (balanced answers), **Sage** (model variety), **Echo** (laptop model), **Any** (custom endpoint), and others. Real IDs remain in `data-provider` / select values.
+- Settings open with a single **Control room** card; the dense model, key, web, privacy and appearance panels stay hidden until **Advanced settings** is chosen.
+- The palette is strictly black/grey/white in both dark and light themes. Motion is original, dependency-free and reduced-motion aware; see [OPEN_SOURCE_CREDITS.md](./OPEN_SOURCE_CREDITS.md).
 
 ## Student accounts, squad invites & leaderboard
 
