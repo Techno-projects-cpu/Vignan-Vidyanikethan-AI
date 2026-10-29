@@ -10,8 +10,8 @@
  * point at the original passage.
  */
 
-import { CORE_STRINGS } from "./translations-core.js?v=30";
-import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=30";
+import { CORE_STRINGS } from "./translations-core.js?v=31";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=31";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 
@@ -113,6 +113,8 @@ const EN = {
   "soon.title": "Your school's SCERT and NCERT books, built in",
   "soon.body": "These stay out until the publisher gives written permission. When that arrives they will appear here and work exactly like the pages you add yourself: searchable, cited by page, usable offline. Until then your own uploads and the starter pages do the same job.",
   "soon.button": "Waiting for publisher permission",
+  "settings.languageChoose": "Choose your language",
+  "settings.languageSearch": "Search languages",
   "settings.languageIndian": "Indian languages",
   "settings.languageWorld": "World languages",
   "ask.openPage": "Open page",

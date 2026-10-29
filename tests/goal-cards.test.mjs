@@ -86,7 +86,7 @@ test("a shared link fills the box, and only the box", () => {
 
 test("a card can be shared as a link and read back unchanged", () => {
   for (const card of promptCards()) {
-    const link = askLink(card, "https://example.org/app/?v=30");
+    const link = askLink(card, "https://example.org/app/?v=31");
     assert.ok(link.startsWith("https://example.org/app/?" + ASK_PARAM + "="), "query strings are not stacked");
     assert.equal(askFromUrl(link.slice(link.indexOf("?"))), card.prompt);
   }
@@ -167,7 +167,9 @@ test("the blocks look like one object: square, joined, full width", () => {
   assert.match(block, /border-radius: 0/, "sharp corners, not rounded cards");
   assert.match(block, /border-top: 1px solid var\(--line\); border-radius: 0/, "each row shares one 1px border");
   assert.match(block, /\.goal-card:first-child \{ border-top: 0; \}/, "the first row does not double the container border");
-  assert.match(block, /min-height: 66px/, "the rows are real blocks, and five of them fit a laptop column");
+  assert.match(block, /min-height: 92px/, "the rows are big blocks: 92px before they stretch to fill the column");
+  assert.match(block, /flex: 1 1 auto/, "each row stretches, so five rows always fill the panel");
+  assert.match(block, /goal-card::after[\s\S]*?attr\(data-num\)/, "each row carries a large, faint number");
   assert.match(block, /grid-template-columns: 1fr auto/, "each row spans the column");
   assert.match(block, /\.goal-card:hover \{ background: var\(--brand-soft\)/, "hover changes colour");
   assert.match(block, /#view-ask:not\(\.has-conversation\) \.chat-suggestions \{ display: none; \}/, "the old chips never appear beside the blocks");

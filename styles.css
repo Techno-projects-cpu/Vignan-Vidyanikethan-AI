@@ -1549,66 +1549,75 @@ body.minimal-ui {
 
 
 /* ---------------------------------------------------------------------------
-   Starting blocks (2.6.1): full-width, square, stuck together, and they ask the
-   question the moment they are tapped. Borrowed in spirit from the free tutors we
-   read and from zero-vast's numbered blocks; the words, rules and CSS are ours.
+   Starting blocks (2.7.0): the first thing on the screen, and the biggest thing
+   on it. Full width, square, joined into one object, each row stretching to share
+   the height of the panel, so there is never an empty band under them.
    --------------------------------------------------------------------------- */
 
 .goal-cards {
   border: 1px solid var(--line-strong); border-radius: 0;
-  background: var(--surface-2); margin: 8px 0 12px; min-height: 0;
-  display: flex; flex-direction: column;
+  background: var(--surface-2); margin: 8px 0 12px;
+  display: flex; flex-direction: column; min-height: 0;
 }
 .goal-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-  flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--line-strong);
+  flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--line-strong);
 }
-.goal-head h3 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .01em; color: var(--ink); }
+.goal-head h3 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); }
 .goal-head p { margin: 0; font-size: 11.5px; color: var(--muted); }
 
-/* The blocks share their borders, so the list reads as one object, not five cards. */
-.goal-stack { display: grid; gap: 0; min-height: 0; overflow-y: auto; }
+/* One object: the rows share their borders and divide the height between them. */
+.goal-stack { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow-y: auto; }
 .goal-card {
-  display: grid; grid-template-columns: 1fr auto; grid-template-areas: "top arrow" "copy arrow";
-  align-items: center; column-gap: 14px; row-gap: 6px;
-  width: 100%; min-height: 66px; padding: 11px 16px;
+  position: relative; display: grid; flex: 1 1 auto;
+  grid-template-columns: 1fr auto; grid-template-areas: "top arrow" "copy arrow";
+  align-items: center; column-gap: 18px; row-gap: 7px;
+  width: 100%; min-height: 92px; padding: 16px 22px;
   border: 0; border-top: 1px solid var(--line); border-radius: 0;
   background: transparent; color: var(--ink-2); text-align: left; cursor: pointer;
   transition: background-color .18s ease, color .18s ease, box-shadow .18s ease;
 }
 .goal-card:first-child { border-top: 0; }
-.goal-top { grid-area: top; display: flex; align-items: center; gap: 10px; }
+.goal-card::after {
+  content: attr(data-num); position: absolute; right: 58px; top: 50%;
+  transform: translateY(-50%); font-family: var(--mono); font-size: 46px;
+  line-height: 1; color: var(--ink); opacity: .05; pointer-events: none;
+  transition: opacity .18s ease, color .18s ease;
+}
+.goal-top { grid-area: top; display: flex; align-items: center; gap: 11px; }
 .goal-index {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
   color: var(--muted); transition: color .18s ease;
 }
-.goal-icon { width: 15px; height: 15px; color: var(--muted); stroke-width: 1.7; transition: color .18s ease; }
-.goal-copy { grid-area: copy; display: grid; gap: 3px; min-width: 0; }
-.goal-copy strong { font-size: 14.5px; font-weight: 650; color: var(--ink); letter-spacing: -.01em; }
-.goal-copy small { font-size: 11px; color: var(--muted); line-height: 1.45; }
+.goal-icon { width: 18px; height: 18px; color: var(--muted); stroke-width: 1.7; transition: color .18s ease; }
+.goal-copy { grid-area: copy; display: grid; gap: 4px; min-width: 0; }
+.goal-copy strong { font-size: 17.5px; font-weight: 650; color: var(--ink); letter-spacing: -.015em; line-height: 1.25; }
+.goal-copy small { font-size: 12px; color: var(--muted); line-height: 1.5; }
 .goal-arrow {
-  grid-area: arrow; font-size: 17px; color: var(--muted);
+  grid-area: arrow; font-size: 20px; color: var(--muted);
   transition: color .18s ease, transform .18s ease;
 }
 
-/* Colour change is the confirmation that the tap landed. */
-.goal-card:hover { background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+/* The colour change is the confirmation that the tap landed. */
+.goal-card:hover { background: var(--brand-soft); box-shadow: inset 4px 0 0 var(--brand); }
 .goal-card:hover .goal-copy strong,
 .goal-card:hover .goal-arrow,
 .goal-card:hover .goal-icon,
 .goal-card:hover .goal-index { color: var(--brand); }
-.goal-card:hover .goal-arrow { transform: translate(2px, -2px); }
+.goal-card:hover .goal-arrow { transform: translate(4px, -4px); }
+.goal-card:hover::after { opacity: .1; color: var(--brand); }
 .goal-card:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
-.goal-card:active { background: var(--brand); box-shadow: inset 3px 0 0 var(--ink); }
+.goal-card:active { background: var(--brand); box-shadow: inset 4px 0 0 var(--ink); }
 .goal-card:active .goal-copy strong,
 .goal-card:active .goal-copy small,
 .goal-card:active .goal-arrow,
 .goal-card:active .goal-icon,
 .goal-card:active .goal-index { color: #fff; }
-.goal-card-launching { animation: goal-launch .6s ease both; }
+.goal-card:active::after { color: #fff; opacity: .18; }
+.goal-card-launching { animation: goal-launch .62s ease both; }
 @keyframes goal-launch {
-  0% { background: var(--brand); box-shadow: inset 3px 0 0 var(--ink); }
-  35% { background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+  0% { background: var(--brand); box-shadow: inset 4px 0 0 var(--ink); }
+  40% { background: var(--brand-soft); box-shadow: inset 4px 0 0 var(--brand); }
   100% { background: transparent; box-shadow: none; }
 }
 .goal-card-empty { border-left: 2px solid color-mix(in srgb, var(--warning) 55%, var(--line)); }
@@ -1618,39 +1627,64 @@ body.minimal-ui {
 #view-ask.has-conversation .goal-cards { display: none; }
 #view-ask:not(.has-conversation) .chat-suggestions { display: none; }
 /* First open: the blocks are the content. The greeting would only repeat them,
-   and the answer-style rows set themselves once a block is tapped, so both wait
-   until there is a conversation. That leaves five rows visible on a laptop
-   instead of one and a half squeezed into the leftover space. */
+   and the answer-style rows set themselves once a block is tapped. */
 #view-ask:not(.has-conversation) .chat-log { display: none; }
 #view-ask:not(.has-conversation) .goal-cards { flex: 1 1 auto; }
 #view-ask:not(.has-conversation) .composer .response-modes { display: none; }
 #view-ask:not(.has-conversation) .connect-banner { margin-bottom: 8px; padding: 9px 12px; }
 #view-ask:not(.has-conversation) .connect-copy p { display: none; }
-@media (max-height: 760px) {
+@media (max-height: 780px) {
   #view-ask:not(.has-conversation) .connect-banner { display: none; }
-  .goal-card { min-height: 58px; padding: 9px 14px; }
+  .goal-head { padding: 10px 16px; }
+  .goal-card { min-height: 72px; padding: 11px 18px; }
+  .goal-copy strong { font-size: 15.5px; }
   .goal-copy small { display: none; }
+  .goal-card::after { font-size: 34px; }
 }
-/* The blocks carry their own divider, so the composer does not stack a second one. */
-.goal-cards + .composer { border-top: 0; }
 @media (prefers-reduced-motion: reduce) {
-  .goal-card, .goal-card-launching, .goal-arrow { animation: none !important; transition: none !important; }
+  .goal-card, .goal-card-launching, .goal-arrow, .goal-card::after { animation: none !important; transition: none !important; }
 }
 
-.language-grid { display: grid; gap: 14px; margin-top: 14px; }
-.language-group > .eyebrow { display: block; margin-bottom: 7px; }
-.language-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(94px, 1fr)); gap: 6px; }
+/* Language selection (2.7.0): the picker as a screen of its own, not a dropdown.
+   Every language shows its own script large enough to be recognised at a glance. */
+.language-grid { display: grid; gap: 18px; margin-top: 16px; }
+.language-group > .eyebrow { display: block; margin-bottom: 9px; }
+.language-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 8px; }
 .language-tile {
-  display: grid; gap: 3px; justify-items: start; padding: 9px 10px 8px;
-  border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2);
-  color: var(--ink-2); text-align: left; cursor: pointer; transition: .16s ease;
+  position: relative; display: grid; gap: 5px; justify-items: center; align-content: center;
+  min-height: 96px; padding: 14px 10px 12px; text-align: center;
+  border: 1px solid var(--line); border-radius: 0; background: var(--surface-2);
+  color: var(--ink-2); cursor: pointer;
+  transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
 }
 .language-tile:hover { border-color: var(--line-strong); background: var(--surface-3); }
 .language-tile:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-.language-tile.active { border-color: var(--brand); background: var(--brand-soft); }
-.language-glyph { font-size: 19px; line-height: 1.15; font-weight: 600; color: var(--ink); }
-.language-name { font-size: 11px; color: var(--muted); }
-.language-tile.active .language-name { color: var(--ink-2); }
+.language-tile.active {
+  border-color: var(--brand); background: var(--brand-soft);
+  box-shadow: inset 0 0 0 1px var(--brand);
+}
+.language-tile.active::after {
+  content: "✓"; position: absolute; top: 6px; right: 8px;
+  font-size: 11px; color: var(--brand); line-height: 1;
+}
+.language-glyph { font-size: 31px; line-height: 1.1; font-weight: 600; color: var(--ink); }
+.language-tile.active .language-glyph { color: var(--brand-2); }
+.language-name { font-size: 12.5px; color: var(--ink-2); }
+.language-latin { font-size: 10.5px; color: var(--muted); letter-spacing: .02em; }
+.language-filter-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.language-filter {
+  flex: 1 1 auto; min-width: 0; padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: 0; background: var(--surface-2); color: var(--ink); font-size: 13px;
+}
+.language-filter:focus { outline: none; border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+.language-count { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; color: var(--muted); white-space: nowrap; }
+.language-empty { padding: 18px 0; color: var(--muted); font-size: 12.5px; }
+@media (max-width: 560px) {
+  .language-tiles { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+  .language-tile { min-height: 84px; }
+  .language-glyph { font-size: 25px; }
+  .language-name { font-size: 11.5px; }
+}
 
 .soon-card { display: grid; gap: 8px; margin-top: 12px; border-style: dashed; background: var(--surface-2); }
 .soon-badge {

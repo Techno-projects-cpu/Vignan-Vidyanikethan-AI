@@ -1,6 +1,6 @@
 /** Deterministic, bounded chat commands. No model or network is used here. */
-import { asksAboutCreator, casualReply, conversationReply, isFollowUp, safetyReply } from "./conversation.js?v=30";
-import { chapterReference } from "./text.js?v=30";
+import { asksAboutCreator, casualReply, conversationReply, isFollowUp, safetyReply } from "./conversation.js?v=31";
+import { chapterReference } from "./text.js?v=31";
 
 const CONTEXT_REFERENCE = /\b(?:this|that|it|these|those|above|previous|last answer)\b|(?:^|\s)(?:इस|इसे|इसके|इसका|उस|उसे|उसके|उसी)(?=\s|$)|(?:దీని|దాని|ఇది|అది|ఈ అంశం|ఆ అంశం)/iu;
 

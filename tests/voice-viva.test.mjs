@@ -221,8 +221,8 @@ test("voice and viva are wired into the app, not shipped as dead files", () => {
   assert.match(html, /id="ask-mic"/);
   assert.match(html, /<symbol id="i-mic"/);
   assert.match(html, /<symbol id="i-speaker"/);
-  assert.match(app, /from "\.\/voice\.js\?v=30"/);
-  assert.match(app, /from "\.\/viva\.js\?v=30"/);
+  assert.match(app, /from "\.\/voice\.js\?v=31"/);
+  assert.match(app, /from "\.\/viva\.js\?v=31"/);
   assert.match(app, /function speakCurrentQuestion/);
   assert.match(app, /async function dictateAnswer/);
   assert.match(app, /async function dictateQuestion/);
@@ -234,8 +234,8 @@ test("voice and viva are wired into the app, not shipped as dead files", () => {
   assert.match(app, /question-voice-button/, "each question can be read or answered aloud");
   assert.match(css, /\.viva-card/);
   assert.match(css, /\.question-voice-button/);
-  assert.match(sw, /"\.\/js\/voice\.js\?v=30"/, "voice ships offline");
-  assert.match(sw, /"\.\/js\/viva\.js\?v=30"/);
+  assert.match(sw, /"\.\/js\/voice\.js\?v=31"/, "voice ships offline");
+  assert.match(sw, /"\.\/js\/viva\.js\?v=31"/);
 });
 
 test("a viva question is a sentence from the student's page, marked on its own words", async () => {

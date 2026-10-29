@@ -88,8 +88,8 @@ test("first open belongs to the blocks, so nothing is squeezed", () => {
   assert.match(css, /#view-ask:not\(\.has-conversation\) \.chat-log \{ display: none; \}/);
   assert.match(css, /#view-ask:not\(\.has-conversation\) \.composer \.response-modes \{ display: none; \}/);
   assert.match(css, /#view-ask:not\(\.has-conversation\) \.goal-cards \{ flex: 1 1 auto; \}/);
-  assert.match(css, /@media \(max-height: 760px\)[\s\S]*?\.goal-card \{ min-height: 58px; padding: 9px 14px; \}/);
+  assert.match(css, /@media \(max-height: 780px\)[\s\S]*?\.goal-card \{ min-height: 72px; padding: 11px 18px; \}/);
   // Five rows plus the head must fit a normal laptop column without scrolling.
   const row = Number((css.match(/\.goal-card \{[\s\S]*?min-height: (\d+)px/) || [])[1]);
-  assert.ok(row > 0 && row <= 70, `rows are compact enough to fit five (${row}px)`);
+  assert.ok(row >= 60 && row <= 100, `rows are sized to fill the panel (${row}px)`);
 });
