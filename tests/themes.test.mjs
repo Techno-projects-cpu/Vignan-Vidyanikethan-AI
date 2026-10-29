@@ -8,8 +8,11 @@ import {
   contrast,
   isKnownStyle,
   normalizeStyle,
+  resolveStyle,
+  switchLockedReason,
   themeById,
   themeContrast,
+  themeSupportsSwitch,
 } from "../js/themes.js";
 import { DEFAULT_SETTINGS, normalizeSettings } from "../js/settings.js";
 
@@ -107,7 +110,7 @@ test("the style is applied by attribute, mirrored, and rendered as tiles", () =>
   assert.match(app, /root\.dataset\.style = style/);
   assert.match(app, /root\.removeAttribute\("data-style"\)/, "minimal is the absence of the attribute");
   assert.match(app, /localStorage\.setItem\(STYLE_MIRROR_KEY, style\)/, "the mirror is written synchronously");
-  assert.match(app, /applyStyle\(state\.settings\.style, \{ save: false \}\)/, "the saved style is applied at boot");
+  assert.match(app, /applyStyle\(isKnownStyle\(mirroredStyle\) \? mirroredStyle : state\.settings\.style, \{ save: false, remember: false \}\)/, "the saved style is applied at boot, without becoming a fresh choice");
   assert.match(app, /function renderStyleTiles\(/);
   assert.match(app, /tile\.setAttribute\("aria-pressed"/);
   assert.match(html, /<div class="style-grid" id="style-grid" role="group"/);
@@ -150,4 +153,57 @@ test("responsiveness covers phone, tablet, laptop and a 720p projector", () => {
   assert.match(css, /font-size: clamp\(26px, 3\.4vw, 44px\)/, "headings scale instead of jumping");
   assert.match(css, /min-height: 40px/, "phone targets stay thumb-sized");
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+});
+
+test("the light/dark switch is only offered where it can work", () => {
+  // Minimal is the original pair; the other five fix their own palette, so a
+  // toggle there would be a control that does nothing.
+  assert.equal(themeSupportsSwitch("minimal"), true);
+  for (const id of ["soft", "editorial", "luxury", "terminal", "brutal"]) {
+    assert.equal(themeSupportsSwitch(id), false, `${id} pins its own palette`);
+    assert.match(switchLockedReason(id), /light\/dark does not apply here/, `${id} explains itself`);
+    assert.match(switchLockedReason(id), /Minimal/, "and says what to pick instead");
+  }
+  assert.equal(switchLockedReason("minimal"), "", "nothing to explain on Minimal");
+  // A style declaration is data, so every theme must state it explicitly.
+  for (const theme of THEMES) assert.equal(typeof theme.switchable, "boolean", `${theme.id} declares switchable`);
+  // The stylesheet really does pin those palettes.
+  for (const id of ["soft", "editorial", "luxury", "brutal"]) {
+    assert.match(css, new RegExp(`html\\[data-style="${id}"\\][^{]*\\{[^}]*color-scheme: light`), `${id} is pinned light`);
+  }
+  assert.match(css, /html\[data-style="terminal"\][^{]*\{[^}]*color-scheme: dark/, "Terminal is pinned dark");
+});
+
+test("a locked switch is visible, disabled, and explained in one line", () => {
+  assert.match(html, /id="theme-locked-note"[^>]*hidden/, "the reason line starts hidden");
+  assert.match(app, /function syncThemeSwitchLock\(\)/);
+  assert.match(app, /toggle\.disabled = locked/);
+  assert.match(app, /select\.disabled = locked/, "the Settings select cannot pretend either");
+  assert.match(app, /note\.hidden = !locked/);
+  assert.match(app, /syncThemeSwitchLock\(\);/, "it is called when the style changes");
+  // One guard in setTheme covers the header button, the select and the command.
+  const setTheme = app.slice(app.indexOf("function setTheme("), app.indexOf("function setTheme(") + 700);
+  assert.match(setTheme, /if \(!themeSupportsSwitch\(state\.settings\.style\)\)/);
+  assert.match(setTheme, /ui\.showToast\(switchLockedReason\(state\.settings\.style\)/);
+  assert.match(css, /#theme-toggle\[aria-disabled="true"\]/);
+  assert.match(css, /\.settings-note \{/);
+});
+
+test("a new device starts in the school's style, and its own choice always wins", () => {
+  assert.equal(resolveStyle({}), DEFAULT_STYLE, "nothing known: the default style");
+  assert.equal(resolveStyle({ schoolDefault: "editorial" }), "editorial");
+  assert.equal(resolveStyle({ stored: "luxury", schoolDefault: "soft" }), "luxury", "a choice beats a default");
+  assert.equal(resolveStyle({ stored: "__proto__", schoolDefault: "soft" }), "soft");
+  assert.equal(resolveStyle({ stored: "", schoolDefault: "comic-sans" }), DEFAULT_STYLE);
+  // The server validates its own env var, so a typo cannot blank the app.
+  const server = readFileSync(fileURLToPath(new URL("serve.mjs", root)), "utf8");
+  assert.match(server, /const STYLE_IDS = \["minimal", "soft", "editorial", "luxury", "terminal", "brutal"\]/);
+  assert.match(server, /SCHOOL_DEFAULT_STYLE = STYLE_IDS\.includes/);
+  assert.match(server, /defaultStyle: SCHOOL_DEFAULT_STYLE/);
+  // The app applies it once, only when the device has never chosen.
+  const apply = app.slice(app.indexOf("function applySchoolDefaultStyle()"));
+  assert.match(apply, /if \(isKnownStyle\(chosen\)\) return;/);
+  assert.match(apply, /applyStyle\(school, \{ save: false, remember: false \}\)/, "a default is not a choice");
+  // The first frame already paints it, so a classroom of tablets matches.
+  assert.match(html, /localStorage\.getItem\("vignan\.style\.school"\)/);
 });

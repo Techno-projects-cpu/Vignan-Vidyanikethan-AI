@@ -7,11 +7,12 @@
  * labelled as being outside the textbooks.
  */
 
-import { salientSentences, splitSentences } from "./text.js?v=33";
-import { truncate } from "./util.js?v=33";
-import { buildFlashcards } from "./flashcards.js?v=33";
-import { buildStudySheet } from "./study-sheet.js?v=33";
-import { t } from "./i18n.js?v=33";
+import { salientSentences, splitSentences } from "./text.js?v=34";
+import { truncate } from "./util.js?v=34";
+import { missingTerms } from "./answer-quality.js?v=34";
+import { buildFlashcards } from "./flashcards.js?v=34";
+import { buildStudySheet } from "./study-sheet.js?v=34";
+import { t } from "./i18n.js?v=34";
 
 export function sourcesFromHits(hits = []) {
   return hits.map((hit, index) => ({
@@ -65,7 +66,38 @@ function webBlock(webResults = []) {
   ].join("\n");
 }
 
-export function notFoundMessage(reason, webResults = [], webEnabled = false, language = "en") {
+/**
+ * Name what was missing, so a refusal is useful instead of polite.
+ *
+ * A student cannot act on "I could not find this". They can act on "I could not
+ * find *entropy* or *carnot* in your books" — that tells them which chapter to
+ * add, or that they meant a different word. The near-miss line is drawn only
+ * from pages retrieval actually returned, so nothing is implied that was not
+ * read. English only: a half-translated diagnostic is worse than none.
+ */
+export function evidenceNote({ query = "", hits = [], reason = "not-in-books" } = {}) {
+  if (!hits.length) return "";
+  const missing = missingTerms(query, hits);
+  const lines = [];
+  if (missing.length) {
+    const quoted = missing.map((term) => `“${term}”`).join(", ");
+    lines.push(
+      `Your books were searched, and these words do not appear in the pages that came closest: ${quoted}.`,
+    );
+  }
+  const nearest = hits[0];
+  if (nearest?.title) {
+    const where = nearest.sourceUrl ? "an imported section" : `${nearest.title}, p. ${nearest.page ?? 1}`;
+    lines.push(
+      `The closest page was ${where} — open it to check whether the topic is there under a different name.`,
+    );
+  }
+  if (!lines.length) return "";
+  lines.push("Not the same as an answer, so I have not written one.");
+  return lines.join("\n");
+}
+
+export function notFoundMessage(reason, webResults = [], webEnabled = false, language = "en", context = {}) {
   if (language === "te" || language === "hi") {
     const messages = language === "te" ? {
       "empty-library": "మీ గ్రంథాలయం ఖాళీగా ఉంది. ముందుగా Library లో PDF లేదా నోట్స్ జోడించండి.",
@@ -101,7 +133,10 @@ export function notFoundMessage(reason, webResults = [], webEnabled = false, lan
     headline +=
       "\n\nWeb fallback is on, but no outside results were returned. Try a shorter question or check your connection.";
   }
-  return `${headline}${webBlock(webResults)}`;
+  // Only English gets the diagnostic: it is built from the student's own words
+  // and cannot be translated honestly on the fly.
+  const note = context.hits?.length && language === "en" ? evidenceNote({ ...context, reason }) : "";
+  return `${headline}${note ? `\n\n${note}` : ""}${webBlock(webResults)}`;
 }
 
 function extractiveLines(query, sources, mode) {
@@ -288,11 +323,12 @@ export function composeGroundedAnswer({
   webEnabled = false,
   language = "en",
   depth = "balanced",
+  partial = false,
 } = {}) {
   const sources = sourcesFromHits(hits);
   if (!sources.length) {
     return {
-      text: notFoundMessage(reason, webResults, webEnabled, language),
+      text: notFoundMessage(reason, webResults, webEnabled, language, { query, hits }),
       sources: [],
       webSources: webResults,
       flashcards: [],
@@ -332,6 +368,15 @@ export function composeGroundedAnswer({
     const shaped = teacherAnswer(evidenceQuery, sources, depth);
     if (shaped.length) {
       parts.push(...shaped);
+      if (partial) {
+        // Retrieval already judged this a partial match. Saying so in the answer
+        // body, not only in a small tag, is the difference between a study aid
+        // and a confident guess.
+        parts.push(
+          "",
+          "_Only part of your question is covered by these pages. The rest is not in your books, so I have not filled the gap from memory — check the citations first._",
+        );
+      }
       parts.push("", "_Every line is taken from the cited pages. Open a citation to read it in context._");
     } else {
       parts.push(...extractiveLines(evidenceQuery, sources, mode).map((line) => `- ${line}`));

@@ -32,7 +32,14 @@ async function walk(directory, prefix = "") {
   return files;
 }
 
+// The release number is read from the worker itself. It used to be typed here
+// as well, and the two drifted apart on every version bump until a test caught
+// it. One source of truth: whatever the worker will cache under is the version.
+const swSource = await fs.readFile(path.join(REPO, "sw.js"), "utf8");
+const version = Number((swSource.match(/CACHE_NAME = "vignan-vidyanikethan-ai-v(\d+)"/) || [])[1] || 0);
+if (!version) throw new Error("Could not read the release version from sw.js");
+
 const files = (await walk(REPO)).sort();
 const urls = [...new Set(["./", "./index.html", ...files])];
-await fs.writeFile(OUT, `${JSON.stringify({ version: 33, generatedAt: new Date().toISOString(), urls }, null, 2)}\n`);
+await fs.writeFile(OUT, `${JSON.stringify({ version, generatedAt: new Date().toISOString(), urls }, null, 2)}\n`);
 console.log(`Wrote ${urls.length} URLs to ${path.relative(REPO, OUT)}`);

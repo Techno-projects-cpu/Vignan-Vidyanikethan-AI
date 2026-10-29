@@ -43,14 +43,36 @@ export function depthDirective(depth = DEFAULT_DEPTH) {
  * is not penalised for being short.
  */
 export function citationCoverage(text = "") {
-  const sentences = String(text || "")
+  const lines = String(text || "")
     .replace(/```[\s\S]*?```/g, " ")
     .split(/(?<=[.!?])\s+|\n+/)
     .map((line) => line.trim())
-    .filter((line) => line.length > 24 && !/^\|/.test(line) && !/^[-*]\s*$/.test(line));
-  if (!sentences.length) return { sentences: 0, cited: 0, ratio: 0 };
-  const cited = sentences.filter((line) => /\[\d+\]|\[W\d+\]/.test(line)).length;
-  return { sentences: sentences.length, cited, ratio: cited / sentences.length };
+    .filter(Boolean);
+  // This app writes the marker after the full stop — "... p. 4. [1]". A bare
+  // marker on its own line belongs to the sentence above it; without this it
+  // was thrown away and a fully cited answer measured as uncited.
+  const sentences = [];
+  const marker = "(?:\\[\\d+\\]|\\[W\\d+\\])";
+  for (const line of lines) {
+    // A marker may sit at the end of a sentence ("... p. 4. [1]") or at the
+    // start of the next one after a full stop; both cite the sentence before.
+    const leading = line.match(new RegExp(`^(?:${marker}\\s*)+`));
+    if (leading && sentences.length) {
+      sentences[sentences.length - 1] += ` ${leading[0].trim()}`;
+      const rest = line.slice(leading[0].length).trim();
+      if (rest) sentences.push(rest);
+      continue;
+    }
+    if (new RegExp(`^(?:${marker})+$`).test(line) && sentences.length) {
+      sentences[sentences.length - 1] += ` ${line}`;
+      continue;
+    }
+    sentences.push(line);
+  }
+  const counted = sentences.filter((line) => line.length > 24 && !/^\|/.test(line) && !/^[-*]\s*$/.test(line));
+  if (!counted.length) return { sentences: 0, cited: 0, ratio: 0 };
+  const cited = counted.filter((line) => /\[\d+\]|\[W\d+\]/.test(line)).length;
+  return { sentences: counted.length, cited, ratio: cited / counted.length };
 }
 
 /**
@@ -97,4 +119,93 @@ function cleanTopic(query = "") {
     .trim();
   const trimmed = text || String(query || "").trim();
   return trimmed.length > 90 ? `${trimmed.slice(0, 87).trimEnd()}…` : trimmed;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Naming what is missing, and checking what a model added                      */
+/* ------------------------------------------------------------------------- */
+
+const STOP = new Set((
+  "the a an and or but of in on at to for from with without into onto about as is are was were be been being do does did " +
+  "can could should would will shall may might must i you he she it we they me my your our their this that these those " +
+  "what why how when where which who whom whose please explain describe tell show give make write list define compare " +
+  "difference between step steps work works mean means example examples question answer book books page pages chapter " +
+  "class subject topic notes note help need want know understand using use used also more most very much many any some"
+).split(/\s+/));
+
+/**
+ * The words a student actually typed that mean something.
+ *
+ * These are the words a refusal should name back to them: "I could not find
+ * entropy in your books" is actionable; "I could not find this" is not.
+ */
+export function queryTerms(query = "", limit = 4) {
+  const words = String(query || "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]+/gu, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+  const seen = new Set();
+  const terms = [];
+  for (const word of words) {
+    if (word.length < 4 || STOP.has(word) || seen.has(word)) continue;
+    seen.add(word);
+    terms.push(word);
+    if (terms.length >= limit) break;
+  }
+  return terms;
+}
+
+/**
+ * Which of the student's words never appear in what was retrieved.
+ *
+ * Used only when retrieval already decided it could not answer, so this is an
+ * explanation of a refusal that has happened, never a reason to refuse.
+ */
+export function missingTerms(query = "", hits = []) {
+  const terms = queryTerms(query);
+  if (!terms.length) return [];
+  const haystack = hits
+    .map((hit) => `${hit?.text || hit?.quote || ""} ${hit?.section || ""} ${hit?.title || ""}`)
+    .join(" ")
+    .toLowerCase();
+  if (!haystack.trim()) return terms;
+  return terms.filter((term) => !haystack.includes(term));
+}
+
+/**
+ * Numbers a written answer states that no cited page contains.
+ *
+ * The offline engine only quotes, so it cannot invent "9.8 m/s²". A connected
+ * model can, and that is exactly the failure a citation is supposed to prevent.
+ * This returns the offending numbers so the UI can say so plainly instead of
+ * implying every figure came from the student's book.
+ *
+ * Years, small counts and mark values ("Question 3", "5 marks") are ignored:
+ * they are about the lesson, not about the physics.
+ */
+export function ungroundedNumbers(text = "", sources = []) {
+  const clean = String(text || "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/\[\d+\]|\[W\d+\]/g, " ");
+  const found = clean.match(/-?\d+(?:\.\d+)?(?:\s?[×x]\s?10\s?\^?\s?-?\d+)?/g) || [];
+  const pageText = sources
+    .map((source) => `${source?.text || ""} ${source?.quote || ""}`)
+    .join(" ")
+    .replace(/\s+/g, " ");
+  const seen = new Set();
+  const missing = [];
+  for (const raw of found) {
+    const value = raw.replace(/\s+/g, "");
+    if (seen.has(value)) continue;
+    seen.add(value);
+    const bare = value.replace(/[×x]10\^?-?\d+$/, "");
+    const number = Number(bare);
+    // Small integers are almost always counts ("two examples", "Question 3").
+    if (Number.isFinite(number) && Math.abs(number) < 100 && Number.isInteger(number)) continue;
+    if (pageText.includes(bare) || pageText.includes(value)) continue;
+    missing.push(value);
+    if (missing.length >= 5) break;
+  }
+  return missing;
 }

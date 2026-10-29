@@ -25,6 +25,7 @@ export const THEMES = [
     note: "Black, grey and white. The original — sharp edges, nothing shouting.",
     tags: ["minimal", "monochrome"],
     scheme: "dark",
+    switchable: true,
     bg: "#080808", surface: "#101010", ink: "#f8f8f8", accent: "#f8f8f8",
     swatches: ["#080808", "#101010", "#f8f8f8"],
   },
@@ -34,6 +35,7 @@ export const THEMES = [
     note: "Cool light greys with a single indigo accent and gentle corners.",
     tags: ["minimal", "light"],
     scheme: "light",
+    switchable: false,
     bg: "#eef2f7", surface: "#ffffff", ink: "#1a1d22", accent: "#4f5bd5",
     swatches: ["#eef2f7", "#ffffff", "#4f5bd5"],
   },
@@ -43,6 +45,7 @@ export const THEMES = [
     note: "Paper white, serif headings, a deep red rule. Reads like a printed chapter.",
     tags: ["editorial", "serif", "light"],
     scheme: "light",
+    switchable: false,
     bg: "#fbfaf7", surface: "#ffffff", ink: "#12100e", accent: "#b32d1f",
     swatches: ["#fbfaf7", "#ffffff", "#b32d1f"],
   },
@@ -52,6 +55,7 @@ export const THEMES = [
     note: "Warm ivory, thin gold hairlines, letterspaced small capitals.",
     tags: ["luxury", "serif", "light"],
     scheme: "light",
+    switchable: false,
     bg: "#f6f2ea", surface: "#fffdf8", ink: "#14110d", accent: "#8a6a1e",
     swatches: ["#f6f2ea", "#fffdf8", "#8a6a1e"],
   },
@@ -61,6 +65,7 @@ export const THEMES = [
     note: "Near-black, monospace everywhere, phosphor green for anything live.",
     tags: ["terminal", "mono", "dark"],
     scheme: "dark",
+    switchable: false,
     bg: "#05070a", surface: "#0b0f14", ink: "#d7ffe9", accent: "#35ff9e",
     swatches: ["#05070a", "#0b0f14", "#35ff9e"],
   },
@@ -70,12 +75,24 @@ export const THEMES = [
     note: "Cream paper, 3px black borders, hard offset shadows, no rounding at all.",
     tags: ["brutalism", "bold", "light"],
     scheme: "light",
+    switchable: false,
     bg: "#f2efe6", surface: "#fffdf5", ink: "#0b0b0b", accent: "#ffe14d",
     swatches: ["#f2efe6", "#fffdf5", "#ffe14d"],
   },
 ];
 
 export const DEFAULT_STYLE = "minimal";
+
+/**
+ * The look a brand-new device starts in, before the student has chosen one.
+ *
+ * The school can set this once (the `SCHOOL_DEFAULT_STYLE` environment variable
+ * on the server, reported by `/api/health`); a student who picks a style keeps
+ * it on that device. Deliberately per device and not per account: the same
+ * student may use a projector laptop and a phone, and a shared classroom tablet
+ * should not carry one student's taste to the next.
+ */
+export const SCHOOL_DEFAULT_STYLE = DEFAULT_STYLE;
 
 /** A style by id, falling back to the default instead of throwing. */
 export function themeById(id) {
@@ -90,6 +107,37 @@ export function isKnownStyle(id) {
 /** Only keep a style that exists, so a stale saved value cannot blank the app. */
 export function normalizeStyle(id) {
   return isKnownStyle(String(id || "")) ? String(id) : DEFAULT_STYLE;
+}
+
+/**
+ * Can the light/dark switch do anything in this style?
+ *
+ * Four styles pin their own fixed palette — a light theme has no dark twin, and
+ * Terminal is dark on purpose. Offering a switch there would be a control that
+ * does nothing, so the app greys it out and says why instead of pretending.
+ */
+export function themeSupportsSwitch(id) {
+  return Boolean(themeById(id).switchable);
+}
+
+/** One plain sentence explaining the greyed-out switch, for that style. */
+export function switchLockedReason(id) {
+  const theme = themeById(id);
+  if (themeSupportsSwitch(theme.id)) return "";
+  return `${theme.name} sets its own fixed palette, so light/dark does not apply here. Choose Minimal to switch themes.`;
+}
+
+/**
+ * Which style this device should paint.
+ *
+ * Order: what the student chose on this device, then the school's default, then
+ * Minimal. A stored value always wins — a school default is a starting point,
+ * never something that overwrites a choice someone already made.
+ */
+export function resolveStyle({ stored = "", schoolDefault = "" } = {}) {
+  if (isKnownStyle(String(stored || ""))) return String(stored);
+  if (isKnownStyle(String(schoolDefault || ""))) return String(schoolDefault);
+  return SCHOOL_DEFAULT_STYLE;
 }
 
 /**

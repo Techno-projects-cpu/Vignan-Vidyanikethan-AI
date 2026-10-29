@@ -1,7 +1,7 @@
 /** Page-level textbook reader used by every citation. */
 
-import { element, openModal, qs, showToast } from "./ui.js?v=33";
-import { safeUrl, truncate } from "./util.js?v=33";
+import { element, openModal, qs, showToast } from "./ui.js?v=34";
+import { safeUrl, truncate } from "./util.js?v=34";
 
 /** Resolve a cited page number, which may not equal its position in pasted notes. */
 export function pageIndexForCitation(pages = [], pageNumber = 1) {
@@ -61,11 +61,29 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
   const previous = element("button", "button ghost small", "← Prev");
   const next = element("button", "button ghost small", "Next →");
   const pageLabel = element("span", "reader-page-label", "");
+  // Reading happens on phones in bright rooms and on a projector at the back of
+  // a classroom. One fixed size cannot serve both, so the reader keeps its own.
+  const SIZES = [13, 14, 16, 18, 21];
+  const SIZE_KEY = "vignan.reader.size";
+  const readSize = () => {
+    try {
+      const stored = Number(localStorage.getItem(SIZE_KEY));
+      return SIZES.includes(stored) ? stored : 14;
+    } catch {
+      return 14;
+    }
+  };
+  const sizeDown = element("button", "button ghost small", "A−");
+  const sizeUp = element("button", "button ghost small", "A+");
+  sizeDown.type = "button";
+  sizeUp.type = "button";
+  sizeDown.setAttribute("aria-label", "Smaller text");
+  sizeUp.setAttribute("aria-label", "Larger text");
   const openPdf = element("a", "button ghost small", "Open PDF at page");
   openPdf.target = "_blank";
   openPdf.rel = "noopener noreferrer";
   if (!pdfUrl) openPdf.classList.add("hidden");
-  controls.append(previous, pageLabel, next, openPdf);
+  controls.append(previous, pageLabel, next, sizeDown, sizeUp, openPdf);
   const origin = safeUrl(book?.sourceUrl);
   if (origin) {
     const openOrigin = element("a", "button ghost small", "Open original web source ↗");
@@ -83,6 +101,16 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
   const searchStatus = element("span", "reader-search-status", "");
   searchStatus.setAttribute("role", "status");
   searchWrap.append(search, searchStatus);
+  // Opening a citation should answer "where is that passage?" in one click.
+  // The filter is only offered when there is a passage to look for.
+  let matchOnly = false;
+  let onlyMatch = null;
+  if (String(highlight || "").trim()) {
+    onlyMatch = element("button", "button ghost small reader-only-match", "Only pages with your quote");
+    onlyMatch.type = "button";
+    onlyMatch.setAttribute("aria-pressed", "false");
+    searchWrap.appendChild(onlyMatch);
+  }
   const pageText = element("div", "reader-page-text");
   const sourceNote = element("div", "reader-note");
   content.append(toolbar, searchWrap, pageText, sourceNote);
@@ -118,26 +146,84 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
     qs(".reader-pages", wrapper)?.querySelector(".active")?.scrollIntoView({ block: "nearest" });
   }
 
-  search.addEventListener("input", () => {
+  function applyFilters() {
     const query = search.value.trim().toLocaleLowerCase();
+    const quote = String(highlight || "").replace(/\s+/g, " ").trim().toLocaleLowerCase();
     let matches = 0;
     pageButtons.forEach((button, index) => {
       const page = pageList[index];
       const haystack = `${page.page || index + 1} ${page.heading || ""} ${page.text || ""}`.toLocaleLowerCase();
-      button.hidden = Boolean(query) && !haystack.includes(query);
+      const text = String(page.text || "").replace(/\s+/g, " ").toLocaleLowerCase();
+      const hiddenBySearch = Boolean(query) && !haystack.includes(query);
+      const hiddenByMatch = matchOnly && quote && !text.includes(quote);
+      button.hidden = Boolean(hiddenBySearch || hiddenByMatch);
       if (!button.hidden) matches += 1;
     });
-    searchStatus.textContent = query ? `${matches} ${matches === 1 ? "page" : "pages"} found · press Enter to open the first` : "";
-  });
+    if (query) {
+      searchStatus.textContent = `${matches} ${matches === 1 ? "page" : "pages"} found · press Enter to open the first`;
+    } else if (matchOnly) {
+      searchStatus.textContent = `${matches} ${matches === 1 ? "page holds" : "pages hold"} your quoted passage`;
+    } else {
+      searchStatus.textContent = "";
+    }
+    onlyMatch?.setAttribute("aria-pressed", matchOnly ? "true" : "false");
+    onlyMatch?.classList.toggle("active", matchOnly);
+  }
+
+  search.addEventListener("input", applyFilters);
   search.addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
     event.preventDefault();
     const firstMatch = pageButtons.findIndex((button) => !button.hidden);
     if (firstMatch >= 0) render(firstMatch + 1, search.value);
   });
+  onlyMatch?.addEventListener("click", () => {
+    matchOnly = !matchOnly;
+    applyFilters();
+    // Jump to the page that actually holds the passage rather than making the
+    // student hunt through a filtered list.
+    if (!matchOnly) return;
+    const target = pageButtons.findIndex((button) => !button.hidden);
+    if (target >= 0 && pageButtons[current - 1]?.hidden) render(target + 1, search.value);
+  });
+
+  let size = readSize();
+  function applySize() {
+    pageText.style.fontSize = `${size}px`;
+    sizeDown.disabled = size <= SIZES[0];
+    sizeUp.disabled = size >= SIZES[SIZES.length - 1];
+    try {
+      localStorage.setItem(SIZE_KEY, String(size));
+    } catch {
+      /* storage can be blocked; the size still applies for this visit */
+    }
+  }
+  sizeDown.addEventListener("click", () => {
+    size = SIZES[Math.max(0, SIZES.indexOf(size) - 1)];
+    applySize();
+  });
+  sizeUp.addEventListener("click", () => {
+    size = SIZES[Math.min(SIZES.length - 1, SIZES.indexOf(size) + 1)];
+    applySize();
+  });
+
   previous.addEventListener("click", () => render(current - 1, search.value));
   next.addEventListener("click", () => render(current + 1, search.value));
+  // Arrow keys page through the book, the way every reader a student has used
+  // does — except while they are typing in the search box.
+  function onKey(event) {
+    if (event.target === search || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (event.key === "ArrowLeft" && current > 1) {
+      event.preventDefault();
+      render(current - 1, search.value);
+    } else if (event.key === "ArrowRight" && current < pageList.length) {
+      event.preventDefault();
+      render(current + 1, search.value);
+    }
+  }
+  document.addEventListener("keydown", onKey);
   render(current);
+  applySize();
 
   openModal({
     title: `Reader — ${book?.title || "Book"}`,
@@ -145,6 +231,7 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
     wide: true,
     className: "reader-modal",
     onClose: () => {
+      document.removeEventListener("keydown", onKey);
       if (pdfUrl) setTimeout(() => URL.revokeObjectURL(pdfUrl), 60_000);
     },
   });

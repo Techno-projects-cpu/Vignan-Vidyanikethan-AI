@@ -69,6 +69,14 @@ const STUDENT_KEY_FALLBACK = String(env("STUDENT_KEY_FALLBACK") || "true").toLow
 const AI_RATE_LIMIT = Math.min(600, Math.max(1, Number(env("AI_RATE_LIMIT") || 60) || 60));
 const SEARCH_RATE_LIMIT = Math.min(600, Math.max(1, Number(env("SEARCH_RATE_LIMIT") || 30) || 30));
 const SEARCH_URL = env("SEARCH_URL");
+
+// The look a brand-new device starts in. A school sets this once as an
+// environment variable; anything unrecognised falls back to Minimal, so a typo
+// cannot leave the app unstyled.
+const STYLE_IDS = ["minimal", "soft", "editorial", "luxury", "terminal", "brutal"];
+const SCHOOL_DEFAULT_STYLE = STYLE_IDS.includes(String(process.env.SCHOOL_DEFAULT_STYLE || "").trim())
+  ? String(process.env.SCHOOL_DEFAULT_STYLE).trim()
+  : "minimal";
 const WIKIPEDIA_SEARCH = String(env("WIKIPEDIA_SEARCH", "true")).toLowerCase() !== "false";
 const searchCache = new Map();
 const searchRequestTimes = [];
@@ -933,7 +941,7 @@ async function socialDiagnostics({ fresh = false } = {}) {
 function health() {
   return {
     ok: true,
-    version: "2.8.0",
+    version: "2.9.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,
@@ -960,6 +968,9 @@ function health() {
     social: socialStore ? socialStore.backend : "unavailable",
     games: ["chess", "quiz", "math", "word"],
     offlineReady: true,
+    // The style a device uses before anyone has chosen one. Chosen per device,
+    // set per school: a shared classroom tablet should not inherit a taste.
+    defaultStyle: SCHOOL_DEFAULT_STYLE,
     localAI: {
       runtime: "webllm",
       bundled: true,
@@ -1158,7 +1169,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.8.0</strong></div>
+      <div><span>release</span><strong>2.9.0</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1272,7 +1283,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.8.0",
+    release: "2.9.0",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);

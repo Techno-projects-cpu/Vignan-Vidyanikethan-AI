@@ -125,13 +125,13 @@ test("the app installs the shelf on first open and lets the student remove it", 
   assert.match(html, /id="starter-status"/);
   assert.match(html, /Start with pages we wrote ourselves/);
 
-  assert.match(app, /from "\.\/starter-shelf\.js\?v=33"/);
+  assert.match(app, /from "\.\/starter-shelf\.js\?v=34"/);
   assert.match(app, /await ensureStarterShelf\(\);/, "first open never shows an empty workspace");
   assert.match(app, /async function installStarterShelf/, "the same path is used for the button");
   assert.match(app, /async function removeStarterShelf/);
   assert.match(app, /renderStarterCard\(\);/);
   assert.match(app, /Add the starter pages/, "the empty exam panel offers the shelf too");
-  assert.match(sw, /"\.\/js\/starter-shelf\.js\?v=33"/, "the shelf ships offline");
+  assert.match(sw, /"\.\/js\/starter-shelf\.js\?v=34"/, "the shelf ships offline");
 
   // A starter book must never be marked as the retired demo pack: reloadIndexes
   // deletes demo books, which would silently bring the empty workspace back.

@@ -281,6 +281,54 @@ body.premium-ui .section-copy h2 { font-size: clamp(20px, 2.4vw, 28px); }
   .goal-copy small { display: none; }
 }
 
+/* ---- Locked switches ------------------------------------------------------
+   Four styles fix their own palette, so light/dark has nothing to do there.
+   The control stays in place — hiding it would make students think it broke —
+   but it is visibly unavailable and a one-line reason sits under it in
+   Settings. Terminal is dark by design and behaves the same way.            */
+body.premium-ui #theme-toggle:disabled,
+body.premium-ui #theme-toggle[aria-disabled="true"] {
+  opacity: .38;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+body.premium-ui .settings-note {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 46ch;
+}
+
+body.premium-ui select:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* ---- Reader tools --------------------------------------------------------
+   Larger text, a page filter that keeps only pages holding the cited passage,
+   and arrow-key paging. All three exist because citations are read on phones in
+   daylight and on a projector at the back of a classroom.                    */
+body.premium-ui .reader-only-match.active {
+  color: var(--brand);
+  border-color: var(--brand);
+  font-weight: 750;
+}
+
+body.premium-ui .reader-controls button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+body.premium-ui .reader-page-text {
+  tab-size: 4;
+}
+
+@media (max-width: 480px) {
+  body.premium-ui .reader-only-match { width: 100%; margin-top: 6px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .style-tile, .settings-tab, .first-run { transition: none !important; }
 }
