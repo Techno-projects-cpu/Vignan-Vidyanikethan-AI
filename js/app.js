@@ -6,31 +6,31 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=29";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=29";
-import { ingestPdf, ingestText } from "./ingest.js?v=29";
-import { splitSentences } from "./text.js?v=29";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=29";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=29";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=29";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=29";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=29";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=29";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=29";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=29";
+import * as db from "./db.js?v=30";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=30";
+import { ingestPdf, ingestText } from "./ingest.js?v=30";
+import { splitSentences } from "./text.js?v=30";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=30";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=30";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=30";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=30";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=30";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=30";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=30";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=30";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=29";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=29";
+} from "./pro-mode.js?v=30";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=30";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=29";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=29";
-import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=29";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=29";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=29";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=29";
+} from "./updates.js?v=30";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=30";
+import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=30";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=30";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=30";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=30";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -38,8 +38,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=29";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=29";
+} from "./llm.js?v=30";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=30";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -51,7 +51,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=29";
+} from "./local-ai.js?v=30";
 import {
   EXAMS,
   MODES,
@@ -66,12 +66,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=29";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=29";
-import { availableVoices, listenMessage, listenOnce, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=29";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=29";
-import { TASKS } from "./model-router.js?v=29";
-import { PROVIDERS, providerList } from "./providers.js?v=29";
+} from "./exam-packs.js?v=30";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=30";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=30";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=30";
+import { TASKS } from "./model-router.js?v=30";
+import { PROVIDERS, providerList } from "./providers.js?v=30";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -80,30 +80,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=29";
-import { parseApiKeys } from "./key-pool.js?v=29";
+} from "./settings.js?v=30";
+import { parseApiKeys } from "./key-pool.js?v=30";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=29";
+} from "./student-keys.js?v=30";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=29";
+} from "./quiz.js?v=30";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=29";
+} from "./flashcards.js?v=30";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=29";
+} from "./study-decks.js?v=30";
 import {
   accuracy,
   currentStreak,
@@ -114,15 +114,15 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=29";
-import { externalSearchUrl, searchWeb } from "./web.js?v=29";
-import { openEditStudio } from "./edit-studio.js?v=29";
-import { openReader } from "./reader.js?v=29";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=29";
-import { languageLabel, languageGroups, languageMeta, languageGlyph } from "./languages.js?v=29";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=29";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=29";
-import * as ui from "./ui.js?v=29";
+} from "./progress.js?v=30";
+import { externalSearchUrl, searchWeb } from "./web.js?v=30";
+import { openEditStudio } from "./edit-studio.js?v=30";
+import { openReader } from "./reader.js?v=30";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=30";
+import { languageLabel, languageGroups, languageMeta, languageGlyph } from "./languages.js?v=30";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=30";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=30";
+import * as ui from "./ui.js?v=30";
 import {
   clearReferral,
   getLeaderboard,
@@ -132,8 +132,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=29";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=29";
+} from "./auth.js?v=30";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=30";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -141,12 +141,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=29";
-import { initMotion, revealVisible } from "./motion.js?v=29";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=29";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=29";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=29";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=29";
+} from "./premium-ui.js?v=30";
+import { initMotion, revealVisible } from "./motion.js?v=30";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=30";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=30";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=30";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=30";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -2120,6 +2120,63 @@ function speakCurrentQuestion() {
  * Speech is a shortcut for typing, never a replacement: on any failure the box
  * keeps its text and the student is told what happened.
  */
+/**
+ * Put a microphone failure where the student can read it and act on it.
+ *
+ * A toast disappears in five seconds and cannot carry a link. This notice stays
+ * until it is fixed or dismissed, says which failure happened, and when the page
+ * is inside a preview frame it offers the one action that works: open the app in
+ * its own tab.
+ */
+function showVoiceHelp(problem) {
+  const box = $("#voice-help");
+  if (!box) {
+    ui.showToast(problem.message, "info", 7000);
+    return;
+  }
+  box.replaceChildren();
+  box.appendChild(document.createTextNode(problem.message));
+  if (problem.openTab) {
+    const link = ui.element("a", "voice-help-link", "Open in a new tab ↗");
+    link.href = location.href;
+    link.target = "_blank";
+    link.rel = "noopener";
+    box.appendChild(link);
+  }
+  const close = ui.element("button", "voice-help-close", "Dismiss");
+  close.type = "button";
+  close.addEventListener("click", hideVoiceHelp);
+  box.appendChild(close);
+  box.classList.remove("hidden");
+  box.dataset.code = problem.code;
+}
+
+function hideVoiceHelp() {
+  const box = $("#voice-help");
+  if (!box) return;
+  box.classList.add("hidden");
+  box.replaceChildren();
+  delete box.dataset.code;
+}
+
+/**
+ * Ask the browser what it thinks before blaming the student.
+ *
+ * Chrome reports a blocked frame and a refused permission with the same error
+ * code, so the frame check comes first; the Permissions API, where it exists,
+ * distinguishes a refusal the student made themselves.
+ */
+async function voiceProblem(error) {
+  let permission = "";
+  try {
+    const status = await navigator.permissions?.query?.({ name: "microphone" });
+    if (status?.state === "denied") permission = "denied";
+  } catch {
+    // Firefox and Safari do not expose the microphone here; carry on.
+  }
+  return microphoneProblem({ error: permission || error, framed: insideFrame(), permission });
+}
+
 async function dictateAnswer(button) {
   const env = voiceEnv();
   if (!env.listen) {
@@ -2130,7 +2187,7 @@ async function dictateAnswer(button) {
   let recognition = null;
   try { recognition = new Recognition(); } catch { recognition = null; }
   if (!recognition) {
-    ui.showToast(listenMessage("unsupported"), "info", 6000);
+    showVoiceHelp(microphoneProblem({ error: "unsupported", framed: insideFrame() }));
     return;
   }
   const input = $("#quiz-question textarea.short-input") || $("#quiz-question input.fill-input");
@@ -2147,12 +2204,13 @@ async function dictateAnswer(button) {
   button.textContent = original;
   button.classList.remove("listening");
   if (text) {
+    hideVoiceHelp();
     input.value = input.value ? `${input.value.trim()} ${text}` : text;
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.focus();
     return;
   }
-  ui.showToast(listenMessage(error || "empty"), "info", 6500);
+  showVoiceHelp(await voiceProblem(error || "empty"));
 }
 
 async function dictateQuestion(button) {
@@ -2165,7 +2223,7 @@ async function dictateQuestion(button) {
   let recognition = null;
   try { recognition = new (env.Recognition)(); } catch { recognition = null; }
   if (!recognition) {
-    ui.showToast(listenMessage("unsupported"), "info", 6000);
+    showVoiceHelp(microphoneProblem({ error: "unsupported", framed: insideFrame() }));
     return;
   }
   button.disabled = true;
@@ -2174,11 +2232,12 @@ async function dictateQuestion(button) {
   button.disabled = false;
   button.classList.remove("listening");
   if (text) {
+    hideVoiceHelp();
     input.value = text;
     input.focus();
     return;
   }
-  ui.showToast(listenMessage(error || "empty"), "info", 6500);
+  showVoiceHelp(await voiceProblem(error || "empty"));
 }
 
 /** The viva report card, built from the questions the examiner actually asked. */
@@ -4490,7 +4549,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=29");
+            const { social } = await import("./social.js?v=30");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));

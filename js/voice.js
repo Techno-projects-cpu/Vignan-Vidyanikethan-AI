@@ -177,6 +177,67 @@ export function listenOnce({ recognition = null, language = "en-IN", timeoutMs =
   });
 }
 
+/**
+ * Why the microphone did not work, in terms the student can act on.
+ *
+ * The generic "did not work" is useless: a blocked frame, a refused permission
+ * and a browser with no microphone all need different next steps. `framed` says
+ * the page is running inside another page's frame — which is true of most preview
+ * panes — because Chrome refuses microphone access there unless the page that
+ * hosts the frame asked for it, and it reports that as `not-allowed`, the same
+ * code it uses for a refusal the student made themselves.
+ */
+export function microphoneProblem({ error = "", framed = false, permission = "" } = {}) {
+  const code = String(error || permission || "").toLowerCase();
+  if (framed && ["not-allowed", "service-not-allowed", "denied", "aborted", ""].includes(code)) {
+    return {
+      code: "framed",
+      openTab: true,
+      message:
+        "The preview window blocks the microphone. Open this app in its own tab and the microphone will work; typing already works here.",
+    };
+  }
+  switch (code) {
+    case "not-allowed":
+    case "service-not-allowed":
+    case "denied":
+      return {
+        code: "denied",
+        openTab: false,
+        message:
+          "Microphone access is blocked for this site. Open the padlock beside the address, allow the microphone, then tap the microphone again. Typing works meanwhile.",
+      };
+    case "audio-capture":
+      return {
+        code: "no-device",
+        openTab: false,
+        message: "No microphone was found on this device. Plug one in, or type the answer.",
+      };
+    case "network":
+      return { code: "network", openTab: false, message: "Listening needs a connection in this browser. Type the answer instead." };
+    case "no-speech":
+      return { code: "no-speech", openTab: false, message: "I did not hear anything. Tap the microphone and speak a little closer." };
+    case "timeout":
+      return { code: "timeout", openTab: false, message: "That took too long, so I stopped listening. Try again or type the answer." };
+    case "unsupported":
+      return { code: "unsupported", openTab: false, message: "This browser cannot take speech. Type the answer instead." };
+    default:
+      return { code: "unknown", openTab: false, message: "The microphone did not work. Type the answer instead." };
+  }
+}
+
+/** Is this page running inside another page's frame? */
+export function insideFrame(win = null) {
+  const target = win || (typeof window !== "undefined" ? window : null);
+  if (!target) return false;
+  try {
+    return Boolean(target.self) && target.self !== target.top;
+  } catch {
+    // A cross-origin parent throws on access, which means we are framed.
+    return true;
+  }
+}
+
 /** The sentence shown when listening fails, in the student's own terms. */
 export function listenMessage(error = "") {
   switch (String(error)) {

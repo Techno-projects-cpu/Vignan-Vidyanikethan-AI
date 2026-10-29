@@ -412,8 +412,8 @@ npm run offline:check
 ```
 
 ```
-Release v29
-Cached after install: 368 files in vignan-vidyanikethan-ai-v29
+Release v30
+Cached after install: 368 files in vignan-vidyanikethan-ai-v30
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
@@ -638,7 +638,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-381 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
+388 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 

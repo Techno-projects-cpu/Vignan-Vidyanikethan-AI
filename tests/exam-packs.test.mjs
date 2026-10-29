@@ -230,7 +230,7 @@ test("the exam practice page is reachable and uses the existing quiz pipeline", 
   }
   assert.match(html, /class="command-item" data-view="exam"/, "the command menu lists it");
   assert.match(html, /<symbol id="i-target"/, "the nav icon exists");
-  assert.match(app, /from "\.\/exam-packs\.js\?v=29"/, "the app imports the packs");
+  assert.match(app, /from "\.\/exam-packs\.js\?v=30"/, "the app imports the packs");
   assert.match(app, /if \(view === "exam"\) renderExamView\(\);/, "opening the view renders it");
   assert.match(app, /scoreExam\(exam, items\)/, "exam sessions are marked with the exam's own marking");
   assert.match(app, /result\.exam = \{/, "the result carries the exam readout");
