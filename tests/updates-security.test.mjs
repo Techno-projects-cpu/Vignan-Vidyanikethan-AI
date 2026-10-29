@@ -17,7 +17,7 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 const read = (path) => readFileSync(`${root}${path}`, "utf8");
 
 test("the worker version is read from the cache name", () => {
-  assert.equal(parseCacheVersion('const CACHE_NAME = "vignan-vidyanikethan-ai-v24";'), "24");
+  assert.equal(parseCacheVersion('const CACHE_NAME = "vignan-vidyanikethan-ai-v25";'), "25");
   assert.equal(parseCacheVersion('const CACHE_NAME = "vignan-vidyanikethan-ai-v40";'), "40");
   assert.equal(parseCacheVersion("nonsense"), "");
   assert.equal(isNewer("19", "18"), true);
@@ -78,8 +78,8 @@ test("the worker waits for permission instead of swapping itself in", () => {
 
 test("the offline report counts what the worker really stored", () => {
   const ready = summarize({
-    expected: ["./index.html", "./js/app.js?v=24", "./styles.css"],
-    cached: ["./index.html", "./js/app.js?v=24", "./styles.css"],
+    expected: ["./index.html", "./js/app.js?v=25", "./styles.css"],
+    cached: ["./index.html", "./js/app.js?v=25", "./styles.css"],
     critical: ["./index.html"],
   });
   assert.equal(ready.total, 3);
@@ -87,7 +87,7 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(ready.summary, /Ready offline: 3 of 3/);
 
   const broken = summarize({
-    expected: ["./index.html", "./js/app.js?v=24"],
+    expected: ["./index.html", "./js/app.js?v=25"],
     cached: [],
     critical: ["./index.html"],
   });
@@ -97,8 +97,8 @@ test("the offline report counts what the worker really stored", () => {
 
   // A release is not "ready" when a file every lesson needs is missing.
   const missingShell = summarize({
-    expected: ["./index.html", "./js/app.js?v=24"],
-    cached: ["./js/app.js?v=24"],
+    expected: ["./index.html", "./js/app.js?v=25"],
+    cached: ["./js/app.js?v=25"],
     critical: CRITICAL_FILES,
   });
   assert.equal(missingShell.ready, false);
@@ -109,9 +109,9 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(nothing.summary, /Open the app once while online/);
 
   // Query strings and absolute URLs compare equal.
-  assert.equal(normalizeUrl("./js/app.js?v=24"), "js/app.js");
-  assert.equal(normalizeUrl("https://app.local/js/app.js?v=24"), "js/app.js");
-  assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v24"], "18"), "vignan-vidyanikethan-ai-v24");
+  assert.equal(normalizeUrl("./js/app.js?v=25"), "js/app.js");
+  assert.equal(normalizeUrl("https://app.local/js/app.js?v=25"), "js/app.js");
+  assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v25"], "18"), "vignan-vidyanikethan-ai-v25");
 });
 
 test("the in-app check survives a browser with no cache and no network", async () => {
@@ -216,6 +216,13 @@ test("judge mode stays grayscale and does not overclaim", () => {
   }
   const judge = read("/judge.html");
   assert.match(judge, /No textbook is bundled/);
+  // Honesty that a judge can check is a feature, and it must not be quietly
+  // deleted in a later release: AI assistance and the unproven parts are named.
+  assert.match(judge, /Was this code written by AI\?/);
+  assert.match(judge, /Arena Agent Mode/);
+  assert.match(judge, /Not proven here, and stated plainly/);
+  assert.match(judge, /no professional security audit/);
+  assert.match(read("/README.md"), /## How this was built/);
   assert.match(judge, /no professional security audit/);
   assert.doesNotMatch(judge, /guarantee|100% accurate|unhackable/i);
 });

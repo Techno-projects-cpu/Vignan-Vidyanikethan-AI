@@ -11,7 +11,7 @@
  * rotate to the next key on quota/auth/network failures.
  */
 
-import { isQuotaFailure, parseApiKeys, providerKeyVariants } from "./key-pool.js?v=24";
+import { isQuotaFailure, parseApiKeys, providerKeyVariants } from "./key-pool.js?v=25";
 
 export const PROVIDERS = {
   server: {

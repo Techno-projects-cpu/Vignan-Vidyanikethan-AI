@@ -58,6 +58,16 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 
 ---
 
+## How this was built
+
+The code here was written with an AI coding agent (Arena Agent Mode) under the student's
+direction: the student decided the scope, rejected what did not belong, and the agent wrote
+the code and the tests. That is disclosed on the judge page too, because a science-fair
+project should not leave a judge to guess. What makes the claims checkable is not who typed
+the code: it is `npm run check`, which runs the secret scanner, the tests, the precache
+build and an offline simulation with the network switched off, and fails the build when
+something is missing. `CHECKLIST.md` lists the checks that still need a human and a phone.
+
 ## How this compares to the other free AI tutors
 
 Most of them are a hosted model plus a layer around it, and so is this. The open-source
@@ -387,8 +397,8 @@ npm run offline:check
 ```
 
 ```
-Release v24
-Cached after install: 366 files in vignan-vidyanikethan-ai-v24
+Release v25
+Cached after install: 366 files in vignan-vidyanikethan-ai-v25
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
