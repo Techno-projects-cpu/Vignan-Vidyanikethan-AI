@@ -81,6 +81,23 @@ export function languageGroups() {
   ];
 }
 
+/**
+ * One character to stand for a language on a card.
+ *
+ * A row of names in a dropdown looks like a setting; a grid of characters looks
+ * like care. We show the first real character of the language's own name —
+ * ত for Bengali, ت for Telugu's neighbour Urdu, E for English — because a student
+ * recognises their own script from across the screen, not the word "Telugu".
+ *
+ * Combining marks are skipped so the glyph is never an accent floating on its
+ * own, and a language with no name still gets a visible placeholder.
+ */
+export function languageGlyph(native) {
+  const characters = [...String(native || "").trim()];
+  const letter = characters.find((character) => !/^\p{M}$/u.test(character)) || "";
+  return letter ? letter.toUpperCase() : "•";
+}
+
 /** Wikipedia editions that exist for the interface languages we ship. */
 export const WIKIPEDIA_LANGUAGES = new Set(LANGUAGE_CODES);
 

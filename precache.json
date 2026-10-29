@@ -1,6 +1,6 @@
 {
-  "version": 27,
-  "generatedAt": "2026-10-29T15:37:37.345Z",
+  "version": 28,
+  "generatedAt": "2026-10-29T15:59:30.381Z",
   "urls": [
     "./",
     "./index.html",
@@ -42,6 +42,7 @@
     "./js/flashcards.js",
     "./js/free-apis.js",
     "./js/friends-ui.js",
+    "./js/goal-cards.js",
     "./js/i18n.js",
     "./js/ingest.js",
     "./js/key-pool.js",

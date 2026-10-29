@@ -106,6 +106,9 @@ error. A funded team covers far more ground; this one goes deeper on less.
 | Viva practice | An examiner asks you to explain a sentence from your own page, out loud or typed. One follow-up question when the answer is thin, then a report card out of ten that names the exact misconception and sends you back to the cited page. Marking is deterministic, so a student can check it by hand. |
 | Voice | Read any answer or question aloud, and ask a question or answer it by speaking, using the browser's own speech APIs. Both are optional and neither is bundled data: if a browser has no voices, or listening needs a connection, the app says so and typing still works. |
 | Starter shelf | Four books of pages written for this project (Physics, Chemistry, Biology, Mathematics) are installed on the first open, so citations, quizzes, flashcards and exam mocks work before a student adds anything. They are ordinary library pages - searchable, cited and removable - not a reproduction of any published textbook, and a student's own upload is always searched before them. |
+| Starting sentences | The Ask screen opens with five sentences instead of a blank box: stuck on a question, quiz me on a chapter, my viva is coming up, mark my answer, revise in ten minutes. Every sentence says where the pages will come from, the student can edit it before sending, and any sentence can be shared as a link (`?ask=…`) that fills the box without sending anything. |
+| Language tiles | All 33 languages appear as tiles showing a character in their own script — ਤ, తె, ا, E — with the hidden `<select>` kept underneath for keyboards and screen readers. Urdu, Arabic and Persian tiles flow right-to-left. |
+| Honest empty slots | A feature that is not built says so. The Library shows a dashed "coming soon" card for SCERT/NCERT books with the reason (publisher permission) and a disabled button, rather than a promise that fails when tapped. |
 | Library | Upload PDFs and readable text (for example TXT, Markdown, CSV and JSON), paste notes, or import a public webpage/PDF/text URL. Scripts, executables and archives are rejected. Web imports retain their origin and are labelled separately. |
 | Quizzes | MCQ, fill-in-the-blank, short-answer and mixed quizzes; easy/medium/hard; timed or untimed; AI-written or offline-generated; instant grading with per-question review, topic breakdown and a revise list. |
 | Exam practice | **JEE Main**, **NEET (UG)**, **AP EAPCET** (Engineering and Agriculture) and **JEE Advanced** as three modes each: a **mock test** in the real paper's shape (question count, subject split, marking and pace per question), a **chapter drill** (untimed, no penalty) and **syllabus coverage** (which chapters your own pages already answer, and what to study next). Marking is the exam's own, including negative totals. No past papers, coaching PDFs or textbook scans are bundled, fetched or indexed: the pattern is public, the questions are written from the student's own pages, and every pack links the official page. |
@@ -409,8 +412,8 @@ npm run offline:check
 ```
 
 ```
-Release v27
-Cached after install: 366 files in vignan-vidyanikethan-ai-v27
+Release v28
+Cached after install: 368 files in vignan-vidyanikethan-ai-v28
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
@@ -635,7 +638,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-368 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
+377 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 

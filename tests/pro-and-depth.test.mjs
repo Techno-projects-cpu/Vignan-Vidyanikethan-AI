@@ -127,9 +127,9 @@ test("the chrome exists and both modules are offline", () => {
   assert.match(app, /looksUncited\(model\.content\)/);
   const sw = read("/sw.js");
   for (const module of ["pro-mode.js", "pro-ui.js", "answer-quality.js"]) {
-    assert.match(sw, new RegExp(`\\./js/${module.replace(".", "\\.")}\\?v=27`), module);
+    assert.match(sw, new RegExp(`\\./js/${module.replace(".", "\\.")}\\?v=28`), module);
   }
-  assert.match(sw, /\.\/styles-pro\.css\?v=27/);
+  assert.match(sw, /\.\/styles-pro\.css\?v=28/);
 });
 
 test("the depth directive actually reaches the model prompt", async () => {
