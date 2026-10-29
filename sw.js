@@ -61,6 +61,7 @@ const CORE = [
   "./js/local-ai.js?v=18",
   "./js/model-paper.js?v=18",
   "./js/model-router.js?v=18",
+  "./js/offline-check.js?v=18",
   "./js/motion.js?v=18",
   "./js/password-policy.js?v=18",
   "./js/play-ui.js?v=18",
@@ -77,6 +78,7 @@ const CORE = [
   "./js/startup.js?v=18",
   "./js/student-keys.js?v=18",
   "./js/study-decks.js?v=18",
+  "./js/updates.js?v=18",
   "./js/study-sheet.js?v=18",
   "./js/revision-plan.js?v=18",
   "./js/text.js?v=18",
@@ -107,9 +109,14 @@ self.addEventListener("install", (event) => {
       } catch {
         // The core shell is enough to keep the app usable.
       }
-      await self.skipWaiting();
+      // No automatic skipWaiting: a new worker waits until the student taps
+      // "Update now", so a lesson is never interrupted by a silent swap.
     })(),
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {

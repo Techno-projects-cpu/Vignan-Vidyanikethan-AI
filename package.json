@@ -3,13 +3,15 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "Vignan Vidyanikethan AI \u2014 offline-first, textbook-grounded study assistant for Vignan Vidyanikethan E.M. School.",
+  "description": "Vignan Vidyanikethan AI — offline-first, textbook-grounded study assistant for Vignan Vidyanikethan E.M. School.",
   "scripts": {
     "start": "node serve.mjs",
     "dev": "node serve.mjs",
     "test": "node --test tests/*.test.mjs",
     "precache": "node tools/generate-precache.mjs",
-    "sql:social": "node tools/print-social-sql.mjs"
+    "sql:social": "node tools/print-social-sql.mjs",
+    "offline:check": "node tools/offline-sim.mjs",
+    "check": "node tools/generate-precache.mjs && node --test tests/*.test.mjs && node tools/offline-sim.mjs"
   },
   "engines": {
     "node": ">=18"

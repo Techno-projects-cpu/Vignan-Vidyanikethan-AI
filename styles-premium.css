@@ -1807,3 +1807,96 @@ body.premium-ui .chat-suggestions .suggestion-label {
   text-transform: uppercase;
 }
 body.premium-ui .chat-suggestions.hidden { display: none; }
+
+/* ------------------------------------------------------------------------- */
+/* Update banner: permission first, never a silent reload.                    */
+/* ------------------------------------------------------------------------- */
+
+body.premium-ui .update-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1800;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--p-line);
+  background: var(--p-surface);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+body.premium-ui .update-banner[hidden] { display: none; }
+
+body.premium-ui .update-banner-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--p-ink);
+  animation: update-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes update-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+body.premium-ui .update-banner-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 240px;
+}
+
+body.premium-ui .update-banner-copy strong { font-size: 13px; font-weight: 700; }
+body.premium-ui .update-banner-copy small { color: var(--p-muted); font-size: 11.5px; line-height: 1.45; }
+
+body.premium-ui .update-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+body.premium-ui .update-banner .button { min-height: 38px; }
+
+body.premium-ui.has-update .app-shell { padding-top: 58px; }
+
+@media (max-width: 560px) {
+  body.premium-ui .update-banner { padding: 10px 12px; }
+  body.premium-ui .update-banner-actions { width: 100%; justify-content: flex-end; }
+  body.premium-ui.has-update .app-shell { padding-top: 104px; }
+}
+
+/* Settings → App, updates & offline */
+
+body.premium-ui .update-rows {
+  display: grid;
+  gap: 1px;
+  margin: 12px 0 14px;
+  border: 1px solid var(--p-line);
+  background: var(--p-line);
+}
+
+body.premium-ui .update-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--p-surface);
+  font-size: 12.5px;
+}
+
+body.premium-ui .update-row span { color: var(--p-muted); }
+body.premium-ui .update-row strong { font-weight: 700; }
+
+/* Strictly monochrome: state is carried by weight and a leading mark, not hue. */
+body.premium-ui .update-row strong[data-state="ready"]::before { content: "● "; }
+body.premium-ui .update-row strong[data-state="partial"]::before { content: "◐ "; }
+body.premium-ui .update-row strong[data-state="none"]::before { content: "○ "; }
+body.premium-ui .update-row strong[data-state="partial"],
+body.premium-ui .update-row strong[data-state="none"] { color: var(--p-muted); font-weight: 650; }

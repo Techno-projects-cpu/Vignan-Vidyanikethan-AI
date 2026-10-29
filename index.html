@@ -166,7 +166,7 @@
         <span>No email needed</span><span aria-hidden="true">·</span>
         <span>Books are stored on this device</span><span aria-hidden="true">·</span>
         <span>On shared devices, local data remains after log out</span>
-        <span aria-hidden="true">·</span><a href="./privacy.html" target="_blank" rel="noopener">Privacy</a><span aria-hidden="true">·</span><a href="./terms.html" target="_blank" rel="noopener">Terms</a><span aria-hidden="true">·</span><a href="https://zero-vast.vercel.app/" target="_blank" rel="noopener noreferrer">Zero Vast ↗</a>
+        <span aria-hidden="true">·</span><a href="./privacy.html" target="_blank" rel="noopener">Privacy</a><span aria-hidden="true">·</span><a href="./terms.html" target="_blank" rel="noopener">Terms</a><span aria-hidden="true">·</span><a href="./security.html" target="_blank" rel="noopener">Security</a><span aria-hidden="true">·</span><a href="./copyright.html" target="_blank" rel="noopener">Copyright</a><span aria-hidden="true">·</span><a href="https://zero-vast.vercel.app/" target="_blank" rel="noopener noreferrer">Zero Vast ↗</a>
       </footer>
       <noscript><p class="gate-noscript">JavaScript is required to open the study workspace. Please enable it and reload.</p></noscript>
     </div>
@@ -197,6 +197,18 @@
   </svg>
 
   <a class="skip-link" href="#main">Skip to content</a>
+  <div class="update-banner" id="update-banner" hidden role="status" aria-live="polite">
+    <span class="update-banner-dot" aria-hidden="true"></span>
+    <div class="update-banner-copy">
+      <strong>A new version is ready</strong>
+      <small id="update-detail">Your books, decks and chats stay on this device.</small>
+    </div>
+    <div class="update-banner-actions">
+      <button type="button" class="button primary small" id="update-now">Update now</button>
+      <button type="button" class="text-button" id="update-later">Later</button>
+    </div>
+  </div>
+
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="./" aria-label="Vignan Vidyanikethan AI home">
@@ -679,7 +691,24 @@
               <div class="storage-summary" id="storage-summary">Checking storage…</div>
               <div class="button-row wrap"><button type="button" class="button ghost" id="export-data" data-i18n="settings.export">Export data (JSON)</button><button type="button" class="button ghost" id="clear-chat-data">Clear chat</button><button type="button" class="button ghost danger" id="delete-all" data-i18n="settings.deleteAll">Delete all local data</button></div>
               <p class="hint">The JSON export includes decks, history and book details, but not textbook pages or PDF files. API keys are excluded.</p>
-              <p class="legal-links"><a href="./privacy.html" target="_blank" rel="noopener">Privacy policy ↗</a><a href="./terms.html" target="_blank" rel="noopener">Terms of use ↗</a></p>
+              <p class="legal-links"><a href="./privacy.html" target="_blank" rel="noopener">Privacy policy ↗</a><a href="./terms.html" target="_blank" rel="noopener">Terms of use ↗</a><a href="./security.html" target="_blank" rel="noopener">Security ↗</a><a href="./copyright.html" target="_blank" rel="noopener">Copyright ↗</a></p>
+            </section>
+
+            <section class="card settings-card" id="app-updates-card">
+              <h2>App, updates &amp; offline</h2>
+              <p class="hint minimal-hide">The app keeps a copy of itself on this device so it works without a connection. When you are online it checks for a new release and waits for your permission before updating.</p>
+              <div class="update-rows">
+                <div class="update-row"><span>Version</span><strong id="app-version">—</strong></div>
+                <div class="update-row"><span>Offline copy</span><strong id="app-offline-state">Checking…</strong></div>
+                <div class="update-row"><span>Last update check</span><strong id="app-last-check">Not yet</strong></div>
+              </div>
+              <div class="button-row wrap">
+                <button type="button" class="button primary" id="check-updates">Check for updates</button>
+                <button type="button" class="button ghost" id="run-offline-check">Check offline readiness</button>
+              </div>
+              <p class="hint" id="update-result" aria-live="polite"></p>
+              <p class="hint minimal-hide">Updating reloads the page in place. Nothing is uploaded: books, decks and chats stay in this browser. You can also turn the network off and keep asking questions from the pages you already saved.</p>
+              <p class="legal-links"><a href="./security.html" target="_blank" rel="noopener">Security ↗</a><a href="./copyright.html" target="_blank" rel="noopener">Copyright &amp; takedown ↗</a><a href="./privacy.html" target="_blank" rel="noopener">Privacy ↗</a><a href="./terms.html" target="_blank" rel="noopener">Terms ↗</a></p>
             </section>
 
             <section class="card settings-card">

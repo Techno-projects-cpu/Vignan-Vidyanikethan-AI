@@ -175,6 +175,34 @@ const CONTENT_SECURITY_POLICY = [
   "form-action 'self'",
 ].join("; ");
 
+/** True when the request reached us over TLS (directly or via a proxy). */
+function isHttps(request) {
+  const proto = String(request.headers["x-forwarded-proto"] || "").split(",")[0].trim().toLowerCase();
+  return proto === "https" || Boolean(request.socket?.encrypted);
+}
+
+/**
+ * Headers every response gets: no sniffing, no framing by strangers, no
+ * referrer leakage, no powerful browser APIs, and HSTS once we are on TLS.
+ */
+function baseSecurityHeaders(request) {
+  const headers = {
+    "X-Content-Type-Options": "nosniff",
+    // Framing is deliberately not restricted: the Arena live preview embeds
+    // this page in an iframe. Clickjacking is limited instead by CSRF tokens,
+    // the same-origin check on every mutation and JSON-only writes.
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), hid=(), midi=()",
+    "Cross-Origin-Resource-Policy": "same-origin",
+    "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    "X-Permitted-Cross-Domain-Policies": "none",
+  };
+  if (isHttps(request)) {
+    headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";
+  }
+  return headers;
+}
+
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".htm": "text/html; charset=utf-8",
@@ -192,6 +220,7 @@ const MIME = {
   ".gif": "image/gif",
   ".ico": "image/x-icon",
   ".txt": "text/plain; charset=utf-8",
+  ".well-known": "text/plain; charset=utf-8",
   ".md": "text/markdown; charset=utf-8",
   ".pdf": "application/pdf",
   ".woff": "font/woff",
@@ -207,13 +236,10 @@ const MIME = {
 function sendJson(response, status, data, { api = false, extraHeaders = {}, corsOrigin = null } = {}) {
   const body = Buffer.from(JSON.stringify(data));
   const headers = {
+    ...baseSecurityHeaders(response.__vignanRequest || {}),
     "Content-Type": "application/json; charset=utf-8",
     "Content-Length": body.length,
     "Cache-Control": "no-store",
-    "X-Content-Type-Options": "nosniff",
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-    "Cross-Origin-Resource-Policy": "same-origin",
   };
   if (api) {
     headers["Vary"] = "Origin";
@@ -957,13 +983,10 @@ async function serveStatic(request, response, pathname) {
   const noCache = ["sw.js", "index.html", "precache.json", "manifest.webmanifest"].includes(path.basename(target));
   const buffer = await fs.readFile(target);
   const headers = {
+    ...baseSecurityHeaders(request),
     "Content-Type": contentType,
     "Content-Length": buffer.length,
     "Cache-Control": noCache ? "no-cache" : "public, max-age=3600",
-    "X-Content-Type-Options": "nosniff",
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-    "Cross-Origin-Resource-Policy": "same-origin",
     "Content-Security-Policy": CONTENT_SECURITY_POLICY,
   };
   response.writeHead(200, headers);
@@ -971,6 +994,9 @@ async function serveStatic(request, response, pathname) {
 }
 
 const server = http.createServer(async (request, response) => {
+  // Remember the request on the response so JSON helpers can pick HSTS/security
+  // headers without threading it through every call site.
+  response.__vignanRequest = request;
   let url;
   try {
     url = new URL(request.url || "/", `http://${request.headers.host || "localhost"}`);

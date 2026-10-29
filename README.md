@@ -330,6 +330,85 @@ do not contain it, Pro Mode says so too. Reduced-motion users get a cross-fade
 instead of the animation. `js/pro-mode.js` is pure logic, `js/pro-ui.js` runs
 the sequence, and `styles-pro.css` styles it.
 
+### Updates happen only with permission
+
+The service worker no longer swaps itself in. A new release installs, then
+**waits**; the page shows a banner — *"A new version is ready · your books, decks
+and chats stay on this device"* — with **Update now** and **Later**. Update now
+posts `SKIP_WAITING`, waits for the worker to take control, then reloads in
+place. Later leaves the lesson untouched.
+
+Checks run when the app comes back online, when the tab is shown again, and on a
+slow timer; they are skipped silently when the device is offline.
+`Settings → App, updates & offline` shows the current release, the last check
+time, a **Check for updates** button and an **offline readiness** button.
+
+- `js/updates.js` — `parseCacheVersion`, `isNewer`, `checkForUpdate`, `applyUpdate`, `startUpdateWatch`
+- The worker's message handler is the only thing that calls `skipWaiting()`
+
+### Testing the offline version
+
+Two ways, one automated and one by hand.
+
+**Automated — no browser needed.** `tools/offline-sim.mjs` loads the real
+`sw.js` in a sandbox with a Cache Storage implementation and a `fetch` that reads
+the repository the way the server would. It installs the worker, turns the
+network off, and asks for every core file and every module of the release.
+
+```bash
+npm run offline:check
+```
+
+```
+Release v18
+Cached after install: 355 files in vignan-vidyanikethan-ai-v18
+  ok  200   75099 B  ./
+  ok  200   166698 B  ./js/app.js?v=18
+  ...
+Navigation fallback offline: ok (75099 B of index.html)
+Uncached file while offline: 503 with a clear message (correct)
+OFFLINE CHECK PASSED
+```
+
+It is also a test (`tests/updates-security.test.mjs`), so `npm test` fails if a
+new module is missing from the cache — this is exactly how `updates.js` and
+`offline-check.js` were caught missing on the first run.
+
+**By hand, in the browser.**
+
+1. Open the deployed app once while online and wait a few seconds.
+2. Go to **Settings → App, updates & offline** and press **Check offline
+   readiness**. It should read *Ready · N/N files*.
+3. Open DevTools → Network → **Offline** (or switch the phone to aeroplane mode
+   and reload).
+4. Ask a question about a chapter you already added: it answers with page
+   citations. Ask *"key terms of …"*: the sheet is built. Open Quiz, Flashcards
+   and Progress: the revision plan is there. Type the Pro Mode phrase: it boots.
+5. The web-fallback switch no longer offers dead links — the answer says the
+   search was skipped because you are offline.
+
+### Security and legal pages
+
+| Page | What it covers |
+| --- | --- |
+| `privacy.html` | what stays on the device, what is sent where, choices |
+| `terms.html` | acceptable use, accounts, limits of a student project |
+| `security.html` | protections in place, what is deliberately not collected, limits, private disclosure, DPDP Act 2023 rights |
+| `copyright.html` | no textbook is bundled or hosted, how quotations are used, takedown route |
+| `SECURITY.md` | the same policy in repository form, for GitHub |
+| `.well-known/security.txt` | machine-readable contact, policy and expiry |
+| `robots.txt`, `sitemap.xml` | crawling rules and the public pages |
+
+Server-side hardening in `serve.mjs`: HTTPS-only HSTS, a strict CSP (no inline
+scripts, no outside scripts, `object-src 'none'`), `nosniff`,
+`Referrer-Policy: strict-origin-when-cross-origin`, a narrow
+`Permissions-Policy`, `Cross-Origin-Resource-Policy: same-origin`,
+`Cross-Origin-Opener-Policy: same-origin-allow-popups` and
+`X-Permitted-Cross-Domain-Policies: none`. Every JSON response shares the same
+base headers. Framing is deliberately **not** restricted, because the Arena live
+preview embeds the page; clickjacking is instead limited by CSRF tokens,
+same-origin checks on every mutation and JSON-only writes.
+
 ### Offline behaviour of the newest features
 
 The service worker precaches every module, so the whole study loop is available

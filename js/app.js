@@ -22,6 +22,10 @@ import {
   proBootLines, proBriefing, proGreeting, proStatusReport,
 } from "./pro-mode.js?v=18";
 import { playProActivation, setProChrome } from "./pro-ui.js?v=18";
+import {
+  RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
+} from "./updates.js?v=18";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=18";
 import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=18";
 import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=18";
 import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=18";
@@ -156,6 +160,8 @@ const state = {
   mode: "answer",
   currentView: "ask",
   lastAnswer: {},
+  updateStatus: { status: "unsupported", remote: "" },
+  lastUpdateCheck: "",
   selectedFile: null,
   askBusy: false,
   linkContext: null,
@@ -210,6 +216,8 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     setLanguage(state.settings.language);
     setTheme(state.settings.theme, { save: false });
     setProChrome(Boolean(state.settings.pro));
+    state.updateStatus = { status: "unsupported", remote: "" };
+    state.lastUpdateCheck = "";
     await reloadIndexes();
     if (!state.messages.length) addWelcomeMessage();
     bindEvents();
@@ -287,21 +295,132 @@ async function saveSettings() {
   await db.setSetting("settings", state.settings);
 }
 
+let swRegistration = null;
+
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
   try {
     const script = new URL("../sw.js", import.meta.url);
     const scope = new URL("../", import.meta.url).pathname;
-    navigator.serviceWorker.register(script, { scope }).catch(() => {});
+    navigator.serviceWorker
+      .register(script, { scope })
+      .then((registration) => {
+        swRegistration = registration;
+        watchForUpdates(registration);
+      })
+      .catch(() => {});
   } catch {
     // Service workers are optional; the app still works from a static host.
   }
+}
+
+/** Show the update banner; never swap a release under a student mid-lesson. */
+function showUpdateBanner({ remote = "" } = {}) {
+  const banner = $("#update-banner");
+  if (!banner) return;
+  const detail = $("#update-detail");
+  if (detail) detail.textContent = updateBannerText({ current: RELEASE, remote });
+  banner.hidden = false;
+  document.body.classList.add("has-update");
+}
+
+function hideUpdateBanner() {
+  const banner = $("#update-banner");
+  if (banner) banner.hidden = true;
+  document.body.classList.remove("has-update");
+}
+
+function watchForUpdates(registration) {
+  startUpdateWatch(registration, {
+    onAvailable: ({ remote }) => showUpdateBanner({ remote }),
+    onStatus: (result) => {
+      state.updateStatus = result;
+      renderAppVersion();
+    },
+  });
+  updateLastCheckLabel("Checked on load");
+}
+
+function renderAppVersion() {
+  const version = $("#app-version");
+  if (version) version.textContent = `Release ${RELEASE}`;
+  const offline = $("#app-offline-state");
+  if (offline && !offline.dataset.checked) offline.textContent = state.settings ? "Checking…" : "—";
+  const last = $("#app-last-check");
+  if (last && state.lastUpdateCheck) last.textContent = state.lastUpdateCheck;
+}
+
+function updateLastCheckLabel(text) {
+  state.lastUpdateCheck = text;
+  const node = $("#app-last-check");
+  if (node) node.textContent = text;
+}
+
+/** The "Check offline readiness" button: counts what the worker really stored. */
+async function checkOfflineReadiness({ announce = true } = {}) {
+  const node = $("#app-offline-state");
+  const report = await runOfflineCheck({ version: RELEASE, critical: CRITICAL_FILES });
+  if (node) {
+    node.dataset.checked = "1";
+    node.textContent = report.ready
+      ? `Ready · ${report.cached}/${report.total || "?"} files`
+      : report.installed
+        ? `Incomplete · ${report.cached}/${report.total} files`
+        : "Not installed yet";
+    node.dataset.state = report.ready ? "ready" : report.installed ? "partial" : "none";
+  }
+  if (announce) {
+    ui.showToast(report.summary, report.ready ? "success" : "warning", 6000);
+    const result = $("#update-result");
+    if (result) {
+      result.textContent = report.ready
+        ? `${report.summary} Answers, study sheets, revision and quizzes work with the network off.`
+        : `${report.summary} Open the app once while online so the worker can store the release.`;
+    }
+  }
+  return report;
+}
+
+async function runUpdateCheck({ userInitiated = false } = {}) {
+  const result = $("#update-result");
+  if (navigator.onLine === false) {
+    if (userInitiated) ui.showToast(updateStatusLabel("offline"), "warning", 5000);
+    if (result) result.textContent = updateStatusLabel("offline");
+    return;
+  }
+  if (result) result.textContent = "Checking…";
+  const outcome = swRegistration
+    ? await checkForUpdate(swRegistration)
+    : { status: "unsupported", remote: "" };
+  updateLastCheckLabel(new Date().toLocaleTimeString());
+  if (outcome.status === "available") {
+    showUpdateBanner({ remote: outcome.remote });
+    if (result) result.textContent = updateStatusLabel("available");
+    if (userInitiated) ui.showToast("A new version is ready — use Update now.", "info", 5000);
+    return;
+  }
+  if (result) result.textContent = updateStatusLabel(outcome.status);
+  if (userInitiated) ui.showToast(updateStatusLabel(outcome.status), outcome.status === "current" ? "success" : "warning", 4500);
+}
+
+async function takeUpdate() {
+  if (!swRegistration) {
+    location.reload();
+    return;
+  }
+  ui.showToast("Updating — the page will reload.", "info", 3000);
+  await applyUpdate(swRegistration);
 }
 
 /* ------------------------------------------------------------- navigation */
 
 function setView(view, { skipHistory = false } = {}) {
   if (!VIEW_META[view]) view = "ask";
+  if (view === "settings") {
+    renderAppVersion();
+    void checkOfflineReadiness({ announce: false });
+    void runUpdateCheck();
+  }
   state.currentView = view;
   $$(".view").forEach((panel) => panel.classList.toggle("active", panel.dataset.panel === view));
   $$(".nav-item, .mobile-nav-item").forEach((button) => {
@@ -3660,6 +3779,13 @@ function bindEvents() {
   window.addEventListener("online", updateOfflineChip);
   window.addEventListener("offline", updateOfflineChip);
   $("#pro-chip")?.addEventListener("click", () => { void disengageProMode(); });
+  $("#update-now")?.addEventListener("click", () => { void takeUpdate(); });
+  $("#update-later")?.addEventListener("click", () => {
+    hideUpdateBanner();
+    ui.showToast("Fine — it will wait. Update from Settings whenever you like.", "info", 3600);
+  });
+  $("#check-updates")?.addEventListener("click", () => { void runUpdateCheck({ userInitiated: true }); });
+  $("#run-offline-check")?.addEventListener("click", () => { void checkOfflineReadiness(); });
 
   $("#ask-form").addEventListener("submit", handleAsk);
   $("#ask-web-fallback").addEventListener("change", (event) => void setWebChoice(event.target.checked));
