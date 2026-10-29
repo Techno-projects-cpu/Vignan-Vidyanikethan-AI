@@ -59,6 +59,23 @@ Before inviting students, the operator should review `privacy.html` and `terms.h
 
 If Supabase settings are missing or an obvious placeholder was pasted, `/api/health` reports `accountsBackend: "unavailable"`; account requests return 503 instead of silently creating local, ephemeral accounts. Guest study still works. A `"supabase"` health value means the settings look present, not that credentials or connectivity were tested.
 
+### 3d. Run both SQL migrations once (accounts **and** friends)
+
+Supabase needs two migrations. `20261027000000_vignan_ai.sql` creates the account, session, leaderboard and progress tables; `20261028000000_vignan_social.sql` creates the friends, notification, chat and game tables. Both are idempotent — running them twice is harmless.
+
+1. Open <https://supabase.com/dashboard> → your project → **SQL Editor** → **New query**.
+2. Paste the contents of `supabase/migrations/20261027000000_vignan_ai.sql`, press **Run**.
+3. Paste the contents of `supabase/migrations/20261028000000_vignan_social.sql`, press **Run**. `npm run sql:social` prints this file with the instructions attached.
+4. Wait about ten seconds for PostgREST to refresh its schema cache, then reload the site. No redeploy is needed.
+
+Without the second migration, login and the leaderboard work but **Friends, Chat and Play fail**. The app now says so plainly — the server answers 503 with *"Friends, chat and games are not set up on this server yet…"* and logs the exact missing tables at boot. To check the database without opening the app:
+
+```bash
+curl -s https://YOUR-SERVICE.onrender.com/api/health?social=1
+```
+
+`socialReady: true` means every table answered. When it is `false`, `socialCheck.missing` lists the tables that are still missing and `socialCheck.detail` says why. `npm start` also prints one line at boot — either `Social store: 7 tables` or a warning naming the migration to run.
+
 ## 4. Use a real local AI — or add your own free keys
 
 **No API keys are bundled.** Public, leaked or shared keys are not safe: they can expose private data, exhaust someone else's quota, and create surprise bills. Generate keys from your own provider accounts and paste only the secret value into Render → Environment. The app's **Settings → Advanced settings → Official free-tier API keys** panel links directly to every official key page.

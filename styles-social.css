@@ -1278,3 +1278,25 @@ body.premium-ui .account-dot.has-alerts {
     transition: none;
   }
 }
+
+/* A failed friends sync must leave a way forward, not just red text. */
+.social-error-card {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  padding: 16px;
+  border: 1px solid var(--p-line-strong);
+  background: var(--p-surface);
+}
+
+.social-error-card .social-hint {
+  margin: 0;
+  color: var(--p-ink);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.social-error-card .button {
+  justify-self: start;
+  min-height: 44px;
+}

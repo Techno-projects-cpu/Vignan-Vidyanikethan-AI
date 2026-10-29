@@ -89,9 +89,15 @@ async function api(path, { method = "GET", body, signal } = {}) {
       data = {};
     }
     if (!response.ok || data.ok === false) {
+      // Always prefer the server's own sentence: it knows whether the tables are
+      // missing, the database is down or the request was refused.
       const message = data.error || (response.status === 401
         ? "Log in with your student account to use friends, chat and games."
-        : "The server could not complete that request. Please try again.");
+        : response.status === 404
+          ? "This deployment does not have friends, chat and games yet. Redeploy the latest version and try again."
+          : response.status === 503
+            ? "Friends, chat and games are temporarily unavailable on the server. Please try again in a minute."
+            : `The server could not complete that request (error ${response.status}). Please try again.`);
       throw new SocialClientError(message, response.status);
     }
     return data;

@@ -853,6 +853,30 @@ async function handleFetch(request, response) {
   }
 }
 
+let socialCheckCache = { at: 0, value: null };
+
+/**
+ * Ask the social store whether it can actually serve requests.
+ *
+ * Cached for a minute: it costs one tiny query per table, and health checks are
+ * cheap to call. `?social=1` returns the result; the plain health payload stays
+ * as small as before.
+ */
+async function socialDiagnostics({ fresh = false } = {}) {
+  if (!socialStore) return { ok: false, backend: "unavailable", detail: "accounts backend unavailable" };
+  if (!fresh && socialCheckCache.value && Date.now() - socialCheckCache.at < 60_000) return socialCheckCache.value;
+  let value;
+  try {
+    value = typeof socialStore.health === "function"
+      ? await socialStore.health()
+      : { ok: true, backend: socialStore.backend, detail: "no probe" };
+  } catch (error) {
+    value = { ok: false, backend: socialStore.backend, code: error?.code || "", detail: error?.message || String(error) };
+  }
+  socialCheckCache = { at: Date.now(), value };
+  return value;
+}
+
 function health() {
   return {
     ok: true,
@@ -979,7 +1003,12 @@ const server = http.createServer(async (request, response) => {
       return;
     }
     if (apiPath === "/api/health" && request.method === "GET") {
-      sendJson(response, 200, health(), { api: true });
+      const payload = health();
+      if (url.searchParams.get("social")) {
+        payload.socialCheck = await socialDiagnostics({ fresh: url.searchParams.get("social") === "fresh" });
+        payload.socialReady = Boolean(payload.socialCheck.ok);
+      }
+      sendJson(response, 200, payload, { api: true });
       return;
     }
     if (apiPath === "/api/auth/register" && request.method === "POST") {
@@ -1044,7 +1073,8 @@ const server = http.createServer(async (request, response) => {
       sendError(response, error.status, error.message, authOptions(request));
       return;
     }
-    console.error("[vignan-ai] request failed", apiPath, error?.name || "Error");
+    // Log the cause once, in a form that maps onto the front-end message.
+    console.error("[vignan-ai] request failed", apiPath, error?.name || "Error", error?.message || "", error?.code || "", error?.table || "");
     if (!response.headersSent) sendError(response, 500, "The server could not complete the request. Please try again.");
     else response.end();
   }
@@ -1062,4 +1092,16 @@ server.listen(PORT, HOST, () => {
     `Student accounts: ${accountsBackend === "supabase" ? "Supabase Auth + persistent sessions" : accountsBackend === "local" ? "local JSON store (scrypt-hashed)" : "unavailable — check Supabase configuration"}`,
   );
   console.log(`Social layer: ${socialStore ? `friends, chat and 4 games (${socialStore.backend} store)` : "unavailable"}`);
+  // A missing Supabase migration is the one social failure worth shouting about
+  // at boot: everything else recovers by itself.
+  socialDiagnostics({ fresh: true })
+    .then((check) => {
+      if (check?.ok) console.log(`Social store: ${check.detail || check.backend}`);
+      else if (check?.missing?.length) {
+        console.warn(`[vignan-ai] Social tables missing (${check.missing.join(", ")}). Run supabase/migrations/20261028000000_vignan_social.sql in the Supabase SQL editor. Friends, chat and games stay unavailable until then.`);
+      } else {
+        console.warn(`[vignan-ai] Social store check failed: ${check?.detail || "unknown"}. Friends, chat and games may be unavailable.`);
+      }
+    })
+    .catch(() => {});
 });

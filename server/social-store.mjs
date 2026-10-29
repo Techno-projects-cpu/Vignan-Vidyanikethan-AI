@@ -14,6 +14,30 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 
 const HALL_THREAD_ID = "00000000-0000-4000-8000-000000000001";
+
+/** Every table `supabase/migrations/20261028000000_vignan_social.sql` creates. */
+export const SOCIAL_TABLES = [
+  "social_profiles",
+  "friend_requests",
+  "friendships",
+  "social_notifications",
+  "chat_threads",
+  "chat_messages",
+  "games",
+];
+
+/**
+ * PostgREST reports an unapplied migration as 404 + PGRST205, or PostgreSQL
+ * raises 42P01 ("relation does not exist") when it talks to the database
+ * directly. Both mean the same thing to an operator: run the migration.
+ */
+export function isMissingTable(error) {
+  const code = String(error?.code || "").toUpperCase();
+  const text = `${error?.detail || ""} ${error?.message || ""}`.toLowerCase();
+  if (code === "PGRST205" || code === "42P01") return true;
+  if (text.includes("could not find the table") || text.includes("schema cache")) return true;
+  return /relation .{0,80}does not exist/.test(text);
+}
 export const STUDY_HALL_ID = HALL_THREAD_ID;
 
 const emptyState = () => ({
@@ -76,6 +100,25 @@ export function createLocalSocialStore(filePath) {
 
   return {
     backend: "local",
+
+    /**
+     * Is the JSON file actually usable? A Render container with a read-only
+     * mount (or a full disk) fails on the first write, which used to surface as
+     * a generic 500 in the friends view.
+     */
+    async health() {
+      const probe = `${filePath}.probe`;
+      try {
+        await fs.mkdir(directory, { recursive: true });
+        await fs.writeFile(probe, "ok", { mode: 0o600 });
+        await fs.unlink(probe).catch(() => {});
+        // A file that exists but cannot be parsed would also break every call.
+        const state = await loadNow();
+        return { ok: true, backend: "local", detail: `${path.basename(filePath)} · ${state.profiles.length} profiles` };
+      } catch (error) {
+        return { ok: false, backend: "local", code: error.code || "", detail: error.message };
+      }
+    },
 
     async upsertProfile(profile) {
       return mutate((state) => {
@@ -348,7 +391,7 @@ export function createLocalSocialStore(filePath) {
 
 /* --------------------------------------------------------------- supabase */
 
-export function createSupabaseSocialStore({ url, serviceRoleKey }) {
+export function createSupabaseSocialStore({ url, serviceRoleKey, fetchImpl = fetch }) {
   const base = `${String(url).replace(/\/+$/, "")}/rest/v1`;
   const headers = {
     apikey: serviceRoleKey,
@@ -357,7 +400,7 @@ export function createSupabaseSocialStore({ url, serviceRoleKey }) {
   };
 
   async function rest(table, { method = "GET", query = "", body, prefer = "", single = false } = {}) {
-    const response = await fetch(`${base}/${table}${query}`, {
+    const response = await fetchImpl(`${base}/${table}${query}`, {
       method,
       headers: { ...headers, ...(prefer ? { Prefer: prefer } : {}) },
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -377,6 +420,8 @@ export function createSupabaseSocialStore({ url, serviceRoleKey }) {
       const error = new Error(`social store request failed (${response.status})`);
       error.status = response.status;
       error.detail = typeof data === "string" ? data : data?.message || "";
+      error.code = data?.code || "";
+      error.table = table;
       throw error;
     }
     return single ? (Array.isArray(data) ? data[0] || null : data) : data;
@@ -424,6 +469,28 @@ export function createSupabaseSocialStore({ url, serviceRoleKey }) {
 
   return {
     backend: "supabase",
+
+    /**
+     * Confirm every table the social layer needs is present.
+     *
+     * Supabase needs `supabase/migrations/20261028000000_vignan_social.sql`
+     * applied once. When it has not been, PostgREST answers 404/PGRST205 and
+     * the friends screen used to show only "the server could not complete the
+     * request"; this probe turns that into an exact, checkable diagnosis.
+     */
+    async health() {
+      const missing = [];
+      for (const table of SOCIAL_TABLES) {
+        try {
+          await rest(table, { query: "?select=*&limit=1" });
+        } catch (error) {
+          if (isMissingTable(error)) missing.push(table);
+          else return { ok: false, backend: "supabase", code: error.code || String(error.status || ""), detail: error.detail || error.message, table };
+        }
+      }
+      if (missing.length) return { ok: false, backend: "supabase", code: "PGRST205", missing, detail: `missing tables: ${missing.join(", ")}` };
+      return { ok: true, backend: "supabase", detail: `${SOCIAL_TABLES.length} tables` };
+    },
 
     async upsertProfile(profile) {
       const rows = await rest("social_profiles", {

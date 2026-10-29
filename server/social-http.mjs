@@ -7,8 +7,36 @@
  */
 
 import { SocialError } from "./social.mjs";
+import { isMissingTable } from "./social-store.mjs";
 
 const LOGIN_MESSAGE = "Log in with your student account to use friends, chat and games.";
+const SETUP_MESSAGE =
+  "Friends, chat and games are not set up on this server yet. An admin needs to run "
+  + "supabase/migrations/20261028000000_vignan_social.sql in the Supabase SQL editor, then retry.";
+const OUTAGE_MESSAGE =
+  "Friends, chat and games could not reach the account database just now. Please try again in a minute.";
+
+/**
+ * Turn an unexpected store failure into one honest sentence.
+ *
+ * Without this, any PostgREST/disk error escaped to the top-level handler and a
+ * student saw only "the server could not complete the request", which says
+ * nothing about what to fix. The detail is logged once per distinct cause so a
+ * Render log still has the full picture.
+ */
+function failure(error, scope) {
+  if (error instanceof SocialError) return error;
+  // A nickname clash is the student's to fix, not an outage.
+  if (String(error?.code || "") === "23505" && String(error?.table || "").includes("social_profiles")) {
+    return new SocialError("That nickname is already used by another student in Friends. Change your name in Progress, then try again.", 409);
+  }
+  const missing = isMissingTable(error);
+  const message = missing ? SETUP_MESSAGE : OUTAGE_MESSAGE;
+  const error$ = new SocialError(message, 503);
+  error$.cause = error;
+  error$.logged = { message: error?.message || String(error), code: error?.code || "", table: error?.table || scope };
+  return error$;
+}
 
 export function createSocialRouter({ service, accounts, accountsBackend, currentSession, sendJson, sendError, authOptions, readJson, rateLimit }) {
   const options = (request) => authOptions(request);
@@ -55,8 +83,27 @@ export function createSocialRouter({ service, accounts, accountsBackend, current
     }
   };
 
+  const logged = new Set();
+
   return async function routeSocial({ request, response, apiPath, url }) {
     if (!apiPath.startsWith("/api/social/") && !apiPath.startsWith("/api/games/")) return false;
+    try {
+      return await handle({ request, response, apiPath, url });
+    } catch (error) {
+      const wrapped = failure(error, apiPath);
+      if (wrapped.logged) {
+        const key = `${wrapped.logged.code}:${wrapped.logged.message}`;
+        if (!logged.has(key)) {
+          logged.add(key);
+          console.error(`[vignan-ai] social store error at ${apiPath}:`, wrapped.logged.message, wrapped.logged.code || "", wrapped.logged.table ? `(${wrapped.logged.table})` : "");
+        }
+      }
+      if (!response.headersSent) sendError(response, wrapped.status || 503, wrapped.message, options(request));
+      return true;
+    }
+  };
+
+  async function handle({ request, response, apiPath, url }) {
     const method = request.method;
     const who = await student(request, response);
     if (!who) return true;
@@ -188,5 +235,5 @@ export function createSocialRouter({ service, accounts, accountsBackend, current
 
     sendError(response, 404, "Unknown social endpoint.", options(request));
     return true;
-  };
+  }
 }

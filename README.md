@@ -139,9 +139,19 @@ Account API (same origin; legacy `/study-ai/api/...` aliases still work):
 Two backends are included:
 
 - **Local JSON (default):** dependency-free file at `server/data/accounts.json`, intended for a school demo, LAN or local prototype. It is ignored by Git and never served as a static file. Sessions are in memory, so a restart logs students out.
-- **Supabase (recommended for Render):** set `STUDY_AI_ACCOUNTS_BACKEND=supabase` plus `SUPABASE_URL`, `SUPABASE_ANON_KEY` (publishable or legacy anon) and `SUPABASE_SERVICE_ROLE_KEY` (secret or legacy service-role). Apply `supabase/migrations/20261027000000_vignan_ai.sql` first. Supabase Auth handles password hashing; profiles, progress, referrals and sessions live in Postgres with row-level security, so Render's ephemeral filesystem and cold starts do not erase accounts. Supabase's free tier includes 50,000 monthly active users, a 500 MB database and 500,000 Edge Function invocations ([billing docs](https://supabase.com/docs/guides/platform/billing-on-supabase)), but free projects pause after a week of database inactivity.
+- **Supabase (recommended for Render):** set `STUDY_AI_ACCOUNTS_BACKEND=supabase` plus `SUPABASE_URL`, `SUPABASE_ANON_KEY` (publishable or legacy anon) and `SUPABASE_SERVICE_ROLE_KEY` (secret or legacy service-role). Apply **both** migrations in the Supabase SQL editor first — `supabase/migrations/20261027000000_vignan_ai.sql` (accounts, sessions, leaderboard, progress) and `supabase/migrations/20261028000000_vignan_social.sql` (friends, notifications, chat, games). `npm run sql:social` prints the second one with instructions. Supabase Auth handles password hashing; profiles, progress, referrals and sessions live in Postgres with row-level security, so Render's ephemeral filesystem and cold starts do not erase accounts. Supabase's free tier includes 50,000 monthly active users, a 500 MB database and 500,000 Edge Function invocations ([billing docs](https://supabase.com/docs/guides/platform/billing-on-supabase)), but free projects pause after a week of database inactivity.
 
-When Supabase is requested but its URL or keys are missing or obviously invalid, accounts fail closed instead of silently creating non-persistent Render accounts; guest study remains available. `/api/health` reports the configured backend, not a live credential/connection test. For a larger public deployment, add verified guardian consent, account recovery, moderation, backups and distributed rate limiting. Never put the Supabase secret/service-role key in the browser, chat or Git.
+When Supabase is requested but its URL or keys are missing or obviously invalid, accounts fail closed instead of silently creating non-persistent Render accounts; guest study remains available. `/api/health` reports the configured backend, not a live credential/connection test.
+
+### When Friends, Chat or Play says the server could not complete the request
+
+That message means the request reached the server and the social store could not answer. The usual cause is the second migration: login and the leaderboard use `vignan_ai.sql`, while friends, chat and games need the tables from `vignan_social.sql`. The app now diagnoses it instead of hiding it:
+
+- Friends shows a sentence naming the fix, with a **Try again** button.
+- The server logs one line at boot and answers `503` with *"Friends, chat and games are not set up on this server yet…"* until the tables exist.
+- `GET /api/health?social=1` returns `socialReady`, `socialCheck.missing` and `socialCheck.detail`.
+
+Fix: Supabase dashboard → **SQL Editor** → paste `supabase/migrations/20261028000000_vignan_social.sql` (or run `npm run sql:social` and copy the output) → **Run** → wait ten seconds → reload. With `STUDY_AI_ACCOUNTS_BACKEND=local`, the same check reports whether the JSON file under `server/data/` is writable — a read-only mount produces the same 503. For a larger public deployment, add verified guardian consent, account recovery, moderation, backups and distributed rate limiting. Never put the Supabase secret/service-role key in the browser, chat or Git.
 
 ---
 
@@ -224,6 +234,14 @@ The same `/api/ai` endpoint is also available as a Supabase Edge Function under
 curl http://localhost:4173/api/health
 # {"ok":true,"ai":true,"aiProviders":["gemini","groq"],"freeRouter":true,
 #  "accounts":true,"accountsBackend":"local","offlineReady":true,"localAI":{"bundled":true},...}
+```
+
+Add `?social=1` to check the friends database, which is otherwise only exercised when a student opens the Friends, Chat or Play screen:
+
+```bash
+curl -s http://localhost:4173/api/health?social=1 | python3 -m json.tool
+# "social": "supabase", "socialReady": true, "socialCheck": {"ok": true, "detail": "7 tables"}
+# or  "socialCheck": {"ok": false, "missing": ["social_profiles", ...]}
 ```
 
 Legacy `/study-ai/api/health`, `/study-ai/api/ai`, `/study-ai/api/search`, `/study-ai/api/auth/*`, `/study-ai/api/leaderboard` and `/study-ai/api/progress` aliases are still accepted for older bookmarks, but the PWA now lives at the site root.

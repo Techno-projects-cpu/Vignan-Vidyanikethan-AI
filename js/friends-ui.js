@@ -381,6 +381,7 @@ export function renderFriends() {
   const data = social_.data;
   const signature = JSON.stringify({
     signedIn: social_.signedIn,
+    retryable: Boolean(social_.error),
     loaded: social_.loaded,
     error: social_.error,
     tab: activeTab,
@@ -401,7 +402,25 @@ export function renderFriends() {
     return;
   }
   if (!data) {
-    root.appendChild(ui.element("p", "social-hint", social_.error || "Loading your friends…"));
+    if (social_.error) {
+      // A bare hint left the student with no way forward; offer the retry inline.
+      const box = ui.element("div", "social-empty social-error-card");
+      box.appendChild(ui.element("p", "social-hint", social_.error));
+      const retry = ui.element("button", "button primary", "Try again");
+      retry.type = "button";
+      retry.addEventListener("click", () => {
+        lastSignature = "";
+        retry.disabled = true;
+        syncSocial({ silent: false }).catch(() => {}).finally(() => {
+          lastSignature = "";
+          renderFriends();
+        });
+      });
+      box.appendChild(retry);
+      root.appendChild(box);
+      return;
+    }
+    root.appendChild(ui.element("p", "social-hint", "Loading your friends…"));
     return;
   }
   renderTabs(root);
