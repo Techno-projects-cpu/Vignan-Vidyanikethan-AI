@@ -6,6 +6,7 @@
  * the sender is a friend or the room is the shared Study Hall.
  */
 
+import { decorateAvatar } from "./avatars.js?v=16";
 import * as ui from "./ui.js?v=16";
 import { onSocialChange, setActiveThread, social, socialState, syncSocial } from "./social.js?v=16";
 import { relativeTime } from "./friends-ui.js?v=16";
@@ -92,7 +93,13 @@ export function renderChat() {
     for (const thread of ordered) {
       const node = ui.element("button", `chat-thread${thread.id === chat.threadId ? " active" : ""}`);
       node.type = "button";
-      const mark = ui.element("span", `social-avatar${thread.kind === "hall" ? " hall" : ""}${thread.online ? " online" : ""}`, thread.kind === "hall" ? "☰" : String(thread.title || "?").charAt(0).toUpperCase());
+      const mark = ui.element("span", `social-avatar${thread.kind === "hall" ? " hall" : ""}`);
+      if (thread.kind === "hall") {
+        mark.textContent = "☰";
+      } else {
+        // Same monogram and pattern as the Friends list, so threads are easy to spot.
+        decorateAvatar(mark, { name: thread.title || "?", seed: thread.avatarSeed, online: thread.online });
+      }
       node.appendChild(mark);
       const copy = ui.element("span", "chat-thread-copy");
       copy.appendChild(ui.element("strong", "", thread.title || "Conversation"));

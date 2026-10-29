@@ -150,6 +150,13 @@ export function createSocialRouter({ service, accounts, accountsBackend, current
       return true;
     }
 
+    if (apiPath === "/api/social/avatar" && method === "POST") {
+      if (!limited(request, response, `avatar:${user.id}`, 30, 10 * 60_000)) return true;
+      const data = await body(request);
+      json(request, response, await service.setAvatar(user, data.seed));
+      return true;
+    }
+
     if (apiPath === "/api/social/notifications/read" && method === "POST") {
       if (!limited(request, response, `notify-read:${user.id}`, 60, 60_000)) return true;
       const data = await body(request);

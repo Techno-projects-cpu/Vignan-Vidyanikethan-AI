@@ -1312,3 +1312,146 @@ body.premium-ui .account-dot.has-alerts {
 #friends-add-more {
   min-height: 36px;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Monogram avatars: eight patterns, black/grey/white only.                  */
+/* Decoration, not identity — nothing here is derived from age or gender.    */
+/* ------------------------------------------------------------------------- */
+
+.social-avatar {
+  letter-spacing: 0.02em;
+  font-size: 12px;
+  text-transform: uppercase;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.social-avatar.large {
+  width: 54px;
+  height: 54px;
+  font-size: 17px;
+}
+
+/* A quiet gradient lives behind the letters in every pattern. */
+.social-avatar[data-avatar] {
+  background-color: var(--p-surface-3);
+  background-image: none;
+  color: var(--p-ink);
+}
+
+.social-avatar[data-avatar="dots"] {
+  background-image: radial-gradient(var(--p-line-strong) 1px, transparent 1.4px);
+  background-size: 7px 7px;
+  background-position: 2px 2px;
+}
+
+.social-avatar[data-avatar="grid"] {
+  background-image:
+    linear-gradient(var(--p-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--p-line) 1px, transparent 1px);
+  background-size: 9px 9px;
+}
+
+.social-avatar[data-avatar="ring"] {
+  background-image: radial-gradient(circle at center, transparent 0 44%, var(--p-line-strong) 44% 58%, transparent 58%);
+}
+
+.social-avatar[data-avatar="stripes"] {
+  background-image: repeating-linear-gradient(90deg, var(--p-line-strong) 0 2px, transparent 2px 7px);
+}
+
+.social-avatar[data-avatar="corner"] {
+  background-image: linear-gradient(45deg, var(--p-line-strong) 0 26%, transparent 26% 100%);
+}
+
+.social-avatar[data-avatar="split"] {
+  background-image: linear-gradient(90deg, transparent 0 52%, var(--p-line-strong) 52% 100%);
+}
+
+/* Every pattern stays in the grey palette so the monogram is always readable. */
+.social-avatar[data-avatar="diagonal"] {
+  background-image: linear-gradient(135deg, var(--p-line-strong) 0 44%, transparent 44% 100%);
+}
+
+/* ------------------------------------------------------------------------- */
+/* "You" strip with the avatar picker.                                       */
+/* ------------------------------------------------------------------------- */
+
+.social-me {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--p-line);
+  background: var(--p-surface);
+}
+
+.social-me-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.social-me-copy strong {
+  font-size: 14px;
+  font-weight: 750;
+  color: var(--p-ink);
+}
+
+.social-me-copy small {
+  color: var(--p-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.avatar-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+
+.avatar-swatch {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--p-line);
+  border-radius: 0;
+  background: var(--p-surface-2);
+  color: var(--p-ink);
+  font: 700 10px var(--font);
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.avatar-swatch:hover,
+.avatar-swatch:focus-visible {
+  border-color: var(--p-ink);
+}
+
+.avatar-swatch.active {
+  border-color: var(--p-ink);
+  box-shadow: inset 0 0 0 1px var(--p-ink);
+}
+
+.avatar-swatch[disabled] {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+@media (max-width: 520px) {
+  .avatar-swatches {
+    margin-inline-start: 0;
+    width: 100%;
+  }
+  .avatar-swatch {
+    width: 32px;
+    height: 32px;
+  }
+}

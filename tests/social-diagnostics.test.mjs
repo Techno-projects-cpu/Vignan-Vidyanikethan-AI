@@ -81,7 +81,7 @@ test("the local store probe reports an unwritable file instead of pretending it 
   await fs.rm(dir, { recursive: true, force: true });
 });
 
-function harness(service) {
+function harness(service, { body = {} } = {}) {
   const sent = [];
   const router = createSocialRouter({
     service,
@@ -91,7 +91,7 @@ function harness(service) {
     sendJson: (response, status, payload) => sent.push({ status, payload }),
     sendError: (response, status, error) => sent.push({ status, error }),
     authOptions: () => ({ api: true }),
-    readJson: async () => ({}),
+    readJson: async () => body,
     rateLimit: () => true,
   });
   return { router, sent };
@@ -185,4 +185,28 @@ test("the Supabase profile upsert sends column types Postgres accepts", async ()
   assert.equal(posted[0].xp, 12, "xp is a number");
   assert.equal(posted[0].streak, 3);
   assert.equal(posted[0].user_id, "u1");
+});
+
+test("saving an avatar goes through one validated endpoint", async () => {
+  const seen = [];
+  const service = {
+    state: async () => ({}),
+    setAvatar: async (user, seed) => {
+      seen.push(seed);
+      if (!/^p[0-7]$/.test(String(seed))) throw new SocialError("Pick one of the eight avatars.");
+      return { avatarSeed: seed };
+    },
+  };
+  const post = { ...request, method: "POST" };
+
+  const ok = harness(service, { body: { seed: "p4" } });
+  await ok.router({ request: post, response, apiPath: "/api/social/avatar", url });
+  assert.equal(ok.sent[0].status, 200);
+  assert.equal(ok.sent[0].payload.avatarSeed, "p4");
+
+  const bad = harness(service, { body: { seed: "p9" } });
+  await bad.router({ request: post, response, apiPath: "/api/social/avatar", url });
+  assert.equal(bad.sent[0].status, 400);
+  assert.match(bad.sent[0].error, /eight avatars/);
+  assert.deepEqual(seen, ["p4", "p9"]);
 });

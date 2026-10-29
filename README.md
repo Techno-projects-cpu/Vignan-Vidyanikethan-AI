@@ -152,6 +152,10 @@ That message means the request reached the server and the social store could not
 - The server logs one line at boot and answers `503` with *"Friends, chat and games are not set up on this server yet…"* until the tables exist.
 - `GET /api/health?social=1` returns `socialReady`, `socialCheck.missing` and `socialCheck.detail`.
 
+### Avatars
+
+Every student gets a monogram avatar: their initials over one of eight grey patterns, chosen by a hash of their username. It is decoration only — nothing is derived from age, gender or results, and there are no photo uploads, so there is no moderation problem and no extra storage. Students can open **Friends** and tap one of eight swatches to pin a favourite; that choice is saved to their social profile (`avatar_seed`) and classmates see it in the friends list and in Chat. Without a pin, the pattern is derived locally from the name, so even a brand-new row looks right immediately. Seeds are validated server-side against `p0`–`p7`, so a stored value can never inject markup.
+
 ### Adding friends
 
 Open **Friends**. The empty tab has an **Add a friend** button, and the Find tab lists classmates you can add with one tap — no username needed. Anyone who has opened Friends, Chat or Play once appears there; only usernames, XP and streak are shown, never age, gender or exact results. Students who have never opened those screens are found by typing two or more letters of their username.

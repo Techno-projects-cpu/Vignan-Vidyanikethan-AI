@@ -93,16 +93,45 @@ export function createSocialService({ store, now = () => Date.now(), lookupByNam
     return null;
   }
 
-  /** Refresh the searchable directory row for the signed-in student. */
+  /**
+   * Which pattern a student has pinned, if any.
+   *
+   * Accepts only the tiny `p0`–`p7` tokens the picker emits. Anything else is
+   * treated as "no choice" so a stored value can never inject markup or CSS.
+   */
+  function cleanAvatarSeed(value) {
+    const text = String(value || "").trim().toLowerCase();
+    if (!text) return "";
+    const match = /^p([0-7])$/.exec(text);
+    return match ? text : "";
+  }
+
+  /**
+   * Refresh the searchable directory row for the signed-in student.
+   *
+   * A pinned avatar wins over the account default; the account value is only a
+   * fallback for rows created before anyone chose one.
+   */
   async function touchProfile(user) {
+    const existing = (await store.getProfiles([user.id]))[0];
+    const pinned = cleanAvatarSeed(existing?.avatar_seed);
     return store.upsertProfile({
       user_id: user.id,
       username: user.username,
-      avatar_seed: user.avatarSeed || "",
+      avatar_seed: pinned || cleanAvatarSeed(user.avatarSeed),
       xp: Number(user.xp) || 0,
       streak: Number(user.streak) || 0,
       last_seen: new Date(now()).toISOString(),
     });
+  }
+
+  /** Save the avatar a student tapped, and hand back the stored row. */
+  async function setAvatar(user, seed) {
+    const clean = cleanAvatarSeed(seed);
+    if (!clean) throw new SocialError("Pick one of the eight avatars.");
+    const profile = await touchProfile(user);
+    const updated = await store.upsertProfile({ ...profile, avatar_seed: clean });
+    return { avatarSeed: clean, me: person(updated) };
   }
 
   function person(profile, extra = {}) {
@@ -204,6 +233,7 @@ export function createSocialService({ store, now = () => Date.now(), lookupByNam
         kind: "dm",
         title: profile?.username || otherName,
         friendId: otherId,
+        avatarSeed: profile?.avatar_seed || "",
         preview: thread.last_preview,
         lastAt: thread.last_at,
         online: isOnline(profile),
@@ -226,7 +256,7 @@ export function createSocialService({ store, now = () => Date.now(), lookupByNam
   }
 
   async function state(user) {
-    await touchProfile(user);
+    const me = await touchProfile(user);
     const [friends, requests, notifications, unread, threads, games] = await Promise.all([
       friendList(user),
       requestList(user),
@@ -236,7 +266,7 @@ export function createSocialService({ store, now = () => Date.now(), lookupByNam
       myGames(user),
     ]);
     return {
-      self: { id: user.id, username: user.username },
+      self: { id: user.id, username: user.username, avatarSeed: me?.avatar_seed || "" },
       friends,
       requests,
       notifications: notifications.map((row) => ({
@@ -616,6 +646,7 @@ export function createSocialService({ store, now = () => Date.now(), lookupByNam
 
   return {
     touchProfile,
+    setAvatar,
     findProfile,
     state,
     search,

@@ -171,6 +171,8 @@ export const social = {
   respondFriend: (requestId, accept) => api("social/friends/respond", { method: "POST", body: { requestId, accept } }),
   removeFriend: (userId) => api("social/friends/remove", { method: "POST", body: { userId } }),
   markRead: (ids = null) => api("social/notifications/read", { method: "POST", body: ids ? { ids } : {} }),
+  /** Pin one of the eight monogram avatars for classmates to see. */
+  setAvatar: (seed) => api("social/avatar", { method: "POST", body: { seed } }),
   openChat: (payload) => api("social/chat/open", { method: "POST", body: payload }),
   messages: (threadId, after = "") =>
     api(`social/chat/messages?threadId=${encodeURIComponent(threadId)}${after ? `&after=${encodeURIComponent(after)}` : ""}`),

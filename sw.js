@@ -50,6 +50,7 @@ const CORE = [
   "./js/knowledge.js?v=16",
   "./js/languages.js?v=16",
   "./js/question-copy.js?v=16",
+  "./js/avatars.js?v=16",
   "./js/replies.js?v=16",
   "./js/translations-core.js?v=16",
   "./js/link-reader.js?v=16",

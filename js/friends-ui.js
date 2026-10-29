@@ -7,6 +7,7 @@
 
 import * as ui from "./ui.js?v=16";
 import { onSocialChange, social, socialState, syncSocial } from "./social.js?v=16";
+import { AVATAR_PATTERNS, avatarSeed, decorateAvatar } from "./avatars.js?v=16";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -40,10 +41,60 @@ export function avatarLetter(name) {
   return String(name || "V").trim().charAt(0).toUpperCase() || "V";
 }
 
-function avatar(name, online = false, size = "") {
-  const node = ui.element("span", `social-avatar${size ? ` ${size}` : ""}`, avatarLetter(name));
-  if (online) node.classList.add("online");
+/** One monogram avatar, patterned from the student's name or their pinned seed. */
+function avatar(name, online = false, size = "", seed = "") {
+  const node = ui.element("span", `social-avatar${size ? ` ${size}` : ""}`);
+  decorateAvatar(node, { name, seed, online });
   return node;
+}
+
+/**
+ * A compact "you" strip with the swatch picker.
+ *
+ * Eight taps is the whole feature: it changes how your friends see you, needs no
+ * upload and no extra storage, and works offline.
+ */
+function renderAvatarPicker(body, data) {
+  const me = data.self || {};
+  const current = me.avatarSeed || "";
+  const wrap = ui.element("div", "social-me");
+  wrap.appendChild(avatar(me.username || "You", true, "large", current));
+  const copy = ui.element("div", "social-me-copy");
+  copy.appendChild(ui.element("strong", "", me.username || "You"));
+  copy.appendChild(ui.element("small", "", "This is how classmates see you."));
+  wrap.appendChild(copy);
+
+  const swatches = ui.element("div", "avatar-swatches");
+  swatches.setAttribute("role", "group");
+  swatches.setAttribute("aria-label", "Choose your avatar");
+  AVATAR_PATTERNS.forEach((pattern, index) => {
+    const seed = avatarSeed(index);
+    const swatch = ui.element("button", "avatar-swatch");
+    swatch.type = "button";
+    decorateAvatar(swatch, { name: me.username || "You", seed });
+    swatch.dataset.seed = seed;
+    swatch.setAttribute("aria-label", `${pattern} avatar`);
+    swatch.setAttribute("aria-pressed", String(current === seed));
+    if (current === seed) swatch.classList.add("active");
+    swatch.addEventListener("click", async () => {
+      if (swatch.disabled) return;
+      swatches.querySelectorAll("button").forEach((node) => { node.disabled = true; });
+      try {
+        await social.setAvatar(seed);
+        ui.showToast("Avatar saved for your classmates.", "success");
+        await syncSocial();
+      } catch (error) {
+        ui.showToast(error.message, "error");
+      } finally {
+        swatches.querySelectorAll("button").forEach((node) => { node.disabled = false; });
+      }
+      lastSignature = "";
+      renderFriends();
+    });
+    swatches.appendChild(swatch);
+  });
+  wrap.appendChild(swatches);
+  body.appendChild(wrap);
 }
 
 function presence(row) {
@@ -154,6 +205,7 @@ export function openAddFriend() {
 }
 
 function renderFriendsTab(body, data) {
+  if (data.self?.username) renderAvatarPicker(body, data);
   const friends = data.friends || [];
   if (!friends.length) {
     body.appendChild(ui.emptyState("◇", "No friends yet", "Type a classmate's username and send a request. You can also share a game code from Play."));
@@ -200,6 +252,7 @@ function renderFriendsTab(body, data) {
       name: friend.username,
       subtitle: presence(friend),
       online: friend.online,
+      avatarNode: avatar(friend.username, friend.online, "", friend.avatarSeed),
       actions,
     }));
   }
@@ -362,6 +415,7 @@ function renderFindTab(body) {
       name: person.username,
       subtitle: presence(person),
       online: person.online,
+      avatarNode: avatar(person.username, person.online, "", person.avatarSeed),
       actions: [action],
     }));
   }
@@ -443,6 +497,7 @@ export function renderFriends() {
     suggested: suggested.map((row) => `${row.id}:${row.relationship}`),
     busy: searchBusy,
     unread: data?.unread,
+    me: data?.self?.avatarSeed || "",
     friends: data?.friends?.map((row) => `${row.id}:${row.online}:${row.xp}:${row.streak}`),
     requests: data?.requests,
     alerts: data?.notifications?.map((row) => `${row.id}:${row.read}`),
