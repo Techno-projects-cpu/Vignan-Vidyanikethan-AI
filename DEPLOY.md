@@ -49,7 +49,11 @@ STUDY_AI_KEY_COOLDOWN_MS=60000
 STUDY_AI_STUDENT_KEY_FALLBACK=true
 ```
 
-Get the two keys from <https://supabase.com/dashboard/project/dwmzbrrnqxzdoxrxbrna/settings/api>. Put the **publishable** key in `SUPABASE_ANON_KEY` and the **secret** key in `SUPABASE_SERVICE_ROLE_KEY`; the variable names stay the same. Legacy anon/service-role JWTs still work during migration. New secret keys can be rotated individually; see [Supabase's migration guide](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys).
+Get the keys from **Supabase → Settings → API Keys** (there is no separate *Settings → API* page any more, and older tutorials will send you to a page that does not exist). Supabase renamed the pair: the old **anon** key is now the **publishable** key (`sb_publishable_…`) and the old **service_role** key is now the **secret** key (`sb_secret_…`). If your project has not created the new pair yet, the dashboard offers *Create new API keys*; creating them does not break the legacy ones.
+
+Put the **publishable** key in `SUPABASE_ANON_KEY` and the **secret** key in `SUPABASE_SERVICE_ROLE_KEY`. The variable names are historical and stay the same; `SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SECRET_KEY` are accepted as aliases, and legacy anon/service-role JWTs still work. New secret keys can be rotated individually; see [Supabase's migration guide](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys).
+
+If `/api/health` reports `"accounts": "unavailable"`, read `accountsConfig.missing` — it names the variable that is wrong or empty (never the value) — or the Render log, which prints the same list.
 
 If a legacy service-role key was exposed, move both Render variables to the new keys, redeploy and verify registration, login and `/api/leaderboard`. Then disable legacy API keys in Supabase **only after** checking that no other application still uses them. This is a project-wide change and can interrupt other clients. Never publish either secret.
 

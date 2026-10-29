@@ -239,3 +239,51 @@ test("Render rate limiting distinguishes verified Cloudflare client addresses", 
   assert.notEqual((await call("203.0.113.2")).status, 429);
   assert.equal((await call("203.0.113.1")).status, 429);
 });
+
+test("Supabase keys work under both the legacy and the renamed variable names", async () => {
+  const server = await fs.readFile(path.join(root, "serve.mjs"), "utf8");
+  assert.match(server, /"SUPABASE_ANON_KEY", "SUPABASE_PUBLISHABLE_KEY"/);
+  assert.match(server, /"SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SECRET_KEY"/);
+  assert.match(server, /sb_publishable_/);
+  assert.match(server, /sb_secret_/);
+  // Diagnostics name the variable, never echo its value.
+  assert.match(server, /accountsConfig/);
+  assert.match(server, /missing: supabaseMissing/);
+});
+
+test("the health payload can tell an operator which variable is wrong", async () => {
+  const port = 4930 + Math.floor(Math.random() * 40);
+  const child = spawn(process.execPath, ["serve.mjs"], {
+    cwd: new URL("..", import.meta.url).pathname,
+    env: {
+      ...process.env,
+      STUDY_AI_PORT: String(port),
+      STUDY_AI_ACCOUNTS_BACKEND: "supabase",
+      SUPABASE_URL: "",
+      SUPABASE_ANON_KEY: "",
+      SUPABASE_SERVICE_ROLE_KEY: "",
+      SUPABASE_PUBLISHABLE_KEY: "",
+      SUPABASE_SECRET_KEY: "",
+    },
+    stdio: "ignore",
+  });
+  try {
+    let body = null;
+    for (let attempt = 0; attempt < 40 && !body; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      try {
+        const response = await fetch(`http://127.0.0.1:${port}/api/health`);
+        if (response.ok) body = await response.json();
+      } catch { /* not listening yet */ }
+    }
+    assert.ok(body, "health endpoint did not answer");
+    assert.equal(body.accounts, false);
+    assert.equal(body.accountsBackend, "unavailable");
+    assert.ok(Array.isArray(body.accountsConfig.missing), "missing list should be an array");
+    assert.ok(body.accountsConfig.missing.some((name) => name.includes("SUPABASE_URL")));
+    assert.ok(body.accountsConfig.missing.some((name) => name.includes("SUPABASE_ANON_KEY")));
+    assert.doesNotMatch(JSON.stringify(body.accountsConfig), /sb_secret_|eyJ/, "no key value should be echoed");
+  } finally {
+    child.kill("SIGKILL");
+  }
+});

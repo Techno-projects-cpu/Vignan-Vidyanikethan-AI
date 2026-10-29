@@ -79,9 +79,25 @@ const ALLOWED_ORIGINS = new Set(
     .filter(Boolean),
 );
 
+// Supabase renamed its keys: "anon" is now "publishable" (sb_publishable_…)
+// and "service_role" is now "secret" (sb_secret_…). Both formats work, so the
+// same deployment keeps running before, during and after the rename.
+const firstEnv = (...names) => {
+  for (const name of names) {
+    const value = String(process.env[name] ?? "").trim();
+    if (value) return value;
+  }
+  return "";
+};
 const SUPABASE_URL = String(process.env.SUPABASE_URL || env("SUPABASE_URL") || "").trim();
-const SUPABASE_ANON_KEY = String(process.env.SUPABASE_ANON_KEY || env("SUPABASE_ANON_KEY") || "").trim();
-const SUPABASE_SERVICE_ROLE_KEY = String(process.env.SUPABASE_SERVICE_ROLE_KEY || env("SUPABASE_SERVICE_ROLE_KEY") || "").trim();
+const SUPABASE_ANON_KEY = firstEnv(
+  "SUPABASE_ANON_KEY", "SUPABASE_PUBLISHABLE_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  "STUDY_AI_SUPABASE_ANON_KEY", "STUDY_AI_SUPABASE_PUBLISHABLE_KEY",
+);
+const SUPABASE_SERVICE_ROLE_KEY = firstEnv(
+  "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SECRET_KEY",
+  "STUDY_AI_SUPABASE_SERVICE_ROLE_KEY", "STUDY_AI_SUPABASE_SECRET_KEY",
+);
 const SUPABASE_EMAIL_DOMAIN = String(env("SUPABASE_EMAIL_DOMAIN") || "students.vignanvidyanikethan.org").trim();
 const requestedAccountsBackend = String(env("ACCOUNTS_BACKEND") || "local").trim().toLowerCase();
 function plausibleSupabaseUrl(value) {
@@ -97,8 +113,14 @@ function plausibleSupabaseKey(value) {
 const useSupabase = requestedAccountsBackend === "supabase" && plausibleSupabaseUrl(SUPABASE_URL) &&
   plausibleSupabaseKey(SUPABASE_ANON_KEY) && plausibleSupabaseKey(SUPABASE_SERVICE_ROLE_KEY);
 const accountsBackend = useSupabase ? "supabase" : requestedAccountsBackend === "supabase" ? "unavailable" : "local";
+// Names only, never values: an operator reading the Render log should know
+// exactly which variable to fix without ever printing a secret.
+const supabaseMissing = [];
+if (!plausibleSupabaseUrl(SUPABASE_URL)) supabaseMissing.push("SUPABASE_URL");
+if (!plausibleSupabaseKey(SUPABASE_ANON_KEY)) supabaseMissing.push("SUPABASE_ANON_KEY (or SUPABASE_PUBLISHABLE_KEY)");
+if (!plausibleSupabaseKey(SUPABASE_SERVICE_ROLE_KEY)) supabaseMissing.push("SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY)");
 if (accountsBackend === "unavailable") {
-  console.warn("[vignan-ai] Supabase configuration is missing or invalid; accounts are unavailable until it is corrected. Guest mode remains available.");
+  console.warn(`[vignan-ai] Supabase configuration is missing or invalid (${supabaseMissing.join(", ") || "unknown"}); accounts are unavailable until it is corrected. Guest mode remains available.`);
 }
 const accounts = useSupabase
   ? createSupabaseAccountStore({
@@ -925,6 +947,11 @@ function health() {
     linkReading: true,
     accounts: accountsBackend !== "unavailable",
     accountsBackend,
+    // Booleans and variable names only, so a parent can diagnose a deployment
+    // from /api/health without any secret being readable.
+    accountsConfig: accountsBackend === "supabase"
+      ? { publicKey: true, secretKey: true }
+      : { publicKey: plausibleSupabaseKey(SUPABASE_ANON_KEY), secretKey: plausibleSupabaseKey(SUPABASE_SERVICE_ROLE_KEY), url: plausibleSupabaseUrl(SUPABASE_URL), missing: supabaseMissing },
     social: socialStore ? socialStore.backend : "unavailable",
     games: ["chess", "quiz", "math", "word"],
     offlineReady: true,
