@@ -10,8 +10,8 @@
  * point at the original passage.
  */
 
-import { CORE_STRINGS } from "./translations-core.js?v=35";
-import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=35";
+import { CORE_STRINGS } from "./translations-core.js?v=36";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=36";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 
@@ -483,14 +483,152 @@ const HI = {
   "knowledge.keepReading": "अधिक स्रोत:",
 };
 
+/**
+ * The reader talks to the student in their own language too.
+ *
+ * These keys live here rather than inside EN/TE/HI because they arrived with
+ * later features; merging them at the end keeps one place to look and lets
+ * every other language fall back to English without a half-translated button.
+ */
+const EXTRA_STRINGS = {
+  en: {
+    "reader.title": "Reader — {title}",
+    "reader.prev": "← Prev",
+    "reader.next": "Next →",
+    "reader.openPdf": "Open PDF at page",
+    "reader.openSource": "Open original web source ↗",
+    "reader.find": "Find words in this book",
+    "reader.onlyMatch": "Only pages with your quote",
+    "reader.smaller": "Smaller text",
+    "reader.larger": "Larger text",
+    "reader.page": "Page",
+    "reader.section": "Section",
+    "reader.position": "{label} {page} · {current} of {total}",
+    "reader.foundOne": "{count} page found · press Enter to open the first",
+    "reader.foundMany": "{count} pages found · press Enter to open the first",
+    "reader.holdsOne": "{count} page holds your quoted passage",
+    "reader.holdsMany": "{count} pages hold your quoted passage",
+    "reader.noText": "No page text is stored for this book.",
+    "reader.imported": "Imported from a public website. Verify the original.",
+    "reader.approx": "Sections are approximate.",
+    "reader.untitled": "Book",
+    "reader.continueFrom": "Continuing from page {page}.",
+    "reader.askPage": "Ask about this page",
+    "reader.notesTitle": "My note on this page",
+    "reader.notesPlaceholder": "In your own words — what must you remember from this page?",
+    "reader.noteSave": "Save note",
+    "reader.noteUpdate": "Update note",
+    "reader.noteDelete": "Delete note",
+    "reader.noteHint": "Kept on this device only. Nothing here is sent to a model.",
+    "reader.notesExport": "Save my notes (.md)",
+    "reader.notesOnBook": "{count} on this book",
+    "reader.noteSaved": "Note saved on this page.",
+    "reader.noteUpdated": "Note updated.",
+    "reader.noteDeleted": "Note deleted.",
+    "reader.notesExported": "Your notes were saved as a Markdown file.",
+    "reader.noteEmpty": "Write something first — one line is enough.",
+    "source.matched": "Matched: {terms}",
+    "source.noSharedWords": "No shared words with your question — check this page",
+    "source.number": "Source {n}",
+  },
+  te: {
+    "reader.title": "రీడర్ — {title}",
+    "reader.prev": "← వెనుకకు",
+    "reader.next": "తరువాత →",
+    "reader.openPdf": "PDF లో ఈ పేజీ తెరవండి",
+    "reader.openSource": "అసలు వెబ్ మూలం తెరవండి ↗",
+    "reader.find": "ఈ పుస్తకంలో పదాలను వెతకండి",
+    "reader.onlyMatch": "మీ మాటలు ఉన్న పేజీలు మాత్రమే",
+    "reader.smaller": "చిన్న అక్షరాలు",
+    "reader.larger": "పెద్ద అక్షరాలు",
+    "reader.page": "పేజీ",
+    "reader.section": "విభాగం",
+    "reader.position": "{label} {page} · {total}లో {current}",
+    "reader.foundOne": "{count} పేజీ దొరికింది · మొదటిది తెరవడానికి Enter నొక్కండి",
+    "reader.foundMany": "{count} పేజీలు దొరికాయి · మొదటిది తెరవడానికి Enter నొక్కండి",
+    "reader.holdsOne": "{count} పేజీలో మీ మాటలు ఉన్నాయి",
+    "reader.holdsMany": "{count} పేజీల్లో మీ మాటలు ఉన్నాయి",
+    "reader.noText": "ఈ పుస్తకానికి పేజీ పాఠ్యం లేదు.",
+    "reader.imported": "పబ్లిక్ వెబ్‌సైట్ నుండి తీసుకోబడింది. అసలు మూలాన్ని తనిఖీ చేయండి.",
+    "reader.approx": "విభాగాలు సుమారుగా ఉంటాయి.",
+    "reader.untitled": "పుస్తకం",
+    "reader.continueFrom": "{page} పేజీ నుండి కొనసాగుతోంది.",
+    "reader.askPage": "ఈ పేజీ గురించి అడగండి",
+    "reader.notesTitle": "ఈ పేజీపై నా గమనిక",
+    "reader.notesPlaceholder": "మీ మాటల్లో — ఈ పేజీ నుండి ఏమి గుర్తుంచుకోవాలి?",
+    "reader.noteSave": "గమనిక సేవ్ చేయండి",
+    "reader.noteUpdate": "గమనిక నవీకరించండి",
+    "reader.noteDelete": "గమనిక తొలగించండి",
+    "reader.noteHint": "ఈ పరికరంలో మాత్రమే ఉంటుంది. ఇది ఏ మోడల్‌కూ పంపబడదు.",
+    "reader.notesExport": "నా గమనికలు (.md) సేవ్ చేయండి",
+    "reader.notesOnBook": "ఈ పుస్తకంలో {count}",
+    "reader.noteSaved": "గమనిక సేవ్ అయింది.",
+    "reader.noteUpdated": "గమనిక నవీకరించబడింది.",
+    "reader.noteDeleted": "గమనిక తొలగించబడింది.",
+    "reader.notesExported": "మీ గమనికలు Markdown ఫైల్‌గా సేవ్ అయ్యాయి.",
+    "reader.noteEmpty": "మొదట ఏదైనా రాయండి — ఒక లైన్ చాలు.",
+    "source.matched": "సరిపోలిన పదాలు: {terms}",
+    "source.noSharedWords": "మీ ప్రశ్నతో పంచుకున్న పదాలు లేవు — ఈ పేజీని తనిఖీ చేయండి",
+    "source.number": "మూలం {n}",
+  },
+  hi: {
+    "reader.title": "रीडर — {title}",
+    "reader.prev": "← पिछला",
+    "reader.next": "अगला →",
+    "reader.openPdf": "PDF में यह पृष्ठ खोलें",
+    "reader.openSource": "मूल वेब स्रोत खोलें ↗",
+    "reader.find": "इस किताब में शब्द खोजें",
+    "reader.onlyMatch": "केवल वे पृष्ठ जिनमें आपका अंश है",
+    "reader.smaller": "छोटा पाठ",
+    "reader.larger": "बड़ा पाठ",
+    "reader.page": "पृष्ठ",
+    "reader.section": "खंड",
+    "reader.position": "{label} {page} · {total} में से {current}",
+    "reader.foundOne": "{count} पृष्ठ मिला · पहला खोलने के लिए Enter दबाएँ",
+    "reader.foundMany": "{count} पृष्ठ मिले · पहला खोलने के लिए Enter दबाएँ",
+    "reader.holdsOne": "{count} पृष्ठ में आपका अंश है",
+    "reader.holdsMany": "{count} पृष्ठों में आपका अंश है",
+    "reader.noText": "इस किताब का पाठ सहेजा नहीं गया है।",
+    "reader.imported": "सार्वजनिक वेबसाइट से लिया गया। मूल को जाँचें।",
+    "reader.approx": "खंड अनुमानित हैं।",
+    "reader.untitled": "किताब",
+    "reader.continueFrom": "{page} पृष्ठ से जारी।",
+    "reader.askPage": "इस पृष्ठ के बारे में पूछें",
+    "reader.notesTitle": "इस पृष्ठ पर मेरा नोट",
+    "reader.notesPlaceholder": "अपने शब्दों में — इस पृष्ठ से क्या याद रखना है?",
+    "reader.noteSave": "नोट सहेजें",
+    "reader.noteUpdate": "नोट बदलें",
+    "reader.noteDelete": "नोट हटाएँ",
+    "reader.noteHint": "केवल इसी डिवाइस पर। यह किसी मॉडल को नहीं भेजा जाता।",
+    "reader.notesExport": "मेरे नोट (.md) सहेजें",
+    "reader.notesOnBook": "इस किताब में {count}",
+    "reader.noteSaved": "नोट सहेजा गया।",
+    "reader.noteUpdated": "नोट बदला गया।",
+    "reader.noteDeleted": "नोट हटाया गया।",
+    "reader.notesExported": "आपके नोट Markdown फ़ाइल में सहेजे गए।",
+    "reader.noteEmpty": "पहले कुछ लिखें — एक पंक्ति पर्याप्त है।",
+    "source.matched": "मिले शब्द: {terms}",
+    "source.noSharedWords": "आपके प्रश्न से कोई शब्द नहीं मिला — यह पृष्ठ जाँचें",
+    "source.number": "स्रोत {n}",
+  },
+};
+
 const FULL_DICTIONARIES = { en: EN, te: TE, hi: HI };
+
+// `t()` falls back to the raw EN table, so English has to actually contain the
+// reader keys — otherwise a language without them shows "reader.notesTitle"
+// instead of a sentence.
+Object.assign(EN, EXTRA_STRINGS.en);
 
 /** Every catalogue language, with its core strings merged over English. */
 export const LANGUAGES = Object.fromEntries(
   LANGUAGE_CATALOGUE.map(({ code }) => {
     const core = CORE_STRINGS[code] || {};
     const full = FULL_DICTIONARIES[code] || {};
-    return [code, code === "en" ? { ...core, ...full } : { ...core, ...full }];
+    // The reader keys are merged for the three long-tail languages, and every
+    // other language quietly keeps the English ones.
+    const extra = EXTRA_STRINGS[code] || {};
+    return [code, { ...core, ...full, ...extra }];
   }),
 );
 

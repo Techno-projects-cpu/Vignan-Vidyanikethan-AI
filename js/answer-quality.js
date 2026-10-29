@@ -121,6 +121,19 @@ function cleanTopic(query = "") {
   return trimmed.length > 90 ? `${trimmed.slice(0, 87).trimEnd()}…` : trimmed;
 }
 
+/**
+ * Which words of the question a cited passage actually repeats.
+ *
+ * Shown under a source card so "why is this page here?" has an answer the
+ * student can check themselves. An empty list is information too: the page came
+ * back for its neighbours, not for its words.
+ */
+export function matchedTerms(query = "", text = "", limit = 4) {
+  const haystack = String(text || "").toLowerCase();
+  if (!haystack.trim()) return [];
+  return queryTerms(query, 8).filter((term) => haystack.includes(term)).slice(0, limit);
+}
+
 /* ------------------------------------------------------------------------- */
 /* Do the citations point at anything?                                      */
 /* ------------------------------------------------------------------------- */

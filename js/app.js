@@ -6,31 +6,31 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=35";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=35";
-import { ingestPdf, ingestText } from "./ingest.js?v=35";
-import { splitSentences } from "./text.js?v=35";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=35";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=35";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=35";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=35";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=35";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=35";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=35";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=35";
+import * as db from "./db.js?v=36";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=36";
+import { ingestPdf, ingestText } from "./ingest.js?v=36";
+import { splitSentences } from "./text.js?v=36";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=36";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=36";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=36";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=36";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=36";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=36";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=36";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=36";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=35";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=35";
+} from "./pro-mode.js?v=36";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=36";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=35";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=35";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=35";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=35";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=35";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=35";
+} from "./updates.js?v=36";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=36";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=36";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=36";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=36";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=36";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -38,8 +38,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=35";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=35";
+} from "./llm.js?v=36";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=36";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -51,7 +51,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=35";
+} from "./local-ai.js?v=36";
 import {
   EXAMS,
   MODES,
@@ -66,12 +66,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=35";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=35";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=35";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=35";
-import { TASKS } from "./model-router.js?v=35";
-import { PROVIDERS, providerList } from "./providers.js?v=35";
+} from "./exam-packs.js?v=36";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=36";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=36";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=36";
+import { TASKS } from "./model-router.js?v=36";
+import { PROVIDERS, providerList } from "./providers.js?v=36";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -80,30 +80,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=35";
-import { parseApiKeys } from "./key-pool.js?v=35";
+} from "./settings.js?v=36";
+import { parseApiKeys } from "./key-pool.js?v=36";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=35";
+} from "./student-keys.js?v=36";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=35";
+} from "./quiz.js?v=36";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=35";
+} from "./flashcards.js?v=36";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=35";
+} from "./study-decks.js?v=36";
 import {
   accuracy,
   currentStreak,
@@ -114,16 +114,16 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=35";
-import { externalSearchUrl, searchWeb } from "./web.js?v=35";
-import { openEditStudio } from "./edit-studio.js?v=35";
-import { openReader } from "./reader.js?v=35";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=35";
-import { languageLabel, languageGroups, languageMeta, languageGlyph } from "./languages.js?v=35";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=35";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=35";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=35";
-import * as ui from "./ui.js?v=35";
+} from "./progress.js?v=36";
+import { externalSearchUrl, searchWeb } from "./web.js?v=36";
+import { openEditStudio } from "./edit-studio.js?v=36";
+import { openReader } from "./reader.js?v=36";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=36";
+import { languageLabel, languageGroups, languageMeta, languageGlyph } from "./languages.js?v=36";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=36";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=36";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=36";
+import * as ui from "./ui.js?v=36";
 import {
   clearReferral,
   getLeaderboard,
@@ -133,8 +133,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=35";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=35";
+} from "./auth.js?v=36";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=36";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -142,12 +142,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=35";
-import { initMotion, revealVisible } from "./motion.js?v=35";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=35";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=35";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=35";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=35";
+} from "./premium-ui.js?v=36";
+import { initMotion, revealVisible } from "./motion.js?v=36";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=36";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=36";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=36";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=36";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -502,6 +502,8 @@ async function setAnswerDepth(depth) {
   ui.showToast(chosen === "exam" ? "Answers will come as model exam answers." : chosen === "brief" ? "Answers will stay brief." : "Answers will be balanced.", "info", 2200);
 }
 
+const THEME_MIRROR_KEY = "vignan.theme";
+
 function setTheme(theme, { save = true } = {}) {
   if (!themeSupportsSwitch(state.settings.style)) {
     // Three things can call this — the header button, Settings, and a command.
@@ -514,6 +516,10 @@ function setTheme(theme, { save = true } = {}) {
   state.settings.theme = theme === "dark" ? "dark" : "light";
   const use = $("#theme-toggle use");
   if (use) use.setAttribute("href", theme === "dark" ? "#i-sun" : "#i-moon");
+  // The styles mirror to localStorage for the first frame; the theme did not,
+  // so a student who chose dark saw a white flash on every load. Same reason,
+  // same fix, and only for a value this app wrote itself.
+  try { localStorage.setItem(THEME_MIRROR_KEY, theme === "dark" ? "dark" : "light"); } catch { /* private mode */ }
   if (save) saveSettings();
 }
 
@@ -1120,6 +1126,7 @@ function addMessage(message, { persist = true } = {}) {
     studySheet: message.studySheet && !message.studySheet.empty ? message.studySheet : null,
     suggest: message.suggest || null,
     citationAudit: message.citationAudit || null,
+    query: String(message.query || ""),
   };
   state.messages.push(full);
   if (persist) db.addMessage(full).catch(() => {});
@@ -1806,12 +1813,16 @@ async function handleAsk(event) {
       }
     }
     if (state.settings.pro) answer.meta = proPersonaMeta(answer.meta);
+    // The sources panel explains each page by the words it shares with the
+    // question, so the question travels with the answer.
+    answer.query = query;
     state.lastAnswer = answer;
     addMessage({
       role: "assistant", content: answer.text, sources: answer.sources,
       webSources: answer.webSources, meta: answer.meta, confidence: answer.confidence,
       verification: answer.verification, flashcards: answer.flashcards,
       studySheet: answer.studySheet, suggest: answer.suggest, citationAudit: answer.citationAudit,
+      query: answer.query || query,
     });
     renderSources(answer);
     if (answer.flashcards?.length) {
@@ -1856,7 +1867,7 @@ function renderSources(answer = {}) {
   if (!sources.length) {
     list.appendChild(ui.emptyState("⌕", t("ask.sources"), t("ask.sourcesEmpty")));
   } else {
-    sources.forEach((source) => list.appendChild(sourceCard(source)));
+    sources.forEach((source) => list.appendChild(sourceCard(source, answer.query || "")));
   }
 
   const confidenceBox = $("#confidence-box");
@@ -1874,13 +1885,22 @@ function renderSources(answer = {}) {
   renderWebResults(webSources);
 }
 
-function sourceCard(source) {
+function sourceCard(source, query = "") {
   const card = ui.element("div", "source-card");
   const top = ui.element("div", "source-card-top");
   top.appendChild(ui.element("span", "source-number", String(source.n)));
   top.appendChild(ui.element("div", "source-title", `${source.sourceUrl ? "Web import · " : ""}${truncate(source.title, 54)}`));
   top.appendChild(ui.element("span", "source-page", source.sourceUrl && source.sourceKind !== "pdf" ? `section ${source.page}` : `p. ${source.page}`));
   const snippet = ui.element("p", "source-snippet", truncate(source.quote || source.text, 190));
+  // Why this page? The words it shares with the question, in plain sight. When
+  // there are none, that is said too — a page can arrive for its neighbours.
+  const matched = matchedTerms(query, `${source.text || ""} ${source.section || ""}`);
+  const matchLine = ui.element(
+    "p",
+    `source-match${matched.length ? "" : " none"}`,
+    matched.length ? t("source.matched", { terms: matched.join(", ") }) : t("source.noSharedWords"),
+  );
+  card.append(top, snippet, matchLine, actions);
   const actions = ui.element("div", "source-actions");
   const read = ui.element("button", "", t("ask.reader"));
   read.type = "button";
@@ -1889,7 +1909,6 @@ function sourceCard(source) {
   copy.type = "button";
   copy.addEventListener("click", () => copyText(source.quote || source.text));
   actions.append(read, copy);
-  card.append(top, snippet, actions);
   return card;
 }
 
@@ -2325,7 +2344,9 @@ async function handleBookAction(event) {
   } else if (action === "quiz") {
     await prepareQuizFromText("", book.id);
   } else if (action === "read") {
-    openReader({ book, pages: book.pages || [], initialPage: 1 });
+    // No page in mind: the reader continues where this device stopped. A
+    // citation passes its own page and is never affected by this.
+    openReader({ book, pages: book.pages || [] });
   } else if (action === "delete") {
     const confirmed = await ui.confirmDialog({
       title: "Remove this book?",
@@ -4861,7 +4882,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=35");
+            const { social } = await import("./social.js?v=36");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -5295,6 +5316,17 @@ function bindEvents() {
     button.title = label;
     button.setAttribute("aria-label", label);
     button.addEventListener("click", () => setView(button.dataset.view));
+  });
+  // The reader builds a question from the page in front of the student. It fills
+  // the composer and stops there: nothing is sent without a tap on Send.
+  window.addEventListener("vignan:ask-page", (event) => {
+    const input = $("#ask-input");
+    if (!input) return;
+    input.value = String(event.detail?.question || "");
+    setMode("answer");
+    setView("ask");
+    input.focus({ preventScroll: true });
+    ui.showToast("Your question is ready. Edit it or send it.", "info", 3600);
   });
   $("#theme-toggle").addEventListener("click", () =>
     setTheme(state.settings.theme === "dark" ? "light" : "dark"),

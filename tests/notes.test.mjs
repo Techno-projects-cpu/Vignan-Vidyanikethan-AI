@@ -106,9 +106,9 @@ test("the reader offers a note box on the page, not a separate screen", () => {
   assert.match(reader, /import \{[^}]*notesFor[^}]*\} from "\.\/notes\.js\?v=\d+"/);
   assert.match(reader, /const notesBlock = element\("section", "reader-notes"\)/);
   assert.match(reader, /content\.append\(toolbar, searchWrap, pageText, sourceNote, notesBlock\)/);
-  assert.match(reader, /Kept on this device only\. Nothing here is sent to a model\./);
-  assert.match(reader, /noteSave\.textContent = existing \? "Update note" : "Save note"/);
+  assert.match(reader, /const noteHint = element\("p", "reader-note-hint", t\("reader\.noteHint"\)\)/);
+  assert.match(reader, /noteSave\.textContent = t\(existing \? "reader\.noteUpdate" : "reader\.noteSave"\)/);
   assert.match(reader, /event\.key === "Enter" && \(event\.metaKey \|\| event\.ctrlKey\)/, "Ctrl+Enter saves");
   assert.match(reader, /notesMarkdown\(mine, \{ title: book\?\.title \|\| "My book" \}\)/);
-  assert.match(reader, /aria-label", `Delete the note on page/, "each note has its own delete");
+  assert.match(reader, /aria-label", `\$\{t\("reader\.noteDelete"\)\} · \$\{t\("reader\.page"\)\} \$\{note\.page\}`/, "each note has its own delete");
 });

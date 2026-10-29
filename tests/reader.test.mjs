@@ -34,8 +34,9 @@ test("the reader can be made readable on a phone and on a projector", () => {
   assert.match(reader, /const SIZE_KEY = "vignan\.reader\.size"/, "the size is remembered on this device");
   assert.match(reader, /pageText\.style\.fontSize/, "and applied to the page text itself");
   assert.match(reader, /sizeDown\.disabled = size <= SIZES\[0\]/, "the ends of the range are disabled, not silent");
-  assert.match(reader, /aria-label", "Smaller text"/);
-  assert.match(reader, /aria-label", "Larger text"/);
+  // The labels are translated now, so the key is what the test can rely on.
+  assert.match(reader, /sizeDown\.setAttribute\("aria-label", t\("reader\.smaller"\)\)/);
+  assert.match(reader, /sizeUp\.setAttribute\("aria-label", t\("reader\.larger"\)\)/);
 });
 
 test("opening a citation offers only the pages that hold the passage", () => {
@@ -53,4 +54,36 @@ test("arrow keys page through the book, and the listener is removed on close", (
   assert.match(reader, /if \(event\.target === search \|\| event\.metaKey \|\| event\.ctrlKey \|\| event\.altKey\) return;/, "typing in search is not paging");
   assert.match(reader, /document\.addEventListener\("keydown", onKey\)/);
   assert.match(reader, /document\.removeEventListener\("keydown", onKey\)/);
+});
+
+test("reading resumes where it stopped, but a citation never moves", () => {
+  assert.match(reader, /const LAST_PAGE_PREFIX = "vignan\.reader\.page\."/);
+  assert.match(reader, /const citedPage = Number\(initialPage\) \|\| 0;/, "a cited page is explicit");
+  assert.match(reader, /const resumed = citedPage \? 0 : lastReadPage\(bookId\)/, "only a plain read resumes");
+  assert.match(reader, /rememberReadPage\(bookId, page\.page \|\| current\)/, "the page is remembered as it is read");
+  assert.match(reader, /showToast\(t\("reader\.continueFrom"/, "and the student is told why it opened there");
+  const app = readFileSync(fileURLToPath(new URL("../js/app.js", import.meta.url)), "utf8");
+  assert.match(app, /openReader\(\{ book, pages: book\.pages \|\| \[\] \}\)/, "opening from Library resumes");
+  assert.match(app, /initialPage: source\.page \|\| 1/, "a citation still pins its page");
+});
+
+test("an unsaved note survives turning the page, and still is not a note", () => {
+  assert.match(reader, /const drafts = new Map\(\);/);
+  assert.match(reader, /if \(shownPage && shownPage !== pageNumber\) drafts\.set\(shownPage, noteInput\.value\)/);
+  assert.match(reader, /noteInput\.value = drafts\.has\(pageNumber\) \? drafts\.get\(pageNumber\) : existing \? existing\.text : ""/);
+  assert.match(reader, /drafts\.delete\(pageNumber\)/, "saving or deleting clears the draft");
+});
+
+test("the reader can hand the page to Ask without sending anything", () => {
+  assert.match(reader, /const askPage = element\("button", "button ghost small", t\("reader\.askPage"\)\)/);
+  assert.match(reader, /controls\.append\(previous, pageLabel, next, sizeDown, sizeUp, askPage, openPdf\)/);
+  assert.match(reader, /window\.dispatchEvent\(new window\.CustomEvent\("vignan:ask-page"/);
+  assert.match(reader, /closeModal\(\);/, "the reader closes so the composer is visible");
+  const app = readFileSync(fileURLToPath(new URL("../js/app.js", import.meta.url)), "utf8");
+  assert.match(app, /window\.addEventListener\("vignan:ask-page"/);
+  const start = app.indexOf('window.addEventListener("vignan:ask-page"');
+  const handler = app.slice(start, start + 700);
+  assert.match(handler, /input\.value = String\(event\.detail\?\.question \|\| ""\)/);
+  assert.match(handler, /setView\("ask"\)/);
+  assert.doesNotMatch(handler, /requestSubmit|handleAsk/, "nothing is sent without a tap on Send");
 });

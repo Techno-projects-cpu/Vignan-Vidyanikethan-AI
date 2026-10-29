@@ -80,6 +80,13 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 3.19e | `Save my notes (.md)` downloads a file that lists the notes in page order, and the note text never appears in any request to a model | ☐ | ☐ | ☐ |
 | 3.19f | Ask something the books do not cover: the reply names the closest page and a button opens it; nothing is guessed | ☐ | ☐ | ☐ |
 | 3.19g | A connected answer that cites more pages than were found shows the warning above the text and `n of m pages cited` in the meta line | ☐ | ☐ | ☐ |
+| 3.20 | Terminal is dark; the light/dark button works there and turns it paper-white with dark-green ink. Editorial, Soft, Luxury and Neo-brutalism stay locked with the one-line reason | ☐ | ☐ | ☐ |
+| 3.20b | Choose a style and a theme, reload: the page never flashes the wrong colours before the app starts | ☐ | ☐ | ☐ |
+| 3.20c | Read to page 7 of a book, close it, open it again from Library: it continues at page 7 and says so. Open a citation instead: it opens the cited page, not page 7 | ☐ | ☐ | ☐ |
+| 3.20d | In the reader press "Ask about this page": the reader closes, the composer holds a complete question, and nothing has been sent | ☐ | ☐ | ☐ |
+| 3.20e | Type half a note, turn the page, come back: the text is still there, and it was never saved as a note | ☐ | ☐ | ☐ |
+| 3.20f | The sources panel under an answer shows `Matched: lever, moments` for a page that shares words, and a plain note when it does not | ☐ | ☐ | ☐ |
+| 3.20g | Switch the interface to తెలుగు and open a citation: the reader's buttons, note box and hint are in Telugu, with no English island left | ☐ | ☐ | ☐ |
 | 3.19 | Library: the "coming soon" card is visible, says publisher permission, and its button cannot be pressed | ☐ | ☐ | ☐ |
 | 3.20 | A link ending in `?ask=…` fills the composer on open and does not send by itself | ☐ | ☐ | ☐ |
 
@@ -143,5 +150,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (431 checks) plus
+The quickest regression test for a UI fix is `npm test` (441 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.

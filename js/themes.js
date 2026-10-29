@@ -65,8 +65,12 @@ export const THEMES = [
     note: "Near-black, monospace everywhere, phosphor green for anything live.",
     tags: ["terminal", "mono", "dark"],
     scheme: "dark",
-    switchable: false,
+    // Terminal used to be locked: it was dark with nothing to switch to. It now
+    // ships a paper-white companion with the same monospace rules, so the
+    // switch does something real here and is offered.
+    switchable: true,
     bg: "#05070a", surface: "#0b0f14", ink: "#d7ffe9", accent: "#35ff9e",
+    light: { bg: "#f6f8f5", surface: "#ffffff", ink: "#08160f", accent: "#067a46" },
     swatches: ["#05070a", "#0b0f14", "#35ff9e"],
   },
   {
@@ -112,9 +116,10 @@ export function normalizeStyle(id) {
 /**
  * Can the light/dark switch do anything in this style?
  *
- * Four styles pin their own fixed palette — a light theme has no dark twin, and
- * Terminal is dark on purpose. Offering a switch there would be a control that
- * does nothing, so the app greys it out and says why instead of pretending.
+ * The four paper styles pin their own single palette — a light theme with a
+ * second palette stops being that theme. Offering a switch there would be a
+ * control that does nothing, so the app greys it out and says why instead of
+ * pretending. Minimal and Terminal both carry a real pair.
  */
 export function themeSupportsSwitch(id) {
   return Boolean(themeById(id).switchable);
@@ -168,10 +173,20 @@ export function contrast(bg, ink) {
  * small amounts, never to carry body text. (The first version of this file made
  * that mistake, and the test caught the gold on ivory at 3.9:1.)
  */
-export function themeContrast(theme) {
+export function themeContrast(theme, scheme = "") {
+  // A style with two palettes is measured twice; the light one is not a
+  // decoration, so it gets the same AA check as the dark one.
+  const palette = scheme === "light" && theme.light ? { ...theme, ...theme.light } : theme;
   return {
-    onSurface: Math.round(contrast(theme.surface, theme.ink) * 100) / 100,
-    onBackground: Math.round(contrast(theme.bg, theme.ink) * 100) / 100,
-    accentOnSurface: Math.round(contrast(theme.surface, theme.accent) * 100) / 100,
+    onSurface: Math.round(contrast(palette.surface, palette.ink) * 100) / 100,
+    onBackground: Math.round(contrast(palette.bg, palette.ink) * 100) / 100,
+    accentOnSurface: Math.round(contrast(palette.surface, palette.accent) * 100) / 100,
   };
+}
+
+/** Every palette a style ships: its main one, plus a light twin when it has one. */
+export function themePalettes(theme) {
+  const list = [{ scheme: theme.scheme, ...theme }];
+  if (theme.light) list.push({ scheme: "light", ...theme, ...theme.light });
+  return list;
 }

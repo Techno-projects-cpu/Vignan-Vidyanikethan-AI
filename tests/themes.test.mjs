@@ -12,6 +12,7 @@ import {
   switchLockedReason,
   themeById,
   themeContrast,
+  themePalettes,
   themeSupportsSwitch,
 } from "../js/themes.js";
 import { DEFAULT_SETTINGS, normalizeSettings } from "../js/settings.js";
@@ -156,10 +157,12 @@ test("responsiveness covers phone, tablet, laptop and a 720p projector", () => {
 });
 
 test("the light/dark switch is only offered where it can work", () => {
-  // Minimal is the original pair; the other five fix their own palette, so a
-  // toggle there would be a control that does nothing.
+  // Minimal is the original pair and Terminal now ships a paper companion, so
+  // both have two palettes. The four paper styles fix their own palette.
   assert.equal(themeSupportsSwitch("minimal"), true);
-  for (const id of ["soft", "editorial", "luxury", "terminal", "brutal"]) {
+  assert.equal(themeSupportsSwitch("terminal"), true, "Terminal has a light twin now");
+  assert.ok(themeById("terminal").light, "and that twin is declared as data");
+  for (const id of ["soft", "editorial", "luxury", "brutal"]) {
     assert.equal(themeSupportsSwitch(id), false, `${id} pins its own palette`);
     assert.match(switchLockedReason(id), /light\/dark does not apply here/, `${id} explains itself`);
     assert.match(switchLockedReason(id), /Minimal/, "and says what to pick instead");
@@ -171,7 +174,29 @@ test("the light/dark switch is only offered where it can work", () => {
   for (const id of ["soft", "editorial", "luxury", "brutal"]) {
     assert.match(css, new RegExp(`html\\[data-style="${id}"\\][^{]*\\{[^}]*color-scheme: light`), `${id} is pinned light`);
   }
-  assert.match(css, /html\[data-style="terminal"\][^{]*\{[^}]*color-scheme: dark/, "Terminal is pinned dark");
+  assert.match(css, /html\[data-style="terminal"\][^{]*\{[^}]*color-scheme: dark/, "Terminal defaults to dark");
+});
+
+test("Terminal's light twin is a real palette, measured like the others", () => {
+  const terminal = themeById("terminal");
+  assert.equal(themeContrast(terminal).onSurface >= 4.5, true, "dark terminal stays readable");
+  const light = themeContrast(terminal, "light");
+  assert.equal(light.onSurface >= 4.5, true, `light terminal ink on surface is ${light.onSurface}:1`);
+  assert.equal(light.onBackground >= 4.5, true, `light terminal ink on background is ${light.onBackground}:1`);
+  assert.equal(light.accentOnSurface >= 4.5, true, `light terminal accent is ${light.accentOnSurface}:1`);
+  // The stylesheet and the data must agree, or the tile preview lies.
+  assert.match(css, /html\[data-style="terminal"\]\[data-theme="light"\] body\.premium-ui \{[^}]*--p-bg: #f6f8f5/);
+  assert.match(css, /html\[data-style="terminal"\]\[data-theme="light"\] body\.premium-ui \{[^}]*--p-ink: #08160f/);
+  assert.match(css, /html\[data-style="terminal"\]\[data-theme="light"\] body\.premium-ui \{[^}]*--brand-ink: #067a46/);
+  assert.equal(terminal.light.bg, "#f6f8f5");
+  assert.equal(terminal.light.ink, "#08160f");
+  // Every palette a style ships is measured, so a new twin cannot skip the check.
+  for (const theme of THEMES) {
+    for (const palette of themePalettes(theme)) {
+      const measured = themeContrast(theme, palette.scheme === theme.scheme ? "" : palette.scheme);
+      assert.ok(measured.onSurface >= 4.5, `${theme.id}/${palette.scheme} is ${measured.onSurface}:1`);
+    }
+  }
 });
 
 test("a locked switch is visible, disabled, and explained in one line", () => {
@@ -206,4 +231,18 @@ test("a new device starts in the school's style, and its own choice always wins"
   assert.match(apply, /applyStyle\(school, \{ save: false, remember: false \}\)/, "a default is not a choice");
   // The first frame already paints it, so a classroom of tablets matches.
   assert.match(html, /localStorage\.getItem\("vignan\.style\.school"\)/);
+});
+
+test("the theme is mirrored, so a dark device does not flash white first", () => {
+  assert.ok(app.includes('const THEME_MIRROR_KEY = "vignan.theme"'), "the mirror key exists");
+  const setThemeAt = app.indexOf("function setTheme(");
+  const setTheme = app.slice(setThemeAt, app.indexOf("function applyStyle(", setThemeAt));
+  assert.ok(
+    setTheme.includes('localStorage.setItem(THEME_MIRROR_KEY, theme === "dark" ? "dark" : "light")'),
+    "the choice is mirrored synchronously",
+  );
+  // The inline script must accept only the two values this app writes, so a
+  // tampered storage value cannot repaint the page.
+  assert.ok(html.includes('const theme = localStorage.getItem("vignan.theme")'));
+  assert.ok(html.includes('if (theme === "dark" || theme === "light") document.documentElement.dataset.theme = theme'));
 });

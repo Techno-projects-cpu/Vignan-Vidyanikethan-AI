@@ -10,6 +10,7 @@ import {
   citationWarning,
   citedMarkers,
   looksUncited,
+  matchedTerms,
   missingTerms,
   queryTerms,
   ungroundedNumbers,
@@ -132,4 +133,16 @@ test("the audit reaches the answer and its meta line", () => {
   assert.match(app, /citationNote \? `\$\{citationNote\}\\n\\n` : ""/, "the warning leads the answer");
   assert.match(app, /citationAudit: audit,/);
   assert.match(app, /const cited = citationSummary\(message\.citationAudit\)/);
+});
+
+test("each cited page can say which of the student's words it repeats", () => {
+  const page = "A lever balances when the moments on both sides are equal.";
+  assert.deepEqual(matchedTerms("Why does a lever balance on moments?", page), ["lever", "balance", "moments"]);
+  assert.deepEqual(matchedTerms("What is entropy?", page), [], "a page can arrive on its neighbours");
+  assert.deepEqual(matchedTerms("Why does a lever balance?", "   "), []);
+  // The panel shows it under the passage, and says so plainly when empty.
+  assert.match(app, /const matched = matchedTerms\(query, /);
+  assert.match(app, /t\("source\.matched", \{ terms: matched\.join\(", "\) \}\)/);
+  assert.match(app, /t\("source\.noSharedWords"\)/);
+  assert.match(app, /sourceCard\(source, answer\.query \|\| ""\)/);
 });

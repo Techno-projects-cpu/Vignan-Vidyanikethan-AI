@@ -89,6 +89,21 @@ html[data-style="terminal"] body.premium-ui .button { border-radius: 0 !importan
 html[data-style="terminal"] body.premium-ui .eyebrow { color: var(--brand); letter-spacing: .22em; }
 html[data-style="terminal"] body.premium-ui .goal-copy strong::before { content: "> "; color: var(--brand); }
 
+/* Terminal, light: the same typewriter rules on paper instead of glass. This is
+   what the light/dark switch now has to switch to — before this block existed
+   the switch was locked, because there was nothing on the other side.         */
+html[data-style="terminal"][data-theme="light"] body.premium-ui {
+  color-scheme: light;
+  --p-bg: #f6f8f5; --p-surface: #ffffff; --p-surface-2: #eef3ee; --p-surface-3: #e3eae3;
+  --p-ink: #08160f; --p-ink-2: #1d3b2c; --p-muted: #4f6b5c;
+  --p-line: #cfdccf; --p-line-strong: #a9bfad;
+  --brand-ink: #067a46;
+  --shadow: none; --shadow-soft: none;
+}
+html[data-style="terminal"][data-theme="light"] body.premium-ui {
+  --brand: var(--brand-ink); --brand-2: #0a9b58; --brand-soft: #e3f3e8;
+}
+
 /* ---- Neo-brutalism: cream, 3px black, hard shadows, zero rounding -------- */
 html[data-style="brutal"] body.premium-ui {
   color-scheme: light;
@@ -279,6 +294,23 @@ body.premium-ui .section-copy h2 { font-size: clamp(20px, 2.4vw, 28px); }
   .goal-head p { display: none; }
   .goal-card { min-height: 56px; }
   .goal-copy small { display: none; }
+}
+
+/* ---- Why this page? ------------------------------------------------------
+   Under each cited passage: the words it shares with the question. Loud when
+   they exist, quiet when they do not — a page can arrive on its neighbours.   */
+body.premium-ui .source-match {
+  margin: 6px 0 0;
+  font-size: 11px;
+  letter-spacing: .01em;
+  color: var(--brand);
+  font-weight: 650;
+}
+
+body.premium-ui .source-match.none {
+  color: var(--muted);
+  font-weight: 500;
+  font-style: italic;
 }
 
 /* ---- My note on this page ------------------------------------------------
