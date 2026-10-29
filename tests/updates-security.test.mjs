@@ -17,7 +17,7 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 const read = (path) => readFileSync(`${root}${path}`, "utf8");
 
 test("the worker version is read from the cache name", () => {
-  assert.equal(parseCacheVersion('const CACHE_NAME = "vignan-vidyanikethan-ai-v26";'), "26");
+  assert.equal(parseCacheVersion('const CACHE_NAME = "vignan-vidyanikethan-ai-v27";'), "27");
   assert.equal(parseCacheVersion('const CACHE_NAME = "vignan-vidyanikethan-ai-v40";'), "40");
   assert.equal(parseCacheVersion("nonsense"), "");
   assert.equal(isNewer("19", "18"), true);
@@ -78,8 +78,8 @@ test("the worker waits for permission instead of swapping itself in", () => {
 
 test("the offline report counts what the worker really stored", () => {
   const ready = summarize({
-    expected: ["./index.html", "./js/app.js?v=26", "./styles.css"],
-    cached: ["./index.html", "./js/app.js?v=26", "./styles.css"],
+    expected: ["./index.html", "./js/app.js?v=27", "./styles.css"],
+    cached: ["./index.html", "./js/app.js?v=27", "./styles.css"],
     critical: ["./index.html"],
   });
   assert.equal(ready.total, 3);
@@ -87,7 +87,7 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(ready.summary, /Ready offline: 3 of 3/);
 
   const broken = summarize({
-    expected: ["./index.html", "./js/app.js?v=26"],
+    expected: ["./index.html", "./js/app.js?v=27"],
     cached: [],
     critical: ["./index.html"],
   });
@@ -97,8 +97,8 @@ test("the offline report counts what the worker really stored", () => {
 
   // A release is not "ready" when a file every lesson needs is missing.
   const missingShell = summarize({
-    expected: ["./index.html", "./js/app.js?v=26"],
-    cached: ["./js/app.js?v=26"],
+    expected: ["./index.html", "./js/app.js?v=27"],
+    cached: ["./js/app.js?v=27"],
     critical: CRITICAL_FILES,
   });
   assert.equal(missingShell.ready, false);
@@ -109,9 +109,9 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(nothing.summary, /Open the app once while online/);
 
   // Query strings and absolute URLs compare equal.
-  assert.equal(normalizeUrl("./js/app.js?v=26"), "js/app.js");
-  assert.equal(normalizeUrl("https://app.local/js/app.js?v=26"), "js/app.js");
-  assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v26"], "18"), "vignan-vidyanikethan-ai-v26");
+  assert.equal(normalizeUrl("./js/app.js?v=27"), "js/app.js");
+  assert.equal(normalizeUrl("https://app.local/js/app.js?v=27"), "js/app.js");
+  assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v27"], "18"), "vignan-vidyanikethan-ai-v27");
 });
 
 test("the in-app check survives a browser with no cache and no network", async () => {
@@ -228,6 +228,14 @@ test("judge mode stays grayscale and does not overclaim", () => {
   assert.match(judge, /OPEN_SOURCE_CREDITS\.md/);
   assert.match(read("/README.md"), /## Where the ideas came from/);
   assert.match(read("/OPEN_SOURCE_CREDITS.md"), /visheshpandey\/Eklavya/);
+  // Two projects share the name Eklavya, and the page must not blur them: the
+  // funded product and the independent hackathon repository are named apart.
+  assert.match(judge, /eklavya\.io/);
+  assert.match(judge, /Apni Pathshala with Malpani Ventures/);
+  assert.match(judge, /independent weekend hackathon repository/);
+  assert.match(judge, /on our list/);
+  assert.match(read("/OPEN_SOURCE_CREDITS.md"), /\*\*not\*\* the funded product at eklavya\.io/);
+  assert.match(read("/README.md"), /two different projects use the name \*\*Eklavya\*\*/);
   assert.match(judge, /no professional security audit/);
   assert.doesNotMatch(judge, /guarantee|100% accurate|unhackable/i);
 });

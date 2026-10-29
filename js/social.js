@@ -6,7 +6,7 @@
  * sync and makes retries readable.
  */
 
-import { authApiUrl } from "./auth.js?v=26";
+import { authApiUrl } from "./auth.js?v=27";
 
 const REQUEST_TIMEOUT = 15000;
 const CSRF_COOKIE = "vignan_csrf";

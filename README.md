@@ -70,16 +70,26 @@ something is missing. `CHECKLIST.md` lists the checks that still need a human an
 
 ## Where the ideas came from
 
-The free tutors already out there were the best reading material for building this one.
-The open-source voice tutor [Eklavya](https://github.com/visheshpandey/Eklavya) is the
-closest relative and is credited in `OPEN_SOURCE_CREDITS.md`: the viva that asks you to
-explain, then names the misconception, came from reading it. It also shows the same
-foundation — a hosted model (their configuration names Gemini as the only vendor) plus a
-careful layer around it — which is exactly what this project is too. The difference is a
-deliberate constraint here: every answer must name a page of the student's own book and is
-refused when that page is missing, the whole study loop (quizzes, flashcards, exam mocks, a
-viva) runs with the network off, and a rate-limited provider is rotated past rather than
-turned into an error. A funded team covers more ground; this one goes deeper on less.
+The free tutors already out there were the best reading material for building this one, and
+two different projects use the name **Eklavya**, so both are named here.
+
+**eklavya.io** is the funded one: built by the team behind Apni Pathshala with Malpani
+Ventures, free, no ads, no credit card, covering CBSE/NCERT, JEE, NEET and eight state
+boards. It is the standard in this space, and this project does not claim to beat it. It
+lists Andhra Pradesh and Telangana as "on our list", so learners here are not served yet —
+which is the honest local reason a school in Guntur builds its own.
+
+The **open-source repository** at
+[visheshpandey/Eklavya](https://github.com/visheshpandey/Eklavya) is a separate weekend
+hackathon project that happens to share the name. The idea of a viva that asks you to
+explain, then names the misconception, came from reading it; it is credited in
+`OPEN_SOURCE_CREDITS.md`, publishes no licence, and none of its code, text or prompts were
+copied — the rules in `js/viva.js` are our own.
+
+What is different here is a deliberate constraint: every answer must name a page of the
+student's own book and is refused when that page is missing, the whole study loop runs with
+the network off, and a rate-limited provider is rotated past rather than turned into an
+error. A funded team covers far more ground; this one goes deeper on less.
 
 ## What is implemented
 
@@ -399,8 +409,8 @@ npm run offline:check
 ```
 
 ```
-Release v26
-Cached after install: 366 files in vignan-vidyanikethan-ai-v26
+Release v27
+Cached after install: 366 files in vignan-vidyanikethan-ai-v27
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...

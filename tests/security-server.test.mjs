@@ -89,7 +89,7 @@ test("account HTTP endpoints enforce CSRF, safe cookies, rate limits and preserv
   const robots = await get("/robots.txt");
   assert.equal(robots.status, 200);
   assert.match(await robots.text(), /Sitemap: https:/);
-  const icon = await get("/icons/icon.svg?v=26");
+  const icon = await get("/icons/icon.svg?v=27");
   assert.equal(icon.status, 200);
   assert.match(icon.headers.get("content-type"), /^image\/svg\+xml/);
 
