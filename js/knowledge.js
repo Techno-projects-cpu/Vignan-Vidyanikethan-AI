@@ -9,7 +9,7 @@
  * clearly-marked web fallback instead of being invented.
  */
 
-import { tokenize } from "./text.js?v=25";
+import { tokenize } from "./text.js?v=26";
 
 const SCHOOL_EN = [
   "**Vignan Vidyanikethan English Medium High School** is an English-medium school in India. Teaching, exams and daily conversation there happen in English, with Indian languages used alongside in the classroom and at home.",

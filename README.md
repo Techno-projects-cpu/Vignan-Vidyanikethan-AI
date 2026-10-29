@@ -68,16 +68,18 @@ the code: it is `npm run check`, which runs the secret scanner, the tests, the p
 build and an offline simulation with the network switched off, and fails the build when
 something is missing. `CHECKLIST.md` lists the checks that still need a human and a phone.
 
-## How this compares to the other free AI tutors
+## Where the ideas came from
 
-Most of them are a hosted model plus a layer around it, and so is this. The open-source
-voice tutor that shares the Eklavya name says in its own configuration that Gemini is its
-only model and vendor — no model is trained there, and none is trained here. The
-difference is the constraint: every answer must name a page of the student's own book and
-is refused when that page is missing, the whole study loop (quizzes, flashcards, exam
-mocks, a viva) runs with the network off, and a rate-limited provider is rotated past
-rather than turned into an error. A funded team covers more ground; this project shows its
-working for what it does cover.
+The free tutors already out there were the best reading material for building this one.
+The open-source voice tutor [Eklavya](https://github.com/visheshpandey/Eklavya) is the
+closest relative and is credited in `OPEN_SOURCE_CREDITS.md`: the viva that asks you to
+explain, then names the misconception, came from reading it. It also shows the same
+foundation — a hosted model (their configuration names Gemini as the only vendor) plus a
+careful layer around it — which is exactly what this project is too. The difference is a
+deliberate constraint here: every answer must name a page of the student's own book and is
+refused when that page is missing, the whole study loop (quizzes, flashcards, exam mocks, a
+viva) runs with the network off, and a rate-limited provider is rotated past rather than
+turned into an error. A funded team covers more ground; this one goes deeper on less.
 
 ## What is implemented
 
@@ -397,8 +399,8 @@ npm run offline:check
 ```
 
 ```
-Release v25
-Cached after install: 366 files in vignan-vidyanikethan-ai-v25
+Release v26
+Cached after install: 366 files in vignan-vidyanikethan-ai-v26
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
