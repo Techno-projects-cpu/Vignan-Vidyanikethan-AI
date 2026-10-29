@@ -37,6 +37,11 @@ import { ValidationError, cleanUsername, createAccountStore, publicUser, validat
 import { createLocalSocialStore, createSupabaseSocialStore } from "./server/social-store.mjs";
 import { SocialError, createSocialService } from "./server/social.mjs";
 import { createSocialRouter } from "./server/social-http.mjs";
+import {
+  ADMIN_COOKIE, adminCookieHeader, adminFormToken, adminFormTokenMatches, adminHeaders,
+  adminState, accountsToBackup, accountsToCsv, auditLog, renderAdminDashboard, renderAdminLogin,
+  signAdminSession, verifyAdminSession, verifyAdminToken,
+} from "./server/admin.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 const env = (name, fallback = "") => process.env[`STUDY_AI_${name}`] ?? process.env[`VIGNAN_AI_${name}`] ?? fallback;
@@ -928,7 +933,7 @@ async function socialDiagnostics({ fresh = false } = {}) {
 function health() {
   return {
     ok: true,
-    version: "2.1.0",
+    version: "2.2.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,
@@ -1153,7 +1158,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.1.0</strong></div>
+      <div><span>release</span><strong>2.2.0</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1189,6 +1194,176 @@ function sendSetupPage(request, response) {
     "Content-Security-Policy": CONTENT_SECURITY_POLICY,
   });
   response.end(request.method === "HEAD" ? undefined : body);
+}
+
+/* ---------------------------------------------------------------- operator console */
+
+/**
+ * The console is off unless STUDY_AI_ADMIN_TOKEN is set to something long.
+ * Resolved lazily so a token changed in Render takes effect on redeploy, and so
+ * tests can drive it with a bare process.env.
+ */
+function adminConfig() {
+  return adminState(process.env);
+}
+
+function adminSession(request) {
+  const config = adminConfig();
+  if (!config.enabled) return null;
+  const value = parseCookies(request)[ADMIN_COOKIE];
+  return verifyAdminSession(value, config.token) ? value : null;
+}
+
+/** Read a urlencoded form body with a hard cap. */
+async function readForm(request, limit = 8_192) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of request) {
+    size += chunk.length;
+    if (size > limit) throw new RequestBodyError("That form was too large.", 413);
+    chunks.push(chunk);
+  }
+  const params = new URLSearchParams(Buffer.concat(chunks).toString("utf8"));
+  const output = {};
+  for (const [key, value] of params) output[key] = value;
+  return output;
+}
+
+function sendHtml(request, response, status, html, extraHeaders = {}) {
+  const body = Buffer.from(html, "utf8");
+  response.writeHead(status, {
+    ...baseSecurityHeaders(request),
+    ...adminHeaders(extraHeaders),
+    "Content-Type": "text/html; charset=utf-8",
+    "Content-Length": body.length,
+    "Content-Security-Policy": CONTENT_SECURITY_POLICY,
+  });
+  response.end(request.method === "HEAD" ? undefined : body);
+}
+
+async function handleAdminPage(request, response) {
+  const config = adminConfig();
+  const session = adminSession(request);
+  if (!session) {
+    const message = new URL(request.url || "/admin", "http://local").searchParams.get("error") === "expired"
+      ? "That session ended. Sign in again."
+      : "";
+    const page = renderAdminLogin({ enabled: config.enabled, reason: config.reason, message });
+    sendHtml(request, response, config.enabled ? 200 : 503, page.html);
+    return;
+  }
+
+  const url = new URL(request.url || "/admin", "http://local");
+  const search = String(url.searchParams.get("q") || "").trim().slice(0, 40);
+  const page = Math.max(1, Math.min(200, Number(url.searchParams.get("page") || 1) || 1));
+  const pageSize = 100;
+  let rows = [];
+  let total = 0;
+  let failure = "";
+  try {
+    const all = typeof accounts?.list === "function" ? await accounts.list({ limit: 500, search }) : [];
+    total = all.length;
+    rows = all.slice((page - 1) * pageSize, page * pageSize);
+  } catch (error) {
+    failure = `Could not read the account list: ${String(error?.message || error).slice(0, 200)}`;
+  }
+  auditLog("view-accounts", { ip: clientIp(request), search, page, rows: rows.length, total });
+  const html = renderAdminDashboard({
+    rows, total, search, page, pageSize,
+    csrf: adminFormToken(session),
+    backend: accountsBackend,
+    release: "2.2.0",
+    message: failure,
+  });
+  sendHtml(request, response, 200, html.html);
+}
+
+async function handleAdminExport(request, response) {
+  const session = adminSession(request);
+  if (!session) {
+    response.writeHead(302, { Location: "/admin?error=expired", ...adminHeaders() }).end();
+    return;
+  }
+  const url = new URL(request.url || "/admin/export", "http://local");
+  const format = url.searchParams.get("format") === "csv" ? "csv" : "json";
+  const search = String(url.searchParams.get("q") || "").trim().slice(0, 40);
+  let rows = [];
+  try {
+    rows = typeof accounts?.list === "function" ? await accounts.list({ limit: 500, search }) : [];
+  } catch (error) {
+    sendError(response, 500, `Could not build the backup: ${String(error?.message || error).slice(0, 200)}`);
+    return;
+  }
+  const stamp = new Date().toISOString().slice(0, 10);
+  auditLog("export-accounts", { ip: clientIp(request), format, rows: rows.length, search });
+  const payload = format === "csv"
+    ? accountsToCsv(rows)
+    : JSON.stringify(accountsToBackup(rows, { backend: accountsBackend }), null, 2);
+  const body = Buffer.from(payload, "utf8");
+  response.writeHead(200, {
+    ...baseSecurityHeaders(request),
+    ...adminHeaders({
+      "Content-Type": format === "csv" ? "text/csv; charset=utf-8" : "application/json; charset=utf-8",
+      "Content-Disposition": `attachment; filename="vignan-accounts-${stamp}.${format}"`,
+    }),
+    "Content-Length": body.length,
+  });
+  response.end(body);
+}
+
+async function handleAdminLogin(request, response) {
+  const config = adminConfig();
+  if (!config.enabled) {
+    sendHtml(request, response, 503, renderAdminLogin({ enabled: false, reason: config.reason }).html);
+    return;
+  }
+  if (!isSameOriginRequest(request)) {
+    sendHtml(request, response, 403, renderAdminLogin({ enabled: true, message: "Send that form from this site, not from another page." }).html);
+    return;
+  }
+  if (!rateLimit(request, "admin-login", 5, 600_000)) {
+    auditLog("login-throttled", { ip: clientIp(request) });
+    sendHtml(request, response, 429, renderAdminLogin({ enabled: true, message: "Too many attempts. Wait ten minutes, then try again." }).html);
+    return;
+  }
+  const form = await readForm(request);
+  if (!verifyAdminToken(form.token, config.token)) {
+    auditLog("login-failed", { ip: clientIp(request) });
+    sendHtml(request, response, 401, renderAdminLogin({ enabled: true, message: "That token is not right. It is the exact value of STUDY_AI_ADMIN_TOKEN." }).html);
+    return;
+  }
+  const { secure, partitioned } = cookiePolicy(request);
+  const value = signAdminSession(config.token);
+  auditLog("login-ok", { ip: clientIp(request) });
+  response.writeHead(303, {
+    ...adminHeaders({
+      "Set-Cookie": adminCookieHeader({ secure, partitioned, value }),
+      Location: "/admin",
+    }),
+  });
+  response.end();
+}
+
+async function handleAdminLogout(request, response) {
+  const session = adminSession(request);
+  if (!session || !isSameOriginRequest(request)) {
+    response.writeHead(303, { ...adminHeaders({ Location: "/admin" }) }).end();
+    return;
+  }
+  const form = await readForm(request);
+  if (!adminFormTokenMatches(form.csrf, session)) {
+    sendHtml(request, response, 403, renderAdminLogin({ enabled: true, message: "That sign-out form was out of date. Reload the console and try again." }).html);
+    return;
+  }
+  auditLog("logout", { ip: clientIp(request) });
+  const { secure, partitioned } = cookiePolicy(request);
+  response.writeHead(303, {
+    ...adminHeaders({
+      "Set-Cookie": adminCookieHeader({ secure, partitioned, clear: true }),
+      Location: "/admin",
+    }),
+  });
+  response.end();
 }
 
 async function serveStatic(request, response, pathname) {
@@ -1326,6 +1501,14 @@ const server = http.createServer(async (request, response) => {
       sendError(response, 503, "Friends, chat and games are temporarily unavailable.", authOptions(request));
       return;
     }
+    if (apiPath === "/api/admin/login" && request.method === "POST") {
+      await handleAdminLogin(request, response);
+      return;
+    }
+    if (apiPath === "/api/admin/logout" && request.method === "POST") {
+      await handleAdminLogout(request, response);
+      return;
+    }
     if (apiPath === "/api/ai" && request.method === "POST") {
       await handleAi(request, response);
       return;
@@ -1382,6 +1565,14 @@ const server = http.createServer(async (request, response) => {
     }
     if (url.pathname === "/setup" || url.pathname === "/setup/" || url.pathname === "/setup.html") {
       sendSetupPage(request, response);
+      return;
+    }
+    if (url.pathname === "/admin" || url.pathname === "/admin/") {
+      await handleAdminPage(request, response);
+      return;
+    }
+    if (url.pathname === "/admin/export") {
+      await handleAdminExport(request, response);
       return;
     }
     await serveStatic(request, response, url.pathname);

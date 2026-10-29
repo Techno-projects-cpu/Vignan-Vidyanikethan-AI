@@ -6,30 +6,30 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=19";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=19";
-import { ingestPdf, ingestText } from "./ingest.js?v=19";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=19";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=19";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=19";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=19";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=19";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=19";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=19";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=19";
+import * as db from "./db.js?v=20";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=20";
+import { ingestPdf, ingestText } from "./ingest.js?v=20";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=20";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=20";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=20";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=20";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=20";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=20";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=20";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=20";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=19";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=19";
+} from "./pro-mode.js?v=20";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=20";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=19";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=19";
-import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=19";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=19";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=19";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=19";
+} from "./updates.js?v=20";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=20";
+import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=20";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=20";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=20";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=20";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -37,8 +37,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=19";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=19";
+} from "./llm.js?v=20";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=20";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -50,9 +50,9 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=19";
-import { TASKS } from "./model-router.js?v=19";
-import { PROVIDERS, providerList } from "./providers.js?v=19";
+} from "./local-ai.js?v=20";
+import { TASKS } from "./model-router.js?v=20";
+import { PROVIDERS, providerList } from "./providers.js?v=20";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -61,30 +61,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=19";
-import { parseApiKeys } from "./key-pool.js?v=19";
+} from "./settings.js?v=20";
+import { parseApiKeys } from "./key-pool.js?v=20";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=19";
+} from "./student-keys.js?v=20";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=19";
+} from "./quiz.js?v=20";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=19";
+} from "./flashcards.js?v=20";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=19";
+} from "./study-decks.js?v=20";
 import {
   accuracy,
   currentStreak,
@@ -95,14 +95,14 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=19";
-import { externalSearchUrl, searchWeb } from "./web.js?v=19";
-import { openEditStudio } from "./edit-studio.js?v=19";
-import { openReader } from "./reader.js?v=19";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=19";
-import { languageLabel, languageGroups } from "./languages.js?v=19";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=19";
-import * as ui from "./ui.js?v=19";
+} from "./progress.js?v=20";
+import { externalSearchUrl, searchWeb } from "./web.js?v=20";
+import { openEditStudio } from "./edit-studio.js?v=20";
+import { openReader } from "./reader.js?v=20";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=20";
+import { languageLabel, languageGroups } from "./languages.js?v=20";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=20";
+import * as ui from "./ui.js?v=20";
 import {
   clearReferral,
   getLeaderboard,
@@ -112,8 +112,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=19";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=19";
+} from "./auth.js?v=20";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=20";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -121,12 +121,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=19";
-import { initMotion, revealVisible } from "./motion.js?v=19";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=19";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=19";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=19";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=19";
+} from "./premium-ui.js?v=20";
+import { initMotion, revealVisible } from "./motion.js?v=20";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=20";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=20";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=20";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=20";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -3341,7 +3341,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=19");
+            const { social } = await import("./social.js?v=20");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));

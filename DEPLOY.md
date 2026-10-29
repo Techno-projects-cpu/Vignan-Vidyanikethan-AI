@@ -44,6 +44,31 @@ It catches the two mistakes that account for nearly every broken deployment:
 
 The page refreshes every 15 seconds while something is wrong, links straight to the Supabase project's **Settings → API Keys** page and the Render environment, and shows the release, accounts backend, social backend, offline readiness, web fallback and how many server AI keys are loaded. It is marked `noindex`, sends `Cache-Control: no-store` and reveals no secret, so a screenshot is safe to share. `/api/health` remains the machine-readable equivalent.
 
+## Operator console at /admin (off by default)
+
+The school has to be able to answer "what do you hold about my child?" and to take a backup. `/admin` does exactly that, and refuses to do more.
+
+**Turn it on**
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Paste the output into **Render → Environment** as `STUDY_AI_ADMIN_TOKEN`, save, wait for the redeploy, then open `/admin` and paste the same value once. The console stays off — for everyone, including you — until that variable holds at least 24 characters. Rotating the variable signs every console session out, which is how you revoke access if a laptop is lost.
+
+**What it shows:** username, age band, gender choice, signup date, quizzes, average, XP, streak and referrals. Search by username, page through 100 at a time, and download a backup as JSON or CSV.
+
+**What it cannot do, by design:**
+
+- no passwords or hashes — those live in Supabase Auth and are never read by this project;
+- no impersonation: there is no endpoint that issues a session for another person, and a test fails if one appears;
+- no reading of books, chats, study sheets, decks or answers — they are in each student's browser and never uploaded, so there is nothing on the server to read;
+- no editing of marks or progress.
+
+**How it is protected:** constant-time token comparison, a signed HttpOnly `SameSite=Strict` cookie that expires after eight hours, a per-session form token for sign-out, same-origin checks on both POSTs, five attempts per address per ten minutes, `no-store`, `noindex`, and an audit line in the Render log for every sign-in, listing, export and sign-out. The token itself is never logged, and a test asserts that.
+
+**Before term starts:** tell students and parents that this exists — `privacy.html` says so in plain words — and keep the token to yourself. It is the only key to the console.
+
 ## 3. Add Render environment variables
 
 Add these in **Render → Environment**. The blank key values below are placeholders: copy the actual values directly from your Supabase dashboard. Never commit a secret, paste it in chat, or put it in browser code.

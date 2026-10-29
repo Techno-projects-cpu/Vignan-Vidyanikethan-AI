@@ -205,6 +205,25 @@ export function createSupabaseAccountStore({
     return leaderboardFromAccounts(rows.map(rowToAccount), limit);
   }
 
+  /**
+   * Every profile, newest first — for the operator console only.
+   *
+   * `select=*` is narrowed to the columns the console prints, so a future
+   * column (a token, a note) is never included by accident.
+   */
+  async function list({ limit = 100, search = "" } = {}) {
+    const columns = "id,username,age_band,gender,guardian_consent,avatar_seed,xp,streak,best_streak,best,quizzes,total_correct,total_questions,average,referrals,referred_by,created_at";
+    const safeLimit = Math.min(500, Math.max(1, Number(limit) || 100));
+    const query = String(search || "").trim().slice(0, 40);
+    const filter = query ? `&username=ilike.${encodeURIComponent(`*${query}*`)}` : "";
+    const result = await request(
+      `/rest/v1/profiles?select=${columns}${filter}&order=created_at.desc&limit=${safeLimit}`,
+    );
+    if (!result.ok) throw new Error(safeMessage(result.data, `Could not list accounts (${result.status})`));
+    const rows = Array.isArray(result.data) ? result.data : [];
+    return rows.map(rowToAccount).map((account) => publicUser(account));
+  }
+
   async function createSession(userId, tokenHash, expiresAt) {
     const result = await request("/rest/v1/rpc/create_vignan_session", {
       method: "POST",
@@ -235,6 +254,7 @@ export function createSupabaseAccountStore({
     authenticate,
     findById,
     find,
+    list,
     recordResult,
     leaderboard,
     createSession,

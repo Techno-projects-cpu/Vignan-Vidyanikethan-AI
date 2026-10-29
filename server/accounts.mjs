@@ -286,6 +286,19 @@ export function createAccountStore(filePath = DEFAULT_DATA_FILE) {
     return data.users.find((user) => user.id === id) || null;
   }
 
+  /** Every account, newest first — for the operator console only. */
+  async function list({ limit = 100, search = "" } = {}) {
+    const data = await load();
+    const query = String(search || "").trim().toLowerCase().slice(0, 40);
+    const rows = (data.users || [])
+      .filter((account) => !query || String(account.username || "").toLowerCase().includes(query))
+      .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))
+      .slice(0, Math.min(500, Math.max(1, Number(limit) || 100)))
+      // publicUser is the allow-list: no password hash, ever.
+      .map((account) => publicUser(account));
+    return rows;
+  }
+
   function mutate(id, updater) {
     return serial(async () => {
       const data = await loadNow();
@@ -342,5 +355,5 @@ export function createAccountStore(filePath = DEFAULT_DATA_FILE) {
     return leaderboardFromAccounts(data.users, limit);
   }
 
-  return { load, save, find, findById, mutate, register, authenticate, recordResult, leaderboard, filePath };
+  return { load, save, find, findById, list, mutate, register, authenticate, recordResult, leaderboard, filePath };
 }

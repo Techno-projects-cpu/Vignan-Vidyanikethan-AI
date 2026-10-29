@@ -93,3 +93,7 @@ services:
         sync: false
       - key: STUDY_AI_ALLOWED_ORIGINS
         sync: false
+      # Operator console at /admin. Leave unset to keep it switched off.
+      # 24 characters minimum; 64 random hex characters recommended.
+      - key: STUDY_AI_ADMIN_TOKEN
+        sync: false

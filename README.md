@@ -372,8 +372,8 @@ npm run offline:check
 ```
 
 ```
-Release v19
-Cached after install: 358 files in vignan-vidyanikethan-ai-v19
+Release v20
+Cached after install: 358 files in vignan-vidyanikethan-ai-v20
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
@@ -407,6 +407,7 @@ new module is missing from the cache — this is exactly how `updates.js` and
 | `terms.html` | acceptable use, accounts, limits of a student project |
 | `security.html` | protections in place, what is deliberately not collected, limits, private disclosure, DPDP Act 2023 rights |
 | `copyright.html` | no textbook is bundled or hosted, how quotations are used, takedown route |
+| `/admin` | **operator console** (off unless `STUDY_AI_ADMIN_TOKEN` is set): account records, search, JSON/CSV backup, audit trail. Cannot read passwords, books, chats or answers; cannot sign in as anyone |
 | `/setup` | live setup check (server-generated): which Supabase variable is missing, and whether each key has the right *shape* — never the value |
 | `judge.html` | **Judge mode** — what this is and is not, two tests a judge can run in a minute, the FAQ, and the honest limitations |
 | `SECURITY.md` | the same policy in repository form, for GitHub |
@@ -592,7 +593,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-321 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
+337 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 
