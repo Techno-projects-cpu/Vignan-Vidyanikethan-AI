@@ -68,7 +68,7 @@ test("no prep material is bundled, only shapes", () => {
   assert.ok(/^[\x00-\x7F]*$/.test(source), "exam-packs.js stays ASCII");
   assert.equal(getExam("neet").official, undefined, "links live in OFFICIAL, not duplicated");
   for (const mode of MODES) assert.ok(mode.id && mode.name && mode.line, `mode ${mode.id}`);
-  assert.deepEqual(MODES.map((mode) => mode.id), ["mock", "drill", "coverage"]);
+  assert.deepEqual(MODES.map((mode) => mode.id), ["mock", "drill", "viva", "coverage"]);
 });
 
 test("blueprint splits any short set and always sums to what was asked", () => {
@@ -230,7 +230,7 @@ test("the exam practice page is reachable and uses the existing quiz pipeline", 
   }
   assert.match(html, /class="command-item" data-view="exam"/, "the command menu lists it");
   assert.match(html, /<symbol id="i-target"/, "the nav icon exists");
-  assert.match(app, /from "\.\/exam-packs\.js\?v=22"/, "the app imports the packs");
+  assert.match(app, /from "\.\/exam-packs\.js\?v=23"/, "the app imports the packs");
   assert.match(app, /if \(view === "exam"\) renderExamView\(\);/, "opening the view renders it");
   assert.match(app, /scoreExam\(exam, items\)/, "exam sessions are marked with the exam's own marking");
   assert.match(app, /result\.exam = \{/, "the result carries the exam readout");

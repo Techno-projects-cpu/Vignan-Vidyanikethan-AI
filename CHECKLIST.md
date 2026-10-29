@@ -61,6 +61,9 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 3.11 | Syllabus coverage counts only chapters your own pages can answer | ☐ | ☐ | ☐ |
 | 3.12 | First open is not empty: the starter books are in Library and an answer cites them | ☐ | ☐ | ☐ |
 | 3.13 | Removing the starter pages in Library leaves your own uploads untouched | ☐ | ☐ | ☐ |
+| 3.14 | Viva: the examiner asks, a thin answer gets one follow-up, the card shows marks out of ten | ☐ | ☐ | ☐ |
+| 3.15 | Read aloud speaks a real answer without reading `**` or `[1]` | ☐ | ☐ | ☐ |
+| 3.16 | Speaking an answer works, or says why not and leaves typing intact | ☐ | ☐ | ☐ |
 
 ## 4. Social and play
 
@@ -122,5 +125,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (357 checks) plus
+The quickest regression test for a UI fix is `npm test` (368 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.

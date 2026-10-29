@@ -6,30 +6,31 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=22";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=22";
-import { ingestPdf, ingestText } from "./ingest.js?v=22";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=22";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=22";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=22";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=22";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=22";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=22";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=22";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=22";
+import * as db from "./db.js?v=23";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=23";
+import { ingestPdf, ingestText } from "./ingest.js?v=23";
+import { splitSentences } from "./text.js?v=23";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=23";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=23";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=23";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=23";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=23";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=23";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=23";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=23";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=22";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=22";
+} from "./pro-mode.js?v=23";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=23";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=22";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=22";
-import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=22";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=22";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=22";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=22";
+} from "./updates.js?v=23";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=23";
+import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=23";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=23";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=23";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=23";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -37,8 +38,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=22";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=22";
+} from "./llm.js?v=23";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=23";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -50,7 +51,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=22";
+} from "./local-ai.js?v=23";
 import {
   EXAMS,
   MODES,
@@ -65,10 +66,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=22";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=22";
-import { TASKS } from "./model-router.js?v=22";
-import { PROVIDERS, providerList } from "./providers.js?v=22";
+} from "./exam-packs.js?v=23";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=23";
+import { availableVoices, listenMessage, listenOnce, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=23";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=23";
+import { TASKS } from "./model-router.js?v=23";
+import { PROVIDERS, providerList } from "./providers.js?v=23";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -77,30 +80,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=22";
-import { parseApiKeys } from "./key-pool.js?v=22";
+} from "./settings.js?v=23";
+import { parseApiKeys } from "./key-pool.js?v=23";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=22";
+} from "./student-keys.js?v=23";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=22";
+} from "./quiz.js?v=23";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=22";
+} from "./flashcards.js?v=23";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=22";
+} from "./study-decks.js?v=23";
 import {
   accuracy,
   currentStreak,
@@ -111,14 +114,14 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=22";
-import { externalSearchUrl, searchWeb } from "./web.js?v=22";
-import { openEditStudio } from "./edit-studio.js?v=22";
-import { openReader } from "./reader.js?v=22";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=22";
-import { languageLabel, languageGroups } from "./languages.js?v=22";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=22";
-import * as ui from "./ui.js?v=22";
+} from "./progress.js?v=23";
+import { externalSearchUrl, searchWeb } from "./web.js?v=23";
+import { openEditStudio } from "./edit-studio.js?v=23";
+import { openReader } from "./reader.js?v=23";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=23";
+import { languageLabel, languageGroups } from "./languages.js?v=23";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=23";
+import * as ui from "./ui.js?v=23";
 import {
   clearReferral,
   getLeaderboard,
@@ -128,8 +131,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=22";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=22";
+} from "./auth.js?v=23";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=23";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -137,12 +140,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=22";
-import { initMotion, revealVisible } from "./motion.js?v=22";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=22";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=22";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=22";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=22";
+} from "./premium-ui.js?v=23";
+import { initMotion, revealVisible } from "./motion.js?v=23";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=23";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=23";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=23";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=23";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -995,6 +998,13 @@ function renderChat() {
         copy.type = "button";
         copy.addEventListener("click", () => copyText(formatAnswerForCopy(message), "Answer and citations copied."));
         actions.appendChild(copy);
+        if (voiceEnv().speak) {
+          const speak = ui.element("button", "message-action", "Read aloud");
+          speak.type = "button";
+          speak.setAttribute("aria-label", "Read this answer aloud");
+          speak.addEventListener("click", () => sayText(message.content, { label: "Reading the answer aloud." }));
+          actions.appendChild(speak);
+        }
         // A study sheet is a revision handout: let it leave the app as a file so
         // it can be printed or pasted into a notebook.
         if (message.studySheet && !message.studySheet.empty) {
@@ -1973,6 +1983,154 @@ async function handleBookAction(event) {
   }
 }
 
+/* --------------------------------------------------------------- voice, viva */
+
+/** What this browser can do, asked once and remembered for the tab. */
+let voiceCache = null;
+function voiceEnv() {
+  if (!voiceCache) {
+    voiceCache = voiceSupport({
+      speechSynthesis: globalThis.speechSynthesis,
+      SpeechRecognition: globalThis.SpeechRecognition,
+      webkitSpeechRecognition: globalThis.webkitSpeechRecognition,
+      online: typeof navigator === "undefined" ? true : navigator.onLine !== false,
+    });
+  }
+  return voiceCache;
+}
+
+function sayText(text, { label = "" } = {}) {
+  const env = voiceEnv();
+  if (!env.speak) {
+    ui.showToast(env.reason || "This browser cannot read aloud. Everything still works by typing.", "info", 6000);
+    return false;
+  }
+  stopSpeaking();
+  const result = speakText(text, {
+    synth: env.synth,
+    voices: availableVoices(env.synth),
+    language: speechLanguage(state.settings.language),
+  });
+  if (!result.ok) {
+    ui.showToast(result.reason === "empty" ? "There is nothing to read on this screen." : "Reading aloud did not start. Try again, or read the page yourself.", "info", 5000);
+    return false;
+  }
+  if (label) ui.showToast(label, "info", 1800);
+  return true;
+}
+
+function speakCurrentQuestion() {
+  const question = state.quiz?.questions?.[state.quizIndex];
+  if (!question) return;
+  const options = question.type === "mcq" ? ` The options are: ${question.options.join(", ")}.` : "";
+  sayText(`${examinerLine(question)}${options}`, { label: "Reading the question aloud." });
+}
+
+/**
+ * One spoken answer, dropped into whichever box the question uses.
+ * Speech is a shortcut for typing, never a replacement: on any failure the box
+ * keeps its text and the student is told what happened.
+ */
+async function dictateAnswer(button) {
+  const env = voiceEnv();
+  if (!env.listen) {
+    ui.showToast(env.reason || listenMessage("unsupported"), "info", 6500);
+    return;
+  }
+  const Recognition = env.Recognition;
+  let recognition = null;
+  try { recognition = new Recognition(); } catch { recognition = null; }
+  if (!recognition) {
+    ui.showToast(listenMessage("unsupported"), "info", 6000);
+    return;
+  }
+  const input = $("#quiz-question textarea.short-input") || $("#quiz-question input.fill-input");
+  if (!input) {
+    ui.showToast("This kind of question is answered by choosing an option, not by speaking.", "info", 5000);
+    return;
+  }
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = "Listening…";
+  button.classList.add("listening");
+  const { text, error } = await listenOnce({ recognition, language: speechLanguage(state.settings.language) });
+  button.disabled = false;
+  button.textContent = original;
+  button.classList.remove("listening");
+  if (text) {
+    input.value = input.value ? `${input.value.trim()} ${text}` : text;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.focus();
+    return;
+  }
+  ui.showToast(listenMessage(error || "empty"), "info", 6500);
+}
+
+async function dictateQuestion(button) {
+  const env = voiceEnv();
+  const input = $("#ask-input");
+  if (!env.listen || !input) {
+    ui.showToast(env.reason || listenMessage("unsupported"), "info", 6500);
+    return;
+  }
+  let recognition = null;
+  try { recognition = new (env.Recognition)(); } catch { recognition = null; }
+  if (!recognition) {
+    ui.showToast(listenMessage("unsupported"), "info", 6000);
+    return;
+  }
+  button.disabled = true;
+  button.classList.add("listening");
+  const { text, error } = await listenOnce({ recognition, language: speechLanguage(state.settings.language) });
+  button.disabled = false;
+  button.classList.remove("listening");
+  if (text) {
+    input.value = text;
+    input.focus();
+    return;
+  }
+  ui.showToast(listenMessage(error || "empty"), "info", 6500);
+}
+
+/** The viva report card, built from the questions the examiner actually asked. */
+/** The current mark for one answer, using the same rule as the final result. */
+function currentAward(question, answer) {
+  if (!String(answer || "").trim()) return 0;
+  try {
+    const single = makeQuiz({ questions: [question], type: question.type });
+    const graded = gradeQuiz(single, { [question.id]: answer });
+    return Number(graded.perQuestion?.[0]?.awarded) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function vivaCard(report, quiz) {
+  const card = ui.element("div", "card viva-card");
+  card.appendChild(ui.element("span", "eyebrow", `VIVA · ${(quiz?.examName || "Oral practice").toUpperCase()}`));
+  const head = ui.element("div", "viva-head");
+  head.appendChild(ui.element("strong", "viva-marks", `${report.marks} / ${report.outOf}`));
+  head.appendChild(ui.element("span", `viva-band band-${report.band.toLowerCase().replace(/\s+/g, "-")}`, report.band));
+  card.appendChild(head);
+  card.appendChild(ui.element("p", "hint", report.bandNote));
+
+  if (report.strengths.length) {
+    card.appendChild(ui.element("h4", "exam-subhead", "Answered well"));
+    card.appendChild(ui.element("p", "viva-list", report.strengths.slice(0, 5).join(" · ")));
+  }
+  if (report.weaknesses.length) {
+    card.appendChild(ui.element("h4", "exam-subhead", "Needs another sentence"));
+    card.appendChild(ui.element("p", "viva-list", report.weaknesses.slice(0, 5).join(" · ")));
+  }
+  if (report.misconception) {
+    card.appendChild(ui.element("h4", "exam-subhead", `Examiner's note${report.misconceptionTopic ? ` on ${report.misconceptionTopic}` : ""}`));
+    card.appendChild(ui.element("p", "viva-note", report.misconception));
+  }
+  card.appendChild(ui.element("p", "viva-next", report.nextStep));
+  card.appendChild(ui.element("p", "hint", report.honesty));
+  return card;
+}
+
 /* ------------------------------------------------------------ starter shelf */
 
 const STARTER_SHELF_FLAG = "starterShelfAdded";
@@ -2083,11 +2241,12 @@ const EXAM_COUNTS = [5, 10, 15, 20];
 
 /** Exam-practice choices the student made last, kept for this session. */
 function examPreferences() {
-  if (!state.exam) state.exam = { examId: EXAMS[0].id, mode: "mock", count: 10, chapter: "", subjectId: "" };
+  if (!state.exam) state.exam = { examId: EXAMS[0].id, mode: "mock", count: 10, vivaCount: 3, chapter: "", subjectId: "" };
   const exam = examByIdOrFirst(state.exam.examId);
   state.exam.examId = exam.id;
   if (!MODES.some((mode) => mode.id === state.exam.mode)) state.exam.mode = MODES[0].id;
   if (!EXAM_COUNTS.includes(Number(state.exam.count))) state.exam.count = 10;
+  if (![3, 5].includes(Number(state.exam.vivaCount))) state.exam.vivaCount = 3;
   if (!state.exam.subjectId || !exam.subjects.some((subject) => subject.id === state.exam.subjectId)) {
     state.exam.subjectId = exam.subjects[0]?.id || "";
   }
@@ -2146,14 +2305,14 @@ function subjectForChapter(exam, chapter) {
  * Questions for one chapter, written by the same offline engine as every other
  * quiz in the app, then tagged with the exam subject so marking can be exact.
  */
-function examChapterQuestions(exam, { chapter, subjectId, count }) {
+function examChapterQuestions(exam, { chapter, subjectId, count, type = "mcq" }) {
   const { hits } = retrieveChapter(chapter, state.indexes, { topK: Math.max(10, count * 4) });
   if (!hits.length) return [];
   const quiz = generateQuiz({
     hits,
     topic: chapter,
     count,
-    type: "mcq",
+    type,
     difficulty: "medium",
     timed: false,
     secondsPerQuestion: 45,
@@ -2191,6 +2350,43 @@ function buildExamDrill(exam, chapter, count) {
   return examChapterQuestions(exam, { chapter, subjectId: subject?.id || "general", count });
 }
 
+/**
+ * A viva asks the student to explain, so the examiner hands over a sentence from
+ * the student's own page and asks for it in their own words. One sentence per
+ * page keeps the questions varied, and every one carries its citation.
+ */
+function buildExamViva(exam, chapter, count) {
+  const subject = subjectForChapter(exam, chapter);
+  const { hits } = retrieveChapter(chapter, state.indexes, { topK: Math.max(8, count * 3) });
+  const rows = [];
+  for (const hit of hits) {
+    if (rows.length >= count) break;
+    const usable = splitSentences(String(hit.text || ""))
+      .map((line) => line.replace(/\s+/g, " ").trim())
+      .filter((line) => line.split(/\s+/).filter(Boolean).length >= 10 && line.length <= 260);
+    // A chapter can be one page long, so take a few sentences from each page
+    // rather than one; the examiner still never repeats a sentence.
+    for (const sentence of usable.slice(0, 3)) {
+      if (rows.length >= count) break;
+      rows.push({
+        sentence,
+        topic: hit.section || chapter,
+        source: {
+          bookId: hit.bookId,
+          chunkId: hit.chunkId,
+          title: hit.title,
+          page: hit.page,
+          section: hit.section,
+          sourceUrl: hit.sourceUrl || "",
+          quote: sentence,
+        },
+      });
+    }
+  }
+  const questions = vivaQuestionsFromSentences(rows, { count });
+  return questions.map((question) => ({ ...question, examId: exam.id, subjectId: subject?.id || "general", chapter }));
+}
+
 function examQuizFrom(exam, mode, questions) {
   const timed = mode === "mock";
   // A mock is paced at the real paper's rate, so a ten-question set takes as
@@ -2214,13 +2410,17 @@ function examQuizFrom(exam, mode, questions) {
   quiz.examId = exam.id;
   quiz.examMode = mode;
   quiz.examName = exam.name;
+  if (mode === "viva") {
+    quiz.viva = true;
+    quiz.title = `${exam.name} viva - ${questions[0]?.chapter || "mixed"}`;
+  }
   return quiz;
 }
 
 async function startExamSession(options = {}) {
   const preferences = examPreferences();
   const exam = examByIdOrFirst(options.examId || preferences.examId);
-  const mode = options.mode === "drill" ? "drill" : "mock";
+  const mode = options.mode === "drill" ? "drill" : options.mode === "viva" ? "viva" : "mock";
   const count = clamp(Number(options.count || preferences.count) || 10, 3, 40);
   const chapter = String(options.chapter || preferences.chapter || "").trim();
 
@@ -2229,8 +2429,8 @@ async function startExamSession(options = {}) {
     ui.showToast(message, "warning", 6500);
     return { ok: false, message };
   }
-  if (mode === "drill" && !chapter) {
-    const message = "Choose the chapter you want to drill.";
+  if ((mode === "drill" || mode === "viva") && !chapter) {
+    const message = mode === "viva" ? "Choose the chapter the examiner should ask about." : "Choose the chapter you want to drill.";
     ui.showToast(message, "warning");
     return { ok: false, message };
   }
@@ -2238,7 +2438,11 @@ async function startExamSession(options = {}) {
   const button = $("#exam-start");
   if (button) ui.setBusy(button, true, "Building the paper…");
   try {
-    const questions = mode === "drill" ? buildExamDrill(exam, chapter, count) : buildExamMock(exam, count);
+    const questions = mode === "drill"
+      ? buildExamDrill(exam, chapter, count)
+      : mode === "viva"
+        ? buildExamViva(exam, chapter, count)
+        : buildExamMock(exam, count);
     if (!questions.length) {
       const message = `No usable pages were found for ${mode === "drill" ? chapter : exam.name} in your library. Add more of the chapter, then try again.`;
       ui.showToast(message, "warning", 7000);
@@ -2251,7 +2455,9 @@ async function startExamSession(options = {}) {
     state.quizIndex = 0;
     state.result = null;
     $("#quiz-topic-title").textContent = quiz.title;
-    $("#quiz-run-note").textContent = `${quiz.questions.length} ${quiz.questions.length === 1 ? "question" : "questions"} · ${mode === "mock" ? "exam pace, exam marking" : "untimed, no penalty"} · from your books`;
+    $("#quiz-run-note").textContent = `${quiz.questions.length} ${quiz.questions.length === 1 ? "question" : "questions"} · ${
+      mode === "mock" ? "exam pace, exam marking" : mode === "viva" ? "answer aloud or type, marked out of ten" : "untimed, no penalty"
+    } · from your books`;
     setView("quiz");
     startQuizTimer();
     if (quiz.questions.length < count) {
@@ -2436,6 +2642,90 @@ function renderExamDrill(preferences, exam, coverage) {
   return card;
 }
 
+function renderExamViva(preferences, exam, coverage) {
+  const card = ui.element("div", "card exam-card");
+  card.appendChild(ui.element("h3", "", `${exam.name} viva`));
+  card.appendChild(ui.element("p", "hint", "An examiner asks about one chapter. Explain out loud or type it; the answer is marked out of ten, and the examiner names what went wrong instead of only saying so."));
+
+  const subject = exam.subjects.find((entry) => entry.id === preferences.subjectId) || exam.subjects[0];
+  const grid = ui.element("div", "exam-selects");
+
+  const subjectLabel = ui.element("label", "");
+  subjectLabel.appendChild(ui.element("span", "", "Subject"));
+  const subjectSelect = document.createElement("select");
+  for (const entry of exam.subjects) {
+    const option = document.createElement("option");
+    option.value = entry.id;
+    option.textContent = entry.name;
+    option.selected = entry.id === subject.id;
+    subjectSelect.appendChild(option);
+  }
+  subjectSelect.addEventListener("change", () => {
+    preferences.subjectId = subjectSelect.value;
+    const next = exam.subjects.find((entry) => entry.id === subjectSelect.value);
+    preferences.chapter = next?.chapters?.[0] || "";
+    renderExamView();
+  });
+  subjectLabel.appendChild(subjectSelect);
+  grid.appendChild(subjectLabel);
+
+  const coveredHere = new Set(coverage.present.filter((entry) => entry.subjectId === subject.id).map((entry) => entry.chapter));
+  const chapters = subject.chapters || [];
+  const chosen = chapters.includes(preferences.chapter) ? preferences.chapter : chapters[0] || "";
+  preferences.chapter = chosen;
+  const chapterLabel = ui.element("label", "");
+  chapterLabel.appendChild(ui.element("span", "", "Chapter"));
+  const chapterSelect = document.createElement("select");
+  for (const chapter of chapters) {
+    const option = document.createElement("option");
+    option.value = chapter;
+    option.textContent = coveredHere.has(chapter) ? `${chapter} - in your library` : chapter;
+    option.selected = chapter === chosen;
+    chapterSelect.appendChild(option);
+  }
+  chapterSelect.addEventListener("change", () => {
+    preferences.chapter = chapterSelect.value;
+    renderExamView();
+  });
+  chapterLabel.appendChild(chapterSelect);
+  grid.appendChild(chapterLabel);
+  card.appendChild(grid);
+
+  const counts = ui.element("div", "exam-counts");
+  counts.appendChild(ui.element("span", "exam-count-label", "Questions"));
+  for (const value of [3, 5]) {
+    counts.appendChild(examTab(Number(preferences.vivaCount) === value, String(value), () => {
+      preferences.vivaCount = value;
+      renderExamView();
+    }, `A ${value}-question viva`));
+  }
+  card.appendChild(counts);
+
+  const env = voiceEnv();
+  card.appendChild(
+    ui.element(
+      "p",
+      "hint",
+      env.speak && env.listen
+        ? "This browser can read the questions aloud and take a spoken answer. Both are optional; every question can be typed."
+        : env.speak
+          ? "This browser can read the questions aloud. Spoken answers are not available here, so type them."
+          : "Type the answers here. This browser cannot read aloud or listen; the marking is the same either way.",
+    ),
+  );
+
+  const actions = ui.element("div", "exam-actions");
+  const start = ui.element("button", "button primary", "Start viva");
+  start.type = "button";
+  start.id = "exam-start";
+  start.addEventListener("click", () =>
+    void startExamSession({ mode: "viva", examId: exam.id, chapter: preferences.chapter, count: preferences.vivaCount }),
+  );
+  actions.appendChild(start);
+  card.appendChild(actions);
+  return card;
+}
+
 function renderExamCoverage(preferences, exam, coverage) {
   const card = ui.element("div", "card exam-card");
   card.appendChild(ui.element("h3", "", `${exam.name} syllabus coverage`));
@@ -2546,6 +2836,7 @@ function renderExamView() {
 
   if (preferences.mode === "coverage") root.appendChild(renderExamCoverage(preferences, exam, coverage));
   else if (preferences.mode === "drill") root.appendChild(renderExamDrill(preferences, exam, coverage));
+  else if (preferences.mode === "viva") root.appendChild(renderExamViva(preferences, exam, coverage));
   else root.appendChild(renderExamMock(preferences, exam, coverage));
 
   const note = document.createElement("details");
@@ -2759,7 +3050,28 @@ function renderQuizQuestion() {
       `${question.type === "mcq" ? "Multiple choice" : question.type === "fill" ? "Fill in the blank" : "Short answer"} · ${question.topic || "General"}`,
     ),
   );
-  container.appendChild(ui.element("div", "question-prompt", question.prompt));
+  if (quiz.viva) {
+    container.appendChild(ui.element("div", "question-prompt viva-prompt", examinerLine(question)));
+  } else {
+    container.appendChild(ui.element("div", "question-prompt", question.prompt));
+  }
+
+  const voiceRow = ui.element("div", "question-voice");
+  const env = voiceEnv();
+  if (env.speak) {
+    const read = ui.element("button", "question-voice-button", "Read aloud");
+    read.type = "button";
+    read.addEventListener("click", speakCurrentQuestion);
+    voiceRow.appendChild(read);
+  }
+  if (env.listen && question.type !== "mcq" && (quiz.viva || question.type === "short" || question.type === "fill")) {
+    const mic = ui.element("button", "question-voice-button mic", "Answer aloud");
+    mic.type = "button";
+    mic.setAttribute("aria-label", "Answer this question by speaking");
+    mic.addEventListener("click", () => void dictateAnswer(mic));
+    voiceRow.appendChild(mic);
+  }
+  if (voiceRow.childNodes.length) container.appendChild(voiceRow);
 
   const saved = state.quizResponses[question.id] || "";
   if (question.type === "mcq") {
@@ -2795,6 +3107,22 @@ function renderQuizQuestion() {
     textarea.value = saved;
     textarea.addEventListener("input", () => saveQuizResponse(textarea.value));
     container.appendChild(textarea);
+  }
+  if (quiz.viva) {
+    // The probe updates as the student types or speaks, so a thin answer can be
+    // repaired before it is marked. That is the point of a viva.
+    const probeNode = ui.element("p", "viva-probe hidden", "");
+    const refreshProbe = () => {
+      const said = String(state.quizResponses[question.id] || "");
+      const probe = probeFor({ question, answer: said, awarded: currentAward(question, said), probes: 0 });
+      const line = probe && probe.kind !== "silent" ? probe.line : "";
+      probeNode.textContent = line;
+      probeNode.classList.toggle("hidden", !line);
+    };
+    refreshProbe();
+    container.appendChild(probeNode);
+    const box = container.querySelector(".short-input, .fill-input");
+    box?.addEventListener("input", refreshProbe);
   }
   const source = ui.element("p", "hint", studySourceLabel(question.source));
   container.appendChild(source);
@@ -2893,7 +3221,14 @@ async function submitQuiz(options = {}) {
       }
       result = recomputeResult(result);
     }
-    if (quiz.examId) {
+    if (quiz.viva) {
+      const rows = result.perQuestion.map((item) => ({
+        question: item.question,
+        submitted: item.submitted,
+        awarded: item.awarded,
+      }));
+      result.viva = vivaReport(rows);
+    } else if (quiz.examId) {
       const exam = getExam(quiz.examId);
       if (exam) {
         const items = result.perQuestion.map((item) => ({
@@ -3001,6 +3336,7 @@ function renderQuizResults(result) {
   }
   hero.appendChild(actions);
   root.appendChild(hero);
+  if (result.viva) root.appendChild(vivaCard(result.viva, state.quiz));
   if (result.exam) root.appendChild(examResultCard(result.exam));
 
   const detail = ui.element("div", "result-detail");
@@ -4022,7 +4358,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=22");
+            const { social } = await import("./social.js?v=23");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -4476,6 +4812,7 @@ function bindEvents() {
   $("#run-offline-check")?.addEventListener("click", () => { void checkOfflineReadiness(); });
 
   $("#ask-form").addEventListener("submit", handleAsk);
+  $("#ask-mic")?.addEventListener("click", (event) => void dictateQuestion(event.currentTarget));
   $("#ask-web-fallback").addEventListener("change", (event) => void setWebChoice(event.target.checked));
   $("#settings-web-enabled").addEventListener("change", (event) => void setWebChoice(event.target.checked));
   $("#ask-input").addEventListener("keydown", (event) => {

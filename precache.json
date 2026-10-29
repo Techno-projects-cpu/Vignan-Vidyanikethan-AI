@@ -1,6 +1,6 @@
 {
-  "version": 22,
-  "generatedAt": "2026-10-29T15:07:52.765Z",
+  "version": 23,
+  "generatedAt": "2026-10-29T15:16:06.442Z",
   "urls": [
     "./",
     "./index.html",
@@ -81,6 +81,8 @@
     "./js/updates.js",
     "./js/util.js",
     "./js/vector.js",
+    "./js/viva.js",
+    "./js/voice.js",
     "./js/web.js",
     "./judge.html",
     "./manifest.webmanifest",

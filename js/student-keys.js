@@ -7,8 +7,8 @@
  * server-side free-tier keys have been tried (or during an explicit test).
  */
 
-import { PROVIDERS } from "./providers.js?v=22";
-import { parseApiKeys } from "./key-pool.js?v=22";
+import { PROVIDERS } from "./providers.js?v=23";
+import { parseApiKeys } from "./key-pool.js?v=23";
 
 const STUDENT_KEY_PROVIDER_IDS = [
   "gemini",

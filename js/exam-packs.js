@@ -188,6 +188,12 @@ export const MODES = [
     detail: "For the day you learn something, not the day you test yourself.",
   },
   {
+    id: "viva",
+    name: "Viva",
+    line: "An examiner asks, you explain out loud, and the answer is marked out of ten.",
+    detail: "One follow-up question when an answer is thin, then a report card that names the exact misconception.",
+  },
+  {
     id: "coverage",
     name: "Syllabus coverage",
     line: "Which chapters your own books already cover, and what is missing.",

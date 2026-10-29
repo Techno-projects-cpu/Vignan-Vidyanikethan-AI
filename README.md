@@ -70,6 +70,8 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 | Zero-budget AI runtime | Server-side **free AI router** tries Gemini, Groq, Cloudflare Workers AI, OpenRouter free models, Mistral, Cohere and an optional Arena AI workspace key in order; supports multiple keys per provider, auto-rotates on quota limits, cools down exhausted keys, skips rate-limited providers and keeps school keys off student devices. |
 | Student BYOK fallback | After all Render keys are exhausted, students can add one or more of their own keys in account settings. Keys stay browser-local, are used only through the site's own proxy, and never appear in exports, accounts or leaderboards. |
 | Official key links | Settings shows safe signup links for eight free/keyless providers and explicitly warns against leaked or shared keys. |
+| Viva practice | An examiner asks you to explain a sentence from your own page, out loud or typed. One follow-up question when the answer is thin, then a report card out of ten that names the exact misconception and sends you back to the cited page. Marking is deterministic, so a student can check it by hand. |
+| Voice | Read any answer or question aloud, and ask a question or answer it by speaking, using the browser's own speech APIs. Both are optional and neither is bundled data: if a browser has no voices, or listening needs a connection, the app says so and typing still works. |
 | Starter shelf | Four books of pages written for this project (Physics, Chemistry, Biology, Mathematics) are installed on the first open, so citations, quizzes, flashcards and exam mocks work before a student adds anything. They are ordinary library pages - searchable, cited and removable - not a reproduction of any published textbook, and a student's own upload is always searched before them. |
 | Library | Upload PDFs and readable text (for example TXT, Markdown, CSV and JSON), paste notes, or import a public webpage/PDF/text URL. Scripts, executables and archives are rejected. Web imports retain their origin and are labelled separately. |
 | Quizzes | MCQ, fill-in-the-blank, short-answer and mixed quizzes; easy/medium/hard; timed or untimed; AI-written or offline-generated; instant grading with per-question review, topic breakdown and a revise list. |
@@ -374,8 +376,8 @@ npm run offline:check
 ```
 
 ```
-Release v22
-Cached after install: 362 files in vignan-vidyanikethan-ai-v22
+Release v23
+Cached after install: 366 files in vignan-vidyanikethan-ai-v23
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
@@ -448,6 +450,9 @@ with no connection:
 | Flashcards, quizzes, evaluation | Yes |
 | Exam practice: mocks, drills, coverage | Yes — exam patterns are local data; questions come from your saved pages |
 | Starter shelf pages | Yes — bundled with the app and installed on first open |
+| Viva practice and report card | Yes — the examiner's rules are local code |
+| Reading aloud | Yes on devices with a local voice; a browser that needs to download a voice says so |
+| Speaking your answer | Needs a connection in most browsers; the microphone button explains that and typing always works |
 | Pro Mode and its briefing | Yes — no network call |
 | Web fallback | Skipped, and the answer says so instead of offering a dead link |
 | Friends, Chat, Play, leaderboard | Needs the server; the UI explains that |
@@ -597,7 +602,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-357 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
+368 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 
