@@ -6,31 +6,31 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=31";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=31";
-import { ingestPdf, ingestText } from "./ingest.js?v=31";
-import { splitSentences } from "./text.js?v=31";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=31";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=31";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=31";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=31";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=31";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=31";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=31";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=31";
+import * as db from "./db.js?v=32";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=32";
+import { ingestPdf, ingestText } from "./ingest.js?v=32";
+import { splitSentences } from "./text.js?v=32";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=32";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=32";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=32";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=32";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=32";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=32";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=32";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=32";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=31";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=31";
+} from "./pro-mode.js?v=32";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=32";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=31";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=31";
-import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=31";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=31";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=31";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=31";
+} from "./updates.js?v=32";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=32";
+import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=32";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=32";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=32";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=32";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -38,8 +38,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=31";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=31";
+} from "./llm.js?v=32";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=32";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -51,7 +51,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=31";
+} from "./local-ai.js?v=32";
 import {
   EXAMS,
   MODES,
@@ -66,12 +66,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=31";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=31";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=31";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=31";
-import { TASKS } from "./model-router.js?v=31";
-import { PROVIDERS, providerList } from "./providers.js?v=31";
+} from "./exam-packs.js?v=32";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=32";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=32";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=32";
+import { TASKS } from "./model-router.js?v=32";
+import { PROVIDERS, providerList } from "./providers.js?v=32";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -80,30 +80,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=31";
-import { parseApiKeys } from "./key-pool.js?v=31";
+} from "./settings.js?v=32";
+import { parseApiKeys } from "./key-pool.js?v=32";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=31";
+} from "./student-keys.js?v=32";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=31";
+} from "./quiz.js?v=32";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=31";
+} from "./flashcards.js?v=32";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=31";
+} from "./study-decks.js?v=32";
 import {
   accuracy,
   currentStreak,
@@ -114,15 +114,15 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=31";
-import { externalSearchUrl, searchWeb } from "./web.js?v=31";
-import { openEditStudio } from "./edit-studio.js?v=31";
-import { openReader } from "./reader.js?v=31";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=31";
-import { languageLabel, languageGroups, languageMeta, languageGlyph } from "./languages.js?v=31";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=31";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=31";
-import * as ui from "./ui.js?v=31";
+} from "./progress.js?v=32";
+import { externalSearchUrl, searchWeb } from "./web.js?v=32";
+import { openEditStudio } from "./edit-studio.js?v=32";
+import { openReader } from "./reader.js?v=32";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=32";
+import { languageLabel, languageGroups, languageMeta, languageGlyph } from "./languages.js?v=32";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=32";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=32";
+import * as ui from "./ui.js?v=32";
 import {
   clearReferral,
   getLeaderboard,
@@ -132,8 +132,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=31";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=31";
+} from "./auth.js?v=32";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=32";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -141,12 +141,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=31";
-import { initMotion, revealVisible } from "./motion.js?v=31";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=31";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=31";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=31";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=31";
+} from "./premium-ui.js?v=32";
+import { initMotion, revealVisible } from "./motion.js?v=32";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=32";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=32";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=32";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=32";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -4508,8 +4508,9 @@ function renderLanguageGrid() {
       const active = state.settings.language === language.code;
       const tile = ui.element("button", `language-tile${active ? " active" : ""}`);
       tile.type = "button";
-      tile.setAttribute("role", "radio");
-      tile.setAttribute("aria-checked", active ? "true" : "false");
+      // A picker where exactly one is chosen behaves as a set of toggle buttons:
+      // each one is reachable with Tab and says whether it is the current choice.
+      tile.setAttribute("aria-pressed", active ? "true" : "false");
       tile.dataset.language = language.code;
       tile.lang = language.code;
       if (meta.dir === "rtl") tile.dir = "rtl";
@@ -4529,13 +4530,21 @@ function renderLanguageGrid() {
     host.appendChild(section);
   }
   if (!shown) {
-    host.appendChild(ui.element("p", "language-empty", "No language matches that search. Clear it to see all 33."));
+    host.appendChild(ui.element("p", "language-empty", t("settings.languageEmpty")));
   }
   const count = $("#language-count");
   if (count) {
     const total = languageGroups().reduce((sum, group) => sum + group.languages.length, 0);
-    count.textContent = shown === total ? `${total} LANGUAGES` : `${shown} OF ${total}`;
+    count.textContent = shown === total
+      ? t("settings.languageCount", { count: total })
+      : t("settings.languageCountFiltered", { shown, total });
   }
+  const filter = $("#language-filter");
+  if (filter && filter.placeholder !== t("settings.languageFilterPlaceholder")) {
+    filter.placeholder = t("settings.languageFilterPlaceholder");
+  }
+  const totals = $("#language-count");
+  if (totals) totals.dataset.empty = shown ? "no" : "yes";
 }
 
 async function handleLanguageChange() {
@@ -4577,7 +4586,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=31");
+            const { social } = await import("./social.js?v=32");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -5193,8 +5202,16 @@ function bindEvents() {
       .catch(() => {});
   });
   $("#settings-language").addEventListener("change", handleLanguageChange);
-  $("#language-filter")?.addEventListener("input", (event) => {
+  const languageFilter = $("#language-filter");
+  languageFilter?.addEventListener("input", (event) => {
     languageFilterText = event.target.value;
+    renderLanguageGrid();
+  });
+  languageFilter?.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !languageFilter.value) return;
+    event.preventDefault();
+    languageFilter.value = "";
+    languageFilterText = "";
     renderLanguageGrid();
   });
   $("#export-data").addEventListener("click", exportData);

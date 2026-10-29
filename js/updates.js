@@ -9,12 +9,12 @@
  * The pure helpers are exported so they can be tested without a browser.
  */
 
-/** Release the page itself was loaded from: "./js/app.js?v=31" → "31". */
+/** Release the page itself was loaded from: "./js/app.js?v=32" → "32". */
 export const RELEASE = new URL(import.meta.url).searchParams.get("v") || "dev";
 
 const CACHE_PREFIX = "vignan-vidyanikethan-ai-v";
 
-/** "const CACHE_NAME = \"vignan-vidyanikethan-ai-v31\"" → "31". */
+/** "const CACHE_NAME = \"vignan-vidyanikethan-ai-v32\"" → "32". */
 export function parseCacheVersion(source = "") {
   const match = String(source || "").match(/vignan-vidyanikethan-ai-v(\d+)/);
   return match ? match[1] : "";

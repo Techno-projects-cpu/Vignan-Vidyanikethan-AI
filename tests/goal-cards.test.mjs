@@ -86,7 +86,7 @@ test("a shared link fills the box, and only the box", () => {
 
 test("a card can be shared as a link and read back unchanged", () => {
   for (const card of promptCards()) {
-    const link = askLink(card, "https://example.org/app/?v=31");
+    const link = askLink(card, "https://example.org/app/?v=32");
     assert.ok(link.startsWith("https://example.org/app/?" + ASK_PARAM + "="), "query strings are not stacked");
     assert.equal(askFromUrl(link.slice(link.indexOf("?"))), card.prompt);
   }
@@ -115,7 +115,7 @@ test("the page keeps the three parts the cards need", () => {
   assert.ok(goals < ask.indexOf('id="ask-form"'), "the sentences sit above the composer");
   assert.match(ask, /id="goal-heading"/);
 
-  assert.match(html, /<div class="language-grid" id="language-grid" role="radiogroup"/);
+  assert.match(html, /<div class="language-grid" id="language-grid" role="group"/);
   assert.match(html, /<label class="language-select-row sr-only">[\s\S]*?<select id="settings-language">/);
 
   const soon = html.match(/<section class="card soon-card"[\s\S]*?<\/section>/);

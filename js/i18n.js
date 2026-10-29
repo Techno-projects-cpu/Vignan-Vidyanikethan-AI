@@ -10,8 +10,8 @@
  * point at the original passage.
  */
 
-import { CORE_STRINGS } from "./translations-core.js?v=31";
-import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=31";
+import { CORE_STRINGS } from "./translations-core.js?v=32";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=32";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 
@@ -113,8 +113,13 @@ const EN = {
   "soon.title": "Your school's SCERT and NCERT books, built in",
   "soon.body": "These stay out until the publisher gives written permission. When that arrives they will appear here and work exactly like the pages you add yourself: searchable, cited by page, usable offline. Until then your own uploads and the starter pages do the same job.",
   "soon.button": "Waiting for publisher permission",
+  "settings.languageKicker": "Language",
   "settings.languageChoose": "Choose your language",
   "settings.languageSearch": "Search languages",
+  "settings.languageFilterPlaceholder": "Search 33 languages…",
+  "settings.languageCount": "{count} languages",
+  "settings.languageCountFiltered": "{shown} of {total}",
+  "settings.languageEmpty": "No language matches that search. Clear it to see all 33.",
   "settings.languageIndian": "Indian languages",
   "settings.languageWorld": "World languages",
   "ask.openPage": "Open page",
@@ -215,6 +220,15 @@ const EN = {
 };
 
 const TE = {
+  "settings.languageKicker": "భాష",
+  "settings.languageChoose": "మీ భాషను ఎంచుకోండి",
+  "settings.languageSearch": "భాషల్లో వెతకండి",
+  "settings.languageFilterPlaceholder": "33 భాషల్లో వెతకండి…",
+  "settings.languageCount": "{count} భాషలు",
+  "settings.languageCountFiltered": "{total}లో {shown}",
+  "settings.languageEmpty": "ఆ వెతుకుడుకు ఏ భాషా సరిపోలలేదు. అన్నీ చూడాలంటే దాన్ని తొలగించండి.",
+  "settings.languageIndian": "భారతీయ భాషలు",
+  "settings.languageWorld": "ప్రపంచ భాషలు",
   "nav.ask": "అడగండి",
   "nav.library": "గ్రంథాలయం",
   "nav.quiz": "క్విజ్",
@@ -379,6 +393,15 @@ const TE = {
 };
 
 const HI = {
+  "settings.languageKicker": "भाषा",
+  "settings.languageChoose": "अपनी भाषा चुनें",
+  "settings.languageSearch": "भाषाओं में खोजें",
+  "settings.languageFilterPlaceholder": "33 भाषाओं में खोजें…",
+  "settings.languageCount": "{count} भाषाएँ",
+  "settings.languageCountFiltered": "{total} में से {shown}",
+  "settings.languageEmpty": "उस खोज से कोई भाषा नहीं मिली। सभी देखने के लिए उसे मिटाएँ।",
+  "settings.languageIndian": "भारतीय भाषाएँ",
+  "settings.languageWorld": "विश्व भाषाएँ",
   "nav.ask": "पूछें", "nav.library": "पुस्तकालय", "nav.quiz": "क्विज़",
   "nav.flashcards": "फ़्लैशकार्ड", "nav.progress": "प्रगति", "nav.settings": "सेटिंग्स",
   "nav.friends": "दोस्त", "nav.chat": "चैट", "nav.play": "खेल",

@@ -22,7 +22,7 @@ function matchesLanguage(language, term) {
 }
 
 test("the picker is a screen of tiles, not a dropdown", () => {
-  assert.match(html, /id="language-grid" role="radiogroup"/);
+  assert.match(html, /id="language-grid" role="group"/);
   assert.match(html, /id="language-filter"/);
   assert.match(html, /id="language-count"/);
   assert.match(html, /data-i18n="settings.languageChoose"/);
@@ -55,16 +55,68 @@ test("searching finds a language by any of its names, and says when it found non
     const found = LANGUAGE_CATALOGUE.filter((entry) => matchesLanguage(entry, language.name));
     assert.ok(found.some((entry) => entry.code === language.code), `${language.name} is findable`);
   }
-  assert.match(app, /No language matches that search\. Clear it to see all 33\./);
-  assert.match(app, /`\$\{shown\} OF \$\{total\}`/, "the count tells you what the filter did");
+  assert.match(i18n, /"settings\.languageEmpty": "No language matches that search\. Clear it to see all 33\."/);
+  assert.match(app, /t\("settings\.languageCountFiltered", \{ shown, total \}\)/, "the count tells you what the filter did");
+  assert.match(app, /t\("settings\.languageEmpty"\)/, "and the empty state is translatable");
 });
 
 test("choosing a tile is the same action as choosing from the select", () => {
   assert.match(app, /tile\.addEventListener\("click", \(\) => \{[\s\S]*?select\.value = language\.code;[\s\S]*?handleLanguageChange\(\)/);
-  assert.match(app, /tile\.setAttribute\("role", "radio"\)/);
-  assert.match(app, /tile\.setAttribute\("aria-checked"/, "screen readers hear which one is chosen");
+  assert.match(app, /tile\.setAttribute\("aria-pressed"/, "screen readers hear which one is chosen");
   assert.match(app, /if \(meta\.dir === "rtl"\) tile\.dir = "rtl"/, "Urdu and Arabic read the right way round");
-  assert.match(app, /\$\("#language-filter"\)\?\.addEventListener\("input", \(event\) => \{[\s\S]*?renderLanguageGrid\(\)/);
+  assert.match(app, /languageFilter\?\.addEventListener\("input", \(event\) => \{[\s\S]*?renderLanguageGrid\(\)/);
+});
+
+test("a class the markup relies on is actually defined", () => {
+  // The language select is hidden with .sr-only. That class was used in the markup
+  // for years of this project without ever being defined, so the "hidden" select
+  // and its label were on screen. A missing utility class fails silently; this
+  // test makes it fail loudly.
+  assert.match(css, /\.sr-only \{/, ".sr-only must exist");
+  const block = css.slice(css.indexOf(".sr-only {"), css.indexOf(".sr-only {") + 400);
+  for (const rule of ["position: absolute", "width: 1px", "clip-path: inset(50%)", "white-space: nowrap"]) {
+    assert.ok(block.includes(rule), `.sr-only hides with ${rule}`);
+  }
+  for (const used of [...html.matchAll(/class="[^"]*\bsr-only\b[^"]*"/g)].length ? ["sr-only"] : []) {
+    assert.ok(css.includes(`.${used}`), `${used} is used in index.html and must be styled`);
+  }
+});
+
+test("the picker speaks the student's language, not just English", async () => {
+  const { LANGUAGES, setLanguage, t } = await import("../js/i18n.js");
+  const keys = [
+    "settings.languageKicker",
+    "settings.languageChoose",
+    "settings.languageSearch",
+    "settings.languageFilterPlaceholder",
+    "settings.languageCount",
+    "settings.languageCountFiltered",
+    "settings.languageEmpty",
+    "settings.languageIndian",
+    "settings.languageWorld",
+  ];
+  for (const code of ["en", "te", "hi"]) {
+    for (const key of keys) {
+      assert.ok(LANGUAGES[code][key], `${code} translates ${key}`);
+    }
+  }
+  setLanguage("te");
+  assert.match(t("settings.languageCount", { count: 33 }), /33/);
+  assert.equal(t("settings.languageCountFiltered", { shown: 3, total: 33 }), "33లో 3");
+  setLanguage("hi");
+  assert.match(t("settings.languageEmpty"), /भाषा/);
+  setLanguage("en");
+  assert.equal(t("settings.languageCountFiltered", { shown: 3, total: 33 }), "3 of 33");
+  setLanguage("en");
+});
+
+test("Escape clears the search, and a chosen tile stays marked", () => {
+  const start = app.indexOf("const languageFilter = $");
+  const bind = app.slice(start, start + 700);
+  assert.match(bind, /event\.key !== "Escape"/);
+  assert.match(bind, /languageFilterText = "";/);
+  assert.match(app, /tile\.setAttribute\("aria-pressed", active \? "true" : "false"\)/);
+  assert.match(css, /\.language-tile\[dir="rtl"\]\.active::after \{ right: auto; left: 8px; \}/, "the tick moves for right-to-left tiles");
 });
 
 test("the design check page shows both components without logging in, and stays out of the release", () => {

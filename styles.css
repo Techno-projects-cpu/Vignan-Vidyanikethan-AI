@@ -172,6 +172,22 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 .topbar h1 { font-size: 27px; letter-spacing: -.035em; margin: 5px 0 3px; line-height: 1.15; }
 .topbar p { color: var(--muted); font-size: 13px; margin: 0; }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
+/* Screen-reader-only text. This class was used in the markup but never defined,
+   so every "visually hidden" label — including the language select — was on
+   screen. Defined here once, for every use in the app. */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 .chip {
   display: inline-flex; align-items: center; gap: 9px; padding: 7px 13px; border-radius: 99px;
   background: var(--surface); border: 1px solid var(--line); color: var(--ink-2); font-size: 11.5px; font-weight: 650; white-space: nowrap;
@@ -1667,6 +1683,9 @@ body.minimal-ui {
   content: "✓"; position: absolute; top: 6px; right: 8px;
   font-size: 11px; color: var(--brand); line-height: 1;
 }
+.language-tile[dir="rtl"].active::after { right: auto; left: 8px; }
+/* Long English names (Bahasa Indonesia, Português) wrap instead of overflowing. */
+.language-latin { overflow-wrap: anywhere; }
 .language-glyph { font-size: 31px; line-height: 1.1; font-weight: 600; color: var(--ink); }
 .language-tile.active .language-glyph { color: var(--brand-2); }
 .language-name { font-size: 12.5px; color: var(--ink-2); }
