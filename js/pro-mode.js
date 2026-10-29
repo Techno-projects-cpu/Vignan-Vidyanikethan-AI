@@ -8,8 +8,6 @@
  * chrome and the extra readouts a demo audience enjoys.
  */
 
-export const PRO_TRIGGER = "Hi, I am Nezaad, from Nezaad Industries";
-
 export const PRO_ACRONYM = [
   ["V", "Virtual"],
   ["I", "Intelligent"],
@@ -32,21 +30,94 @@ export function normalizeProQuery(text = "") {
 }
 
 /**
- * The easter egg phrase, tolerant of punctuation, case and a missing greeting:
- * "Hi, I am Nezaad, from Nezaad Industries" / "hey i'm nezaad from nezaad
- * industries" / "I am Nezaad from Nezaad Industries."
+ * ANY sentence in which the student says they are Nezaad activates Pro Mode:
+ * "I am Nezaad", "I'm Nezaad from Nezaad Industries", "this is Nezaad",
+ * "my name is Nezaad", "Nezaad here", "you're talking to Nezaad",
+ * "main Nezaad hoon", "nenu Nezaad". Punctuation, case and polite filler do
+ * not matter.
+ *
+ * A question *about* Nezaad Industries is still answered normally: naming
+ * yourself and asking about a subject are different acts, and only the first
+ * boots the easter egg.
  */
+export const PRO_TRIGGER = "I am Nezaad";
+
+/** The name, tolerant of the usual misspellings: Nezaad, Nezad, Nezaaaad. */
+const NAME = "neza+d";
+
+/**
+ * An introduction, as one pattern: a self-identifying cue, at most a couple of
+ * filler words, then the name. Written this way so "I am preparing for the
+ * Nezaad Industries quiz" cannot slip through on proximity alone.
+ */
+const INTRODUCTION = new RegExp(
+  "(?:\\bi am|\\bim|\\biam|\\bi m|" +
+  "\\b(?:my )?names? (?:is|are)|\\bname is|" +
+  "\\b(?:you can )?call me|\\brefer to me as|" +
+  "\\bthis is|\\bits|\\bit is|\\bmyself|\\bits me|" +
+  "\\byou are talking to|\\byoure talking to|\\byou are speaking to|\\byoure speaking to|" +
+  "\\btalking to|\\bspeaking to|\\bspeaking with|\\bdealing with|" +
+  "\\blogged in as|\\bsigned in as|\\blogin as|\\bsign in as|\\bsigning in as|" +
+  "\\bauthorise|\\bauthorize|\\bunlock for|" +
+  "\\bmain|\\bmein|\\bmera naam|\\bmera nam|" +
+  "\\bnenu|\\bnene|\\bnaa peru|\\bna peru)" +
+  "\\s+(?:the |a |an |one and only |real |actual |me |this |here )*" +
+  `\\b${NAME}\\b`,
+);
+
+/** "Nezaad here", "Nezaad speaking", "Nezaad reporting for duty". */
+const SELF_LABEL = new RegExp(
+  `\\b${NAME}\\s+(?:here|speaking|reporting|calling|on the line|at your service|in the house)\\b`,
+);
+
+/** A greeting plus the full name and company, e.g. "hey, Nezaad from Nezaad Industries". */
+const GREETING = /\b(?:hi|hii|hello|hey|namaste|yo|good morning|good afternoon|good evening)\b/;
+const COMPANY = new RegExp(`\\b${NAME} industries\\b`);
+
 export function matchesActivation(text = "") {
-  const line = normalizeProQuery(text);
-  if (line.length > 120) return false;
-  const hasName = /\bnezaad\b/.test(line);
-  const hasCompany = /\bnezaad industries\b/.test(line);
-  if (!hasName || !hasCompany) return false;
-  // The name has to be introduced ("I am", "I'm", "this is") or greeted, so a
-  // question *about* Nezaad Industries is still answered normally.
-  const introducing = /\b(i am|im|this is|its|my name is)\b/.test(line);
-  const greeting = /\b(hi|hii|hello|hey|namaste|yo|good morning|good afternoon|good evening)\b/.test(line);
-  return introducing || greeting;
+  const raw = String(text || "");
+  // Long enough for a full introduction, short enough that an essay cannot
+  // trip the easter egg by accident.
+  if (raw.length > 400) return false;
+  const line = normalizeProQuery(raw);
+  if (!line.trim() || line.length > 260) return false;
+
+  const name = new RegExp(`\\b${NAME}\\b`);
+  if (!name.test(line)) return false;
+
+  if (INTRODUCTION.test(line) || SELF_LABEL.test(line)) return true;
+
+  // "hey nezaad from nezaad industries" — a greeting plus the full identity is
+  // an introduction even without "I am"; a greeting alone is not.
+  return GREETING.test(line) && COMPANY.test(line);
+}
+
+/**
+ * Split an activation into the introduction and whatever else was asked.
+ *
+ * "I am Nezaad, explain photosynthesis" should boot the easter egg *and* still
+ * answer the question, rather than swallowing it. A remainder only counts as a
+ * question when it reads like one, so "I am Nezaad, nice to meet you" stays a
+ * pure greeting.
+ */
+export function splitActivation(text = "") {
+  const raw = String(text || "");
+  if (!matchesActivation(raw)) return { activated: false, question: "" };
+
+  let rest = raw;
+  rest = rest.replace(/^\s*(?:hi|hii|hello|hey|namaste|yo|good\s+(?:morning|afternoon|evening))[\s,!.]*/i, "");
+  rest = rest.replace(
+    /\b(?:i am|im|iam|i m|my name is|my names|call me|this is|its|it is|myself|you are talking to|youre talking to|talking to|speaking to|main|mein|nenu|nene)\b[^,.;:!?]*?\bneza+d\b/i,
+    " ",
+  );
+  rest = rest.replace(/\bneza+d\s+(?:here|speaking|reporting|calling)\b/i, " ");
+  rest = rest.replace(/\b(?:from|of|at)\s+neza+d(?:\s+industries)?\b/i, " ");
+  rest = rest.replace(/^[\s,.;:!?-]+/, "").replace(/^(?:and|so|now|then|please|ok|okay|also)\b[\s,]*/i, "").trim();
+
+  if (!rest) return { activated: true, question: "" };
+  const asks = /\?\s*$/.test(raw) ||
+    /^(?:what|who|where|when|why|how|which|explain|define|describe|list|tell|give|show|find|summar|compare|solve|calculate|write|draw|derive|prove|state|name|why|is|are|can|could|should|would|do|does)\b/i.test(rest);
+  return { activated: true, question: asks ? rest : "" };
 }
 
 export function matchesPowerDown(text = "") {

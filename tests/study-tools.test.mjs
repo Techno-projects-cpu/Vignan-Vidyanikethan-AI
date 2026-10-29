@@ -135,8 +135,8 @@ test("the app wires both features into real screens, not just modules", async ()
   assert.match(app, /"Save sheet"/);
   assert.match(app, /studySheetMarkdown\(message\.studySheet\)/);
   // Both modules are available offline.
-  assert.match(sw, /\.\/js\/study-sheet\.js\?v=18/);
-  assert.match(sw, /\.\/js\/revision-plan\.js\?v=18/);
+  assert.match(sw, /\.\/js\/study-sheet\.js\?v=19/);
+  assert.match(sw, /\.\/js\/revision-plan\.js\?v=19/);
 });
 
 test("the sheet keeps the subject wording, not loose request words", () => {

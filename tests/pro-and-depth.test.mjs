@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   PRO_TRIGGER, matchesActivation, matchesPowerDown, matchesStatusQuery,
-  proBootLines, proBriefing, proStatusReport,
+  proBootLines, proBriefing, proStatusReport, splitActivation,
 } from "../js/pro-mode.js";
 import {
   citationCoverage, depthDirective, followUpsFor, looksUncited, normalizeDepth,
@@ -127,9 +127,9 @@ test("the chrome exists and both modules are offline", () => {
   assert.match(app, /looksUncited\(model\.content\)/);
   const sw = read("/sw.js");
   for (const module of ["pro-mode.js", "pro-ui.js", "answer-quality.js"]) {
-    assert.match(sw, new RegExp(`\\./js/${module.replace(".", "\\.")}\\?v=18`), module);
+    assert.match(sw, new RegExp(`\\./js/${module.replace(".", "\\.")}\\?v=19`), module);
   }
-  assert.match(sw, /\.\/styles-pro\.css\?v=18/);
+  assert.match(sw, /\.\/styles-pro\.css\?v=19/);
 });
 
 test("the depth directive actually reaches the model prompt", async () => {
@@ -157,4 +157,86 @@ test("the system prompt keeps the honesty rules", async () => {
 test("follow-up topics shed the request wording", () => {
   const chips = followUpsFor({ query: "key terms of nutrition in plants", hits: [{ page: 1 }], hasSheet: true });
   assert.equal(chips[0].prompt, "Explain step by step: nutrition in plants");
+});
+
+test("any way of saying I am Nezaad activates, not just one sentence", () => {
+  for (const line of [
+    "I am Nezaad",
+    "i am nezaad",
+    "I'm Nezaad",
+    "this is Nezaad",
+    "my name is Nezaad",
+    "Nezaad here",
+    "Nezaad speaking",
+    "you are talking to Nezaad",
+    "it's me, Nezaad",
+    "call me Nezaad",
+    "I am Nezaad and I built this",
+    "hello everyone, I am Nezaad, good to meet you",
+    "main Nezaad hoon",
+    "mera naam Nezaad hai",
+    "nenu Nezaad",
+    "I am Nezad",
+    "I AM NEZAAD!!!",
+  ]) {
+    assert.equal(matchesActivation(line), true, line);
+  }
+});
+
+test("a question about the name or the company is still just a question", () => {
+  for (const line of [
+    "What is Nezaad Industries?",
+    "Tell me about Nezaad Industries and who founded it",
+    "Is Nezaad Industries a company from Guntur?",
+    "key terms of nezaad industries",
+    "who is nezaad",
+    "I am preparing for the Nezaad Industries quiz",
+    "search nezaad industries",
+    "hi",
+    "",
+  ]) {
+    assert.equal(matchesActivation(line), false, line);
+  }
+});
+
+test("an introduction plus a question does both", () => {
+  assert.deepEqual(splitActivation("I am Nezaad").question, "");
+  assert.deepEqual(splitActivation("Hi, I am Nezaad, nice to meet you").question, "");
+  assert.equal(splitActivation("I am Nezaad, explain photosynthesis").question, "explain photosynthesis");
+  assert.equal(
+    splitActivation("Hello, this is Nezaad from Nezaad Industries. What is osmosis?").question,
+    "What is osmosis?",
+  );
+  assert.equal(splitActivation("I am Nezaad").activated, true);
+  assert.equal(splitActivation("What is Nezaad Industries?").activated, false);
+});
+
+test("the activation sequence has four beats and stays skippable", () => {
+  const html = read("/index.html");
+  for (const id of ["pro-kicker", "pro-meter", "pro-console", "pro-title", "pro-skip"]) {
+    assert.match(html, new RegExp(`id="${id}"`), id);
+  }
+  for (const part of ["pro-reticle", "pro-wedge", "pro-needle", "pro-bracket", "pro-scanline", "pro-flash"]) {
+    assert.match(html, new RegExp(`class="[^"]*${part}`), part);
+  }
+  const ui = read("/js/pro-ui.js");
+  assert.match(ui, /pro-locked/, "the lock-on beat should be a state, not a guess");
+  assert.match(ui, /pro-letter/, "the title should assemble from letters");
+  assert.match(ui, /phaseLabel/, "each line should drive a phase label");
+  assert.match(ui, /clearInterval/, "typing timers must be cancellable");
+  assert.match(ui, /reducedMotion/, "reduced motion must be honoured");
+  assert.match(ui, /return done;/, "the sequence must resolve a promise");
+});
+
+test("the animation is CSS-only, grayscale-safe, and calms down for reduced motion", () => {
+  const css = read("/styles-pro.css");
+  assert.match(css, /@keyframes pro-letter-in/);
+  assert.match(css, /@keyframes pro-flash/);
+  assert.match(css, /@keyframes pro-scan/);
+  assert.match(css, /@keyframes pro-aurora/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  const reduced = css.slice(css.indexOf("prefers-reduced-motion"));
+  for (const part of ["pro-wedge", "pro-scanline", "pro-flash", "pro-letter"]) {
+    assert.match(reduced, new RegExp(part), `${part} should be stilled`);
+  }
 });

@@ -17,7 +17,8 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 const read = (path) => readFileSync(`${root}${path}`, "utf8");
 
 test("the worker version is read from the cache name", () => {
-  assert.equal(parseCacheVersion('const CACHE_NAME = "vignan-vidyanikethan-ai-v18";'), "18");
+  assert.equal(parseCacheVersion('const CACHE_NAME = "vignan-vidyanikethan-ai-v19";'), "19");
+  assert.equal(parseCacheVersion('const CACHE_NAME = "vignan-vidyanikethan-ai-v40";'), "40");
   assert.equal(parseCacheVersion("nonsense"), "");
   assert.equal(isNewer("19", "18"), true);
   assert.equal(isNewer("18", "18"), false);
@@ -77,8 +78,8 @@ test("the worker waits for permission instead of swapping itself in", () => {
 
 test("the offline report counts what the worker really stored", () => {
   const ready = summarize({
-    expected: ["./index.html", "./js/app.js?v=18", "./styles.css"],
-    cached: ["./index.html", "./js/app.js?v=18", "./styles.css"],
+    expected: ["./index.html", "./js/app.js?v=19", "./styles.css"],
+    cached: ["./index.html", "./js/app.js?v=19", "./styles.css"],
     critical: ["./index.html"],
   });
   assert.equal(ready.total, 3);
@@ -86,7 +87,7 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(ready.summary, /Ready offline: 3 of 3/);
 
   const broken = summarize({
-    expected: ["./index.html", "./js/app.js?v=18"],
+    expected: ["./index.html", "./js/app.js?v=19"],
     cached: [],
     critical: ["./index.html"],
   });
@@ -96,8 +97,8 @@ test("the offline report counts what the worker really stored", () => {
 
   // A release is not "ready" when a file every lesson needs is missing.
   const missingShell = summarize({
-    expected: ["./index.html", "./js/app.js?v=18"],
-    cached: ["./js/app.js?v=18"],
+    expected: ["./index.html", "./js/app.js?v=19"],
+    cached: ["./js/app.js?v=19"],
     critical: CRITICAL_FILES,
   });
   assert.equal(missingShell.ready, false);
@@ -108,9 +109,9 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(nothing.summary, /Open the app once while online/);
 
   // Query strings and absolute URLs compare equal.
-  assert.equal(normalizeUrl("./js/app.js?v=18"), "js/app.js");
-  assert.equal(normalizeUrl("https://app.local/js/app.js?v=18"), "js/app.js");
-  assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v18"], "18"), "vignan-vidyanikethan-ai-v18");
+  assert.equal(normalizeUrl("./js/app.js?v=19"), "js/app.js");
+  assert.equal(normalizeUrl("https://app.local/js/app.js?v=19"), "js/app.js");
+  assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v19"], "18"), "vignan-vidyanikethan-ai-v19");
 });
 
 test("the in-app check survives a browser with no cache and no network", async () => {

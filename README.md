@@ -312,12 +312,24 @@ Pure module: `js/answer-quality.js` (`depthDirective`, `citationCoverage`,
 
 ### Pro Mode (easter egg)
 
-Type **"Hi, I am Nezaad, from Nezaad Industries"** in the Ask box. The screen
-boots a short HUD sequence — rotating rings, a scrolling console with real
-numbers from your own device, then **PRO MODE** — and the assistant introduces
-itself as **V.I.G.N.A.N.**, a JARVIS-style interface wrapped around the same
-cited engine. Pro Mode is skippable (click, Esc, Enter, or *Skip*), stays on
-across reloads, and adds:
+Say who you are in the Ask box — **"I am Nezaad"**, "this is Nezaad", "my name
+is Nezaad", "Nezaad here", "you are talking to Nezaad", "main Nezaad hoon",
+"nenu Nezaad", or the full "I'm Nezaad from Nezaad Industries". Any sentence
+that introduces you as Nezaad works: punctuation, capitalisation and polite
+filler do not matter, and the usual misspellings (Nezad, Nezaaad) are accepted.
+A *question* about Nezaad Industries — "what is Nezaad Industries?" — is still
+answered normally, because asking about a subject is not the same as naming
+yourself.
+
+The screen then boots a four-beat HUD sequence: the reticle wakes and a radar
+wedge starts sweeping, boot lines type out one at a time with a live phase label
+and a progress bar (every line is a real number from your own device), the
+title assembles letter by letter as the frame flashes once and locks on, then
+the iris closes. The assistant introduces itself as **V.I.G.N.A.N.**, a
+JARVIS-style interface wrapped around the same cited engine. Pro Mode is
+skippable (click, Esc, Enter, or *Skip*) and stays on across reloads. An
+introduction can carry a question — "I am Nezaad, explain photosynthesis" boots
+the sequence and then answers it — and it adds:
 
 - a briefing with the live readout: books and pages indexed, decks, cards due,
   answer route, streak and accuracy;
@@ -360,8 +372,8 @@ npm run offline:check
 ```
 
 ```
-Release v18
-Cached after install: 358 files in vignan-vidyanikethan-ai-v18
+Release v19
+Cached after install: 358 files in vignan-vidyanikethan-ai-v19
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
@@ -580,7 +592,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-316 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
+321 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 
