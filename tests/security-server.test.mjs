@@ -287,3 +287,81 @@ test("the health payload can tell an operator which variable is wrong", async ()
     child.kill("SIGKILL");
   }
 });
+
+async function withServer(env, run) {
+  const port = 5000 + Math.floor(Math.random() * 400);
+  const child = spawn(process.execPath, ["serve.mjs"], {
+    cwd: root,
+    env: { ...process.env, STUDY_AI_PORT: String(port), ...env },
+    stdio: "ignore",
+  });
+  try {
+    let ready = false;
+    for (let attempt = 0; attempt < 60 && !ready; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      try {
+        const probe = await fetch(`http://127.0.0.1:${port}/api/health`);
+        ready = probe.ok;
+      } catch { /* still starting */ }
+    }
+    assert.ok(ready, "server did not start");
+    return await run(`http://127.0.0.1:${port}`);
+  } finally {
+    child.kill("SIGKILL");
+  }
+}
+
+const NO_SUPABASE = {
+  STUDY_AI_ACCOUNTS_BACKEND: "supabase",
+  SUPABASE_URL: "",
+  SUPABASE_ANON_KEY: "",
+  SUPABASE_SERVICE_ROLE_KEY: "",
+  SUPABASE_PUBLISHABLE_KEY: "",
+  SUPABASE_SECRET_KEY: "",
+};
+
+test("/setup names the missing variables and never prints a key", async () => {
+  await withServer(NO_SUPABASE, async (origin) => {
+    const response = await fetch(`${origin}/setup`);
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("content-type"), /text\/html/);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    assert.match(response.headers.get("x-content-type-options"), /nosniff/);
+    assert.match(response.headers.get("content-security-policy"), /default-src 'self'/);
+    const html = await response.text();
+    assert.match(html, /Accounts are not connected yet/);
+    for (const name of ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"]) {
+      assert.match(html, new RegExp(name), `${name} should be listed`);
+    }
+    assert.match(html, /missing or wrong/);
+    assert.match(html, /Settings → API Keys/, "should name the current dashboard page");
+    assert.match(html, /noindex/);
+  });
+});
+
+test("/setup spots a publishable key in the secret slot, without echoing it", async () => {
+  const publishable = ["sb", "publishable", "AbCdEfGhIjKlMnOpQrStUvWxYz"].join("_");
+  await withServer({
+    ...NO_SUPABASE,
+    SUPABASE_URL: "https://abcdefghijklmnopqrst.supabase.co",
+    SUPABASE_ANON_KEY: publishable,
+    SUPABASE_SERVICE_ROLE_KEY: publishable,
+  }, async (origin) => {
+    const html = await (await fetch(`${origin}/setup`)).text();
+    assert.match(html, /SUPABASE_SERVICE_ROLE_KEY<\/code> holds a <strong>publishable<\/strong> key/);
+    assert.doesNotMatch(html, new RegExp(publishable), "the page must never contain the key");
+    assert.match(html, /Refresh|refreshes every 15 seconds/);
+  });
+});
+
+test("/setup reports a connected deployment honestly", async () => {
+  await withServer({
+    STUDY_AI_ACCOUNTS_BACKEND: "local",
+    STUDY_AI_ACCOUNTS_FILE: path.join(os.tmpdir(), `vignan-setup-${Date.now()}.json`),
+  }, async (origin) => {
+    const html = await (await fetch(`${origin}/setup`)).text();
+    assert.match(html, /local/);
+    assert.match(html, /offline mode/);
+    assert.match(html, /Machine-readable health/);
+  });
+});

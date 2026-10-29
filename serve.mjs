@@ -964,6 +964,217 @@ function health() {
   };
 }
 
+const escapeHtml = (value) => String(value)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+/**
+ * Describe a key's *shape* without revealing it.
+ *
+ * Half of all setup failures are a publishable key pasted into the secret
+ * variable (or the reverse), and the two formats are distinguishable without
+ * printing a single character of the value.
+ */
+function keyKind(value) {
+  if (!value) return "empty";
+  if (/^sb_publishable_/.test(value)) return "publishable key";
+  if (/^sb_secret_/.test(value)) return "secret key";
+  if (/^eyJ/.test(value)) {
+    try {
+      const payload = JSON.parse(Buffer.from(value.split(".")[1] || "", "base64url").toString("utf8"));
+      if (payload.role === "service_role") return "legacy service_role JWT";
+      if (payload.role === "anon") return "legacy anon JWT";
+      return "legacy JWT";
+    } catch {
+      return "legacy JWT (unreadable payload)";
+    }
+  }
+  if (/^[A-Za-z0-9_\-.]{20,}$/.test(value)) return "a key of unknown format";
+  return "not a key";
+}
+
+function supabaseProjectRef() {
+  try {
+    const host = new URL(SUPABASE_URL).hostname;
+    const [ref] = host.split(".");
+    return /^[a-z0-9]{10,}$/.test(ref) ? ref : "";
+  } catch { return ""; }
+}
+
+/**
+ * A human-readable setup page.
+ *
+ * `/api/health` is for machines; this is the page a student or a parent opens
+ * when registration is broken. It reports presence and *shape* only — never a
+ * key value — and tells them exactly which variable to fix and where.
+ */
+function setupPage() {
+  const ref = supabaseProjectRef();
+  const rows = [
+    {
+      name: "SUPABASE_URL",
+      ok: plausibleSupabaseUrl(SUPABASE_URL),
+      detail: plausibleSupabaseUrl(SUPABASE_URL) ? escapeHtml(SUPABASE_URL) : "not set",
+      purpose: "Address of the Supabase project.",
+    },
+    {
+      name: "SUPABASE_ANON_KEY",
+      ok: plausibleSupabaseKey(SUPABASE_ANON_KEY) && keyKind(SUPABASE_ANON_KEY) !== "secret key",
+      detail: keyKind(SUPABASE_ANON_KEY),
+      purpose: "The publishable key. Public by design; row-level security limits it.",
+    },
+    {
+      name: "SUPABASE_SERVICE_ROLE_KEY",
+      ok: plausibleSupabaseKey(SUPABASE_SERVICE_ROLE_KEY) && keyKind(SUPABASE_SERVICE_ROLE_KEY) !== "publishable key",
+      detail: keyKind(SUPABASE_SERVICE_ROLE_KEY),
+      purpose: "The secret key. Server only; bypasses row-level security.",
+    },
+  ];
+  const ready = accountsBackend === "supabase";
+  const problems = [];
+  if (!rows[0].ok) problems.push("<code>SUPABASE_URL</code> is empty or not a URL.");
+  if (rows[1].ok === false && keyKind(SUPABASE_ANON_KEY) === "secret key") {
+    problems.push("<code>SUPABASE_ANON_KEY</code> holds a <strong>secret</strong> key. Put the <strong>publishable</strong> key there instead.");
+  } else if (!rows[1].ok) {
+    problems.push("<code>SUPABASE_ANON_KEY</code> is empty. Paste the <strong>publishable</strong> key, which starts <code>sb_publishable_</code>.");
+  }
+  if (rows[2].ok === false && keyKind(SUPABASE_SERVICE_ROLE_KEY) === "publishable key") {
+    problems.push("<code>SUPABASE_SERVICE_ROLE_KEY</code> holds a <strong>publishable</strong> key. Put the <strong>secret</strong> key there instead.");
+  } else if (!rows[2].ok) {
+    problems.push("<code>SUPABASE_SERVICE_ROLE_KEY</code> is empty. Paste the <strong>secret</strong> key, which starts <code>sb_secret_</code>.");
+  }
+  if (rows[2].ok && keyKind(SUPABASE_SERVICE_ROLE_KEY) === "legacy service_role JWT") {
+    problems.push("<code>SUPABASE_SERVICE_ROLE_KEY</code> still uses a <strong>legacy</strong> service_role key. It works, but Supabase retires it at the end of 2026 — replace it with a new secret key when convenient.");
+  }
+
+  const keysPage = ref ? `https://supabase.com/dashboard/project/${ref}/settings/api-keys` : "https://supabase.com/dashboard";
+  const keyRows = rows.map((row) => `
+        <tr>
+          <td><code>${row.name}</code><span class="purpose">${row.purpose}</span></td>
+          <td class="state ${row.ok ? "ok" : "bad"}">${row.ok ? "set" : "missing or wrong"}</td>
+          <td class="detail">${escapeHtml(row.detail)}</td>
+        </tr>`).join("");
+
+  const providerList = AI_PROVIDER_IDS.length
+    ? AI_PROVIDER_IDS.map((id) => `<li>${escapeHtml(id)}</li>`).join("")
+    : `<li>none — the app will answer from saved pages only</li>`;
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Setup check — Vignan AI</title>
+  ${ready ? "" : '<meta http-equiv="refresh" content="15">'}
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles-legal.css">
+  <style>
+    .check-main { max-width: 980px; margin: 0 auto; padding: 64px 0 90px; }
+    .verdict { display: flex; gap: 16px; align-items: flex-start; padding: 24px; border: 1px solid #383838; margin: 26px 0 10px; }
+    .verdict .mark { flex: 0 0 auto; width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #555; font-size: 15px; font-weight: 700; }
+    .verdict h2 { margin: 0 0 6px; font-size: 20px; }
+    .verdict p { margin: 0; color: #c9c9c9; font-size: 14px; line-height: 1.7; }
+    table { width: 100%; border-collapse: collapse; margin: 22px 0 8px; font-size: 13.5px; }
+    th { text-align: left; padding: 10px 12px; border-bottom: 1px solid #4a4a4a; color: #9a9a9a; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+    td { padding: 14px 12px; border-bottom: 1px solid #2b2b2b; vertical-align: top; }
+    td code { font-size: 12.5px; color: #fff; }
+    td.purpose, .purpose { display: block; margin-top: 5px; color: #9a9a9a; font-size: 12px; line-height: 1.6; }
+    td.state { white-space: nowrap; font-weight: 700; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+    td.state.ok::before { content: "✓ "; }
+    td.state.bad::before { content: "✕ "; }
+    td.state.bad { border-left: 2px solid #fff; }
+    td.detail { color: #b8b8b8; font-family: ui-monospace, monospace; font-size: 11.5px; overflow-wrap: anywhere; }
+    .steps { counter-reset: step; list-style: none; padding: 0; margin: 18px 0; }
+    .steps li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid #262626; counter-increment: step; color: #d2d2d2; font-size: 13.5px; line-height: 1.7; }
+    .steps li::before { content: counter(step, decimal-leading-zero); color: #7d7d7d; font-family: ui-monospace, monospace; font-size: 11px; }
+    .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); border: 1px solid #383838; margin-top: 26px; }
+    .facts div { padding: 14px 16px; border-right: 1px solid #383838; border-bottom: 1px solid #383838; }
+    .facts span { display: block; color: #8e8e8e; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+    .facts strong { display: block; margin-top: 6px; font-size: 14px; color: #f2f2f2; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .actions a { padding: 12px 18px; border: 1px solid #4a4a4a; color: #fff; font-size: 11px; font-weight: 750; letter-spacing: .1em; text-decoration: none; text-transform: uppercase; }
+    .actions a:hover { background: #f5f5f5; color: #080808; }
+    ul.providers { margin: 8px 0 0; padding-left: 18px; color: #c8c8c8; font-size: 13px; line-height: 1.9; }
+    p.note { color: #9d9d9d; font-size: 12.5px; line-height: 1.75; }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to the check</a>
+  <header class="legal-header"><a class="wordmark" href="/">VIGNAN <span>/ AI</span></a><a href="/">Open the study space ↗</a></header>
+  <main id="content" class="check-main">
+    <div class="legal-intro" style="position:static">
+      <p class="eyebrow">SETUP CHECK / LIVE</p>
+      <h1 style="font-size:clamp(42px,6vw,72px)">Is it<br><span>connected?</span></h1>
+      <p style="max-width:560px">This page reads the deployment's own configuration and reports what is set, what is missing and which key is the wrong shape. It shows variable names and formats only — never a key value, so it is safe to open in front of anyone.</p>
+    </div>
+
+    <div class="verdict">
+      <div class="mark">${ready ? "✓" : "!"}</div>
+      <div>
+        <h2>${ready ? "Accounts are connected." : "Accounts are not connected yet."}</h2>
+        <p>${ready
+          ? "Registration, login, sessions, progress, referrals, friends and the leaderboard all run on Supabase."
+          : `Registration and login will fail until this is fixed. Guest mode, the library, answers from saved pages and the offline mode all still work.${problems.length ? " " + problems.length + " problem" + (problems.length === 1 ? "" : "s") + " to fix, below." : ""}`}</p>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th>Variable</th><th>State</th><th>What the server sees</th></tr></thead>
+      <tbody>${keyRows}</tbody>
+    </table>
+    <p class="note">The last column describes the <em>shape</em> of the value, not the value itself. A publishable key starts <code>sb_publishable_</code>; a secret key starts <code>sb_secret_</code>; an older project may still hold long <code>eyJ…</code> keys, which work but are being retired.</p>
+
+    ${problems.length ? `<ol class="steps">${problems.map((problem) => `<li>${problem}</li>`).join("")}</ol>` : ""}
+
+    <h2 style="font-size:20px;margin:34px 0 0">Where to fix it</h2>
+    <ol class="steps">
+      <li>Open <a href="${keysPage}" target="_blank" rel="noopener noreferrer">Supabase → Settings → API Keys</a>. There is no separate “Settings → API” page any more, and the old names are gone: the <strong>anon</strong> key is now the <strong>publishable</strong> key, and the <strong>service_role</strong> key is now the <strong>secret</strong> key.</li>
+      <li>In <a href="https://dashboard.render.com/" target="_blank" rel="noopener noreferrer">Render → your service → Environment</a>, paste the publishable key into <code>SUPABASE_ANON_KEY</code> and the secret key into <code>SUPABASE_SERVICE_ROLE_KEY</code>. The variable names are historical; the values are the new ones.</li>
+      <li>Save. Render redeploys by itself; this page refreshes every 15 seconds while something is wrong.</li>
+      <li>If registration still fails after this page shows all three as set, check that both SQL migrations have been run in the Supabase SQL editor.</li>
+    </ol>
+
+    <div class="facts">
+      <div><span>release</span><strong>2.0.0</strong></div>
+      <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
+      <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
+      <div><span>offline mode</span><strong>ready</strong></div>
+      <div><span>web fallback</span><strong>${SEARCH_URL || WIKIPEDIA_SEARCH ? "on" : "off"}</strong></div>
+      <div><span>server AI keys</span><strong>${AI_UPSTREAMS.length}</strong></div>
+    </div>
+
+    <h3 style="margin:26px 0 0;font-size:15px">AI providers with a key on the server</h3>
+    <ul class="providers">${providerList}</ul>
+    <p class="note">Key rotation, cooldown and the student-key fallback need no dashboard work: paste several keys into one variable separated by commas and the server tries them in order.</p>
+
+    <div class="actions">
+      <a href="/setup">Check again</a>
+      <a href="/api/health?social=1">Machine-readable health ↗</a>
+      <a href="/judge.html">Judge mode ↗</a>
+      <a href="/">Open the app ↗</a>
+    </div>
+    <p class="note" style="margin-top:22px">This page is marked <code>noindex</code> and reveals no secret, but you can also treat it as private: it is an operator's diagnostic, not part of the student experience.</p>
+  </main>
+  <footer class="legal-footer"><div><strong>BUILT BY A STUDENT</strong><p>Vignan Vidyanikethan English Medium High School<br>INSPIRE-MANAK science fair</p></div><nav aria-label="Legal and project links"><a href="/privacy.html">Privacy policy ↗</a><a href="/terms.html">Terms of use ↗</a><a href="/security.html">Security ↗</a><a href="/copyright.html">Copyright ↗</a><a href="/judge.html">Judge mode ↗</a></nav></footer>
+</body>
+</html>`;
+}
+
+function sendSetupPage(request, response) {
+  const body = Buffer.from(setupPage(), "utf8");
+  response.writeHead(200, {
+    ...baseSecurityHeaders(request),
+    "Content-Type": "text/html; charset=utf-8",
+    "Content-Length": body.length,
+    // Always fresh: the whole point is to see the state after an env change.
+    "Cache-Control": "no-store",
+    "Content-Security-Policy": CONTENT_SECURITY_POLICY,
+  });
+  response.end(request.method === "HEAD" ? undefined : body);
+}
+
 async function serveStatic(request, response, pathname) {
   let decoded;
   try {
@@ -1117,6 +1328,10 @@ const server = http.createServer(async (request, response) => {
     }
     if (!["GET", "HEAD"].includes(request.method)) {
       response.writeHead(405).end("Method not allowed");
+      return;
+    }
+    if (url.pathname === "/setup" || url.pathname === "/setup/" || url.pathname === "/setup.html") {
+      sendSetupPage(request, response);
       return;
     }
     await serveStatic(request, response, url.pathname);

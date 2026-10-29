@@ -33,6 +33,17 @@ git remote set-url origin https://github.com/Techno-projects-cpu/Vignan-Vidyanik
 
 Render free web services sleep after inactivity and have limited instance hours; its free Postgres also expires after 30 days. That is why Supabase holds accounts ([Render free-tier notes](https://render.com/articles/platforms-with-a-real-free-tier-for-developers-in-2026)). Supabase's free tier includes 50,000 MAUs, a 500 MB database and 500,000 Edge Function invocations, but pauses after a week of database inactivity ([Supabase billing docs](https://supabase.com/docs/guides/platform/billing-on-supabase)).
 
+## Check it: /setup
+
+Open **`https://<your-service>.onrender.com/setup`**. It is a plain page for a human: every Supabase variable, whether it is set, and — without ever printing a key — whether each value has the *shape* it should (a publishable key starts `sb_publishable_`, a secret key starts `sb_secret_`, legacy `eyJ…` keys are flagged as legacy).
+
+It catches the two mistakes that account for nearly every broken deployment:
+
+- a **publishable** key pasted into `SUPABASE_SERVICE_ROLE_KEY`, or the reverse;
+- a variable left empty after a rename, which the page names explicitly.
+
+The page refreshes every 15 seconds while something is wrong, links straight to the Supabase project's **Settings → API Keys** page and the Render environment, and shows the release, accounts backend, social backend, offline readiness, web fallback and how many server AI keys are loaded. It is marked `noindex`, sends `Cache-Control: no-store` and reveals no secret, so a screenshot is safe to share. `/api/health` remains the machine-readable equivalent.
+
 ## 3. Add Render environment variables
 
 Add these in **Render → Environment**. The blank key values below are placeholders: copy the actual values directly from your Supabase dashboard. Never commit a secret, paste it in chat, or put it in browser code.
