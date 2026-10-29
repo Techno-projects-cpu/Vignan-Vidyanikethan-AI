@@ -22,16 +22,19 @@ test("minimal UI keeps one compact top navigation and a short Ask banner", () =>
   assert.ok(mobile, "mobile navigation exists");
   assert.equal((mobile[0].match(/data-view="/g) || []).length, 7, "the phone bar keeps seven thumb-sized targets");
 
-  const banner = html.match(/<div class="connect-banner"[\s\S]*?<\/div>\s*<div class="chat-log"/);
-  assert.ok(banner, "connect banner exists");
-  assert.equal((banner[0].match(/<button/g) || []).length, 3);
-  assert.match(banner[0], /id="use-local-ai-button"/);
-  assert.match(banner[0], /id="use-free-ai-button"/);
-  assert.match(banner[0], /id="connect-model-button"/);
+  // The connect banner used to repeat what Settings already said. It is gone from
+  // Ask; its three buttons live in Settings under Study & AI.
+  assert.doesNotMatch(html, /id="connect-banner"/, "Ask no longer repeats the engine banner");
+  const engine = html.match(/<section[^>]*id="engine-card"[\s\S]*?<\/section>/);
+  assert.ok(engine, "the engine card exists in Settings");
+  assert.equal((engine[0].match(/<button/g) || []).length, 3);
+  assert.match(engine[0], /id="use-local-ai-button"/);
+  assert.match(engine[0], /id="use-free-ai-button"/);
+  assert.match(engine[0], /id="connect-model-button"/);
 });
 
 test("advanced settings stay in the DOM behind a disclosure control", () => {
-  const start = html.indexOf('<div class="advanced-settings" id="advanced-settings">');
+  const start = html.search(/<div[^>]*class="advanced-settings"[^>]*>/);
   const end = html.indexOf('            </div>\n          </div>\n        </section>', start);
   assert.ok(start > 0 && end > start, "advanced wrapper boundaries exist");
   const advanced = html.slice(start, end);

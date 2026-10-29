@@ -11,6 +11,7 @@
 -->
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../styles-premium.css">
+<link rel="stylesheet" href="../styles-custom.css">
 <style>
   body { margin: 0; padding: 28px 20px 60px; background: var(--bg); color: var(--ink); font-family: var(--font); }
   .frame { max-width: 940px; margin: 0 auto; display: grid; gap: 34px; }
@@ -42,6 +43,26 @@
   </section>
 
   <header>
+    <h1>Design check 03 — styles</h1>
+    <p class="note">Tap a tile: the whole page changes, because the tiles write the same attribute the app writes.</p>
+  </header>
+
+  <section class="panel">
+    <div class="panel-inner">
+      <div class="panel-head">
+        <div>
+          <span class="eyebrow">CUSTOMIZE</span>
+          <h2 style="font-size:17px;margin:4px 0 0">Choose a look</h2>
+          <p class="hint">Six styles. The same app underneath — only the surface, the type and the corners change.</p>
+        </div>
+        <span class="chip" id="style-chip">Minimal</span>
+      </div>
+      <div class="style-grid" id="style-grid" role="group"></div>
+      <p class="style-hint">The light / dark switch only changes the Minimal and Terminal styles; the other four are designed to be read as they are.</p>
+    </div>
+  </section>
+
+  <header>
     <h1>Design check 02 — language picker</h1>
     <p class="note">Every language in its own script, 31px. Type in the box to filter. The selected tile keeps a brand border and a tick.</p>
   </header>
@@ -68,6 +89,7 @@
 <script type="module">
 import { GOAL_CARDS, cardIndex } from "../js/goal-cards.js";
 import { LANGUAGE_CATALOGUE, languageGlyph, languageGroups, languageMeta } from "../js/languages.js";
+import { THEMES } from "../js/themes.js";
 
 // --- blocks ------------------------------------------------------------------
 const stack = document.getElementById("goal-stack");
@@ -108,6 +130,54 @@ GOAL_CARDS.forEach((card, index) => {
   });
   stack.appendChild(button);
 });
+
+// --- styles ------------------------------------------------------------------
+const styleGrid = document.getElementById("style-grid");
+const styleChip = document.getElementById("style-chip");
+let currentStyle = "minimal";
+
+function applyStyle(id) {
+  currentStyle = id;
+  if (id === "minimal") document.documentElement.removeAttribute("data-style");
+  else document.documentElement.dataset.style = id;
+  styleChip.textContent = THEMES.find((theme) => theme.id === id)?.name || id;
+  renderStyles();
+}
+
+function renderStyles() {
+  styleGrid.replaceChildren();
+  for (const theme of THEMES) {
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = `style-tile${theme.id === currentStyle ? " active" : ""}`;
+    tile.dataset.style = theme.id;
+    tile.setAttribute("aria-pressed", String(theme.id === currentStyle));
+    const preview = document.createElement("span");
+    preview.className = "style-preview";
+    for (const colour of theme.swatches) {
+      const swatch = document.createElement("span");
+      swatch.style.background = colour;
+      preview.appendChild(swatch);
+    }
+    const name = document.createElement("span");
+    name.className = "style-name";
+    name.textContent = theme.name;
+    const note = document.createElement("span");
+    note.className = "style-note";
+    note.textContent = theme.note;
+    const tags = document.createElement("span");
+    tags.className = "style-tags";
+    for (const tag of theme.tags) {
+      const tagNode = document.createElement("span");
+      tagNode.className = "style-tag";
+      tagNode.textContent = tag;
+      tags.appendChild(tagNode);
+    }
+    tile.append(preview, name, note, tags);
+    tile.addEventListener("click", () => applyStyle(theme.id));
+    styleGrid.appendChild(tile);
+  }
+}
 
 // --- languages ---------------------------------------------------------------
 const grid = document.getElementById("language-grid");
@@ -181,6 +251,7 @@ function render() {
 
 filter.addEventListener("input", render);
 render();
+renderStyles();
 </script>
 </body>
 </html>

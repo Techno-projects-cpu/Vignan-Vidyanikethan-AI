@@ -10,27 +10,37 @@
   <meta property="og:title" content="Vignan Vidyanikethan AI — learn from your own textbooks">
   <meta property="og:description" content="Turn your textbooks into cited answers, quizzes and revision tools. A student project for INSPIRE-MANAK.">
   <meta property="og:url" content="https://vignanvidyanikethanai.onrender.com/">
-  <meta property="og:image" content="https://vignanvidyanikethanai.onrender.com/icons/icon-512.png?v=32">
+  <meta property="og:image" content="https://vignanvidyanikethanai.onrender.com/icons/icon-512.png?v=33">
   <meta name="twitter:card" content="summary">
   <title>Vignan Vidyanikethan AI — learn from your own textbooks</title>
   <link rel="canonical" href="https://vignanvidyanikethanai.onrender.com/">
-  <link rel="manifest" href="./manifest.webmanifest?v=32">
-  <link rel="icon" href="./icons/icon.svg?v=32" type="image/svg+xml">
-  <link rel="icon" href="./icons/icon-48.png?v=32" type="image/png" sizes="48x48">
-  <link rel="shortcut icon" href="./favicon.ico?v=32">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=32">
+  <link rel="manifest" href="./manifest.webmanifest?v=33">
+  <link rel="icon" href="./icons/icon.svg?v=33" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-48.png?v=33" type="image/png" sizes="48x48">
+  <link rel="shortcut icon" href="./favicon.ico?v=33">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=33">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./styles-premium.css?v=32">
-  <link rel="stylesheet" href="./styles-identity.css?v=32">
-  <link rel="stylesheet" href="./styles-social.css?v=32">
-  <link rel="stylesheet" href="./styles-pro.css?v=32">
+  <link rel="stylesheet" href="./styles-premium.css?v=33">
+  <link rel="stylesheet" href="./styles-identity.css?v=33">
+  <link rel="stylesheet" href="./styles-social.css?v=33">
+  <link rel="stylesheet" href="./styles-pro.css?v=33">
+  <link rel="stylesheet" href="./styles-custom.css?v=33">
+  <script>
+    // Paint the saved look before the first frame. The full settings live in the
+    // database, which is async; this mirror is only a hint, and applyStyle() is
+    // still the authority once the app has loaded.
+    try {
+      const saved = localStorage.getItem("vignan.style");
+      if (saved && saved !== "minimal" && /^[a-z]{3,12}$/.test(saved)) document.documentElement.dataset.style = saved;
+    } catch (error) { /* private browsing: the default look is fine */ }
+  </script>
 </head>
 <body class="minimal-ui premium-ui auth-locked">
 
   <section class="startup-screen" id="startup-screen" role="dialog" aria-modal="true" aria-labelledby="startup-title" hidden>
     <div class="startup-frame">
       <header class="startup-top">
-        <span class="startup-wordmark"><img src="./icons/icon.svg?v=32" alt="" width="29" height="29">VIGNAN<span> / AI</span></span>
+        <span class="startup-wordmark"><img src="./icons/icon.svg?v=33" alt="" width="29" height="29">VIGNAN<span> / AI</span></span>
         <div class="startup-top-right"><span class="startup-edition">A STUDENT PROJECT &nbsp; / &nbsp; 01</span><button type="button" id="startup-skip">Skip intro ↗</button></div>
       </header>
       <div class="startup-body">
@@ -56,7 +66,7 @@
     <div class="auth-gate-shell">
       <header class="auth-gate-top">
         <a class="auth-gate-brand" href="./">
-          <span class="auth-gate-mark" aria-hidden="true"><img src="./icons/icon.svg?v=32" alt="" width="37" height="37"></span>
+          <span class="auth-gate-mark" aria-hidden="true"><img src="./icons/icon.svg?v=33" alt="" width="37" height="37"></span>
           <span>VIGNAN <b>VIDYANIKETHAN AI</b></span>
         </a>
         <span class="auth-gate-badge">YOUR STUDY SPACE</span>
@@ -215,7 +225,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="./" aria-label="Vignan Vidyanikethan AI home">
-        <span class="brand-mark" aria-hidden="true"><img src="./icons/icon.svg?v=32" alt="" width="38" height="38"></span>
+        <span class="brand-mark" aria-hidden="true"><img src="./icons/icon.svg?v=33" alt="" width="38" height="38"></span>
         <span class="brand-text"><strong>Vignan</strong><small>Vidyanikethan AI</small></span>
       </a>
       <div class="sidebar-label">WORKSPACE</div>
@@ -247,7 +257,7 @@
     <div class="workspace">
       <header class="topbar premium-topbar">
         <div class="premium-brand">
-          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home"><img src="./icons/icon.svg?v=32" alt="" width="38" height="38"></a>
+          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home"><img src="./icons/icon.svg?v=33" alt="" width="38" height="38"></a>
           <span class="premium-wordmark">VIGNAN <span>AI</span></span>
         </div>
         <div class="premium-view-chip" aria-live="polite"><span class="premium-view-dot"></span><span id="premium-view-label">Ask</span></div>
@@ -306,17 +316,6 @@
           </section>
           <div class="ask-layout">
             <div class="chat-column card">
-              <div class="connect-banner" id="connect-banner">
-                <div class="connect-copy">
-                  <strong>Ask Vignan Vidyanikethan AI</strong>
-                  <p>Simple by default. Advanced model and key controls stay in Settings.</p>
-                </div>
-                <div class="connect-actions">
-                  <button type="button" class="button primary small" id="use-local-ai-button">Local AI</button>
-                  <button type="button" class="button ghost small" id="use-free-ai-button">Free AI</button>
-                  <button type="button" class="button ghost small" id="connect-model-button">Add keys</button>
-                </div>
-              </div>
               <div class="chat-log" id="chat-log" aria-live="polite"></div>
               <div class="typing hidden" id="typing"><span class="spinner"></span><span id="typing-label">Reading your textbooks…</span></div>
               <div class="goal-cards" id="goal-cards" role="group" aria-labelledby="goal-heading">
@@ -616,12 +615,119 @@
         </section>
 
         <!-- SETTINGS -->
+        id="view-friends" data-panel="friends">
+          <div class="section-toolbar">
+            <div class="section-copy">
+              <span class="eyebrow" data-i18n="view.friends.kicker">CLASSMATES</span>
+              <h2 data-i18n="view.friends.title">Friends</h2>
+              <p data-i18n="view.friends.subtitle">Study together, message privately and challenge each other to a duel.</p>
+            </div>
+          </div>
+          <div id="friends-panel" class="friends-panel"></div>
+        </section>
+
+        <!-- CHAT -->
+        <section class="view" id="view-chat" data-panel="chat">
+          <div class="section-toolbar chat-toolbar">
+            <div class="section-copy">
+              <span class="eyebrow" data-i18n="view.chat.kicker">TALK IT THROUGH</span>
+              <h2 data-i18n="view.chat.title">Chat</h2>
+              <p data-i18n="view.chat.subtitle">The Study Hall for everyone, and private chats with friends.</p>
+            </div>
+            <button type="button" class="button ghost small" id="chat-hall">Study Hall</button>
+          </div>
+          <div class="chat-shell" id="chat-shell" data-mode="list">
+            <div class="chat-list-wrap">
+              <div class="chat-list-head"><span class="eyebrow">CONVERSATIONS</span></div>
+              <div class="chat-thread-list" id="chat-thread-list"></div>
+            </div>
+            <div class="chat-room" id="chat-room">
+              <header class="chat-room-head">
+                <button type="button" class="chat-back" id="chat-back" aria-label="Back to conversations" hidden>←</button>
+                <div class="chat-room-title"><strong id="chat-title">Chat</strong><span id="chat-sub">Friends and the Study Hall</span></div>
+              </header>
+              <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-label="Messages"></div>
+              <form class="chat-composer" id="chat-form">
+                <label class="chat-input-wrap">
+                  <span class="sr-only">Message</span>
+                  <textarea id="chat-input" rows="1" maxlength="500" placeholder="Write a message…" enterkeyhint="send"></textarea>
+                </label>
+                <button type="submit" class="button primary chat-send" id="chat-send">Send</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- PLAY -->
+        <section class="view" id="view-play" data-panel="play">
+          <div class="section-toolbar">
+            <div class="section-copy">
+              <span class="eyebrow" data-i18n="view.play.kicker">PLAY &amp; LEARN</span>
+              <h2 data-i18n="view.play.title">Play</h2>
+              <p data-i18n="view.play.subtitle">Chess, quiz duels and maths races with classmates. Every answer is checked on the school server.</p>
+            </div>
+          </div>
+          <div id="play-panel" class="play-panel"></div>
+          <div id="play-arena" class="play-arena" hidden></div>
+        </section>
+
+        <!-- PROGRESS -->
+        <section class="view" id="view-progress" data-panel="progress">
+          <div class="section-toolbar">
+            <div class="section-copy"><span class="eyebrow" data-i18n="view.progress.kicker">MOMENTUM</span><h2 data-i18n="view.progress.title">Your progress</h2><p data-i18n="view.progress.subtitle">Streaks, topic mastery and a local class leaderboard.</p></div>
+          </div>
+          <section class="card study-next" aria-labelledby="study-next-title">
+            <div><span class="study-kicker">A LITTLE EVERY DAY</span><h3 id="study-next-title">Your next step</h3><p id="study-next-copy">Choose a small place to begin.</p></div>
+            <button type="button" class="button primary" id="study-next-action">Start a quiz</button>
+            <div class="revision-plan" id="revision-plan" aria-live="polite"></div>
+            <div class="revision-plan-foot">
+              <span class="hint" id="revision-plan-total"></span>
+              <button type="button" class="button ghost small" id="revision-plan-copy">Copy plan</button>
+            </div>
+          </section>
+          <div class="stat-grid" id="stat-grid"></div>
+          <section class="card account-card" id="account-card">
+            <div class="panel-head">
+              <div><span class="eyebrow">SQUAD</span><h2>Join the Vignan squad</h2><p class="hint minimal-hide">Log in to save streaks, climb the live leaderboard and invite friends with your own code.</p></div>
+              <span class="chip" id="account-chip">Guest</span>
+            </div>
+            <div id="account-body"></div>
+          </section>
+          <div class="two-column">
+            <section class="card"><h3 data-i18n="progress.mastery">Topic mastery</h3><div id="mastery-list" class="list-stack"></div></section>
+            <section class="card"><h3>Live class leaderboard</h3><p class="hint minimal-hide">Only usernames and scores are public. Exact age and gender stay private.</p><div id="server-leaderboard-list" class="list-stack"></div></section>
+          </div>
+          <section class="card"><h3 data-i18n="progress.leaderboard">Leaderboard on this device</h3><p class="hint minimal-hide">Local results from this browser, even when the account server is offline.</p><div id="leaderboard-list" class="list-stack"></div></section>
+          <section class="card"><h3 data-i18n="progress.recent">Recent results</h3><div id="recent-results" class="list-stack"></div></section>
+          <section class="card profile-card"><label><span data-i18n="progress.profileName">Your name on this device</span><input type="text" id="profile-name" maxlength="32"></label><button type="button" class="button ghost" id="save-profile">Save name</button><button type="button" class="button ghost danger" id="reset-progress">Reset progress</button></section>
+        </section>
+
+        <!-- SETTINGS -->
         <section class="view" id="view-settings" data-panel="settings">
           <div class="section-toolbar premium-settings-toolbar">
             <div class="section-copy"><span class="eyebrow" data-i18n="view.settings.kicker">CONTROL</span><h2 data-i18n="view.settings.title">Settings</h2><p data-i18n="view.settings.subtitle">Choose a local model, free keys, fallback and privacy options.</p></div>
             <button type="button" class="button ghost small" id="toggle-advanced-settings" data-i18n="settings.advanced" aria-expanded="false" aria-controls="advanced-settings">Advanced settings</button>
           </div>
-          <section class="card web-setting-card" aria-labelledby="web-setting-heading">
+          <div class="settings-tabs" role="tablist" aria-label="Settings sections" id="settings-tabs">
+            <button type="button" class="settings-tab" role="tab" data-settings-tab="appearance" aria-selected="true">Look &amp; language</button>
+            <button type="button" class="settings-tab" role="tab" data-settings-tab="ai" aria-selected="false">Study &amp; AI</button>
+            <button type="button" class="settings-tab" role="tab" data-settings-tab="privacy" aria-selected="false">Privacy &amp; app</button>
+          </div>
+          <section data-settings-group="ai" class="card engine-card" id="engine-card" aria-labelledby="engine-heading">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">ENGINE</span>
+                <h2 id="engine-heading">Which brain answers</h2>
+                <p class="hint">Offline by default. Bolt reads your own pages; a local model or a connected key is optional.</p>
+              </div>
+            </div>
+            <div class="button-row wrap">
+              <button type="button" class="button ghost small" id="use-local-ai-button">Local AI</button>
+              <button type="button" class="button ghost small" id="use-free-ai-button">Free AI</button>
+              <button type="button" class="button ghost small" id="connect-model-button">Add keys</button>
+            </div>
+          </section>
+          <section data-settings-group="ai" class="card web-setting-card" aria-labelledby="web-setting-heading">
             <h2 id="web-setting-heading" data-i18n="settings.webTitle">Web search</h2>
             <label class="web-choice" for="settings-web-enabled">
               <span class="web-choice-copy"><strong data-i18n="ask.webFallback">Search the web if needed</strong><small id="settings-web-state">On</small></span>
@@ -629,7 +735,19 @@
             </label>
             <p id="web-setting-help" data-i18n="ask.webPrivacy">Books first. If there's no match, your question goes to Wikipedia or your chosen search provider. Don't share private information.</p>
           </section>
-          <section class="card settings-card language-card" id="language-card" aria-labelledby="language-heading">
+          <section class="card settings-card style-card" id="style-card" data-settings-group="appearance" aria-labelledby="style-heading">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow" data-i18n="style.kicker">Customize</span>
+                <h2 id="style-heading" data-i18n="style.title">Choose a look</h2>
+                <p class="hint" data-i18n="style.note">Six styles. The same app underneath — only the surface, the type and the corners change. Saved on this device.</p>
+              </div>
+              <span class="chip" id="style-chip">Minimal</span>
+            </div>
+            <div class="style-grid" id="style-grid" role="group" aria-labelledby="style-heading"></div>
+            <p class="style-hint" data-i18n="style.hint">The light / dark switch above only changes the Minimal and Terminal styles; the other four are designed to be read as they are.</p>
+          </section>
+          <section data-settings-group="appearance" class="card settings-card language-card" id="language-card" aria-labelledby="language-heading">
             <div class="panel-head">
               <div>
                 <span class="eyebrow" data-i18n="settings.languageKicker">Language</span>
@@ -654,7 +772,7 @@
             <button type="button" class="premium-button quiet" data-premium-action="theme">Invert theme</button>
           </div>
           <div class="settings-grid">
-            <section class="card settings-card span-2 local-ai-card" id="local-ai-panel">
+            <section data-settings-group="ai" class="card settings-card span-2 local-ai-card" id="local-ai-panel">
               <div class="panel-head">
                 <div><span class="eyebrow">OFFLINE AI</span><h2><svg class="panel-icon"><use href="#i-cpu"></use></svg>Real local model</h2><p class="hint minimal-hide">Open-weight Meta / SmolLM2 / Qwen models run in this browser with Vignan's own textbook rules.</p></div>
                 <span class="chip" id="local-ai-chip">Checking device…</span>
@@ -680,14 +798,14 @@
               <p class="hint minimal-hide">WebGPU is required for the in-browser model. On laptops without it, run <code>ollama pull llama3.2:1b</code> and choose <strong>Ollama</strong> below; on phones, the cited-excerpt engine still works offline.</p>
             </section>
 
-            <div class="advanced-settings" id="advanced-settings">
-            <section class="card settings-card span-2" id="free-api-card">
+            <div data-settings-group="ai" class="advanced-settings" id="advanced-settings">
+            <section data-settings-group="ai" class="card settings-card span-2" id="free-api-card">
               <div class="panel-head"><div><span class="eyebrow">FREE KEYS</span><h2><svg class="panel-icon"><use href="#i-key"></use></svg>Official free-tier API keys</h2><p class="hint minimal-hide">Generate your own keys. Put them in Render → Environment, never in Git. You can paste several keys into one variable.</p></div><div class="panel-head-actions"><span class="chip">$0 budget</span><button type="button" class="button ghost small" id="open-student-keys">Add my own key</button></div></div>
               <div class="notice warning-notice minimal-hide" id="free-api-warning"></div>
               <div class="key-grid" id="free-api-links"></div>
             </section>
 
-            <section class="card settings-card span-2 student-key-card" id="student-key-card">
+            <section data-settings-group="ai" class="card settings-card span-2 student-key-card" id="student-key-card">
               <div class="panel-head"><div><span class="eyebrow">STUDENT KEYS</span><h2><svg class="panel-icon"><use href="#i-key"></use></svg>Your own API keys</h2><p class="hint minimal-hide">Optional bring-your-own-key fallback. Used only after the school's Render keys are exhausted.</p></div><span class="chip" id="student-key-chip">Local only</span></div>
               <div class="notice warning-notice"><strong>Private by default.</strong> Your keys stay in this browser. They are sent to this site's <code>/api/ai</code> only for the current request, never saved to your account, leaderboard or data exports. Do not add keys on a shared computer unless you clear them afterwards.</div>
               <label class="switch-label block"><input type="checkbox" id="student-key-enabled" checked><span>Use my keys when all Render keys are exhausted</span></label>
@@ -706,7 +824,7 @@
               <p class="hint" id="student-key-status" aria-live="polite"></p>
             </section>
 
-            <section class="card settings-card span-2">
+            <section data-settings-group="ai" class="card settings-card span-2">
               <div class="panel-head"><div><span class="eyebrow">MODEL ROUTER</span><h2 data-i18n="settings.aiTitle">AI engine</h2><p class="hint minimal-hide" data-i18n="settings.aiHelp">Offline is the default. A connected model is optional.</p></div><span class="chip" id="server-status">Checking server…</span></div>
               <div class="notice router-notice minimal-hide"><strong>No model training · $0 budget.</strong> Vignan Vidyanikethan AI orchestrates existing AIs. Choose the local WebLLM model, the server's free router (Gemini, Groq, Cloudflare, OpenRouter, Mistral, Cohere, Arena), Ollama, or any OpenAI-compatible endpoint. Textbook passages stay the source of truth.</div>
               <div class="routing-table" id="routing-table"></div>
@@ -726,7 +844,7 @@
               </div>
             </section>
 
-            <section class="card settings-card">
+            <section data-settings-group="ai" class="card settings-card">
               <h2>Advanced search source</h2>
               <p>Optional: choose a different search source. The on/off switch is always available in chat and at the top of Settings.</p>
               <label><span data-i18n="settings.webMode">Search source</span><select id="settings-web-mode"><option value="server" data-i18n="settings.webServer">Built-in Wikipedia / server provider</option><option value="custom" data-i18n="settings.webCustom">Custom JSON endpoint</option></select></label>
@@ -735,7 +853,7 @@
               <button type="button" class="button primary full" id="web-save">Save web settings</button>
             </section>
 
-            <section class="card settings-card">
+            <section data-settings-group="privacy" class="card settings-card">
               <h2 data-i18n="settings.privacyTitle">Privacy &amp; data</h2>
               <p class="hint minimal-hide" data-i18n="settings.privacyHelp">Books and chats are stored in this browser. Search queries, requested links, connected AIs and account features can contact outside services.</p>
               <div class="storage-summary" id="storage-summary">Checking storage…</div>
@@ -744,7 +862,7 @@
               <p class="legal-links"><a href="./privacy.html" target="_blank" rel="noopener">Privacy policy ↗</a><a href="./terms.html" target="_blank" rel="noopener">Terms of use ↗</a><a href="./security.html" target="_blank" rel="noopener">Security ↗</a><a href="./copyright.html" target="_blank" rel="noopener">Copyright ↗</a><a href="./judge.html" target="_blank" rel="noopener">Judge mode ↗</a></p>
             </section>
 
-            <section class="card settings-card" id="app-updates-card">
+            <section data-settings-group="privacy" class="card settings-card" id="app-updates-card">
               <h2>App, updates &amp; offline</h2>
               <p class="hint minimal-hide">The app keeps a copy of itself on this device so it works without a connection. When you are online it checks for a new release and waits for your permission before updating.</p>
               <div class="update-rows">
@@ -765,7 +883,7 @@
               <p class="legal-links"><a href="./security.html" target="_blank" rel="noopener">Security ↗</a><a href="./copyright.html" target="_blank" rel="noopener">Copyright &amp; takedown ↗</a><a href="./privacy.html" target="_blank" rel="noopener">Privacy ↗</a><a href="./terms.html" target="_blank" rel="noopener">Terms ↗</a></p>
             </section>
 
-            <section class="card settings-card">
+            <section data-settings-group="appearance" class="card settings-card">
               <h2>Appearance</h2>
               <p class="hint minimal-hide">Language is chosen in the <strong>Language</strong> card at the top of Settings. This card stores the theme and the name used on this device.</p>
               <div class="settings-avatar-row">
@@ -779,7 +897,7 @@
               <button type="button" class="button primary full" id="appearance-save">Save appearance</button>
             </section>
 
-            <section class="card settings-card span-2 minimal-hide">
+            <section data-settings-group="privacy" class="card settings-card span-2 minimal-hide">
               <h2 data-i18n="settings.helpTitle">How this works</h2>
               <p class="hint" data-i18n="settings.helpBody">Your books are split into page-preserving passages. A local hybrid search finds evidence; the offline engine quotes it with citations. If you connect a model, only those short passages are sent. Web results are labelled as outside your textbooks.</p>
               <ol class="help-list"><li>Upload PDFs or paste notes in <strong>Library</strong>.</li><li>Ask a question; Vignan Vidyanikethan AI retrieves the best passages with page numbers.</li><li>A local open model, the free router, or the offline excerpt engine writes the answer from those passages.</li><li>Generate a quiz, get instant feedback, and share a funky edit video.</li></ol>
@@ -804,7 +922,7 @@
   <div class="command-overlay" id="command-overlay" hidden aria-hidden="true">
     <div class="command-panel" role="dialog" aria-modal="true" aria-labelledby="command-title">
       <div class="command-head">
-        <span class="command-mark" aria-hidden="true"><img src="./icons/icon.svg?v=32" alt="" width="38" height="38"></span>
+        <span class="command-mark" aria-hidden="true"><img src="./icons/icon.svg?v=33" alt="" width="38" height="38"></span>
         <div class="command-title-wrap">
           <strong id="command-title">Everything, in one menu.</strong>
           <span>Search pages, actions and AI nicknames.</span>
@@ -888,6 +1006,16 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./js/boot.js?v=32"></script>
+  <script type="module" src="./js/boot.js?v=33"></script>
+
+  <aside class="first-run" id="first-run" role="dialog" aria-modal="false" aria-labelledby="first-run-title" hidden>
+    <span class="first-run-step" id="first-run-step">STEP 1 OF 3</span>
+    <h2 id="first-run-title">Your books, your pages</h2>
+    <p id="first-run-body">Add a PDF or your notes in Library — or use the starter pages written for this project. Every answer names the page it came from.</p>
+    <div class="first-run-actions">
+      <button type="button" class="button ghost small" id="first-run-skip">Skip</button>
+      <button type="button" class="button primary small grow" id="first-run-next">Next</button>
+    </div>
+  </aside>
 </body>
 </html>

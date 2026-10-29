@@ -108,6 +108,9 @@ error. A funded team covers far more ground; this one goes deeper on less.
 | Starter shelf | Four books of pages written for this project (Physics, Chemistry, Biology, Mathematics) are installed on the first open, so citations, quizzes, flashcards and exam mocks work before a student adds anything. They are ordinary library pages - searchable, cited and removable - not a reproduction of any published textbook, and a student's own upload is always searched before them. |
 | Starting blocks | The Ask screen opens with five full-width blocks instead of a blank box, numbered `01 / 05` and sharing their borders so they read as one object: explain a concept, quiz me on a chapter, my viva is coming up, revise in ten minutes, write a five-mark exam answer. Tapping one **asks it straight away** — each question is already complete, ends by asking for a page, and changes colour as it launches — or opens the tool it names. With an empty library the notes say where the pages will come from; a block can also be shared as a link (`?ask=…`) that fills the box without sending. The old suggestion chips are hidden while the blocks are showing, so only one set of suggestions is ever on screen. |
 | Language picker | A screen of 33 large tiles, each led by a character from its own script (31px) with the native name under it and the English name below that. A search box filters by script, English name or code and reports `3 OF 33`; the chosen tile keeps a brand border and a tick. The hidden `<select>` stays for keyboards and screen readers, and Urdu, Arabic and Persian tiles flow right-to-left. |
+| Six styles | Settings → Look & language offers Minimal, Soft, Editorial, Luxury, Terminal and Neo-brutalism. Each is a token set — surface, ink, accent, corner radius, typeface, border weight — mapped onto the variables the app already used, so a style is a dozen lines and cannot break another. The choice is saved per device, applied before the first frame from a validated mirror, and every style is checked for WCAG AA contrast by a test rather than by eye. |
+| Responsive by measurement | Four targets are handled explicitly: phone (360–430px), tablet (768–1024), laptop, and a 1280×720 projector. Ask becomes one column below 1024px, headings scale with `clamp()` instead of jumping, tab bars scroll sideways instead of wrapping, phone targets stay 40px tall, and landscape phones hide the hero so the composer never leaves the screen. |
+| Settings tabs | Settings is split into Look & language, Study & AI and Privacy & app. The cards are tagged in the markup, so the tabs only decide what is visible — an untagged card stays on screen in every tab rather than disappearing. Arrow keys, Home and End work. |
 | Honest empty slots | A feature that is not built says so. The Library shows a dashed "coming soon" card for SCERT/NCERT books with the reason (publisher permission) and a disabled button, rather than a promise that fails when tapped. |
 | Library | Upload PDFs and readable text (for example TXT, Markdown, CSV and JSON), paste notes, or import a public webpage/PDF/text URL. Scripts, executables and archives are rejected. Web imports retain their origin and are labelled separately. |
 | Quizzes | MCQ, fill-in-the-blank, short-answer and mixed quizzes; easy/medium/hard; timed or untimed; AI-written or offline-generated; instant grading with per-question review, topic breakdown and a revise list. |
@@ -412,8 +415,8 @@ npm run offline:check
 ```
 
 ```
-Release v32
-Cached after install: 368 files in vignan-vidyanikethan-ai-v32
+Release v33
+Cached after install: 372 files in vignan-vidyanikethan-ai-v33
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
@@ -638,7 +641,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-396 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
+406 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 

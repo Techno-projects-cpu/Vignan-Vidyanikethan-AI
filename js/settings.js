@@ -1,11 +1,12 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=32";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=32";
-import { parseApiKeys } from "./key-pool.js?v=32";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=32";
-import { aiProfile } from "./ai-nicknames.js?v=32";
-import { LANGUAGE_CODES } from "./languages.js?v=32";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=33";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=33";
+import { parseApiKeys } from "./key-pool.js?v=33";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=33";
+import { aiProfile } from "./ai-nicknames.js?v=33";
+import { LANGUAGE_CODES } from "./languages.js?v=33";
+import { DEFAULT_STYLE, THEMES } from "./themes.js?v=33";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -38,6 +39,8 @@ export const DEFAULT_SETTINGS = {
   searchToken: "",
   language: "en",
   theme: "dark",
+  // The look of the app: one of the six styles in js/themes.js.
+  style: "minimal",
   profile: "Student",
   // Monogram avatar (`p0`-`p7`), kept locally so guests get one too.
   avatar: "",
@@ -108,6 +111,7 @@ export function normalizeSettings(value = {}) {
   if (!["server", "custom"].includes(merged.webMode)) merged.webMode = "server";
   if (!["light", "dark"].includes(merged.theme)) merged.theme = "light";
   if (!LANGUAGE_CODES.includes(merged.language)) merged.language = "en";
+  if (!THEMES.some((theme) => theme.id === merged.style)) merged.style = DEFAULT_STYLE;
   merged.freeRouterDismissed = Boolean(raw.freeRouterDismissed);
   merged.profile = String(merged.profile || "Student").slice(0, 32);
   // Only the eight known patterns are accepted, so a stored value can never

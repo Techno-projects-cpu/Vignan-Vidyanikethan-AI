@@ -86,7 +86,7 @@ test("a shared link fills the box, and only the box", () => {
 
 test("a card can be shared as a link and read back unchanged", () => {
   for (const card of promptCards()) {
-    const link = askLink(card, "https://example.org/app/?v=32");
+    const link = askLink(card, "https://example.org/app/?v=33");
     assert.ok(link.startsWith("https://example.org/app/?" + ASK_PARAM + "="), "query strings are not stacked");
     assert.equal(askFromUrl(link.slice(link.indexOf("?"))), card.prompt);
   }

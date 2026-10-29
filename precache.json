@@ -1,6 +1,6 @@
 {
-  "version": 32,
-  "generatedAt": "2026-10-29T16:26:42.178Z",
+  "version": 33,
+  "generatedAt": "2026-10-29T16:36:42.717Z",
   "urls": [
     "./",
     "./index.html",
@@ -77,6 +77,7 @@
     "./js/study-decks.js",
     "./js/study-sheet.js",
     "./js/text.js",
+    "./js/themes.js",
     "./js/translations-core.js",
     "./js/ui.js",
     "./js/updates.js",
@@ -91,6 +92,7 @@
     "./robots.txt",
     "./security.html",
     "./sitemap.xml",
+    "./styles-custom.css",
     "./styles-identity.css",
     "./styles-judge.css",
     "./styles-legal.css",

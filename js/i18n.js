@@ -10,8 +10,8 @@
  * point at the original passage.
  */
 
-import { CORE_STRINGS } from "./translations-core.js?v=32";
-import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=32";
+import { CORE_STRINGS } from "./translations-core.js?v=33";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=33";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 
@@ -114,6 +114,10 @@ const EN = {
   "soon.body": "These stay out until the publisher gives written permission. When that arrives they will appear here and work exactly like the pages you add yourself: searchable, cited by page, usable offline. Until then your own uploads and the starter pages do the same job.",
   "soon.button": "Waiting for publisher permission",
   "settings.languageKicker": "Language",
+  "style.kicker": "Customize",
+  "style.title": "Choose a look",
+  "style.note": "Six styles. The same app underneath — only the surface, the type and the corners change. Saved on this device.",
+  "style.hint": "The light / dark switch above only changes the Minimal and Terminal styles; the other four are designed to be read as they are.",
   "settings.languageChoose": "Choose your language",
   "settings.languageSearch": "Search languages",
   "settings.languageFilterPlaceholder": "Search 33 languages…",
