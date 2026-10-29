@@ -7,7 +7,7 @@ The monochrome interface and animations are original CSS and JavaScript. They ru
 - [Motion Primitives](https://github.com/ibelick/motion-primitives), MIT — restrained interface transitions.
 - [css-motion](https://github.com/epavanello/css-motion), MIT — accessible CSS motion and reduced-motion awareness.
 
-- [Eklavya / StudyPilot Voice](https://github.com/visheshpandey/Eklavya) — the idea of a viva examiner that probes an answer and names the misconception, and of a voice-first study loop. That repository publishes **no licence**, so no code, text or prompt was copied; the viva rules in `js/viva.js` and the speech helpers in `js/voice.js` were written for this project. Our marks, bands and probe rules are our own, and every line the examiner says comes from the student's cited page.
+- [Eklavya / StudyPilot Voice](https://github.com/visheshpandey/Eklavya) — the idea of a viva examiner that probes an answer and names the misconception, and of a voice-first study loop. That repository publishes **no licence**, so no code, text or prompt was copied; its own `backend/app/config.py` describes Gemini as "the only model/vendor", which is why nothing there is trained and nothing here is either. the viva rules in `js/viva.js` and the speech helpers in `js/voice.js` were written for this project. Our marks, bands and probe rules are our own, and every line the examiner says comes from the student's cited page.
 
 The command menu and prompt-first layout were also informed by [Arena.ai](https://arena.ai/); Vignan uses its own implementation and AI nicknames. No Arena source, fonts, images, API keys or paid dependencies are included.
 

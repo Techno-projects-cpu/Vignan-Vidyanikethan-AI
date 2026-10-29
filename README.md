@@ -58,6 +58,17 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 
 ---
 
+## How this compares to the other free AI tutors
+
+Most of them are a hosted model plus a layer around it, and so is this. The open-source
+voice tutor that shares the Eklavya name says in its own configuration that Gemini is its
+only model and vendor — no model is trained there, and none is trained here. The
+difference is the constraint: every answer must name a page of the student's own book and
+is refused when that page is missing, the whole study loop (quizzes, flashcards, exam
+mocks, a viva) runs with the network off, and a rate-limited provider is rotated past
+rather than turned into an error. A funded team covers more ground; this project shows its
+working for what it does cover.
+
 ## What is implemented
 
 | Area | What it does |
@@ -376,8 +387,8 @@ npm run offline:check
 ```
 
 ```
-Release v23
-Cached after install: 366 files in vignan-vidyanikethan-ai-v23
+Release v24
+Cached after install: 366 files in vignan-vidyanikethan-ai-v24
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...

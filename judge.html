@@ -7,10 +7,10 @@
   <meta name="description" content="Judge mode: what Vignan Vidyanikethan AI is, how to test its citations and its offline proof in sixty seconds, and what it honestly cannot do.">
   <title>Judge mode — Vignan AI</title>
   <link rel="canonical" href="https://vignanvidyanikethanai.onrender.com/judge.html">
-  <link rel="icon" href="./icons/icon.svg?v=23" type="image/svg+xml">
-  <link rel="icon" href="./icons/icon-48.png?v=23" type="image/png" sizes="48x48">
-  <link rel="stylesheet" href="./styles-legal.css?v=23">
-  <link rel="stylesheet" href="./styles-judge.css?v=23">
+  <link rel="icon" href="./icons/icon.svg?v=24" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-48.png?v=24" type="image/png" sizes="48x48">
+  <link rel="stylesheet" href="./styles-legal.css?v=24">
+  <link rel="stylesheet" href="./styles-judge.css?v=24">
 </head>
 <body>
   <a class="skip" href="#content">Skip to judge mode</a>
@@ -54,8 +54,8 @@
       <p>Science fairs have unreliable Wi-Fi. A tool that fails at the moment of demonstration was never really working. This app is designed to survive that, and the survival is verified by a simulator that runs the real service worker with the network switched off.</p>
       <pre class="term">$ npm run offline:check
 
-<b>Release v23</b>
-Cached after install: 366 files in vignan-vidyanikethan-ai-v23
+<b>Release v24</b>
+Cached after install: 366 files in vignan-vidyanikethan-ai-v24
 every core file ................ ok 200
 every release module ........... ok 200
 navigation fallback ............ ok
@@ -80,6 +80,7 @@ manifest files missing ......... 0
         <div><dt>Why not train your own model?</dt><dd>Because a school project cannot train a model that beats the ones already available, and pretending otherwise would waste the effort. The scarce thing here is not another model — it is a trustworthy study loop around the models that exist.</dd></div>
         <div><dt>What if the provider is down or the key runs out?</dt><dd>Keys rotate automatically, a rate-limited key is retired for a minute, and the app falls back through several providers. If every key fails, the answer comes from the student's own pages instead of failing outright.</dd></div>
         <div><dt>Is student data being sold or trained on?</dt><dd>There is no analytics, no advertising identifier and no data broker. Books, chats and results stay in the browser; only the text needed for one answer is sent to the provider that writes it. The details are in the privacy policy, written in plain language.</dd></div>
+        <div><dt>Other free AI tutors already exist. Why build another?</dt><dd>The honest answer is that many are built the way this one is: a hosted model, plus the layer around it. The open-source voice tutor that shares the Eklavya name states in its own configuration that Gemini is its only model and vendor — nothing is trained there either, and its README says so. What differs here is the constraint. Every answer has to name a page of the student's own book and is refused when that page is missing; the whole study loop, including exam mocks and a viva, runs with the network off; and when one provider is rate-limited the app rotates to the next and finally to its own local engine instead of stopping. This is one student's project, so it covers less ground than a funded team. What it covers, it shows its working for.</dd></div>
         <div><dt>What stops it from making up a page number?</dt><dd>Two things: the answer refuses the built-in fallback when retrieval found evidence, and the citation shown is assembled from the retrieved chunk itself, not from the model's sentence. That is also why we ask you to open the page and check.</dd></div>
       </dl>
     </section>
