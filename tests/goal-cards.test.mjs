@@ -8,6 +8,7 @@ import {
   MAX_LINKED_QUESTION,
   askFromUrl,
   askLink,
+  cardIndex,
   goalCards,
   promptCards,
 } from "../js/goal-cards.js";
@@ -43,6 +44,22 @@ test("every written question can be answered from a cited page", () => {
   }
 });
 
+test("a question is complete before it is tapped", () => {
+  // The block is sent the moment it is clicked, so there can be no blank left for
+  // the student to fill in afterwards, and no placeholder text.
+  for (const card of promptCards()) {
+    assert.ok(card.prompt.trim().split(/\s+/).length >= 18, `${card.id} is a detailed question, not a stub`);
+    assert.doesNotMatch(card.prompt, /<[^>]+>|\byour answer\b|\.\.\.|…/, `${card.id} carries no blank to fill`);
+    assert.ok(["answer", "explain", "summarize", "practice", "flashcards"].includes(card.mode), `${card.id} picks a real answer mode`);
+  }
+});
+
+test("the blocks are numbered like a set", () => {
+  assert.equal(cardIndex(0, 5), "01 / 05");
+  assert.equal(cardIndex(4, 5), "05 / 05");
+  assert.equal(cardIndex(8, 12), "09 / 12");
+});
+
 test("an empty library is explained, not hidden", () => {
   const full = goalCards({ hasBooks: true });
   assert.equal(full.length, 5);
@@ -69,7 +86,7 @@ test("a shared link fills the box, and only the box", () => {
 
 test("a card can be shared as a link and read back unchanged", () => {
   for (const card of promptCards()) {
-    const link = askLink(card, "https://example.org/app/?v=28");
+    const link = askLink(card, "https://example.org/app/?v=29");
     assert.ok(link.startsWith("https://example.org/app/?" + ASK_PARAM + "="), "query strings are not stacked");
     assert.equal(askFromUrl(link.slice(link.indexOf("?"))), card.prompt);
   }
@@ -93,7 +110,7 @@ test("language tiles use the language's own script", () => {
 
 test("the page keeps the three parts the cards need", () => {
   const ask = html.slice(html.indexOf('id="view-ask"'), html.indexOf('id="view-library"'));
-  const goals = ask.indexOf('id="goal-grid"');
+  const goals = ask.indexOf('id="goal-stack"');
   assert.ok(goals > 0, "the empty Ask screen has a place for the sentences");
   assert.ok(goals < ask.indexOf('id="ask-form"'), "the sentences sit above the composer");
   assert.match(ask, /id="goal-heading"/);
@@ -128,8 +145,30 @@ test("the wiring, the styles and the words exist", () => {
   for (const rule of [".goal-card {", ".language-tile {", ".soon-badge {", "#view-ask.has-conversation .goal-cards"]) {
     assert.ok(css.includes(rule), `${rule} is styled`);
   }
-  assert.match(css, /@media \(max-width: 560px\)[\s\S]*\.goal-grid \{ grid-template-columns: 1fr; \}/);
+  assert.match(css, /@media \(max-width: 560px\)[\s\S]*\.goal-card \{ min-height: 78px/);
   for (const key of ["goal.heading", "goal.lead", "soon.badge", "soon.title", "soon.button"]) {
     assert.ok(i18n.includes(`"${key}"`), `${key} is translatable`);
   }
+});
+
+test("tapping a block asks the question, and the tap is visible", () => {
+  const openGoal = app.slice(app.indexOf("function openGoal("), app.indexOf("function applyLinkedQuestion("));
+  assert.match(openGoal, /requestSubmit\(\)/, "a written question is sent, not parked in the box");
+  assert.match(openGoal, /setMode\(card\.mode/, "the answer mode is set before sending");
+  assert.match(openGoal, /goal-card-launching/, "the tapped block changes colour");
+  assert.match(openGoal, /prefers-reduced-motion/, "and not for people who asked for less motion");
+  assert.match(css, /@keyframes goal-launch/, "the colour change is defined");
+  assert.match(openGoal, /setView\("quiz"\)/);
+  assert.match(openGoal, /mode = "viva"/, "the viva block opens the viva, not the mock");
+});
+
+test("the blocks look like one object: square, joined, full width", () => {
+  const block = css.slice(css.indexOf(".goal-cards {"), css.indexOf(".language-grid {"));
+  assert.match(block, /border-radius: 0/, "sharp corners, not rounded cards");
+  assert.match(block, /border-top: 1px solid var\(--line\); border-radius: 0/, "each row shares one 1px border");
+  assert.match(block, /\.goal-card:first-child \{ border-top: 0; \}/, "the first row does not double the container border");
+  assert.match(block, /min-height: 86px/, "the rows are large blocks, not chips");
+  assert.match(block, /grid-template-columns: 1fr auto/, "each row spans the column");
+  assert.match(block, /\.goal-card:hover \{ background: var\(--brand-soft\)/, "hover changes colour");
+  assert.match(block, /#view-ask:not\(\.has-conversation\) \.chat-suggestions \{ display: none; \}/, "the old chips never appear beside the blocks");
 });

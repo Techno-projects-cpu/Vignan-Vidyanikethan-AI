@@ -1549,34 +1549,82 @@ body.minimal-ui {
 
 
 /* ---------------------------------------------------------------------------
-   Starting sentences, language tiles and an honest "coming soon" slot (2.6.0).
-   Borrowed in spirit from the free tutors we read; the words, the rules and this
-   CSS are ours. Sharp edges, 1px lines, no decoration that carries no meaning.
+   Starting blocks (2.6.1): full-width, square, stuck together, and they ask the
+   question the moment they are tapped. Borrowed in spirit from the free tutors we
+   read and from zero-vast's numbered blocks; the words, rules and CSS are ours.
    --------------------------------------------------------------------------- */
 
-.goal-cards { border-top: 1px solid var(--line); margin-top: 6px; padding: 12px 4px 10px; }
-.goal-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 9px; }
-.goal-head h3 { margin: 0; font-size: 13px; font-weight: 650; letter-spacing: .01em; color: var(--ink); }
-.goal-head p { margin: 0; font-size: 11.5px; color: var(--muted); }
-.goal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 6px; }
-.goal-card {
-  display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 10px;
-  text-align: left; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px;
-  background: var(--surface-2); color: var(--ink-2); cursor: pointer; transition: .16s ease;
+.goal-cards {
+  border: 1px solid var(--line-strong); border-radius: 0;
+  background: var(--surface-2); margin: 8px 0 12px; min-height: 0;
+  display: flex; flex-direction: column;
 }
-.goal-card:hover { border-color: var(--line-strong); background: var(--surface-3); color: var(--ink); }
-.goal-card:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-.goal-icon { width: 18px; height: 18px; color: var(--brand); stroke-width: 1.7; }
-.goal-copy { display: grid; gap: 2px; min-width: 0; }
-.goal-copy strong { font-size: 12.5px; font-weight: 650; color: var(--ink); }
-.goal-copy small { font-size: 11px; color: var(--muted); line-height: 1.45; }
-.goal-arrow { font-size: 12px; color: var(--muted); }
-.goal-card:hover .goal-arrow { color: var(--brand); }
-.goal-card-empty { border-style: dashed; }
-/* Once there is a conversation the student already knows what they came for. */
+.goal-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--line-strong);
+}
+.goal-head h3 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .01em; color: var(--ink); }
+.goal-head p { margin: 0; font-size: 11.5px; color: var(--muted); }
+
+/* The blocks share their borders, so the list reads as one object, not five cards. */
+.goal-stack { display: grid; gap: 0; min-height: 0; overflow-y: auto; }
+.goal-card {
+  display: grid; grid-template-columns: 1fr auto; grid-template-areas: "top arrow" "copy arrow";
+  align-items: center; column-gap: 14px; row-gap: 6px;
+  width: 100%; min-height: 86px; padding: 16px 18px;
+  border: 0; border-top: 1px solid var(--line); border-radius: 0;
+  background: transparent; color: var(--ink-2); text-align: left; cursor: pointer;
+  transition: background-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.goal-card:first-child { border-top: 0; }
+.goal-top { grid-area: top; display: flex; align-items: center; gap: 10px; }
+.goal-index {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+  color: var(--muted); transition: color .18s ease;
+}
+.goal-icon { width: 15px; height: 15px; color: var(--muted); stroke-width: 1.7; transition: color .18s ease; }
+.goal-copy { grid-area: copy; display: grid; gap: 3px; min-width: 0; }
+.goal-copy strong { font-size: 15px; font-weight: 650; color: var(--ink); letter-spacing: -.01em; }
+.goal-copy small { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+.goal-arrow {
+  grid-area: arrow; font-size: 17px; color: var(--muted);
+  transition: color .18s ease, transform .18s ease;
+}
+
+/* Colour change is the confirmation that the tap landed. */
+.goal-card:hover { background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.goal-card:hover .goal-copy strong,
+.goal-card:hover .goal-arrow,
+.goal-card:hover .goal-icon,
+.goal-card:hover .goal-index { color: var(--brand); }
+.goal-card:hover .goal-arrow { transform: translate(2px, -2px); }
+.goal-card:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+.goal-card:active { background: var(--brand); box-shadow: inset 3px 0 0 var(--ink); }
+.goal-card:active .goal-copy strong,
+.goal-card:active .goal-copy small,
+.goal-card:active .goal-arrow,
+.goal-card:active .goal-icon,
+.goal-card:active .goal-index { color: #fff; }
+.goal-card-launching { animation: goal-launch .6s ease both; }
+@keyframes goal-launch {
+  0% { background: var(--brand); box-shadow: inset 3px 0 0 var(--ink); }
+  35% { background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+  100% { background: transparent; box-shadow: none; }
+}
+.goal-card-empty { border-left: 2px solid color-mix(in srgb, var(--warning) 55%, var(--line)); }
+.goal-card-empty .goal-copy small { color: var(--warning); }
+/* Once a conversation starts the blocks have done their job, and the follow-up
+   chips take over: one set of suggestions on screen, never two. */
 #view-ask.has-conversation .goal-cards { display: none; }
-/* The cards carry their own divider, so the composer does not stack a second one. */
+#view-ask:not(.has-conversation) .chat-suggestions { display: none; }
+/* Room for the blocks: the greeting shrinks, the list scrolls, the composer stays. */
+#view-ask:not(.has-conversation) .chat-log { flex: 0 1 auto; max-height: 30%; }
+#view-ask:not(.has-conversation) .goal-cards { flex: 1 1 auto; }
+/* The blocks carry their own divider, so the composer does not stack a second one. */
 .goal-cards + .composer { border-top: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .goal-card, .goal-card-launching, .goal-arrow { animation: none !important; transition: none !important; }
+}
 
 .language-grid { display: grid; gap: 14px; margin-top: 14px; }
 .language-group > .eyebrow { display: block; margin-bottom: 7px; }
@@ -1603,8 +1651,9 @@ body.minimal-ui {
 .soon-button[disabled] { opacity: .55; cursor: not-allowed; }
 
 @media (max-width: 560px) {
-  .goal-grid { grid-template-columns: 1fr; }
   .goal-head p { display: none; }
+  .goal-card { min-height: 78px; padding: 14px 15px; }
+  .goal-copy strong { font-size: 14px; }
   .language-tiles { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
   .language-glyph { font-size: 17px; }
 }

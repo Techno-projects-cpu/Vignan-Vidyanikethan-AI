@@ -64,7 +64,8 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 3.14 | Viva: the examiner asks, a thin answer gets one follow-up, the card shows marks out of ten | ☐ | ☐ | ☐ |
 | 3.15 | Read aloud speaks a real answer without reading `**` or `[1]` | ☐ | ☐ | ☐ |
 | 3.16 | Speaking an answer works, or says why not and leaves typing intact | ☐ | ☐ | ☐ |
-| 3.17 | First open: five starting sentences are visible, and tapping one either fills the box or opens the tool it names | ☐ | ☐ | ☐ |
+| 3.17 | First open: five numbered blocks sit under each other, square and joined, and the old suggestion chips are not showing beside them | ☐ | ☐ | ☐ |
+| 3.17b | Tapping "Explain a concept" sends the question by itself and the block flashes brand blue on the way out | ☐ | ☐ | ☐ |
 | 3.18 | Settings: 33 language tiles show their own script; tapping తెలుగు switches the interface and the tile stays marked | ☐ | ☐ | ☐ |
 | 3.19 | Library: the "coming soon" card is visible, says publisher permission, and its button cannot be pressed | ☐ | ☐ | ☐ |
 | 3.20 | A link ending in `?ask=…` fills the composer on open and does not send by itself | ☐ | ☐ | ☐ |
@@ -129,5 +130,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (377 checks) plus
+The quickest regression test for a UI fix is `npm test` (381 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.
