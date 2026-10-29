@@ -6,9 +6,9 @@
  * with a light MMR pass so the model sees more than one page of context.
  */
 
-import { bigrams, chapterReference, chunkPages, parsePages, tokenize } from "./text.js?v=16";
-import { clamp } from "./util.js?v=16";
-import { computeStats, cosine, queryVector, vectorize } from "./vector.js?v=16";
+import { bigrams, chapterReference, chunkPages, parsePages, tokenize } from "./text.js?v=17";
+import { clamp } from "./util.js?v=17";
+import { computeStats, cosine, queryVector, vectorize } from "./vector.js?v=17";
 
 const K1 = 1.5;
 const B = 0.75;

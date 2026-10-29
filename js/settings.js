@@ -1,11 +1,11 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=16";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=16";
-import { parseApiKeys } from "./key-pool.js?v=16";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=16";
-import { aiProfile } from "./ai-nicknames.js?v=16";
-import { LANGUAGE_CODES } from "./languages.js?v=16";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=17";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=17";
+import { parseApiKeys } from "./key-pool.js?v=17";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=17";
+import { aiProfile } from "./ai-nicknames.js?v=17";
+import { LANGUAGE_CODES } from "./languages.js?v=17";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -39,6 +39,8 @@ export const DEFAULT_SETTINGS = {
   language: "en",
   theme: "dark",
   profile: "Student",
+  // Monogram avatar (`p0`-`p7`), kept locally so guests get one too.
+  avatar: "",
   disclaimerSeen: false,
   freeRouterDismissed: false,
 };
@@ -104,6 +106,9 @@ export function normalizeSettings(value = {}) {
   if (!LANGUAGE_CODES.includes(merged.language)) merged.language = "en";
   merged.freeRouterDismissed = Boolean(raw.freeRouterDismissed);
   merged.profile = String(merged.profile || "Student").slice(0, 32);
+  // Only the eight known patterns are accepted, so a stored value can never
+  // become markup or an arbitrary CSS class.
+  merged.avatar = /^p[0-7]$/.test(String(raw.avatar || "")) ? String(raw.avatar) : "";
   return merged;
 }
 

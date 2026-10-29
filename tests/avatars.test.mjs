@@ -122,7 +122,8 @@ test("accounts without a pinned avatar keep working", async () => {
 test("every avatar pattern has a style rule, and the picker markup is wired", async () => {
   const css = await fs.readFile(new URL("../styles-social.css", import.meta.url), "utf8");
   for (const pattern of AVATAR_PATTERNS) {
-    assert.ok(css.includes(`.social-avatar[data-avatar="${pattern}"]`) || pattern === "plain",
+    const selector = `:is(.social-avatar, .profile-chip)[data-avatar="${pattern}"]`;
+    assert.ok(css.includes(selector) || pattern === "plain",
       `${pattern} has a rule (plain keeps the default background)`);
   }
   assert.match(css, /\.social-me\b/, "the you-strip is styled");

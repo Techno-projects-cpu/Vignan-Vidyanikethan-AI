@@ -1,6 +1,6 @@
 {
-  "version": 16,
-  "generatedAt": "2026-10-29T01:53:06.254Z",
+  "version": 17,
+  "generatedAt": "2026-10-29T02:06:45.352Z",
   "urls": [
     "./",
     "./index.html",
@@ -60,11 +60,13 @@
     "./js/reader.js",
     "./js/replies.js",
     "./js/retrieval.js",
+    "./js/revision-plan.js",
     "./js/settings.js",
     "./js/social.js",
     "./js/startup.js",
     "./js/student-keys.js",
     "./js/study-decks.js",
+    "./js/study-sheet.js",
     "./js/text.js",
     "./js/translations-core.js",
     "./js/ui.js",

@@ -34,5 +34,5 @@ async function walk(directory, prefix = "") {
 
 const files = (await walk(REPO)).sort();
 const urls = [...new Set(["./", "./index.html", ...files])];
-await fs.writeFile(OUT, `${JSON.stringify({ version: 16, generatedAt: new Date().toISOString(), urls }, null, 2)}\n`);
+await fs.writeFile(OUT, `${JSON.stringify({ version: 17, generatedAt: new Date().toISOString(), urls }, null, 2)}\n`);
 console.log(`Wrote ${urls.length} URLs to ${path.relative(REPO, OUT)}`);

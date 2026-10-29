@@ -1700,3 +1700,96 @@ body.premium-ui .language-card select:focus-visible { outline: 2px solid var(--p
 body.premium-ui .language-card optgroup { background: var(--p-bg); color: var(--p-muted); font-weight: 700; }
 body.premium-ui .language-card option { background: var(--p-surface); color: var(--p-ink); font-weight: 500; }
 body.premium-ui .language-answers { margin: 0; color: var(--p-muted); font: 600 11px var(--mono); letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* ------------------------------------------------------------------------- */
+/* Today's revision: three short, explained steps.                            */
+/* ------------------------------------------------------------------------- */
+
+body.premium-ui .study-next { flex-wrap: wrap; }
+body.premium-ui .study-next .revision-plan,
+body.premium-ui .study-next .revision-plan-foot { flex: 1 0 100%; }
+
+body.premium-ui .study-next .revision-plan {
+  display: grid;
+  gap: 1px;
+  margin-top: 4px;
+  border: 1px solid var(--p-line);
+  background: var(--p-line);
+}
+
+body.premium-ui .revision-step {
+  display: grid;
+  grid-template-columns: 58px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--p-surface);
+}
+
+body.premium-ui .revision-step-time {
+  font: 700 11px var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--p-muted);
+  white-space: nowrap;
+}
+
+body.premium-ui .revision-step-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+body.premium-ui .revision-step-copy strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--p-ink);
+}
+
+body.premium-ui .revision-step-copy small {
+  color: var(--p-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+body.premium-ui .revision-step .button {
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+body.premium-ui .revision-plan-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+body.premium-ui .revision-plan-foot .hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--p-muted);
+}
+
+@media (max-width: 560px) {
+  body.premium-ui .revision-step {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "time start" "copy copy";
+    row-gap: 8px;
+  }
+  body.premium-ui .revision-step-time { grid-area: time; }
+  body.premium-ui .revision-step .button { grid-area: start; }
+  body.premium-ui .revision-step-copy { grid-area: copy; }
+}
+
+body.premium-ui .message-body .rich-heading {
+  margin: 14px 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--p-ink);
+}
+
+body.premium-ui .message-body .rich-heading:first-child {
+  margin-top: 0;
+}

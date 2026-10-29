@@ -5,9 +5,9 @@
  * and tabs that scroll sideways instead of wrapping.
  */
 
-import * as ui from "./ui.js?v=16";
-import { onSocialChange, social, socialState, syncSocial } from "./social.js?v=16";
-import { AVATAR_PATTERNS, avatarSeed, decorateAvatar } from "./avatars.js?v=16";
+import * as ui from "./ui.js?v=17";
+import { onSocialChange, social, socialState, syncSocial } from "./social.js?v=17";
+import { AVATAR_PATTERNS, avatarSeed, decorateAvatar } from "./avatars.js?v=17";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -82,6 +82,8 @@ function renderAvatarPicker(body, data) {
       try {
         await social.setAvatar(seed);
         ui.showToast("Avatar saved for your classmates.", "success");
+        // Keep the header and Settings in step with the shared choice.
+        window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
         await syncSocial();
       } catch (error) {
         ui.showToast(error.message, "error");

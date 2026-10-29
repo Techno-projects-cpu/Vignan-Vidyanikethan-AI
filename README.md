@@ -255,6 +255,31 @@ curl -s http://localhost:4173/api/health?social=1 | python3 -m json.tool
 
 Legacy `/study-ai/api/health`, `/study-ai/api/ai`, `/study-ai/api/search`, `/study-ai/api/auth/*`, `/study-ai/api/leaderboard` and `/study-ai/api/progress` aliases are still accepted for older bookmarks, but the PWA now lives at the site root.
 
+### Study sheets and today's revision
+
+Two academic helpers sit on top of the pages you already have. Neither one
+calls a model, so neither can invent a fact.
+
+**Cited study sheets.** Ask for revision instead of an explanation — *"key terms
+of chapter 3"*, *"formula sheet for motion"*, *"important dates in Indian
+history"* — and the answer becomes a sheet built only from the matched book
+pages: key terms with their definitions, formulas and relations, and years,
+each with its page number. The sheet is offered as Markdown so it can be copied
+into a notebook. When the pages contain no definitions, formulas or dates the
+sheet says so rather than filling the gap.
+
+**Today's revision.** The Progress screen shows at most three short steps,
+chosen from real data on the device: flashcards that spaced repetition says are
+due, the topic with the weakest quiz average, and a keep-warm quiz only when
+nothing is due. Each step shows its reason and an estimated number of minutes,
+and the plan can be copied as plain text. With no history at all it suggests one
+first step instead of an empty panel.
+
+Pure modules, so both are unit-tested without a browser:
+
+- `js/study-sheet.js` — `asksForStudySheet`, `studySheetTopic`, `buildStudySheet`, `studySheetMarkdown`
+- `js/revision-plan.js` — `buildRevisionPlan`, `revisionPlanText`
+
 ### Ollama, fully offline
 
 ```bash

@@ -58,6 +58,16 @@ export function renderRichText(container, text, options = {}) {
       container.appendChild(element("div", "rich-gap"));
       continue;
     }
+    // Model answers and study sheets use "## Heading"; show real headings
+    // instead of printing the hash marks.
+    const heading = line.match(/^(#{1,4})\s+(.+)$/);
+    if (heading) {
+      list = null;
+      const node = element(`h${Math.min(5, heading[1].length + 2)}`, "rich-heading");
+      appendInline(node, heading[2], options);
+      container.appendChild(node);
+      continue;
+    }
     if (/^[-*]\s+/.test(line)) {
       if (!list) {
         list = element("ul", "rich-list");

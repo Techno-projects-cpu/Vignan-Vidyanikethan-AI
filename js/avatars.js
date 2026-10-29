@@ -73,3 +73,42 @@ export function decorateAvatar(node, { name = "", seed = "", online = false } = 
   node.setAttribute("aria-hidden", "true");
   return node;
 }
+
+/**
+ * Build the eight tap-targets.
+ *
+ * Kept here so the same control works in Friends (where a choice is shared with
+ * classmates) and in Settings (where it also works for guests, with no account).
+ * Returns the container so the caller can place it wherever it belongs.
+ */
+export function renderAvatarSwatches({ name = "", seed = "", label = "Choose your avatar", onPick = null, id = "" } = {}) {
+  const doc = globalThis.document;
+  const wrap = doc.createElement("div");
+  wrap.className = "avatar-swatches";
+  if (id) wrap.id = id;
+  wrap.setAttribute("role", "group");
+  wrap.setAttribute("aria-label", label);
+  const current = String(seed || "");
+  AVATAR_PATTERNS.forEach((pattern, index) => {
+    const value = avatarSeed(index);
+    const swatch = doc.createElement("button");
+    swatch.type = "button";
+    swatch.className = "avatar-swatch";
+    swatch.dataset.seed = value;
+    decorateAvatar(swatch, { name, seed: value });
+    swatch.setAttribute("aria-label", `${pattern} avatar`);
+    swatch.setAttribute("aria-pressed", String(current === value));
+    if (current === value) swatch.classList.add("active");
+    swatch.addEventListener("click", async () => {
+      if (swatch.disabled) return;
+      for (const node of wrap.querySelectorAll("button")) node.disabled = true;
+      try {
+        await onPick?.(value);
+      } finally {
+        for (const node of wrap.querySelectorAll("button")) node.disabled = false;
+      }
+    });
+    wrap.appendChild(swatch);
+  });
+  return wrap;
+}

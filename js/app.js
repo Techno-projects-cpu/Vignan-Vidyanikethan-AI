@@ -6,17 +6,20 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=16";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=16";
-import { ingestPdf, ingestText } from "./ingest.js?v=16";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=16";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=16";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=16";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=16";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=16";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=16";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=16";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=16";
+import * as db from "./db.js?v=17";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=17";
+import { ingestPdf, ingestText } from "./ingest.js?v=17";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=17";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=17";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=17";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=17";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=17";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=17";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=17";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=17";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=17";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=17";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=17";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -24,8 +27,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=16";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=16";
+} from "./llm.js?v=17";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=17";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -37,9 +40,9 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=16";
-import { TASKS } from "./model-router.js?v=16";
-import { PROVIDERS, providerList } from "./providers.js?v=16";
+} from "./local-ai.js?v=17";
+import { TASKS } from "./model-router.js?v=17";
+import { PROVIDERS, providerList } from "./providers.js?v=17";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -48,30 +51,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=16";
-import { parseApiKeys } from "./key-pool.js?v=16";
+} from "./settings.js?v=17";
+import { parseApiKeys } from "./key-pool.js?v=17";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=16";
+} from "./student-keys.js?v=17";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=16";
+} from "./quiz.js?v=17";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=16";
+} from "./flashcards.js?v=17";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=16";
+} from "./study-decks.js?v=17";
 import {
   accuracy,
   currentStreak,
@@ -82,14 +85,14 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=16";
-import { externalSearchUrl, searchWeb } from "./web.js?v=16";
-import { openEditStudio } from "./edit-studio.js?v=16";
-import { openReader } from "./reader.js?v=16";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=16";
-import { languageLabel, languageGroups } from "./languages.js?v=16";
-import { clamp, downloadBlob, formatDate, truncate, uid } from "./util.js?v=16";
-import * as ui from "./ui.js?v=16";
+} from "./progress.js?v=17";
+import { externalSearchUrl, searchWeb } from "./web.js?v=17";
+import { openEditStudio } from "./edit-studio.js?v=17";
+import { openReader } from "./reader.js?v=17";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=17";
+import { languageLabel, languageGroups } from "./languages.js?v=17";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=17";
+import * as ui from "./ui.js?v=17";
 import {
   clearReferral,
   getLeaderboard,
@@ -99,8 +102,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=16";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=16";
+} from "./auth.js?v=17";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=17";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -108,12 +111,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=16";
-import { initMotion, revealVisible } from "./motion.js?v=16";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=16";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=16";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=16";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=16";
+} from "./premium-ui.js?v=17";
+import { initMotion, revealVisible } from "./motion.js?v=17";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=17";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=17";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=17";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=17";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -135,6 +138,7 @@ const SUGGESTIONS = [
   { label: "Explain photosynthesis", prompt: "Explain photosynthesis step by step", mode: "explain" },
   { label: "Quiz me on forces", prompt: "Make a quiz on forces", mode: "answer" },
   { label: "Make flashcards", prompt: "Make flashcards on photosynthesis", mode: "answer" },
+  { label: "Key terms sheet", prompt: "Make a study sheet of the key terms and formulas in this chapter", mode: "answer" },
 ];
 
 const state = {
@@ -345,10 +349,25 @@ function updateOfflineChip() {
   if (label) label.textContent = online ? t("app.online") : t("app.offline");
 }
 
+/** The avatar pinned on the student account, if Friends has loaded it. */
+function socialSeed() {
+  const seed = String(socialState()?.data?.self?.avatarSeed || globalThis.__vignanSocialSeed || "");
+  return /^p[0-7]$/.test(seed) ? seed : "";
+}
+
 function updateStatus() {
   $("#engine-label").textContent = engineLabel(state.settings);
   const displayName = state.account?.username || state.settings.profile || "Student";
-  $("#profile-initial").textContent = String(displayName).trim().charAt(0).toUpperCase() || "S";
+  const seed = socialSeed() || state.settings.avatar || "";
+  const initial = $("#profile-initial");
+  if (initial) {
+    initial.textContent = avatarInitials(displayName);
+    decorateAvatar(initial, { name: displayName, seed });
+  }
+  const chip = $("#profile-button");
+  if (chip) chip.dataset.avatar = initial?.dataset.avatar || "";
+  const preview = $("#settings-avatar-preview");
+  if (preview) decorateAvatar(preview, { name: displayName, seed });
   const accountChip = $("#account-chip");
   const accountName = $("#account-name");
   if (accountChip) {
@@ -970,6 +989,24 @@ async function handleAsk(event) {
       const bookIds = scopeIds("#ask-book-scope");
       const retrieval = retrievePreferBooks(effectiveQuery, state.indexes, { topK: 5, bookIds });
       hits = retrieval.hits;
+      // "Key terms of chapter 3" is a revision request, not a question: build a
+      // cited sheet from the matched pages instead of asking a model to guess.
+      if (hits.length && asksForStudySheet(effectiveQuery)) {
+        const topic = studySheetTopic(effectiveQuery) || (hits[0]?.section || hits[0]?.title || "");
+        const sheet = buildStudySheet(hits, { topic });
+        if (!sheet.empty) {
+          answer = {
+            text: studySheetMarkdown(sheet),
+            sources: sourcesFromHits(hits),
+            webSources: [], flashcards: [], grounded: true,
+            confidence: retrieval.confidence,
+            meta: "Bolt · cited study sheet",
+            verification: { enabled: false },
+            studySheet: sheet,
+          };
+        }
+      }
+
       const webEnabled = Boolean(state.settings.webEnabled);
       let webResults = [];
       let searchProvider = "Web search";
@@ -989,7 +1026,9 @@ async function handleAsk(event) {
 
       let modelError = null;
       const connected = state.settings.routing.answer !== "offline";
-      if (hits.length && connected) {
+      // A ready study sheet is already grounded in the book; a model must not
+      // replace it with prose that could drift from the pages.
+      if (!answer && hits.length && connected) {
         try {
           const model = await answerWithModel({
             query,
@@ -2377,7 +2416,71 @@ async function deleteActiveDeck() {
 
 /* --------------------------------------------------------------- progress */
 
+/**
+ * "Today's revision": up to three cited, actionable steps built from cards that
+ * are due and topics that were weak in real quiz results. Nothing invented.
+ */
+function renderRevisionPlan() {
+  const host = $("#revision-plan");
+  if (!host) return;
+  const decks = normalizeDeckCollection(state.studyDecks).decks;
+  const today = localDay();
+  const dueDeck = decks
+    .map((deck) => ({ deck, count: dueCards(deck.cards, deck.progress, today).length }))
+    .filter((entry) => entry.count > 0)
+    .sort((a, b) => b.count - a.count)[0];
+  const plan = buildRevisionPlan({
+    mastery: topicMastery(state.results),
+    dueCards: decks.reduce((sum, deck) => sum + dueCards(deck.cards, deck.progress, today).length, 0),
+    totalCards: decks.reduce((sum, deck) => sum + deck.cards.length, 0),
+    history: state.results,
+    streak: currentStreak(state.studyProgress),
+    today,
+  });
+  host.replaceChildren();
+  for (const step of plan.steps) {
+    const row = ui.element("div", "revision-step");
+    row.appendChild(ui.element("span", "revision-step-time", `${step.minutes} min`));
+    const copy = ui.element("div", "revision-step-copy");
+    copy.appendChild(ui.element("strong", "", step.title));
+    copy.appendChild(ui.element("small", "", step.detail));
+    row.appendChild(copy);
+    const go = ui.element("button", "button ghost small", "Start");
+    go.type = "button";
+    go.addEventListener("click", () => {
+      if (step.action === "review-cards" && dueDeck) openSavedDeck(dueDeck.deck.id);
+      else if (step.action === "quiz-topic") {
+        setView("quiz");
+        const topic = $("#quiz-topic");
+        if (topic) {
+          topic.value = step.topic || "";
+          requestAnimationFrame(() => topic.focus({ preventScroll: false }));
+        }
+      } else if (step.action === "quiz-mixed") setView("quiz");
+      else setView("library");
+    });
+    row.appendChild(go);
+    host.appendChild(row);
+  }
+  const total = $("#revision-plan-total");
+  if (total) total.textContent = plan.steps.length ? `${plan.headline} About ${plan.minutes} minutes in total.` : plan.headline;
+  const copyButton = $("#revision-plan-copy");
+  if (copyButton && !copyButton.dataset.wired) {
+    copyButton.dataset.wired = "1";
+    copyButton.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(revisionPlanText(state.revisionPlan || plan));
+        ui.showToast("Revision plan copied.", "success");
+      } catch {
+        ui.showToast("Copy is blocked in this browser.", "warning");
+      }
+    });
+  }
+  state.revisionPlan = plan;
+}
+
 function renderStudyNext() {
+  renderRevisionPlan();
   const step = nextStudyStep(state.studyDecks, state.results);
   const copy = $("#study-next-copy");
   const action = $("#study-next-action");
@@ -2914,10 +3017,44 @@ async function handleLanguageChange() {
 }
 
 function renderAppearanceSettings() {
+  renderAvatarSettings();
   renderLanguageOptions();
   $("#settings-language").value = state.settings.language;
   $("#settings-theme").value = state.settings.theme;
   $("#settings-profile").value = state.settings.profile;
+}
+
+/** Eight swatches in Settings, so the avatar is visible without opening Friends. */
+function renderAvatarSettings() {
+  const host = $("#settings-avatar-swatches");
+  if (!host) return;
+  const name = state.account?.username || state.settings.profile || "Student";
+  host.replaceChildren(
+    renderAvatarSwatches({
+      name,
+      seed: state.settings.avatar || socialSeed(),
+      id: "settings-avatar-options",
+      label: "Choose your avatar",
+      onPick: async (seed) => {
+        state.settings.avatar = seed;
+        await saveSettings();
+        updateStatus();
+        renderAvatarSettings();
+        ui.showToast("Avatar saved.", "success");
+        // Signed-in students also update the avatar their classmates see.
+        if (state.account) {
+          try {
+            const { social } = await import("./social.js?v=17");
+            await social.setAvatar(seed);
+            globalThis.__vignanSocialSeed = seed;
+            window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
+          } catch {
+            // Local choice still applies; the shared one can be retried in Friends.
+          }
+        }
+      },
+    }),
+  );
 }
 
 async function renderStorageSummary() {
@@ -3486,6 +3623,19 @@ function bindEvents() {
   $("#student-key-test").addEventListener("click", testStudentKeys);
   $("#web-save").addEventListener("click", saveWebSettings);
   $("#appearance-save").addEventListener("click", saveAppearance);
+  // The Friends picker saves to the account; mirror it locally so the header,
+  // Settings and offline use all agree.
+  window.addEventListener("vignan:avatar", (event) => {
+    const seed = String(event.detail?.seed || "");
+    if (!/^p[0-7]$/.test(seed) || state.settings.avatar === seed) return;
+    state.settings.avatar = seed;
+    saveSettings()
+      .then(() => {
+        updateStatus();
+        renderAvatarSettings();
+      })
+      .catch(() => {});
+  });
   $("#settings-language").addEventListener("change", handleLanguageChange);
   $("#export-data").addEventListener("click", exportData);
   $("#clear-chat-data").addEventListener("click", async () => {

@@ -10,8 +10,8 @@
  * URLs here.
  */
 
-import { parseSearchResults } from "../js/web.js?v=16";
-import { wikipediaLanguage } from "../js/languages.js?v=16";
+import { parseSearchResults } from "../js/web.js?v=17";
+import { wikipediaLanguage } from "../js/languages.js?v=17";
 
 const MAX_SEARCH_BYTES = 1024 * 1024;
 const USER_AGENT =
