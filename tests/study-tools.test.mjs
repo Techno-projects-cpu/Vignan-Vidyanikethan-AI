@@ -129,6 +129,11 @@ test("the app wires both features into real screens, not just modules", async ()
   // Sheet headings must render as headings, never as literal "#" marks.
   const uiSource = readFileSync(`${root}/js/ui.js`, "utf8");
   assert.match(uiSource, /rich-heading/);
+  // The sheet survives onto the saved message and can leave the app as a file.
+  assert.match(app, /studySheet: answer\.studySheet/);
+  assert.match(app, /studySheet: message\.studySheet && !message\.studySheet\.empty/);
+  assert.match(app, /"Save sheet"/);
+  assert.match(app, /studySheetMarkdown\(message\.studySheet\)/);
   // Both modules are available offline.
   assert.match(sw, /\.\/js\/study-sheet\.js\?v=17/);
   assert.match(sw, /\.\/js\/revision-plan\.js\?v=17/);

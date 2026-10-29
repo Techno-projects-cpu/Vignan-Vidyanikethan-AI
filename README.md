@@ -264,8 +264,8 @@ calls a model, so neither can invent a fact.
 of chapter 3"*, *"formula sheet for motion"*, *"important dates in Indian
 history"* — and the answer becomes a sheet built only from the matched book
 pages: key terms with their definitions, formulas and relations, and years,
-each with its page number. The sheet is offered as Markdown so it can be copied
-into a notebook. When the pages contain no definitions, formulas or dates the
+each with its page number. The sheet can be copied with its citations or saved
+as a `.md` file so it can be printed or pasted into a notebook. When the pages contain no definitions, formulas or dates the
 sheet says so rather than filling the gap.
 
 **Today's revision.** The Progress screen shows at most three short steps,

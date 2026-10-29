@@ -726,6 +726,7 @@ function addMessage(message, { persist = true } = {}) {
     confidence: message.confidence || 0,
     verification: message.verification || null,
     flashcards: message.flashcards || [],
+    studySheet: message.studySheet && !message.studySheet.empty ? message.studySheet : null,
   };
   state.messages.push(full);
   if (persist) db.addMessage(full).catch(() => {});
@@ -813,6 +814,19 @@ function renderChat() {
         copy.type = "button";
         copy.addEventListener("click", () => copyText(formatAnswerForCopy(message), "Answer and citations copied."));
         actions.appendChild(copy);
+        // A study sheet is a revision handout: let it leave the app as a file so
+        // it can be printed or pasted into a notebook.
+        if (message.studySheet && !message.studySheet.empty) {
+          const save = ui.element("button", "message-action", "Save sheet");
+          save.type = "button";
+          save.setAttribute("aria-label", "Save this study sheet as a Markdown file");
+          save.addEventListener("click", () => {
+            const name = (message.studySheet.topic || "study-sheet").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "study-sheet";
+            downloadBlob(new Blob([studySheetMarkdown(message.studySheet)], { type: "text/markdown;charset=utf-8" }), `${name}.md`);
+            ui.showToast("Study sheet saved.", "success");
+          });
+          actions.appendChild(save);
+        }
         if (message.sources?.length) {
           const question = lastQuestion;
           const ids = [...new Set(message.sources.map((source) => source.bookId).filter(Boolean))];
@@ -1119,6 +1133,7 @@ async function handleAsk(event) {
       role: "assistant", content: answer.text, sources: answer.sources,
       webSources: answer.webSources, meta: answer.meta, confidence: answer.confidence,
       verification: answer.verification, flashcards: answer.flashcards,
+      studySheet: answer.studySheet,
     });
     renderSources(answer);
     if (answer.flashcards?.length) {
