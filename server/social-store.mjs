@@ -497,7 +497,16 @@ export function createSupabaseSocialStore({ url, serviceRoleKey, fetchImpl = fet
         method: "POST",
         query: "?on_conflict=user_id",
         prefer: "resolution=merge-duplicates,return=representation",
-        body: [profile],
+        // Postgres columns are typed; send exactly those types so an account's
+        // numeric avatar seed cannot upset the text column.
+        body: [{
+          user_id: profile.user_id,
+          username: profile.username,
+          avatar_seed: String(profile.avatar_seed ?? ""),
+          xp: Number(profile.xp) || 0,
+          streak: Number(profile.streak) || 0,
+          last_seen: profile.last_seen || new Date().toISOString(),
+        }],
       });
       return profileFrom(Array.isArray(rows) ? rows[0] : rows);
     },

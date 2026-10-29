@@ -169,3 +169,20 @@ test("a healthy call still answers 200", async () => {
   assert.equal(sent[0].status, 200);
   assert.deepEqual(sent[0].payload.friends, []);
 });
+
+test("the Supabase profile upsert sends column types Postgres accepts", async () => {
+  let posted = null;
+  const store = createSupabaseSocialStore({
+    url: "https://example.supabase.co",
+    serviceRoleKey: "service-role-placeholder-key",
+    fetchImpl: async (target, options = {}) => {
+      if (options.method === "POST") posted = JSON.parse(options.body);
+      return jsonResponse([{ user_id: "u1", username: "asha", avatar_seed: "8", xp: 1, streak: 1, last_seen: new Date().toISOString() }], 201);
+    },
+  });
+  await store.upsertProfile({ user_id: "u1", username: "asha", avatar_seed: 821791952, xp: "12", streak: 3, last_seen: "2026-10-29T00:00:00.000Z" });
+  assert.equal(typeof posted[0].avatar_seed, "string", "numeric avatar seed becomes text");
+  assert.equal(posted[0].xp, 12, "xp is a number");
+  assert.equal(posted[0].streak, 3);
+  assert.equal(posted[0].user_id, "u1");
+});
