@@ -55,6 +55,10 @@ Put the **publishable** key in `SUPABASE_ANON_KEY` and the **secret** key in `SU
 
 If `/api/health` reports `"accounts": "unavailable"`, read `accountsConfig.missing` — it names the variable that is wrong or empty (never the value) — or the Render log, which prints the same list.
 
+Run `npm run secrets` before every push, or `npm run check`, which includes it. The scanner knows the shape of Supabase, Google, OpenAI, GitHub, Slack, Cloudflare and AWS credentials, refuses to print the value it found, and exits non-zero if anything looks live. A key that reaches Git is a key that must be revoked, not deleted: the history keeps it, and this repository is public.
+
+**If a key is ever pasted into a chat, an issue or a screenshot,** treat it as compromised even when nothing was committed. Revoke it in the provider's dashboard, create a replacement, update Render, redeploy, and confirm `/api/health` still reports `"accounts": "supabase"`. Rotating takes about two minutes and costs nothing.
+
 If a legacy service-role key was exposed, move both Render variables to the new keys, redeploy and verify registration, login and `/api/leaderboard`. Then disable legacy API keys in Supabase **only after** checking that no other application still uses them. This is a project-wide change and can interrupt other clients. Never publish either secret.
 
 The app creates student accounts through Supabase's **admin** API. For a dedicated project, consider disabling direct public Supabase signups (while leaving the email provider enabled) so students cannot bypass server-side validation. This setting affects every application using the project. After changing it, verify website registration and login before relying on it. The guardian-permission checkbox is self-attestation, not verified parental consent.

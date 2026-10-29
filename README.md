@@ -579,13 +579,21 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-307 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
+309 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 
 ```bash
 npm run check
 ```
+
+`npm run check` runs, in order: the secret scanner, the precache generator, the
+tests and the offline simulation. `npm run secrets` runs the scanner alone — it
+reads every tracked file, recognises the shape of Supabase, Google, OpenAI,
+GitHub, Slack, Cloudflare and AWS credentials, prints only a truncated hint
+(`sb_secre…Bv3e`) so a report can be shared safely, and exits non-zero if
+anything looks live. A key that reaches a public repository must be revoked, not
+deleted, because the history keeps it.
 
 A separate DOM smoke run (jsdom + fake IndexedDB) was used during development to verify first launch, adding notes, asking a question, generating a quiz, viewing results and opening the performance-card modal. Those harness dependencies are intentionally not added to this zero-dependency repository.
 

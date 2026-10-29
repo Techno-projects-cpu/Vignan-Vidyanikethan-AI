@@ -227,3 +227,40 @@ test("the device checklist covers every area before a demo", () => {
   assert.match(checklist, /aeroplane mode/);
   assert.match(checklist, /Later\*\* hides the banner/);
 });
+
+test("the security page explains how the project's own keys are kept", () => {
+  const page = read("/security.html");
+  assert.match(page, /How the project's own keys are kept/);
+  assert.match(page, /fails the build if one appears/);
+  assert.match(page, /treated as burned/);
+});
+
+test("the secret scanner is wired in and catches a real-shape key", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const fsmod = await import("node:fs/promises");
+  const pathmod = await import("node:path");
+  const root = pathmod.resolve(new URL("..", import.meta.url).pathname);
+  const scripts = JSON.parse(await fsmod.readFile(pathmod.join(root, "package.json"), "utf8")).scripts;
+  assert.match(scripts.check, /scan-secrets/);
+  assert.equal(scripts.secrets, "node tools/scan-secrets.mjs");
+
+  // A file that looks like a live key must fail the scan, and the report must
+  // not repeat the secret it found.
+  const probe = ".secret-probe.test.tmp";
+  // Assembled at run time so this fixture never trips the scanner itself.
+  const fake = ["sb", "secret", "AbCdEfGhIjKlMnOpQrStUvWxYz012345"].join("_");
+  await fsmod.writeFile(pathmod.join(root, probe), `KEY=${fake}\n`);
+  try {
+    assert.throws(
+      () => execFileSync(process.execPath, ["tools/scan-secrets.mjs", "--all"], { cwd: root, encoding: "utf8", stdio: "pipe" }),
+      (error) => {
+        const report = `${error.stderr || ""}`;
+        assert.match(report, /Supabase secret key/);
+        assert.doesNotMatch(report, new RegExp(fake), "the report must not echo the secret");
+        return true;
+      },
+    );
+  } finally {
+    await fsmod.rm(pathmod.join(root, probe), { force: true });
+  }
+});
