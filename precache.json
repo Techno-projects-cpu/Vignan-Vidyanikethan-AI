@@ -1,6 +1,6 @@
 {
   "version": 18,
-  "generatedAt": "2026-10-29T03:01:27.228Z",
+  "generatedAt": "2026-10-29T03:10:36.796Z",
   "urls": [
     "./",
     "./index.html",
@@ -80,12 +80,14 @@
     "./js/util.js",
     "./js/vector.js",
     "./js/web.js",
+    "./judge.html",
     "./manifest.webmanifest",
     "./privacy.html",
     "./robots.txt",
     "./security.html",
     "./sitemap.xml",
     "./styles-identity.css",
+    "./styles-judge.css",
     "./styles-legal.css",
     "./styles-premium.css",
     "./styles-pro.css",

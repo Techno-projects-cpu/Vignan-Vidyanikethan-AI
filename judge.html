@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="Judge mode: what Vignan Vidyanikethan AI is, how to test its citations and its offline proof in sixty seconds, and what it honestly cannot do.">
+  <title>Judge mode — Vignan AI</title>
+  <link rel="canonical" href="https://vignanvidyanikethanai.onrender.com/judge.html">
+  <link rel="icon" href="./icons/icon.svg?v=18" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-48.png?v=18" type="image/png" sizes="48x48">
+  <link rel="stylesheet" href="./styles-legal.css?v=18">
+  <link rel="stylesheet" href="./styles-judge.css?v=18">
+</head>
+<body>
+  <a class="skip" href="#content">Skip to judge mode</a>
+  <header class="legal-header"><a class="wordmark" href="./">VIGNAN <span>/ AI</span></a><a href="./">Open the study space ↗</a></header>
+  <main id="content" class="judge-main">
+    <div class="judge-hero">
+      <p class="eyebrow">FOR JUDGES / 00</p>
+      <h1>Judge<br><span>mode.</span></h1>
+      <p class="lede">This page exists so you can check the claims instead of taking them on trust. Sixty seconds, two tests, no account needed.</p>
+      <p>Vignan Vidyanikethan AI is a study workspace built by a student of Vignan Vidyanikethan English Medium High School for INSPIRE-MANAK. It is not a new model trained from scratch. It orchestrates AI services that already exist, and it refuses to let them answer without evidence.</p>
+      <div class="judge-facts" role="list">
+        <div role="listitem"><strong>305</strong><span>automated tests</span></div>
+        <div role="listitem"><strong>282</strong><span>files precached</span></div>
+        <div role="listitem"><strong>33</strong><span>languages</span></div>
+        <div role="listitem"><strong>0</strong><span>console errors</span></div>
+        <div role="listitem"><strong>₹0</strong><span>running cost</span></div>
+      </div>
+    </div>
+
+    <section class="judge-section">
+      <h2>01 / What it is — and what it is not</h2>
+      <p>Every school AI project this year will be "an AI that answers questions". The interesting question is why anyone should believe the answer. This project's answer is a constraint: <strong>the AI may only answer from pages the student actually has</strong>, and every sentence it claims to be sourced must carry a book, chapter and page. When the saved pages cannot support a question, the app says so and offers a different route rather than inventing one.</p>
+      <p>Built on free tiers only: Render for hosting, GitHub for the code, Supabase for accounts, and the student's own free AI keys. No paid dependency, no shared key, no advertising, no analytics.</p>
+    </section>
+
+    <section class="judge-section">
+      <h2>02 / Test one: the citation</h2>
+      <p>This is the claim that matters most, so test it first, in about twenty seconds.</p>
+      <ol class="steps">
+        <li><b>Add a page you can open by hand</b><span>Use <em>Add book</em> with a PDF, a photo of a page, or a few paragraphs of text. Any page works — even one you typed yourself for this test.</span></li>
+        <li><b>Ask something that is only in that page</b><span>Pick a sentence with a number, a date or a term in it, and ask about that.</span></li>
+        <li><b>Read the citation under the answer</b><span>It names the file and the page number, and quotes the sentence it used.</span></li>
+        <li><b>Open the page and check it</b><span>The quoted sentence should be there, on that page. If it is not, that is a bug and we want to hear about it.</span></li>
+      </ol>
+      <p class="say">"It won't answer from nothing. If the book doesn't cover it, it says so — and only then does it offer a labelled web search instead."</p>
+    </section>
+
+    <section class="judge-section">
+      <h2>03 / Test two: pull the plug</h2>
+      <p>Science fairs have unreliable Wi-Fi. A tool that fails at the moment of demonstration was never really working. This app is designed to survive that, and the survival is verified by a simulator that runs the real service worker with the network switched off.</p>
+      <pre class="term">$ npm run offline:check
+
+<b>Release v18</b>
+Cached after install: 358 files in vignan-vidyanikethan-ai-v18
+every core file ................ ok 200
+every release module ........... ok 200
+navigation fallback ............ ok
+uncached file while offline .... 503, with a clear message (correct)
+manifest files missing ......... 0
+
+<b>OFFLINE CHECK PASSED</b></pre>
+      <p>To repeat it by hand: load the app once, open <em>Settings → App, updates &amp; offline</em>, and press <em>Check offline readiness</em>. Then turn the phone to aeroplane mode and reload. Cited answers from your saved pages, study sheets, the revision plan, quizzes, flashcards, evaluation and Pro Mode all keep working. Web fallback, friends and the live leaderboard honestly say they need a connection.</p>
+      <p class="say">"The offline version isn't a claim in the video — it's a test that fails the build if any file is missing from the cache. It already caught two."</p>
+    </section>
+
+    <section class="judge-section">
+      <h2>04 / Updates ask first</h2>
+      <p>A new version never replaces itself mid-lesson. It installs, then waits. A banner offers <em>Update now</em> or <em>Later</em>, and nothing is uploaded either way — books, decks and chats stay in the browser.</p>
+      <p class="say">"You can see the banner, the release number and the offline readiness in Settings. The student stays in control of the tool."</p>
+    </section>
+
+    <section class="judge-section">
+      <h2>05 / Questions a judge usually asks</h2>
+      <dl class="qa">
+        <div><dt>Isn't this just a wrapper around ChatGPT?</dt><dd>Wrapper is fair, if it stops there. The work is the constraint layer: a page-level retrieval index that runs in the browser, an answer path that is refused when evidence is thin, a citation that has to name a page, an offline fallback that degrades in a defined order, and a local model option so it can run with no cloud at all. Plenty of wrappers answer anything; this one declines when it cannot show its working.</dd></div>
+        <div><dt>Why not train your own model?</dt><dd>Because a school project cannot train a model that beats the ones already available, and pretending otherwise would waste the effort. The scarce thing here is not another model — it is a trustworthy study loop around the models that exist.</dd></div>
+        <div><dt>What if the provider is down or the key runs out?</dt><dd>Keys rotate automatically, a rate-limited key is retired for a minute, and the app falls back through several providers. If every key fails, the answer comes from the student's own pages instead of failing outright.</dd></div>
+        <div><dt>Is student data being sold or trained on?</dt><dd>There is no analytics, no advertising identifier and no data broker. Books, chats and results stay in the browser; only the text needed for one answer is sent to the provider that writes it. The details are in the privacy policy, written in plain language.</dd></div>
+        <div><dt>What stops it from making up a page number?</dt><dd>Two things: the answer refuses the built-in fallback when retrieval found evidence, and the citation shown is assembled from the retrieved chunk itself, not from the model's sentence. That is also why we ask you to open the page and check.</dd></div>
+      </dl>
+    </section>
+
+    <section class="judge-section">
+      <h2>06 / Honest limitations</h2>
+      <ul class="limits">
+        <li><b>No textbook is bundled</b>The publisher's permission has not been granted, so the app ships empty and the student adds their own pages. That is a copyright decision, not a technical gap.</li>
+        <li><b>Free hosting sleeps</b>After a quiet period the Render service takes about half a minute to wake. During the demo, load the page once before you start.</li>
+        <li><b>The local model is optional and heavy</b>Running a model in the browser needs a capable device and a large one-time download. It exists so the app can work with no cloud, not as the default.</li>
+        <li><b>Offline means your own pages</b>With the network off, answers come from saved material. It is a study fallback, not a search engine in your pocket.</li>
+        <li><b>One student, no audit</b>There has been no professional security audit. The protections in place, and what is deliberately not collected, are listed on the security page.</li>
+      </ul>
+      <div class="judge-links">
+        <a href="./">Open the app ↗</a>
+        <a href="./security.html">Security ↗</a>
+        <a href="./privacy.html">Privacy ↗</a>
+        <a href="./copyright.html">Copyright ↗</a>
+      </div>
+    </section>
+  </main>
+  <footer class="legal-footer"><div><strong>BUILT BY A STUDENT</strong><p>Vignan Vidyanikethan English Medium High School<br>INSPIRE-MANAK science fair</p></div><nav aria-label="Legal and project links"><a href="./privacy.html">Privacy policy ↗</a><a href="./terms.html">Terms of use ↗</a><a href="./security.html">Security ↗</a><a href="./copyright.html">Copyright ↗</a><a href="https://zero-vast.vercel.app/" target="_blank" rel="noopener noreferrer">Zero Vast ↗</a></nav></footer>
+</body>
+</html>

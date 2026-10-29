@@ -361,7 +361,7 @@ npm run offline:check
 
 ```
 Release v18
-Cached after install: 355 files in vignan-vidyanikethan-ai-v18
+Cached after install: 358 files in vignan-vidyanikethan-ai-v18
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
@@ -395,9 +395,19 @@ new module is missing from the cache — this is exactly how `updates.js` and
 | `terms.html` | acceptable use, accounts, limits of a student project |
 | `security.html` | protections in place, what is deliberately not collected, limits, private disclosure, DPDP Act 2023 rights |
 | `copyright.html` | no textbook is bundled or hosted, how quotations are used, takedown route |
+| `judge.html` | **Judge mode** — what this is and is not, two tests a judge can run in a minute, the FAQ, and the honest limitations |
 | `SECURITY.md` | the same policy in repository form, for GitHub |
 | `.well-known/security.txt` | machine-readable contact, policy and expiry |
 | `robots.txt`, `sitemap.xml` | crawling rules and the public pages |
+
+Judge mode is linked from the app footer, every legal page and the sitemap, so
+it is one tap away when someone is standing at the table: the citation test, the
+offline test, the questions judges ask and the limits are all on one page.
+
+`CHECKLIST.md` is the other half of that: a printable pass/fail sheet for a real
+phone, tablet and laptop, covering first impression, citations, the study loop,
+social, permissioned updates, aeroplane-mode offline and polish. The automated
+suite proves the code runs; only a human can see that a screen looks right.
 
 Server-side hardening in `serve.mjs`: HTTPS-only HSTS, a strict CSP (no inline
 scripts, no outside scripts, `object-src 'none'`), `nosniff`,
@@ -569,7 +579,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-302 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
+305 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 

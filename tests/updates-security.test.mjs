@@ -191,3 +191,39 @@ test("the settings card says what works offline and what needs a connection", ()
   assert.match(index, /Needs a connection/);
   assert.match(index, /study sheets, revision plan, quizzes, flashcards/);
 });
+
+test("judge mode is a real page, linked from the app and the legal footers", () => {
+  const judge = read("/judge.html");
+  assert.match(judge, /Judge mode/);
+  assert.match(judge, /OFFLINE CHECK PASSED/);
+  assert.match(judge, /Honest limitations/);
+  assert.match(judge, /rel="stylesheet" href="\.\/styles-judge\.css/);
+  for (const page of ["/index.html", "/privacy.html", "/terms.html", "/security.html", "/copyright.html"]) {
+    assert.match(read(page), /judge\.html/, `${page} should link to judge mode`);
+  }
+  assert.match(read("/sitemap.xml"), /judge\.html/);
+});
+
+test("judge mode stays grayscale and does not overclaim", () => {
+  const css = read("/styles-judge.css");
+  const colours = css.match(/#[0-9a-fA-F]{3,8}\b/g) || [];
+  for (const colour of colours) {
+    const hex = colour.slice(1);
+    const full = hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex.slice(0, 6);
+    assert.equal(full.slice(0, 2).toLowerCase(), full.slice(2, 4).toLowerCase(), `${colour} is not grey`);
+    assert.equal(full.slice(2, 4).toLowerCase(), full.slice(4, 6).toLowerCase(), `${colour} is not grey`);
+  }
+  const judge = read("/judge.html");
+  assert.match(judge, /No textbook is bundled/);
+  assert.match(judge, /no professional security audit/);
+  assert.doesNotMatch(judge, /guarantee|100% accurate|unhackable/i);
+});
+
+test("the device checklist covers every area before a demo", () => {
+  const checklist = read("/CHECKLIST.md");
+  for (const heading of ["First impression", "Books and citations", "Study loop", "Social and play", "Updates ask permission", "Offline", "Polish and trust"]) {
+    assert.match(checklist, new RegExp(heading));
+  }
+  assert.match(checklist, /aeroplane mode/);
+  assert.match(checklist, /Later\*\* hides the banner/);
+});
