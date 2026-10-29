@@ -6,31 +6,31 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=36";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=36";
-import { ingestPdf, ingestText } from "./ingest.js?v=36";
-import { splitSentences } from "./text.js?v=36";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=36";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=36";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=36";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=36";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=36";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=36";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=36";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=36";
+import * as db from "./db.js?v=37";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=37";
+import { ingestPdf, ingestText } from "./ingest.js?v=37";
+import { splitSentences } from "./text.js?v=37";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=37";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=37";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=37";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=37";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=37";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=37";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=37";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=37";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=36";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=36";
+} from "./pro-mode.js?v=37";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=37";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=36";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=36";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=36";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=36";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=36";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=36";
+} from "./updates.js?v=37";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=37";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=37";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=37";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=37";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=37";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -38,8 +38,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=36";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=36";
+} from "./llm.js?v=37";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=37";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -51,7 +51,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=36";
+} from "./local-ai.js?v=37";
 import {
   EXAMS,
   MODES,
@@ -66,12 +66,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=36";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=36";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=36";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=36";
-import { TASKS } from "./model-router.js?v=36";
-import { PROVIDERS, providerList } from "./providers.js?v=36";
+} from "./exam-packs.js?v=37";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=37";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=37";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=37";
+import { TASKS } from "./model-router.js?v=37";
+import { PROVIDERS, providerList } from "./providers.js?v=37";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -80,30 +80,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=36";
-import { parseApiKeys } from "./key-pool.js?v=36";
+} from "./settings.js?v=37";
+import { parseApiKeys } from "./key-pool.js?v=37";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=36";
+} from "./student-keys.js?v=37";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=36";
+} from "./quiz.js?v=37";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=36";
+} from "./flashcards.js?v=37";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=36";
+} from "./study-decks.js?v=37";
 import {
   accuracy,
   currentStreak,
@@ -114,16 +114,16 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=36";
-import { externalSearchUrl, searchWeb } from "./web.js?v=36";
-import { openEditStudio } from "./edit-studio.js?v=36";
-import { openReader } from "./reader.js?v=36";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=36";
-import { languageLabel, languageGroups, languageMeta, languageGlyph } from "./languages.js?v=36";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=36";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=36";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=36";
-import * as ui from "./ui.js?v=36";
+} from "./progress.js?v=37";
+import { externalSearchUrl, searchWeb } from "./web.js?v=37";
+import { openEditStudio } from "./edit-studio.js?v=37";
+import { openReader } from "./reader.js?v=37";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=37";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=37";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=37";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=37";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=37";
+import * as ui from "./ui.js?v=37";
 import {
   clearReferral,
   getLeaderboard,
@@ -133,8 +133,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=36";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=36";
+} from "./auth.js?v=37";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=37";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -142,12 +142,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=36";
-import { initMotion, revealVisible } from "./motion.js?v=36";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=36";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=36";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=36";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=36";
+} from "./premium-ui.js?v=37";
+import { initMotion, revealVisible } from "./motion.js?v=37";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=37";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=37";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=37";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=37";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -4729,11 +4729,26 @@ async function setWebChoice(enabled) {
   }
 }
 
+/**
+ * The address and password fields only mean anything for a custom service.
+ *
+ * They used to be on screen permanently, which is how a student ended up looking
+ * at "Endpoint with {q} placeholder" and a URL full of braces in a Settings card
+ * they had no reason to open. A field that cannot do anything should not be
+ * visible; when it can, it explains itself in one sentence.
+ */
+function syncCustomSearchFields() {
+  const mode = $("#settings-web-mode")?.value || "server";
+  const fields = $("#web-custom-fields");
+  if (fields) fields.hidden = mode !== "custom";
+}
+
 function renderWebSettings() {
   renderWebChoice();
   $("#settings-web-mode").value = state.settings.webMode;
   $("#settings-web-endpoint").value = state.settings.searchEndpoint || "";
   $("#settings-web-token").value = state.settings.searchToken || "";
+  syncCustomSearchFields();
 }
 
 /** Build the grouped language picker from the catalogue (33 languages). */
@@ -4768,13 +4783,11 @@ function renderLanguageOptions() {
 let languageFilterText = "";
 
 /** Does a language match what was typed? Native name, English name or code. */
+// The search rule lives in languages.js so the app and the tests run the same
+// code. It used to be copied into the test, which is how "francais" stayed
+// unable to find Français for two releases.
 function matchesLanguageFilter(language, term) {
-  const needle = String(term || "").trim().toLowerCase();
-  if (!needle) return true;
-  const meta = languageMeta(language.code);
-  return [meta.native, meta.name, meta.code, language.code]
-    .filter(Boolean)
-    .some((value) => String(value).toLowerCase().includes(needle));
+  return matchesLanguageQuery(language.code, term);
 }
 
 /**
@@ -4809,14 +4822,27 @@ function renderLanguageGrid() {
       tile.setAttribute("aria-pressed", active ? "true" : "false");
       tile.dataset.language = language.code;
       tile.lang = language.code;
+      // The tile shows two scripts, so its accessible name has to spell out
+      // both; "తెలుగు" alone is not a language name to an English screen reader.
+      // Whether it is the current one is already carried by aria-pressed, which
+      // is the state a screen reader announces — no English word needed.
+      tile.setAttribute("aria-label", languageLabel(language.code));
       if (meta.dir === "rtl") tile.dir = "rtl";
       tile.title = languageLabel(language.code);
-      tile.appendChild(ui.element("span", "language-glyph", languageGlyph(meta.native)));
+      // Unique on the whole board: "EN" and "ES", not two tiles both reading "E".
+      const glyph = languageGlyphFor(language.code);
+      tile.appendChild(ui.element("span", `language-glyph${[...glyph].length > 1 ? " wide" : ""}`, glyph));
       tile.appendChild(ui.element("span", "language-name", meta.native));
       if (meta.name && meta.name !== meta.native) tile.appendChild(ui.element("span", "language-latin", meta.name));
       tile.addEventListener("click", () => {
         const select = $("#settings-language");
-        if (!select || select.value === language.code) return;
+        if (!select) return;
+        if (select.value === language.code) {
+          // Tapping the tile you already have used to do nothing at all, which
+          // reads as a broken button. Say what is already true instead.
+          ui.showToast(t("settings.languageAlready", { language: meta.native }), "info", 2200);
+          return;
+        }
         select.value = language.code;
         void handleLanguageChange();
       });
@@ -4825,20 +4851,33 @@ function renderLanguageGrid() {
     section.appendChild(tiles);
     host.appendChild(section);
   }
+  // The total comes from the catalogue, never from a number typed into a
+  // sentence: the placeholder, the counter and the empty state all agree.
+  const total = LANGUAGE_CATALOGUE.length;
   if (!shown) {
-    host.appendChild(ui.element("p", "language-empty", t("settings.languageEmpty")));
+    const empty = ui.element("div", "language-empty");
+    empty.appendChild(ui.element("p", "", t("settings.languageEmpty", { term: languageFilterText.trim(), count: total })));
+    // Telling someone to clear the box is not the same as letting them.
+    const showAll = ui.element("button", "button ghost small", t("settings.languageShowAll", { count: total }));
+    showAll.type = "button";
+    showAll.addEventListener("click", () => {
+      languageFilterText = "";
+      if ($("#language-filter")) $("#language-filter").value = "";
+      renderLanguageGrid();
+      $("#language-filter")?.focus({ preventScroll: true });
+    });
+    empty.appendChild(showAll);
+    host.appendChild(empty);
   }
   const count = $("#language-count");
   if (count) {
-    const total = languageGroups().reduce((sum, group) => sum + group.languages.length, 0);
     count.textContent = shown === total
       ? t("settings.languageCount", { count: total })
       : t("settings.languageCountFiltered", { shown, total });
   }
   const filter = $("#language-filter");
-  if (filter && filter.placeholder !== t("settings.languageFilterPlaceholder")) {
-    filter.placeholder = t("settings.languageFilterPlaceholder");
-  }
+  const placeholder = t("settings.languageFilterPlaceholder", { count: total });
+  if (filter && filter.placeholder !== placeholder) filter.placeholder = placeholder;
   const totals = $("#language-count");
   if (totals) totals.dataset.empty = shown ? "no" : "yes";
 }
@@ -4882,7 +4921,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=36");
+            const { social } = await import("./social.js?v=37");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -5494,6 +5533,7 @@ function bindEvents() {
   $("#student-key-clear").addEventListener("click", clearStudentKeys);
   $("#student-key-test").addEventListener("click", testStudentKeys);
   $("#web-save").addEventListener("click", saveWebSettings);
+  $("#settings-web-mode").addEventListener("change", syncCustomSearchFields);
   $("#appearance-save").addEventListener("click", saveAppearance);
   // The Friends picker saves to the account; mirror it locally so the header,
   // Settings and offline use all agree.

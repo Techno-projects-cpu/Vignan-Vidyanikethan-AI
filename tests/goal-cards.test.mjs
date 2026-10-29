@@ -86,7 +86,7 @@ test("a shared link fills the box, and only the box", () => {
 
 test("a card can be shared as a link and read back unchanged", () => {
   for (const card of promptCards()) {
-    const link = askLink(card, "https://example.org/app/?v=36");
+    const link = askLink(card, "https://example.org/app/?v=37");
     assert.ok(link.startsWith("https://example.org/app/?" + ASK_PARAM + "="), "query strings are not stacked");
     assert.equal(askFromUrl(link.slice(link.indexOf("?"))), card.prompt);
   }
@@ -141,7 +141,8 @@ test("the wiring, the styles and the words exist", () => {
   assert.match(app, /function applyLinkedQuestion\(/);
   assert.match(app, /function renderLanguageGrid\(/);
   assert.match(app, /applyLinkedQuestion\(\);/, "a shared link is applied on boot");
-  assert.match(app, /languageGlyph\(meta\.native\)/);
+  assert.match(app, /languageGlyphFor\(language\.code\)/, "the tile uses the board-unique glyph");
+  assert.match(app, /language-glyph\$\{\[\.\.\.glyph\]\.length > 1 \? " wide" : ""\}/, "wider glyphs are marked so they fit");
   for (const rule of [".goal-card {", ".language-tile {", ".soon-badge {", "#view-ask.has-conversation .goal-cards"]) {
     assert.ok(css.includes(rule), `${rule} is styled`);
   }

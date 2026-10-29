@@ -87,6 +87,12 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 3.20e | Type half a note, turn the page, come back: the text is still there, and it was never saved as a note | ☐ | ☐ | ☐ |
 | 3.20f | The sources panel under an answer shows `Matched: lever, moments` for a page that shares words, and a plain note when it does not | ☐ | ☐ | ☐ |
 | 3.20g | Switch the interface to తెలుగు and open a citation: the reader's buttons, note box and hint are in Telugu, with no English island left | ☐ | ☐ | ☐ |
+| 3.21 | Settings → Study & AI: the search card reads "Where outside answers come from", and there is no `{q}`, no URL with braces and no "endpoint" anywhere until "My own search service" is chosen | ☐ | ☐ | ☐ |
+| 3.21b | On the language board no two tiles show the same character: English shows EN, Español ES, Português POR, Polski POL, Türkçe TÜ, Tiếng Việt TI, اردو ار, العربية ال | ☐ | ☐ | ☐ |
+| 3.21c | Type `francais`, `turkce` or `portugues` with no accents: each still finds its language | ☐ | ☐ | ☐ |
+| 3.21d | Type `zzz`: the message quotes what you typed and a "Show all 33 languages" button clears the box and brings every tile back | ☐ | ☐ | ☐ |
+| 3.21e | Tap the language that is already selected: a short note says you are already using it, instead of nothing happening | ☐ | ☐ | ☐ |
+| 3.21f | On a 360px phone the glyph is still clearly larger than the name — around 22px, not 17px | ☐ | ☐ | ☐ |
 | 3.19 | Library: the "coming soon" card is visible, says publisher permission, and its button cannot be pressed | ☐ | ☐ | ☐ |
 | 3.20 | A link ending in `?ask=…` fills the composer on open and does not send by itself | ☐ | ☐ | ☐ |
 
@@ -150,5 +156,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (441 checks) plus
+The quickest regression test for a UI fix is `npm test` (452 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.

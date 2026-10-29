@@ -86,8 +86,8 @@ export function languageGroups() {
  *
  * A row of names in a dropdown looks like a setting; a grid of characters looks
  * like care. We show the first real character of the language's own name —
- * ত for Bengali, ت for Telugu's neighbour Urdu, E for English — because a student
- * recognises their own script from across the screen, not the word "Telugu".
+ * ত for Bengali, ا for Urdu, E for English — because a student recognises their
+ * own script from across the screen, not the word "Telugu".
  *
  * Combining marks are skipped so the glyph is never an accent floating on its
  * own, and a language with no name still gets a visible placeholder.
@@ -96,6 +96,94 @@ export function languageGlyph(native) {
   const characters = [...String(native || "").trim()];
   const letter = characters.find((character) => !/^\p{M}$/u.test(character)) || "";
   return letter ? letter.toUpperCase() : "•";
+}
+
+/** Letters of a name, without the combining marks that cannot stand alone. */
+function glyphLetters(native) {
+  return [...String(native || "").trim()].filter((character) => !/^\p{M}$/u.test(character));
+}
+
+const LATIN = /^[A-Za-z]$/;
+
+function glyphOf(letters, width) {
+  const slice = letters.slice(0, Math.max(1, width)).join("");
+  if (!slice) return "•";
+  // Latin names are shortened to capitals; other scripts keep their own case.
+  return LATIN.test(letters[0] || "") ? slice.toUpperCase() : slice;
+}
+
+/**
+ * A glyph for every language that is unique on the whole board.
+ *
+ * The first version of this took one letter each, and four pairs collided:
+ * English and Español both showed "E", Urdu and Arabic both "ا", Português and
+ * Polski both "P", Türkçe and Tiếng Việt both "T". Two identical tiles side by
+ * side is not a shortcut — it is a bug, because the glyph is the thing a student
+ * is supposed to recognise. So the width grows only where it has to: "EN" and
+ * "ES", "POR" and "POL", and everything else keeps its single character.
+ *
+ * A test asserts that no two languages share a glyph, so a language added later
+ * cannot reintroduce the collision.
+ */
+export function languageGlyphs(catalogue = LANGUAGE_CATALOGUE) {
+  const entries = catalogue.map((language) => ({
+    code: language.code,
+    letters: glyphLetters(language.native),
+    width: 1,
+  }));
+  const keyOf = (entry) => glyphOf(entry.letters, entry.width).toLowerCase();
+  // Widening one member of a collision can create another, so repeat until the
+  // whole board is unique or every name is spelled out.
+  for (let round = 0; round < 12; round += 1) {
+    const buckets = new Map();
+    for (const entry of entries) {
+      const key = keyOf(entry);
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key).push(entry);
+    }
+    let changed = false;
+    for (const group of buckets.values()) {
+      if (group.length < 2) continue;
+      for (const entry of group) {
+        if (entry.width < entry.letters.length) {
+          entry.width += 1;
+          changed = true;
+        }
+      }
+    }
+    if (!changed) break;
+  }
+  return Object.fromEntries(entries.map((entry) => [entry.code, glyphOf(entry.letters, entry.width)]));
+}
+
+/** The unique glyph for one language, by code. */
+export function languageGlyphFor(code) {
+  return languageGlyphs()[languageMeta(code).code] || languageGlyph(languageMeta(code).native);
+}
+
+/**
+ * Fold a search term so "francais" finds Français and "turkce" finds Türkçe.
+ *
+ * Students type on a phone keyboard without accents, and an accented name was
+ * unfindable unless it was spelled exactly. Case and decorative marks are not
+ * part of a language's identity for the purpose of a search box.
+ */
+export function foldLanguageSearch(text) {
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/\p{M}+/gu, "")
+    .toLowerCase()
+    .trim();
+}
+
+/** Does a language match what was typed? Native name, English name or code. */
+export function matchesLanguageQuery(code, term) {
+  const needle = foldLanguageSearch(term);
+  if (!needle) return true;
+  const meta = languageMeta(code);
+  return [meta.native, meta.name, meta.code]
+    .filter(Boolean)
+    .some((value) => foldLanguageSearch(value).includes(needle));
 }
 
 /** Wikipedia editions that exist for the interface languages we ship. */
