@@ -981,12 +981,15 @@ async function serveStatic(request, response, pathname) {
   const extension = path.extname(target).toLowerCase();
   const contentType = MIME[extension] || "application/octet-stream";
   const noCache = ["sw.js", "index.html", "precache.json", "manifest.webmanifest"].includes(path.basename(target));
+  // A ?v= query is a content address for one release, so it can be cached hard.
+  // Unversioned files keep a short cache so a fix is never stuck for a year.
+  const versioned = new URL(request.url || "/", "http://local").searchParams.has("v");
   const buffer = await fs.readFile(target);
   const headers = {
     ...baseSecurityHeaders(request),
     "Content-Type": contentType,
     "Content-Length": buffer.length,
-    "Cache-Control": noCache ? "no-cache" : "public, max-age=3600",
+    "Cache-Control": noCache ? "no-cache" : versioned ? "public, max-age=31536000, immutable" : "public, max-age=3600",
     "Content-Security-Policy": CONTENT_SECURITY_POLICY,
   };
   response.writeHead(200, headers);

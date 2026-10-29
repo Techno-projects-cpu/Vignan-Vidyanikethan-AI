@@ -177,3 +177,17 @@ test("the server hardens every response", () => {
   assert.match(read("/robots.txt"), /Disallow: \/api\//);
   assert.match(read("/sitemap.xml"), /security\.html/);
 });
+
+test("versioned assets are cached hard, unversioned files are not", () => {
+  const server = read("/serve.mjs");
+  assert.match(server, /versioned \? "public, max-age=31536000, immutable"/);
+  assert.match(server, /"public, max-age=3600"/);
+  assert.match(server, /noCache \? "no-cache"/);
+});
+
+test("the settings card says what works offline and what needs a connection", () => {
+  const index = read("/index.html");
+  assert.match(index, /Works with the network off/);
+  assert.match(index, /Needs a connection/);
+  assert.match(index, /study sheets, revision plan, quizzes, flashcards/);
+});
