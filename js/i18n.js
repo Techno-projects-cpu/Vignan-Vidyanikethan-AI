@@ -10,8 +10,8 @@
  * point at the original passage.
  */
 
-import { CORE_STRINGS } from "./translations-core.js?v=20";
-import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=20";
+import { CORE_STRINGS } from "./translations-core.js?v=21";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=21";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 
@@ -19,6 +19,7 @@ const EN = {
   "nav.ask": "Ask",
   "nav.library": "Library",
   "nav.quiz": "Quiz",
+  "nav.exam": "Exams",
   "nav.flashcards": "Flashcards",
   "nav.progress": "Progress",
   "nav.settings": "Settings",
@@ -67,6 +68,9 @@ const EN = {
   "view.quiz.kicker": "PRACTICE",
   "view.quiz.title": "Quiz yourself",
   "view.quiz.subtitle": "Custom questions from your chapters, graded with a revise list.",
+  "view.exam.kicker": "EXAM SHAPE",
+  "view.exam.title": "Practise like the real paper",
+  "view.exam.subtitle": "JEE, NEET and AP EAPCET timings, marking and pace - practised on your own textbook pages.",
   "view.flashcards.kicker": "RECALL",
   "view.flashcards.title": "Flashcards",
   "view.flashcards.subtitle": "Review with spaced repetition, one card at a time.",

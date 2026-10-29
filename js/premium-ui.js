@@ -6,8 +6,8 @@
  * wiring. Motion is limited to opacity/transform and respects reduced motion.
  */
 
-import { aiProfile } from "./ai-nicknames.js?v=20";
-import { pulseElement } from "./motion.js?v=20";
+import { aiProfile } from "./ai-nicknames.js?v=21";
+import { pulseElement } from "./motion.js?v=21";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -39,6 +39,7 @@ export function setPremiumView(view = "ask") {
     ask: "Ask",
     library: "Library",
     quiz: "Quiz",
+    exam: "Exams",
     flashcards: "Flashcards",
     progress: "Progress",
     friends: "Friends",

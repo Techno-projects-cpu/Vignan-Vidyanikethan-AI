@@ -14,13 +14,13 @@ test("minimal UI keeps one compact top navigation and a short Ask banner", () =>
   assert.match(html, /<body class="minimal-ui premium-ui(?:\s+[^"]+)?">/);
   const nav = html.match(/<nav class="top-nav[^"]*"[\s\S]*?<\/nav>/);
   assert.ok(nav, "top navigation exists");
-  assert.equal((nav[0].match(/data-view="/g) || []).length, 9);
-  for (const view of ["ask", "library", "quiz", "flashcards", "progress", "friends", "chat", "play", "settings"]) {
+  assert.equal((nav[0].match(/data-view="/g) || []).length, 10);
+  for (const view of ["ask", "library", "quiz", "exam", "flashcards", "progress", "friends", "chat", "play", "settings"]) {
     assert.ok(nav[0].includes(`data-view="${view}"`), `${view} stays reachable from the top navigation`);
   }
   const mobile = html.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/);
   assert.ok(mobile, "mobile navigation exists");
-  assert.equal((mobile[0].match(/data-view="/g) || []).length, 6, "the phone bar keeps six thumb-sized targets");
+  assert.equal((mobile[0].match(/data-view="/g) || []).length, 7, "the phone bar keeps seven thumb-sized targets");
 
   const banner = html.match(/<div class="connect-banner"[\s\S]*?<\/div>\s*<div class="chat-log"/);
   assert.ok(banner, "connect banner exists");

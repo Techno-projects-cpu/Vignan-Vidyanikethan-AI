@@ -56,6 +56,9 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 3.6 | Evaluation screen shows the score without scrolling to find it | ☐ | ☐ | ☐ |
 | 3.7 | Result image/video saves to the phone gallery or downloads, and opens | ☐ | ☐ | ☐ |
 | 3.8 | Progress and streak update after finishing a quiz | ☐ | ☐ | ☐ |
+| 3.9 | Exams: pick JEE/NEET/AP EAPCET, a mock starts with the real subject split and marks out of the real marking | ☐ | ☐ | ☐ |
+| 3.10 | A wrong answer in a mock costs marks, and the result says so in the exam's units | ☐ | ☐ | ☐ |
+| 3.11 | Syllabus coverage counts only chapters your own pages can answer | ☐ | ☐ | ☐ |
 
 ## 4. Social and play
 
@@ -117,5 +120,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (337 checks) plus
+The quickest regression test for a UI fix is `npm test` (349 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.

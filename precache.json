@@ -1,6 +1,6 @@
 {
-  "version": 20,
-  "generatedAt": "2026-10-29T14:15:02.640Z",
+  "version": 21,
+  "generatedAt": "2026-10-29T14:44:38.684Z",
   "urls": [
     "./",
     "./index.html",
@@ -36,6 +36,7 @@
     "./js/db.js",
     "./js/edit-audio.js",
     "./js/edit-studio.js",
+    "./js/exam-packs.js",
     "./js/external-answer.js",
     "./js/files.js",
     "./js/flashcards.js",

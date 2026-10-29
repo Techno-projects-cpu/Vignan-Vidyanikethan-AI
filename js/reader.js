@@ -1,7 +1,7 @@
 /** Page-level textbook reader used by every citation. */
 
-import { element, openModal, qs, showToast } from "./ui.js?v=20";
-import { safeUrl, truncate } from "./util.js?v=20";
+import { element, openModal, qs, showToast } from "./ui.js?v=21";
+import { safeUrl, truncate } from "./util.js?v=21";
 
 /** Resolve a cited page number, which may not equal its position in pasted notes. */
 export function pageIndexForCitation(pages = [], pageNumber = 1) {

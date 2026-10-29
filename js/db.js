@@ -5,7 +5,7 @@
  * (some private windows), an in-memory backend keeps the session usable.
  */
 
-import { maskStudentKeyVault } from "./student-keys.js?v=20";
+import { maskStudentKeyVault } from "./student-keys.js?v=21";
 
 const DB_NAME = "vignan-study-ai";
 const DB_VERSION = 1;

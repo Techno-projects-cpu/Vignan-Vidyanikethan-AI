@@ -72,6 +72,7 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 | Official key links | Settings shows safe signup links for eight free/keyless providers and explicitly warns against leaked or shared keys. |
 | Library | Upload PDFs and readable text (for example TXT, Markdown, CSV and JSON), paste notes, or import a public webpage/PDF/text URL. Scripts, executables and archives are rejected. Web imports retain their origin and are labelled separately. |
 | Quizzes | MCQ, fill-in-the-blank, short-answer and mixed quizzes; easy/medium/hard; timed or untimed; AI-written or offline-generated; instant grading with per-question review, topic breakdown and a revise list. |
+| Exam practice | **JEE Main**, **NEET (UG)**, **AP EAPCET** (Engineering and Agriculture) and **JEE Advanced** as three modes each: a **mock test** in the real paper's shape (question count, subject split, marking and pace per question), a **chapter drill** (untimed, no penalty) and **syllabus coverage** (which chapters your own pages already answer, and what to study next). Marking is the exam's own, including negative totals. No past papers, coaching PDFs or textbook scans are bundled, fetched or indexed: the pattern is public, the questions are written from the student's own pages, and every pack links the official page. |
 | Flashcards | Create multiple device-local cited decks, switch between them, review due cards with a Leitner schedule, or practise without altering that schedule. Missed quiz questions can become a revision deck. |
 | Chat actions | Ask “make a quiz on photosynthesis”, “quiz me on chapter 4”, “make flashcards on that”, or “open my library”. These start directly from chat. “That” uses the most recent cited library answer; it does not quietly convert a web snippet into a textbook. An unfinished quiz needs confirmation before replacement. |
 | Model question papers | Select readable past-paper PDFs/text in Library, or ask chat to make a model paper from selected documents. Bolt identifies, deduplicates and balances existing questions with source pages; preview, download as text, or print/save as PDF. It can reuse questions, cannot predict the exam, and does not infer an answer key. Scanned papers need OCR first. |
@@ -372,8 +373,8 @@ npm run offline:check
 ```
 
 ```
-Release v20
-Cached after install: 358 files in vignan-vidyanikethan-ai-v20
+Release v21
+Cached after install: 360 files in vignan-vidyanikethan-ai-v21
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
@@ -444,6 +445,7 @@ with no connection:
 | Cited study sheets | Yes — built locally from the matched pages |
 | Today's revision | Yes — computed from local decks and results |
 | Flashcards, quizzes, evaluation | Yes |
+| Exam practice: mocks, drills, coverage | Yes — exam patterns are local data; questions come from your saved pages |
 | Pro Mode and its briefing | Yes — no network call |
 | Web fallback | Skipped, and the answer says so instead of offering a dead link |
 | Friends, Chat, Play, leaderboard | Needs the server; the UI explains that |
@@ -593,7 +595,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-337 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
+349 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 

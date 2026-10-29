@@ -6,9 +6,9 @@
  * can show the student what to revise instead of just a score.
  */
 
-import { questionCopy } from "./question-copy.js?v=20";
-import { hashFeature } from "./vector.js?v=20";
-import { splitSentences, tokenize } from "./text.js?v=20";
+import { questionCopy } from "./question-copy.js?v=21";
+import { hashFeature } from "./vector.js?v=21";
+import { splitSentences, tokenize } from "./text.js?v=21";
 import {
   clamp,
   levenshtein,
@@ -18,7 +18,7 @@ import {
   uid,
   unique,
   wordOverlap,
-} from "./util.js?v=20";
+} from "./util.js?v=21";
 
 const FILLER = new Set(
   `about above after again against because before being below between could during each every first following from have into itself more most other second should some such than that their these those through where which while would your textbook chapter page section notes`.split(
@@ -206,6 +206,11 @@ export function prepareQuestions(questions = []) {
   return questions.map((question, index) => ({
     id: question.id || uid("q"),
     index,
+    // Exam practice tags survive preparation: marking needs to know which
+    // subject a question belongs to, not just which chapter it came from.
+    ...(question.examId ? { examId: String(question.examId) } : {}),
+    ...(question.subjectId ? { subjectId: String(question.subjectId) } : {}),
+    ...(question.chapter ? { chapter: String(question.chapter) } : {}),
     type: ["mcq", "fill", "short"].includes(question.type) ? question.type : "mcq",
     prompt: String(question.prompt || "").trim(),
     options: Array.isArray(question.options) ? question.options.map(String) : [],

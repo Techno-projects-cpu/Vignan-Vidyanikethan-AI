@@ -11,7 +11,7 @@
 export const CORE_STRINGS = {
   en: {
     "nav.ask": "Ask", "nav.library": "Library", "nav.quiz": "Quiz", "nav.flashcards": "Flashcards",
-    "nav.progress": "Progress", "nav.settings": "Settings", "nav.friends": "Friends", "nav.chat": "Chat", "nav.play": "Play",
+    "nav.progress": "Progress", "nav.settings": "Settings", "nav.friends": "Friends", "nav.chat": "Chat", "nav.play": "Play", "nav.exam": "Exams",
     "app.tagline": "Your books stay on this device.", "app.online": "Online", "app.offline": "Offline",
     "common.cancel": "Cancel", "common.close": "Close", "common.save": "Save", "common.tryAgain": "Try again", "common.loading": "Working…",
     "view.ask.title": "Ask your textbooks", "view.ask.subtitle": "Every answer points back to a page you can open.",
@@ -36,6 +36,7 @@ export const CORE_STRINGS = {
 
   hi: {
     "nav.ask": "पूछें", "nav.library": "पुस्तकालय", "nav.quiz": "क्विज़", "nav.flashcards": "फ़्लैशकार्ड",
+    "nav.exam": "परीक्षाएँ",
     "nav.progress": "प्रगति", "nav.settings": "सेटिंग्स", "nav.friends": "दोस्त", "nav.chat": "चैट", "nav.play": "खेल",
     "app.tagline": "आपकी किताबें इसी उपकरण में रहती हैं।", "app.online": "ऑनलाइन", "app.offline": "ऑफ़लाइन",
     "common.cancel": "रद्द करें", "common.close": "बंद करें", "common.save": "सहेजें", "common.tryAgain": "फिर कोशिश करें", "common.loading": "कार्य जारी है…",
@@ -61,6 +62,7 @@ export const CORE_STRINGS = {
 
   bn: {
     "nav.ask": "জিজ্ঞাসা", "nav.library": "লাইব্রেরি", "nav.quiz": "কুইজ", "nav.flashcards": "ফ্ল্যাশকার্ড",
+    "nav.exam": "পরীক্ষা",
     "nav.progress": "অগ্রগতি", "nav.settings": "সেটিংস", "nav.friends": "বন্ধু", "nav.chat": "চ্যাট", "nav.play": "খেলা",
     "app.tagline": "আপনার বই এই ডিভাইসেই থাকে।", "app.online": "অনলাইন", "app.offline": "অফলাইন",
     "common.cancel": "বাতিল", "common.close": "বন্ধ করুন", "common.save": "সংরক্ষণ", "common.tryAgain": "আবার চেষ্টা করুন", "common.loading": "কাজ চলছে…",
@@ -86,6 +88,7 @@ export const CORE_STRINGS = {
 
   mr: {
     "nav.ask": "विचारा", "nav.library": "ग्रंथालय", "nav.quiz": "क्विझ", "nav.flashcards": "फ्लॅशकार्ड",
+    "nav.exam": "परीक्षा",
     "nav.progress": "प्रगती", "nav.settings": "सेटिंग्ज", "nav.friends": "मित्र", "nav.chat": "चॅट", "nav.play": "खेळ",
     "app.tagline": "तुमची पुस्तके याच उपकरणात राहतात.", "app.online": "ऑनलाइन", "app.offline": "ऑफलाइन",
     "common.cancel": "रद्द करा", "common.close": "बंद करा", "common.save": "जतन करा", "common.tryAgain": "पुन्हा प्रयत्न करा", "common.loading": "काम चालू आहे…",
@@ -111,6 +114,7 @@ export const CORE_STRINGS = {
 
   te: {
     "nav.ask": "అడగండి", "nav.library": "గ్రంథాలయం", "nav.quiz": "క్విజ్", "nav.flashcards": "ఫ్లాష్ కార్డులు",
+    "nav.exam": "పరీక్షలు",
     "nav.progress": "పురోగతి", "nav.settings": "సెట్టింగులు", "nav.friends": "స్నేహితులు", "nav.chat": "చాట్", "nav.play": "ఆటలు",
     "app.tagline": "మీ పుస్తకాలు ఈ పరికరంలోనే ఉంటాయి.", "app.online": "ఆన్‌లైన్", "app.offline": "ఆఫ్‌లైన్",
     "common.cancel": "రద్దు", "common.close": "మూసివేయి", "common.save": "భద్రపరుచు", "common.tryAgain": "మళ్లీ ప్రయత్నించండి", "common.loading": "పని చేస్తోంది…",
@@ -136,6 +140,7 @@ export const CORE_STRINGS = {
 
   ta: {
     "nav.ask": "கேள்", "nav.library": "நூலகம்", "nav.quiz": "வினாடி வினா", "nav.flashcards": "ஃபிளாஷ் கார்டுகள்",
+    "nav.exam": "தேர்வுகள்",
     "nav.progress": "முன்னேற்றம்", "nav.settings": "அமைப்புகள்", "nav.friends": "நண்பர்கள்", "nav.chat": "அரட்டை", "nav.play": "விளையாட்டு",
     "app.tagline": "உங்கள் புத்தகங்கள் இந்தச் சாதனத்திலேயே இருக்கும்.", "app.online": "இணைப்பில்", "app.offline": "இணைப்பின்றி",
     "common.cancel": "ரத்து", "common.close": "மூடு", "common.save": "சேமி", "common.tryAgain": "மீண்டும் முயற்சி", "common.loading": "வேலை நடக்கிறது…",
@@ -161,6 +166,7 @@ export const CORE_STRINGS = {
 
   gu: {
     "nav.ask": "પૂછો", "nav.library": "પુસ્તકાલય", "nav.quiz": "ક્વિઝ", "nav.flashcards": "ફ્લેશકાર્ડ",
+    "nav.exam": "પરીક્ષાઓ",
     "nav.progress": "પ્રગતિ", "nav.settings": "સેટિંગ્સ", "nav.friends": "મિત્રો", "nav.chat": "ચેટ", "nav.play": "રમત",
     "app.tagline": "તમારાં પુસ્તકો આ જ ઉપકરણમાં રહે છે.", "app.online": "ઓનલાઇન", "app.offline": "ઓફલાઇન",
     "common.cancel": "રદ કરો", "common.close": "બંધ કરો", "common.save": "સાચવો", "common.tryAgain": "ફરી પ્રયાસ કરો", "common.loading": "કામ ચાલુ છે…",
@@ -186,6 +192,7 @@ export const CORE_STRINGS = {
 
   kn: {
     "nav.ask": "ಕೇಳಿ", "nav.library": "ಗ್ರಂಥಾಲಯ", "nav.quiz": "ರಸಪ್ರಶ್ನೆ", "nav.flashcards": "ಫ್ಲಾಶ್ ಕಾರ್ಡ್‌ಗಳು",
+    "nav.exam": "ಪರೀಕ್ಷೆಗಳು",
     "nav.progress": "ಪ್ರಗತಿ", "nav.settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು", "nav.friends": "ಸ್ನೇಹಿತರು", "nav.chat": "ಚಾಟ್", "nav.play": "ಆಟ",
     "app.tagline": "ನಿಮ್ಮ ಪುಸ್ತಕಗಳು ಈ ಸಾಧನದಲ್ಲಿಯೇ ಉಳಿಯುತ್ತವೆ.", "app.online": "ಆನ್‌ಲೈನ್", "app.offline": "ಆಫ್‌ಲೈನ್",
     "common.cancel": "ರದ್ದುಮಾಡಿ", "common.close": "ಮುಚ್ಚಿ", "common.save": "ಉಳಿಸಿ", "common.tryAgain": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ", "common.loading": "ಕೆಲಸ ನಡೆಯುತ್ತಿದೆ…",
@@ -211,6 +218,7 @@ export const CORE_STRINGS = {
 
   ml: {
     "nav.ask": "ചോദിക്കൂ", "nav.library": "ലൈബ്രറി", "nav.quiz": "ക്വിസ്", "nav.flashcards": "ഫ്ലാഷ് കാർഡുകൾ",
+    "nav.exam": "പരീക്ഷകൾ",
     "nav.progress": "പുരോഗതി", "nav.settings": "ക്രമീകരണങ്ങൾ", "nav.friends": "സുഹൃത്തുക്കൾ", "nav.chat": "ചാറ്റ്", "nav.play": "കളി",
     "app.tagline": "നിങ്ങളുടെ പുസ്തകങ്ങൾ ഈ ഉപകരണത്തിൽ തന്നെ തുടരും.", "app.online": "ഓൺലൈൻ", "app.offline": "ഓഫ്‌ലൈൻ",
     "common.cancel": "റദ്ദാക്കുക", "common.close": "അടയ്ക്കുക", "common.save": "സൂക്ഷിക്കുക", "common.tryAgain": "വീണ്ടും ശ്രമിക്കുക", "common.loading": "പ്രവർത്തിക്കുന്നു…",
@@ -236,6 +244,7 @@ export const CORE_STRINGS = {
 
   pa: {
     "nav.ask": "ਪੁੱਛੋ", "nav.library": "ਲਾਇਬ੍ਰੇਰੀ", "nav.quiz": "ਕੁਇਜ਼", "nav.flashcards": "ਫਲੈਸ਼ਕਾਰਡ",
+    "nav.exam": "ਪੇਪਰ",
     "nav.progress": "ਤਰੱਕੀ", "nav.settings": "ਸੈਟਿੰਗਾਂ", "nav.friends": "ਦੋਸਤ", "nav.chat": "ਚੈਟ", "nav.play": "ਖੇਡ",
     "app.tagline": "ਤੁਹਾਡੀਆਂ ਕਿਤਾਬਾਂ ਇਸੇ ਡਿਵਾਈਸ ਵਿੱਚ ਰਹਿੰਦੀਆਂ ਹਨ।", "app.online": "ਆਨਲਾਈਨ", "app.offline": "ਆਫ਼ਲਾਈਨ",
     "common.cancel": "ਰੱਦ ਕਰੋ", "common.close": "ਬੰਦ ਕਰੋ", "common.save": "ਸੰਭਾਲੋ", "common.tryAgain": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ", "common.loading": "ਕੰਮ ਚੱਲ ਰਿਹਾ ਹੈ…",
@@ -261,6 +270,7 @@ export const CORE_STRINGS = {
 
   or: {
     "nav.ask": "ପଚାରନ୍ତୁ", "nav.library": "ପାଠାଗାର", "nav.quiz": "କୁଇଜ୍", "nav.flashcards": "ଫ୍ଲାସ୍ କାର୍ଡ",
+    "nav.exam": "ପରୀକ୍ଷା",
     "nav.progress": "ଅଗ୍ରଗତି", "nav.settings": "ସେଟିଂସ୍", "nav.friends": "ବନ୍ଧୁ", "nav.chat": "ଚାଟ୍", "nav.play": "ଖେଳ",
     "app.tagline": "ଆପଣଙ୍କ ବହିଗୁଡ଼ିକ ଏହି ଡିଭାଇସରେ ରହେ।", "app.online": "ଅନଲାଇନ୍", "app.offline": "ଅଫଲାଇନ୍",
     "common.cancel": "ବାତିଲ୍", "common.close": "ବନ୍ଦ କରନ୍ତୁ", "common.save": "ସଞ୍ଚୟ କରନ୍ତୁ", "common.tryAgain": "ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ", "common.loading": "କାମ ଚାଲିଛି…",
@@ -286,6 +296,7 @@ export const CORE_STRINGS = {
 
   as: {
     "nav.ask": "সোধক", "nav.library": "পুথিভঁৰাল", "nav.quiz": "কুইজ", "nav.flashcards": "ফ্লেছ কাৰ্ড",
+    "nav.exam": "পৰীক্ষা",
     "nav.progress": "অগ্ৰগতি", "nav.settings": "ছেটিংছ", "nav.friends": "বন্ধু", "nav.chat": "চাট", "nav.play": "খেল",
     "app.tagline": "আপোনাৰ কিতাপ এই ডিভাইচতে থাকে।", "app.online": "অনলাইন", "app.offline": "অফলাইন",
     "common.cancel": "বাতিল", "common.close": "বন্ধ কৰক", "common.save": "সংৰক্ষণ কৰক", "common.tryAgain": "পুনৰ চেষ্টা কৰক", "common.loading": "কাম চলি আছে…",
@@ -311,6 +322,7 @@ export const CORE_STRINGS = {
 
   ur: {
     "nav.ask": "پوچھیں", "nav.library": "لائبریری", "nav.quiz": "کوئز", "nav.flashcards": "فلیش کارڈز",
+    "nav.exam": "امتحانات",
     "nav.progress": "پیش رفت", "nav.settings": "ترتیبات", "nav.friends": "دوست", "nav.chat": "چیٹ", "nav.play": "کھیل",
     "app.tagline": "آپ کی کتابیں اسی ڈیوائس پر رہتی ہیں۔", "app.online": "آن لائن", "app.offline": "آف لائن",
     "common.cancel": "منسوخ", "common.close": "بند کریں", "common.save": "محفوظ کریں", "common.tryAgain": "دوبارہ کوشش کریں", "common.loading": "کام جاری ہے…",
@@ -336,6 +348,7 @@ export const CORE_STRINGS = {
 
   ne: {
     "nav.ask": "सोध्नुहोस्", "nav.library": "पुस्तकालय", "nav.quiz": "क्विज", "nav.flashcards": "फ्ल्यासकार्ड",
+    "nav.exam": "परीक्षाहरू",
     "nav.progress": "प्रगति", "nav.settings": "सेटिङ", "nav.friends": "साथी", "nav.chat": "च्याट", "nav.play": "खेल",
     "app.tagline": "तपाईंका किताब यही यन्त्रमा रहन्छन्।", "app.online": "अनलाइन", "app.offline": "अफलाइन",
     "common.cancel": "रद्द गर्नुहोस्", "common.close": "बन्द गर्नुहोस्", "common.save": "सुरक्षित गर्नुहोस्", "common.tryAgain": "फेरि प्रयास गर्नुहोस्", "common.loading": "काम भइरहेको छ…",
@@ -361,6 +374,7 @@ export const CORE_STRINGS = {
 
   ar: {
     "nav.ask": "اسأل", "nav.library": "المكتبة", "nav.quiz": "اختبار", "nav.flashcards": "بطاقات المراجعة",
+    "nav.exam": "الامتحانات",
     "nav.progress": "التقدم", "nav.settings": "الإعدادات", "nav.friends": "الأصدقاء", "nav.chat": "الدردشة", "nav.play": "العب",
     "app.tagline": "كتبك تبقى على هذا الجهاز.", "app.online": "متصل", "app.offline": "غير متصل",
     "common.cancel": "إلغاء", "common.close": "إغلاق", "common.save": "حفظ", "common.tryAgain": "حاول مرة أخرى", "common.loading": "جارٍ العمل…",
@@ -386,6 +400,7 @@ export const CORE_STRINGS = {
 
   fa: {
     "nav.ask": "بپرس", "nav.library": "کتابخانه", "nav.quiz": "آزمون", "nav.flashcards": "کارت‌های مرور",
+    "nav.exam": "آزمون‌ها",
     "nav.progress": "پیشرفت", "nav.settings": "تنظیمات", "nav.friends": "دوستان", "nav.chat": "گفتگو", "nav.play": "بازی",
     "app.tagline": "کتاب‌های شما روی همین دستگاه می‌مانند.", "app.online": "آنلاین", "app.offline": "آفلاین",
     "common.cancel": "لغو", "common.close": "بستن", "common.save": "ذخیره", "common.tryAgain": "دوباره تلاش کن", "common.loading": "در حال کار…",
@@ -411,6 +426,7 @@ export const CORE_STRINGS = {
 
   fr: {
     "nav.ask": "Demander", "nav.library": "Bibliothèque", "nav.quiz": "Quiz", "nav.flashcards": "Cartes mémoire",
+    "nav.exam": "Examens",
     "nav.progress": "Progrès", "nav.settings": "Réglages", "nav.friends": "Amis", "nav.chat": "Discussion", "nav.play": "Jeux",
     "app.tagline": "Vos livres restent sur cet appareil.", "app.online": "En ligne", "app.offline": "Hors ligne",
     "common.cancel": "Annuler", "common.close": "Fermer", "common.save": "Enregistrer", "common.tryAgain": "Réessayer", "common.loading": "En cours…",
@@ -436,6 +452,7 @@ export const CORE_STRINGS = {
 
   de: {
     "nav.ask": "Fragen", "nav.library": "Bibliothek", "nav.quiz": "Quiz", "nav.flashcards": "Lernkarten",
+    "nav.exam": "Prüfungen",
     "nav.progress": "Fortschritt", "nav.settings": "Einstellungen", "nav.friends": "Freunde", "nav.chat": "Chat", "nav.play": "Spiele",
     "app.tagline": "Deine Bücher bleiben auf diesem Gerät.", "app.online": "Online", "app.offline": "Offline",
     "common.cancel": "Abbrechen", "common.close": "Schließen", "common.save": "Speichern", "common.tryAgain": "Erneut versuchen", "common.loading": "Läuft…",
@@ -461,6 +478,7 @@ export const CORE_STRINGS = {
 
   es: {
     "nav.ask": "Preguntar", "nav.library": "Biblioteca", "nav.quiz": "Cuestionario", "nav.flashcards": "Tarjetas",
+    "nav.exam": "Exámenes",
     "nav.progress": "Progreso", "nav.settings": "Ajustes", "nav.friends": "Amigos", "nav.chat": "Chat", "nav.play": "Juegos",
     "app.tagline": "Tus libros se quedan en este dispositivo.", "app.online": "En línea", "app.offline": "Sin conexión",
     "common.cancel": "Cancelar", "common.close": "Cerrar", "common.save": "Guardar", "common.tryAgain": "Intentar de nuevo", "common.loading": "Trabajando…",
@@ -486,6 +504,7 @@ export const CORE_STRINGS = {
 
   pt: {
     "nav.ask": "Perguntar", "nav.library": "Biblioteca", "nav.quiz": "Questionário", "nav.flashcards": "Cartões",
+    "nav.exam": "Exames",
     "nav.progress": "Progresso", "nav.settings": "Configurações", "nav.friends": "Amigos", "nav.chat": "Conversa", "nav.play": "Jogos",
     "app.tagline": "Seus livros ficam neste dispositivo.", "app.online": "On-line", "app.offline": "Off-line",
     "common.cancel": "Cancelar", "common.close": "Fechar", "common.save": "Salvar", "common.tryAgain": "Tentar novamente", "common.loading": "Trabalhando…",
@@ -511,6 +530,7 @@ export const CORE_STRINGS = {
 
   it: {
     "nav.ask": "Chiedi", "nav.library": "Biblioteca", "nav.quiz": "Quiz", "nav.flashcards": "Flashcard",
+    "nav.exam": "Esami",
     "nav.progress": "Progressi", "nav.settings": "Impostazioni", "nav.friends": "Amici", "nav.chat": "Chat", "nav.play": "Giochi",
     "app.tagline": "I tuoi libri restano su questo dispositivo.", "app.online": "In linea", "app.offline": "Non in linea",
     "common.cancel": "Annulla", "common.close": "Chiudi", "common.save": "Salva", "common.tryAgain": "Riprova", "common.loading": "In corso…",
@@ -536,6 +556,7 @@ export const CORE_STRINGS = {
 
   nl: {
     "nav.ask": "Vragen", "nav.library": "Bibliotheek", "nav.quiz": "Quiz", "nav.flashcards": "Flitskaarten",
+    "nav.exam": "Examens",
     "nav.progress": "Voortgang", "nav.settings": "Instellingen", "nav.friends": "Vrienden", "nav.chat": "Chat", "nav.play": "Spellen",
     "app.tagline": "Je boeken blijven op dit apparaat.", "app.online": "Online", "app.offline": "Offline",
     "common.cancel": "Annuleren", "common.close": "Sluiten", "common.save": "Opslaan", "common.tryAgain": "Opnieuw proberen", "common.loading": "Bezig…",
@@ -561,6 +582,7 @@ export const CORE_STRINGS = {
 
   pl: {
     "nav.ask": "Zapytaj", "nav.library": "Biblioteka", "nav.quiz": "Quiz", "nav.flashcards": "Fiszki",
+    "nav.exam": "Egzaminy",
     "nav.progress": "Postępy", "nav.settings": "Ustawienia", "nav.friends": "Znajomi", "nav.chat": "Czat", "nav.play": "Gry",
     "app.tagline": "Twoje książki zostają na tym urządzeniu.", "app.online": "W sieci", "app.offline": "Bez sieci",
     "common.cancel": "Anuluj", "common.close": "Zamknij", "common.save": "Zapisz", "common.tryAgain": "Spróbuj ponownie", "common.loading": "Pracuję…",
@@ -586,6 +608,7 @@ export const CORE_STRINGS = {
 
   ru: {
     "nav.ask": "Спросить", "nav.library": "Библиотека", "nav.quiz": "Тест", "nav.flashcards": "Карточки",
+    "nav.exam": "Экзамены",
     "nav.progress": "Прогресс", "nav.settings": "Настройки", "nav.friends": "Друзья", "nav.chat": "Чат", "nav.play": "Игры",
     "app.tagline": "Ваши книги остаются на этом устройстве.", "app.online": "Онлайн", "app.offline": "Офлайн",
     "common.cancel": "Отмена", "common.close": "Закрыть", "common.save": "Сохранить", "common.tryAgain": "Повторить", "common.loading": "Работаю…",
@@ -611,6 +634,7 @@ export const CORE_STRINGS = {
 
   uk: {
     "nav.ask": "Запитати", "nav.library": "Бібліотека", "nav.quiz": "Тест", "nav.flashcards": "Картки",
+    "nav.exam": "Іспити",
     "nav.progress": "Прогрес", "nav.settings": "Налаштування", "nav.friends": "Друзі", "nav.chat": "Чат", "nav.play": "Ігри",
     "app.tagline": "Ваші книжки залишаються на цьому пристрої.", "app.online": "Онлайн", "app.offline": "Офлайн",
     "common.cancel": "Скасувати", "common.close": "Закрити", "common.save": "Зберегти", "common.tryAgain": "Спробувати ще раз", "common.loading": "Працюю…",
@@ -636,6 +660,7 @@ export const CORE_STRINGS = {
 
   tr: {
     "nav.ask": "Sor", "nav.library": "Kütüphane", "nav.quiz": "Test", "nav.flashcards": "Kartlar",
+    "nav.exam": "Sınavlar",
     "nav.progress": "İlerleme", "nav.settings": "Ayarlar", "nav.friends": "Arkadaşlar", "nav.chat": "Sohbet", "nav.play": "Oyunlar",
     "app.tagline": "Kitapların bu cihazda kalır.", "app.online": "Çevrimiçi", "app.offline": "Çevrimdışı",
     "common.cancel": "İptal", "common.close": "Kapat", "common.save": "Kaydet", "common.tryAgain": "Yeniden dene", "common.loading": "Çalışıyor…",
@@ -661,6 +686,7 @@ export const CORE_STRINGS = {
 
   zh: {
     "nav.ask": "提问", "nav.library": "书库", "nav.quiz": "测验", "nav.flashcards": "记忆卡",
+    "nav.exam": "考试",
     "nav.progress": "进度", "nav.settings": "设置", "nav.friends": "好友", "nav.chat": "聊天", "nav.play": "游戏",
     "app.tagline": "你的课本保留在本设备上。", "app.online": "在线", "app.offline": "离线",
     "common.cancel": "取消", "common.close": "关闭", "common.save": "保存", "common.tryAgain": "重试", "common.loading": "处理中…",
@@ -686,6 +712,7 @@ export const CORE_STRINGS = {
 
   ja: {
     "nav.ask": "質問", "nav.library": "ライブラリ", "nav.quiz": "クイズ", "nav.flashcards": "単語カード",
+    "nav.exam": "試験",
     "nav.progress": "進捗", "nav.settings": "設定", "nav.friends": "友だち", "nav.chat": "チャット", "nav.play": "ゲーム",
     "app.tagline": "教科書はこの端末に保存されます。", "app.online": "オンライン", "app.offline": "オフライン",
     "common.cancel": "キャンセル", "common.close": "閉じる", "common.save": "保存", "common.tryAgain": "もう一度", "common.loading": "処理中…",
@@ -711,6 +738,7 @@ export const CORE_STRINGS = {
 
   ko: {
     "nav.ask": "질문", "nav.library": "서재", "nav.quiz": "퀴즈", "nav.flashcards": "플래시카드",
+    "nav.exam": "시험",
     "nav.progress": "진행", "nav.settings": "설정", "nav.friends": "친구", "nav.chat": "채팅", "nav.play": "게임",
     "app.tagline": "교과서는 이 기기에 남습니다.", "app.online": "온라인", "app.offline": "오프라인",
     "common.cancel": "취소", "common.close": "닫기", "common.save": "저장", "common.tryAgain": "다시 시도", "common.loading": "작업 중…",
@@ -736,6 +764,7 @@ export const CORE_STRINGS = {
 
   id: {
     "nav.ask": "Tanya", "nav.library": "Perpustakaan", "nav.quiz": "Kuis", "nav.flashcards": "Kartu",
+    "nav.exam": "Ujian",
     "nav.progress": "Kemajuan", "nav.settings": "Pengaturan", "nav.friends": "Teman", "nav.chat": "Obrolan", "nav.play": "Permainan",
     "app.tagline": "Bukumu tetap di perangkat ini.", "app.online": "Daring", "app.offline": "Luring",
     "common.cancel": "Batal", "common.close": "Tutup", "common.save": "Simpan", "common.tryAgain": "Coba lagi", "common.loading": "Sedang bekerja…",
@@ -761,6 +790,7 @@ export const CORE_STRINGS = {
 
   vi: {
     "nav.ask": "Hỏi", "nav.library": "Thư viện", "nav.quiz": "Trắc nghiệm", "nav.flashcards": "Thẻ ghi nhớ",
+    "nav.exam": "Kỳ thi",
     "nav.progress": "Tiến độ", "nav.settings": "Cài đặt", "nav.friends": "Bạn bè", "nav.chat": "Trò chuyện", "nav.play": "Trò chơi",
     "app.tagline": "Sách của bạn ở lại trên thiết bị này.", "app.online": "Trực tuyến", "app.offline": "Ngoại tuyến",
     "common.cancel": "Hủy", "common.close": "Đóng", "common.save": "Lưu", "common.tryAgain": "Thử lại", "common.loading": "Đang xử lý…",
@@ -786,6 +816,7 @@ export const CORE_STRINGS = {
 
   th: {
     "nav.ask": "ถาม", "nav.library": "คลังหนังสือ", "nav.quiz": "แบบทดสอบ", "nav.flashcards": "แฟลชการ์ด",
+    "nav.exam": "ข้อสอบ",
     "nav.progress": "ความก้าวหน้า", "nav.settings": "การตั้งค่า", "nav.friends": "เพื่อน", "nav.chat": "แชท", "nav.play": "เกม",
     "app.tagline": "หนังสือของคุณอยู่บนอุปกรณ์นี้", "app.online": "ออนไลน์", "app.offline": "ออฟไลน์",
     "common.cancel": "ยกเลิก", "common.close": "ปิด", "common.save": "บันทึก", "common.tryAgain": "ลองอีกครั้ง", "common.loading": "กำลังทำงาน…",
@@ -811,6 +842,7 @@ export const CORE_STRINGS = {
 
   sw: {
     "nav.ask": "Uliza", "nav.library": "Maktaba", "nav.quiz": "Jaribio", "nav.flashcards": "Kadi za kumbukumbu",
+    "nav.exam": "Mitihani",
     "nav.progress": "Maendeleo", "nav.settings": "Mipangilio", "nav.friends": "Marafiki", "nav.chat": "Gumzo", "nav.play": "Michezo",
     "app.tagline": "Vitabu vyako vinabaki kwenye kifaa hiki.", "app.online": "Mtandaoni", "app.offline": "Nje ya mtandao",
     "common.cancel": "Ghairi", "common.close": "Funga", "common.save": "Hifadhi", "common.tryAgain": "Jaribu tena", "common.loading": "Inafanya kazi…",

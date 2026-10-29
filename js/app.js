@@ -6,30 +6,30 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=20";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=20";
-import { ingestPdf, ingestText } from "./ingest.js?v=20";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=20";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=20";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=20";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=20";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=20";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=20";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=20";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=20";
+import * as db from "./db.js?v=21";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=21";
+import { ingestPdf, ingestText } from "./ingest.js?v=21";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=21";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=21";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=21";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=21";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=21";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=21";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=21";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=21";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=20";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=20";
+} from "./pro-mode.js?v=21";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=21";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=20";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=20";
-import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=20";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=20";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=20";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=20";
+} from "./updates.js?v=21";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=21";
+import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=21";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=21";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=21";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=21";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -37,8 +37,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=20";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=20";
+} from "./llm.js?v=21";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=21";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -50,9 +50,24 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=20";
-import { TASKS } from "./model-router.js?v=20";
-import { PROVIDERS, providerList } from "./providers.js?v=20";
+} from "./local-ai.js?v=21";
+import {
+  EXAMS,
+  MODES,
+  OFFICIAL,
+  blueprint,
+  examAdvice,
+  examByIdOrFirst,
+  getExam,
+  paceLabel,
+  paceSeconds,
+  pacingLine,
+  scoreExam,
+  syllabusCoverage,
+  nextUp,
+} from "./exam-packs.js?v=21";
+import { TASKS } from "./model-router.js?v=21";
+import { PROVIDERS, providerList } from "./providers.js?v=21";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -61,30 +76,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=20";
-import { parseApiKeys } from "./key-pool.js?v=20";
+} from "./settings.js?v=21";
+import { parseApiKeys } from "./key-pool.js?v=21";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=20";
+} from "./student-keys.js?v=21";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=20";
+} from "./quiz.js?v=21";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=20";
+} from "./flashcards.js?v=21";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=20";
+} from "./study-decks.js?v=21";
 import {
   accuracy,
   currentStreak,
@@ -95,14 +110,14 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=20";
-import { externalSearchUrl, searchWeb } from "./web.js?v=20";
-import { openEditStudio } from "./edit-studio.js?v=20";
-import { openReader } from "./reader.js?v=20";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=20";
-import { languageLabel, languageGroups } from "./languages.js?v=20";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=20";
-import * as ui from "./ui.js?v=20";
+} from "./progress.js?v=21";
+import { externalSearchUrl, searchWeb } from "./web.js?v=21";
+import { openEditStudio } from "./edit-studio.js?v=21";
+import { openReader } from "./reader.js?v=21";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=21";
+import { languageLabel, languageGroups } from "./languages.js?v=21";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=21";
+import * as ui from "./ui.js?v=21";
 import {
   clearReferral,
   getLeaderboard,
@@ -112,8 +127,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=20";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=20";
+} from "./auth.js?v=21";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=21";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -121,12 +136,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=20";
-import { initMotion, revealVisible } from "./motion.js?v=20";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=20";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=20";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=20";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=20";
+} from "./premium-ui.js?v=21";
+import { initMotion, revealVisible } from "./motion.js?v=21";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=21";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=21";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=21";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=21";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -135,6 +150,7 @@ const VIEW_META = {
   ask: { kicker: "view.ask.kicker", title: "view.ask.title", subtitle: "view.ask.subtitle" },
   library: { kicker: "view.library.kicker", title: "view.library.title", subtitle: "view.library.subtitle" },
   quiz: { kicker: "view.quiz.kicker", title: "view.quiz.title", subtitle: "view.quiz.subtitle" },
+  exam: { kicker: "view.exam.kicker", title: "view.exam.title", subtitle: "view.exam.subtitle" },
   flashcards: { kicker: "view.flashcards.kicker", title: "view.flashcards.title", subtitle: "view.flashcards.subtitle" },
   progress: { kicker: "view.progress.kicker", title: "view.progress.title", subtitle: "view.progress.subtitle" },
   friends: { kicker: "view.friends.kicker", title: "view.friends.title", subtitle: "view.friends.subtitle" },
@@ -168,6 +184,7 @@ const state = {
   paper: null,
   paperSelection: new Map(),
   quiz: null,
+  exam: { examId: "jee-main", mode: "mock", count: 10, chapter: "", subjectId: "" },
   quizResponses: {},
   quizIndex: 0,
   quizContext: null,
@@ -441,6 +458,7 @@ function setView(view, { skipHistory = false } = {}) {
   }
   if (view === "settings") renderSettings();
   if (view === "quiz") renderQuizState();
+  if (view === "exam") renderExamView();
   if (view === "flashcards") renderFlashcards();
   if (view === "friends" || view === "chat" || view === "play") {
     if (state.account) syncSocial().catch(() => {});
@@ -1949,6 +1967,527 @@ async function handleBookAction(event) {
   }
 }
 
+/* ------------------------------------------------------------------ exams */
+
+const EXAM_COUNTS = [5, 10, 15, 20];
+
+/** Exam-practice choices the student made last, kept for this session. */
+function examPreferences() {
+  if (!state.exam) state.exam = { examId: EXAMS[0].id, mode: "mock", count: 10, chapter: "", subjectId: "" };
+  const exam = examByIdOrFirst(state.exam.examId);
+  state.exam.examId = exam.id;
+  if (!MODES.some((mode) => mode.id === state.exam.mode)) state.exam.mode = MODES[0].id;
+  if (!EXAM_COUNTS.includes(Number(state.exam.count))) state.exam.count = 10;
+  if (!state.exam.subjectId || !exam.subjects.some((subject) => subject.id === state.exam.subjectId)) {
+    state.exam.subjectId = exam.subjects[0]?.id || "";
+  }
+  return state.exam;
+}
+
+let examCorpusCache = { key: null, text: "" };
+
+/** Every page the student owns, lowercased. Cached until the library changes. */
+function examCorpusText() {
+  const key = state.indexes.map((index) => `${index.book?.id || "book"}:${index.book?.pages?.length || 0}`).join("|");
+  if (examCorpusCache.key === key) return examCorpusCache.text;
+  const parts = [];
+  // Four million characters is far more than a school library, and it keeps
+  // this scan from stalling a phone when a student has added many PDFs.
+  let budget = 4000000;
+  for (const index of state.indexes) {
+    for (const page of index.book?.pages || []) {
+      const text = String(page.text || "").trim();
+      if (!text) continue;
+      parts.push(text);
+      budget -= text.length;
+      if (budget <= 0) break;
+    }
+    if (budget <= 0) break;
+  }
+  examCorpusCache = { key, text: parts.join("\n").toLowerCase() };
+  return examCorpusCache.text;
+}
+
+function examCoverage(exam) {
+  return syllabusCoverage(exam, examCorpusText());
+}
+
+/** "+4 right, -1 wrong", in the exam's own units. */
+function markingLine(exam) {
+  const marking = exam.marking || {};
+  const right = Number(marking.correct) || 0;
+  const wrong = Number(marking.wrong) || 0;
+  if (wrong < 0) return `+${right} for a right answer, ${wrong} for a wrong one. Leaving it blank costs nothing.`;
+  return `+${right} for a right answer, no negative marking.`;
+}
+
+/** Chapters already present in the student's pages come first. */
+function chapterQueue(subject, coverage) {
+  const covered = coverage.present.filter((entry) => entry.subjectId === subject.id).map((entry) => entry.chapter);
+  const rest = (subject.chapters || []).filter((chapter) => !covered.includes(chapter));
+  return [...covered, ...rest];
+}
+
+function subjectForChapter(exam, chapter) {
+  return (exam.subjects || []).find((subject) => (subject.chapters || []).includes(chapter)) || exam.subjects[0];
+}
+
+/**
+ * Questions for one chapter, written by the same offline engine as every other
+ * quiz in the app, then tagged with the exam subject so marking can be exact.
+ */
+function examChapterQuestions(exam, { chapter, subjectId, count }) {
+  const { hits } = retrieveChapter(chapter, state.indexes, { topK: Math.max(10, count * 4) });
+  if (!hits.length) return [];
+  const quiz = generateQuiz({
+    hits,
+    topic: chapter,
+    count,
+    type: "mcq",
+    difficulty: "medium",
+    timed: false,
+    secondsPerQuestion: 45,
+    language: state.settings.language,
+  });
+  return quiz.questions.map((question) => ({ ...question, examId: exam.id, subjectId, chapter }));
+}
+
+/** A mock paper: subjects in the exam's own proportion, questions across chapters. */
+function buildExamMock(exam, count) {
+  const coverage = examCoverage(exam);
+  const questions = [];
+  for (const row of blueprint(exam, count)) {
+    const subject = exam.subjects.find((entry) => entry.id === row.subjectId);
+    if (!subject) continue;
+    let taken = 0;
+    let attempts = 0;
+    for (const chapter of chapterQueue(subject, coverage)) {
+      if (taken >= row.count || questions.length >= count) break;
+      if (attempts >= row.count * 6) break;
+      attempts += 1;
+      const batch = examChapterQuestions(exam, { chapter, subjectId: subject.id, count: row.count - taken });
+      for (const question of batch) {
+        if (taken >= row.count || questions.length >= count) break;
+        questions.push(question);
+        taken += 1;
+      }
+    }
+  }
+  return questions;
+}
+
+function buildExamDrill(exam, chapter, count) {
+  const subject = subjectForChapter(exam, chapter);
+  return examChapterQuestions(exam, { chapter, subjectId: subject?.id || "general", count });
+}
+
+function examQuizFrom(exam, mode, questions) {
+  const timed = mode === "mock";
+  // A mock is paced at the real paper's rate, so a ten-question set takes as
+  // long per question as the actual exam allows - that is the lesson.
+  const perQuestion = timed
+    ? Math.max(20, Math.round(paceSeconds(exam, questions.length) / Math.max(1, questions.length)))
+    : 45;
+  const bookIds = [...new Set(questions.map((question) => question.source?.bookId).filter(Boolean))];
+  const quiz = makeQuiz({
+    questions,
+    topic: mode === "drill" ? questions[0]?.chapter || exam.name : exam.name,
+    bookIds,
+    type: "mcq",
+    difficulty: "medium",
+    timed,
+    secondsPerQuestion: perQuestion,
+    generatedBy: "offline",
+    hits: [],
+  });
+  quiz.title = mode === "drill" ? `${quiz.topic} - ${exam.name} drill` : `${exam.name} mock test`;
+  quiz.examId = exam.id;
+  quiz.examMode = mode;
+  quiz.examName = exam.name;
+  return quiz;
+}
+
+async function startExamSession(options = {}) {
+  const preferences = examPreferences();
+  const exam = examByIdOrFirst(options.examId || preferences.examId);
+  const mode = options.mode === "drill" ? "drill" : "mock";
+  const count = clamp(Number(options.count || preferences.count) || 10, 3, 40);
+  const chapter = String(options.chapter || preferences.chapter || "").trim();
+
+  if (!state.indexes.length) {
+    const message = "Add a textbook or your notes in Library first - every question here comes from your own pages.";
+    ui.showToast(message, "warning", 6500);
+    return { ok: false, message };
+  }
+  if (mode === "drill" && !chapter) {
+    const message = "Choose the chapter you want to drill.";
+    ui.showToast(message, "warning");
+    return { ok: false, message };
+  }
+
+  const button = $("#exam-start");
+  if (button) ui.setBusy(button, true, "Building the paper…");
+  try {
+    const questions = mode === "drill" ? buildExamDrill(exam, chapter, count) : buildExamMock(exam, count);
+    if (!questions.length) {
+      const message = `No usable pages were found for ${mode === "drill" ? chapter : exam.name} in your library. Add more of the chapter, then try again.`;
+      ui.showToast(message, "warning", 7000);
+      return { ok: false, message };
+    }
+    const quiz = examQuizFrom(exam, mode, questions);
+    state.quiz = quiz;
+    state.quizContext = null;
+    state.quizResponses = {};
+    state.quizIndex = 0;
+    state.result = null;
+    $("#quiz-topic-title").textContent = quiz.title;
+    $("#quiz-run-note").textContent = `${quiz.questions.length} ${quiz.questions.length === 1 ? "question" : "questions"} · ${mode === "mock" ? "exam pace, exam marking" : "untimed, no penalty"} · from your books`;
+    setView("quiz");
+    startQuizTimer();
+    if (quiz.questions.length < count) {
+      ui.showToast(`Your pages had enough material for ${quiz.questions.length} of the ${count} questions.`, "info", 6000);
+    }
+    return { ok: true, quiz };
+  } catch (error) {
+    console.error(error);
+    const message = error?.message || "Could not build that paper.";
+    ui.showToast(message, "error");
+    return { ok: false, message };
+  } finally {
+    if (button) ui.setBusy(button, false);
+  }
+}
+
+function examFactGrid(rows) {
+  const grid = ui.element("div", "exam-facts");
+  for (const [value, label] of rows) {
+    const cell = ui.element("div", "exam-fact");
+    cell.appendChild(ui.element("strong", "", String(value)));
+    cell.appendChild(ui.element("span", "", label));
+    grid.appendChild(cell);
+  }
+  return grid;
+}
+
+function examTab(active, label, onPick, title) {
+  const tab = ui.element("button", `exam-tab${active ? " active" : ""}`, label);
+  tab.type = "button";
+  tab.setAttribute("aria-pressed", active ? "true" : "false");
+  if (title) tab.title = title;
+  tab.addEventListener("click", onPick);
+  return tab;
+}
+
+function renderExamMock(preferences, exam, coverage) {
+  const card = ui.element("div", "card exam-card");
+  card.appendChild(ui.element("h3", "", `${exam.name} mock test`));
+  card.appendChild(ui.element("p", "hint", "The real shape: the same subject split, the same marking and the real paper's pace per question."));
+  card.appendChild(
+    examFactGrid([
+      [exam.questions, "questions in the real paper"],
+      [exam.marks, "marks"],
+      [`${exam.minutes} min`, "exam time"],
+    ]),
+  );
+  card.appendChild(ui.element("p", "exam-marking", markingLine(exam)));
+
+  const counts = ui.element("div", "exam-counts");
+  counts.appendChild(ui.element("span", "exam-count-label", "Questions here"));
+  for (const value of EXAM_COUNTS) {
+    counts.appendChild(
+      examTab(Number(preferences.count) === value, String(value), () => {
+        preferences.count = value;
+        renderExamView();
+      }, `A ${value}-question set`),
+    );
+  }
+  card.appendChild(counts);
+
+  const split = ui.element("div", "exam-split");
+  for (const row of blueprint(exam, preferences.count)) {
+    const line = ui.element("div", "exam-split-row");
+    line.appendChild(ui.element("span", "", row.name));
+    line.appendChild(ui.element("strong", "", `${row.count} ${row.count === 1 ? "question" : "questions"}`));
+    split.appendChild(line);
+  }
+  card.appendChild(split);
+  card.appendChild(ui.element("p", "hint", `${pacingLine(exam, preferences.count)} ${paceLabel(exam)} at the real pace.`));
+
+  const actions = ui.element("div", "exam-actions");
+  const start = ui.element("button", "button primary", "Start mock test");
+  start.type = "button";
+  start.id = "exam-start";
+  start.addEventListener("click", () => void startExamSession({ mode: "mock", examId: exam.id }));
+  actions.appendChild(start);
+  if (!coverage.covered) {
+    actions.appendChild(ui.element("span", "hint", "Nothing in your library matches this syllabus yet, so the paper may come up short."));
+  }
+  card.appendChild(actions);
+  return card;
+}
+
+function renderExamDrill(preferences, exam, coverage) {
+  const card = ui.element("div", "card exam-card");
+  card.appendChild(ui.element("h3", "", `${exam.name} chapter drill`));
+  card.appendChild(ui.element("p", "hint", "One chapter, untimed, no penalty. For the day you learn something, not the day you test yourself."));
+
+  const subject = exam.subjects.find((entry) => entry.id === preferences.subjectId) || exam.subjects[0];
+  const grid = ui.element("div", "exam-selects");
+
+  const subjectLabel = ui.element("label", "");
+  subjectLabel.appendChild(ui.element("span", "", "Subject"));
+  const subjectSelect = document.createElement("select");
+  subjectSelect.id = "exam-subject";
+  for (const entry of exam.subjects) {
+    const option = document.createElement("option");
+    option.value = entry.id;
+    option.textContent = entry.name;
+    option.selected = entry.id === subject.id;
+    subjectSelect.appendChild(option);
+  }
+  subjectSelect.addEventListener("change", () => {
+    preferences.subjectId = subjectSelect.value;
+    const next = exam.subjects.find((entry) => entry.id === subjectSelect.value);
+    preferences.chapter = next?.chapters?.[0] || "";
+    renderExamView();
+  });
+  subjectLabel.appendChild(subjectSelect);
+  grid.appendChild(subjectLabel);
+
+  const coveredHere = new Set(
+    coverage.present.filter((entry) => entry.subjectId === subject.id).map((entry) => entry.chapter),
+  );
+  const chapters = subject.chapters || [];
+  const chosen = chapters.includes(preferences.chapter) ? preferences.chapter : chapters[0] || "";
+  preferences.chapter = chosen;
+
+  const chapterLabel = ui.element("label", "");
+  chapterLabel.appendChild(ui.element("span", "", "Chapter"));
+  const chapterSelect = document.createElement("select");
+  chapterSelect.id = "exam-chapter";
+  for (const chapter of chapters) {
+    const option = document.createElement("option");
+    option.value = chapter;
+    option.textContent = coveredHere.has(chapter) ? `${chapter} - in your library` : chapter;
+    option.selected = chapter === chosen;
+    chapterSelect.appendChild(option);
+  }
+  chapterSelect.addEventListener("change", () => {
+    preferences.chapter = chapterSelect.value;
+    renderExamView();
+  });
+  chapterLabel.appendChild(chapterSelect);
+  grid.appendChild(chapterLabel);
+  card.appendChild(grid);
+
+  const counts = ui.element("div", "exam-counts");
+  counts.appendChild(ui.element("span", "exam-count-label", "Questions"));
+  for (const value of [5, 10]) {
+    counts.appendChild(
+      examTab(Number(preferences.count) === value, String(value), () => {
+        preferences.count = value;
+        renderExamView();
+      }, `A ${value}-question drill`),
+    );
+  }
+  card.appendChild(counts);
+  card.appendChild(
+    ui.element(
+      "p",
+      "hint",
+      coveredHere.has(chosen)
+        ? "This chapter is in your library, so the drill will be grounded in your own pages."
+        : "This chapter is not in your library yet. Add its pages in Library and the drill fills in.",
+    ),
+  );
+
+  const actions = ui.element("div", "exam-actions");
+  const start = ui.element("button", "button primary", "Start drill");
+  start.type = "button";
+  start.id = "exam-start";
+  start.addEventListener("click", () =>
+    void startExamSession({ mode: "drill", examId: exam.id, chapter: preferences.chapter, count: preferences.count }),
+  );
+  actions.appendChild(start);
+  card.appendChild(actions);
+  return card;
+}
+
+function renderExamCoverage(preferences, exam, coverage) {
+  const card = ui.element("div", "card exam-card");
+  card.appendChild(ui.element("h3", "", `${exam.name} syllabus coverage`));
+  card.appendChild(
+    ui.element(
+      "p",
+      "hint",
+      state.indexes.length
+        ? `${coverage.covered} of ${coverage.total} chapters of this syllabus are already answered by your own pages. The rest need a book before a question about them can be honest.`
+        : "Your library is empty. Add a chapter in Library and this fills in from your own pages.",
+    ),
+  );
+
+  const headline = ui.element("div", "exam-coverage-head");
+  headline.appendChild(ui.element("strong", "exam-coverage-value", `${coverage.percent}%`));
+  headline.appendChild(ui.element("span", "hint", `${coverage.covered} of ${coverage.total} chapters covered`));
+  card.appendChild(headline);
+  const meter = ui.element("div", "meter");
+  const fill = ui.element("span", "");
+  fill.style.width = `${coverage.percent}%`;
+  meter.appendChild(fill);
+  card.appendChild(meter);
+
+  for (const row of coverage.bySubject) {
+    if (!row.total) continue;
+    const line = ui.element("div", "topic-bar");
+    line.appendChild(ui.element("span", "", row.name));
+    const bar = ui.element("div", "meter");
+    const barFill = ui.element("span", "");
+    barFill.style.width = `${row.percent}%`;
+    bar.appendChild(barFill);
+    line.appendChild(bar);
+    line.appendChild(ui.element("span", "", `${row.covered}/${row.total}`));
+    card.appendChild(line);
+  }
+
+  const mastery = topicMastery(state.results).map((entry) => ({ topic: entry.topic, accuracy: entry.percent }));
+  const suggestions = nextUp({ exam, coverage, mastery, limit: 3 });
+  if (suggestions.length) {
+    card.appendChild(ui.element("h4", "exam-subhead", "Study next"));
+    const list = ui.element("div", "exam-next");
+    for (const entry of suggestions) {
+      const row = ui.element("div", "exam-next-row");
+      const copy = ui.element("div", "exam-next-copy");
+      copy.appendChild(ui.element("strong", "", entry.chapter));
+      copy.appendChild(ui.element("span", "hint", `${entry.subjectName} · ${entry.reason}`));
+      row.appendChild(copy);
+      const drill = ui.element("button", "button ghost small", "Drill");
+      drill.type = "button";
+      drill.addEventListener("click", () => {
+        preferences.mode = "drill";
+        preferences.subjectId = entry.subjectId;
+        preferences.chapter = entry.chapter;
+        renderExamView();
+      });
+      row.appendChild(drill);
+      list.appendChild(row);
+    }
+    card.appendChild(list);
+  }
+
+  if (coverage.missing.length) {
+    card.appendChild(ui.element("h4", "exam-subhead", "Not in your library yet"));
+    const list = ui.element("div", "exam-missing");
+    const shown = coverage.missing.slice(0, 12);
+    for (const entry of shown) {
+      list.appendChild(ui.element("span", "exam-missing-item", `${entry.chapter} · ${entry.subjectName}`));
+    }
+    card.appendChild(list);
+    if (coverage.missing.length > shown.length) {
+      card.appendChild(ui.element("p", "hint", `and ${coverage.missing.length - shown.length} more chapters.`));
+    }
+  }
+  return card;
+}
+
+function renderExamView() {
+  const root = $("#exam-panel");
+  if (!root) return;
+  const preferences = examPreferences();
+  const exam = examByIdOrFirst(preferences.examId);
+  const coverage = examCoverage(exam);
+  root.replaceChildren();
+
+  const packs = ui.element("div", "exam-packs");
+  for (const pack of EXAMS) {
+    packs.appendChild(
+      examTab(pack.id === exam.id, pack.name, () => {
+        preferences.examId = pack.id;
+        preferences.chapter = "";
+        preferences.subjectId = "";
+        renderExamView();
+      }, pack.full || pack.name),
+    );
+  }
+  root.appendChild(packs);
+
+  const modes = ui.element("div", "exam-tabs");
+  for (const mode of MODES) {
+    modes.appendChild(
+      examTab(mode.id === preferences.mode, mode.name, () => {
+        preferences.mode = mode.id;
+        renderExamView();
+      }, mode.line),
+    );
+  }
+  root.appendChild(modes);
+
+  if (preferences.mode === "coverage") root.appendChild(renderExamCoverage(preferences, exam, coverage));
+  else if (preferences.mode === "drill") root.appendChild(renderExamDrill(preferences, exam, coverage));
+  else root.appendChild(renderExamMock(preferences, exam, coverage));
+
+  const note = document.createElement("details");
+  note.className = "exam-note";
+  const summary = document.createElement("summary");
+  summary.textContent = "Where these numbers come from";
+  note.appendChild(summary);
+  const body = ui.element("div", "");
+  body.appendChild(
+    ui.element(
+      "p",
+      "",
+      "Counts, timing and marking are the pattern published by the exam body. Questions are never downloaded: each one is written from a page you added, so the citation points at your own book.",
+    ),
+  );
+  body.appendChild(
+    ui.element(
+      "p",
+      "",
+      "No previous-year papers, coaching material or textbook scans are stored or fetched here. Patterns change - check the official page before you rely on them.",
+    ),
+  );
+  const official = OFFICIAL[exam.id];
+  if (official) {
+    const link = ui.element("a", "text-button", `${exam.name} official page`);
+    link.href = official;
+    link.target = "_blank";
+    link.rel = "noreferrer noopener";
+    body.appendChild(link);
+  }
+  if (exam.check) body.appendChild(ui.element("p", "hint", exam.check));
+  note.appendChild(body);
+  root.appendChild(note);
+}
+
+function examResultCard(entry) {
+  const card = ui.element("div", "card exam-result");
+  card.appendChild(ui.element("span", "eyebrow", `EXAM MARKING · ${entry.name.toUpperCase()}`));
+  card.appendChild(ui.element("h3", "", `${entry.score.marks} / ${entry.score.maxMarks} marks`));
+  card.appendChild(
+    examFactGrid([
+      [entry.score.correct, "right"],
+      [entry.score.wrong, "wrong"],
+      [entry.score.skipped, "left blank"],
+    ]),
+  );
+  card.appendChild(
+    ui.element(
+      "p",
+      "hint",
+      entry.score.negativeMarking
+        ? "Negative marking was applied exactly as the exam applies it."
+        : "This exam has no negative marking, so an attempt never costs you.",
+    ),
+  );
+  card.appendChild(ui.element("p", "exam-advice", entry.advice));
+  const actions = ui.element("div", "exam-actions");
+  const back = ui.element("button", "button ghost small", "Back to exam practice");
+  back.type = "button";
+  back.addEventListener("click", () => setView("exam"));
+  actions.appendChild(back);
+  card.appendChild(actions);
+  return card;
+}
+
 /* ------------------------------------------------------------------- quiz */
 
 async function generateQuizHandler(options = {}) {
@@ -2231,6 +2770,24 @@ async function submitQuiz(options = {}) {
       }
       result = recomputeResult(result);
     }
+    if (quiz.examId) {
+      const exam = getExam(quiz.examId);
+      if (exam) {
+        const items = result.perQuestion.map((item) => ({
+          subjectId: item.question.subjectId,
+          status: item.awarded >= 1 ? "correct" : String(item.submitted || "").trim() ? "wrong" : "skipped",
+        }));
+        const score = scoreExam(exam, items);
+        result.exam = {
+          examId: exam.id,
+          name: exam.name,
+          mode: quiz.examMode || "mock",
+          official: OFFICIAL[exam.id] || "",
+          score,
+          advice: examAdvice(exam, score),
+        };
+      }
+    }
     result.profile = state.account?.username || state.settings.profile || "Student";
     state.result = result;
     state.studyProgress = recordResult(state.studyProgress, result, { profile: result.profile });
@@ -2321,6 +2878,7 @@ function renderQuizResults(result) {
   }
   hero.appendChild(actions);
   root.appendChild(hero);
+  if (result.exam) root.appendChild(examResultCard(result.exam));
 
   const detail = ui.element("div", "result-detail");
 
@@ -3341,7 +3899,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=20");
+            const { social } = await import("./social.js?v=21");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
