@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { composeGroundedAnswer, confidenceLabel, notFoundMessage, sourcesFromHits } from "../js/answer.js";
 import { demoIndex } from "./helpers.mjs";
-import { retrieve } from "../js/retrieval.js";
+import { buildBookIndex, retrieve, retrievePreferBooks } from "../js/retrieval.js";
 
 function hitsFor(question) {
   return retrieve(question, [demoIndex()], { topK: 3 }).hits;
@@ -66,4 +66,46 @@ test("confidenceLabel maps numeric confidence to human labels", () => {
   assert.match(confidenceLabel(0.8), /Strong/i);
   assert.match(confidenceLabel(0.4), /Partial/i);
   assert.match(confidenceLabel(0.1), /Weak/i);
+});
+
+test("the offline answer is shaped like a teacher's answer, not a quote dump", () => {
+  const index = buildBookIndex({ id: "b1", title: "Science", subject: "Science" }, [
+    { page: 12, text: "Photosynthesis is the process by which green plants use sunlight to make food. Chlorophyll is the green pigment that absorbs light." },
+    { page: 13, text: "The equation for photosynthesis is 6CO2 + 6H2O = C6H12O6 + 6O2. Stomata are the small pores through which gases enter and leave the leaf." },
+  ]);
+  const hits = retrievePreferBooks("Explain photosynthesis", [index], { topK: 5 }).hits;
+  const answer = composeGroundedAnswer({ query: "Explain photosynthesis", hits, mode: "answer", confidence: 0.6 });
+  // The definition of what was asked leads, with its page and citation.
+  assert.match(answer.text, /^\*\*From your library — Explain photosynthesis\*\*\n\n\*\*Photosynthesis\*\* — the process by which/);
+  assert.match(answer.text, /\(Science, p\. 12\)_ \[1\]/);
+  // The formula from the pages is kept verbatim.
+  assert.match(answer.text, /\*\*Formula:\*\* `6CO2 \+ 6H2O = C6H12O6 \+ 6O2`/);
+  assert.match(answer.text, /Every line is taken from the cited pages/);
+});
+
+test("a question that only matches one definition is not padded with other facts", () => {
+  const index = buildBookIndex({ id: "b1", title: "Science", subject: "Science" }, [
+    { page: 12, text: "Photosynthesis is the process by which green plants use sunlight to make food." },
+    { page: 13, text: "The equation for photosynthesis is 6CO2 + 6H2O = C6H12O6 + 6O2. Stomata are the small pores through which gases enter and leave the leaf." },
+  ]);
+  const hits = retrievePreferBooks("What are stomata?", [index], { topK: 5 }).hits;
+  const answer = composeGroundedAnswer({ query: "What are stomata?", hits, mode: "answer", confidence: 0.5 });
+  assert.match(answer.text, /\*\*Stomata\*\* — the small pores/);
+  assert.doesNotMatch(answer.text, /6CO2/, "an unrelated equation is not attached to this answer");
+  assert.doesNotMatch(answer.text, /Chlorophyll/);
+});
+
+test("web imports stay labelled on every line of the shaped answer", () => {
+  const answer = composeGroundedAnswer({
+    query: "How does it work",
+    hits: [{
+      title: "Online article", page: 1, section: "Growth", bookId: "web1",
+      sourceUrl: "https://example.com/x", sourceKind: "article",
+      text: "Photosynthesis is a process in which green plants use sunlight to make food from carbon dioxide and water. It releases oxygen.",
+    }],
+    mode: "answer",
+    confidence: 0.4,
+  });
+  assert.match(answer.text, /Web import: Online article/);
+  assert.match(answer.text, /verify it independently/);
 });

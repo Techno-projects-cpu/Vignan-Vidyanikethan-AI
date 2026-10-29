@@ -10,6 +10,7 @@
 import { salientSentences, splitSentences } from "./text.js?v=18";
 import { truncate } from "./util.js?v=18";
 import { buildFlashcards } from "./flashcards.js?v=18";
+import { buildStudySheet } from "./study-sheet.js?v=18";
 import { t } from "./i18n.js?v=18";
 
 export function sourcesFromHits(hits = []) {
@@ -120,6 +121,124 @@ function extractiveLines(query, sources, mode) {
   return lines;
 }
 
+
+/** Imported web pages must stay labelled on every line, not only in a header. */
+function origin(source) {
+  return source?.sourceUrl ? "Web import: " : "";
+}
+
+function location(source) {
+  if (!source) return "your library";
+  return source.sourceUrl && source.sourceKind !== "pdf" ? `section ${source.page}` : `p. ${source.page}`;
+}
+
+/** The source a sheet entry came from, so its citation number is the right one. */
+function sourceForEntry(sources, entry) {
+  return sources.find((source) => String(source.page) === String(entry.page) && source.title === entry.title)
+    || sources.find((source) => String(source.page) === String(entry.page))
+    || sources[0];
+}
+
+/** The term a student actually asked about, not merely the first one on the page. */
+function pickLeadTerm(terms = [], query = "") {
+  const words = new Set(
+    String(query).toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter((word) => word.length > 3),
+  );
+  if (!words.size) return terms[0] || null;
+  let best = null;
+  let bestScore = -1;
+  for (const term of terms) {
+    const haystack = `${term.term} ${term.definition}`.toLowerCase();
+    let score = 0;
+    for (const word of words) if (haystack.includes(word)) score += 1;
+    if (term.term.toLowerCase().split(/\s+/).some((word) => words.has(word))) score += 2;
+    if (score > bestScore) {
+      best = term;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
+function sameSentence(a = "", b = "") {
+  const strip = (value) => value.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+  const left = strip(a);
+  const right = strip(b);
+  if (!left || !right) return false;
+  return left.startsWith(right.slice(0, 60)) || right.startsWith(left.slice(0, 60));
+}
+
+/**
+ * The offline answer, shaped like a teacher wrote it: lead with the definition,
+ * then the cited points, then a formula if the page has one. Every line still
+ * comes from a page — this only changes the order and the framing.
+ */
+function teacherAnswer(evidenceQuery, sources, depth = "balanced") {
+  const sheet = buildStudySheet(sources, { topic: evidenceQuery });
+  const brief = depth === "brief";
+  const exam = depth === "exam";
+  const limit = brief ? 2 : 3;
+  const blocks = [];
+  const used = new Set();
+
+  const lead = pickLeadTerm(sheet.terms, evidenceQuery);
+  if (lead) {
+    const source = sourceForEntry(sources, lead);
+    blocks.push(`**${lead.term}** — ${lead.definition.replace(/[.。]$/, "")}. _(${origin(source)}${source.title}, ${location(source)})_ ${citation(source.n)}`);
+    used.add(lead.quote);
+    if (!brief) blocks.push("");
+  }
+
+  // A formula only belongs in this answer if the question's own words appear in
+  // the sentence that carries it — otherwise every page with an equation would
+  // add one to every question about that page.
+  const queryWords = new Set(
+    String(evidenceQuery).toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter((word) => word.length > 3),
+  );
+  const formula = (sheet.formulas || []).find((entry) => {
+    if (!queryWords.size) return false;
+    const haystack = `${entry.quote} ${entry.formula}`.toLowerCase();
+    return [...queryWords].some((word) => haystack.includes(word));
+  }) || null;
+  // Points should answer the question: prefer sentences that use its words, and
+  // only fall back to general salience when the page has none.
+  const onTopic = (sentence) => !queryWords.size || [...queryWords].some((word) => sentence.toLowerCase().includes(word));
+  const candidates = [];
+  for (const source of sources.slice(0, 4)) {
+    for (const sentence of salientSentences(source.text, evidenceQuery, 3).map(cleanSentence)) {
+      if (!sentence || used.has(sentence) || [...used].some((seen) => sameSentence(seen, sentence))) continue;
+      if (formula && sameSentence(formula.quote, sentence)) continue;
+      candidates.push({ sentence, source });
+    }
+  }
+  const onTopicRows = candidates.filter((row) => onTopic(row.sentence));
+  // If nothing on the page talks about the question, a definition alone is a
+  // better answer than padding it with unrelated sentences from the same page.
+  const ordered = onTopicRows.length ? onTopicRows : lead ? [] : candidates;
+  const points = [];
+  for (const { sentence, source } of ordered) {
+    points.push(`- ${truncate(sentence, 300)} _(${origin(source)}${source.title}, ${location(source)})_ ${citation(source.n)}`);
+    if (points.length >= limit) break;
+  }
+
+  if (points.length) {
+    if (exam) blocks.push("**Key points**", "");
+    blocks.push(...points);
+  }
+
+  if (formula) {
+    const source = sourceForEntry(sources, formula);
+    blocks.push("");
+    blocks.push(`${exam ? "**Formula**  " : "**Formula:** "}\`${formula.formula}\` _(${origin(source)}${source.title}, ${location(source)})_ ${citation(source.n)}`);
+  }
+
+  if (exam && sources[0]) {
+    blocks.push("", `_Check ${sources[0].title}, ${location(sources[0])} before the exam — this answer only quotes what those pages say._`);
+  }
+  // Collapse accidental double blank lines so the rendered answer stays tight.
+  return blocks.filter((line, index) => line !== "" || blocks[index - 1] !== "");
+}
+
 function practiceQuestions(query, sources) {
   const questions = [];
   sources.slice(0, 4).forEach((source) => {
@@ -146,6 +265,7 @@ export function composeGroundedAnswer({
   webResults = [],
   webEnabled = false,
   language = "en",
+  depth = "balanced",
 } = {}) {
   const sources = sourcesFromHits(hits);
   if (!sources.length) {
@@ -186,6 +306,14 @@ export function composeGroundedAnswer({
     const lines = extractiveLines(evidenceQuery, sources.slice(0, 3), mode);
     lines.forEach((line, index) => parts.push(`**${index + 1}.** ${line}`));
     parts.push("", "_Each step is taken from a cited passage; open the source to read the full page._");
+  } else if (mode === "answer") {
+    const shaped = teacherAnswer(evidenceQuery, sources, depth);
+    if (shaped.length) {
+      parts.push(...shaped);
+      parts.push("", "_Every line is taken from the cited pages. Open a citation to read it in context._");
+    } else {
+      parts.push(...extractiveLines(evidenceQuery, sources, mode).map((line) => `- ${line}`));
+    }
   } else {
     parts.push(...extractiveLines(evidenceQuery, sources, mode).map((line) => `- ${line}`));
     if (mode === "summarize") {

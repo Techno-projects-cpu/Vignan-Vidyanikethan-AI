@@ -29,6 +29,10 @@ function definitionOf(sentence) {
   const rawTerm = match[1].replace(/^(the|a|an)\s+/i, "").replace(/[.,;:]$/, "").trim();
   const term = rawTerm;
   if (!term || STOP_TERMS.has(term.toLowerCase()) || STOP_TERMS.has(term.toLowerCase().split(/\s+/).pop()) || term.split(/\s+/).length > 6) return null;
+  // "The equation for photosynthesis is 6CO2 + …" is a formula, not a term.
+  if (/^(the\s+)?(equation|formula|expression|relation|ratio|reaction|result|value|answer)\b/i.test(term)) return null;
+  // "Newton's second law states that force" is a clause, not a term.
+  if (/\b(states?|stated|says|said|explains?|describes?|shows?|gives?|means?|indicates?|occurs?|happens?|results?|causes?|tells?)\b/i.test(term)) return null;
   // A definition should not be a question or a list of half-words.
   if (/[?]/.test(term)) return null;
   // "Photosynthesis — the process by which …" reads better than keeping the verb.
@@ -44,15 +48,22 @@ function formulaOf(sentence) {
   if (trimmed.length < 8 || trimmed.length > 320) return null;
   // Prefer a real assignment ("F = m a") over prose that merely uses "is".
   // The left-hand side of a formula is short and has no verb in it.
-  const parts = trimmed.split("=");
+  // Drop a sentence frame such as "The equation for photosynthesis is".
+  const framed = trimmed.replace(
+    /^(the|a|an)\s+(equation|formula|relation|expression)\s+(for|of)\s+[^=]{0,48}?\s+(is|are|:)\s+/i,
+    "",
+  ).replace(/^(the|a|an)\s+(equation|formula|relation|expression)\s+(is|are|:)\s+/i, "");
+  const parts = framed.split("=");
   if (parts.length === 2) {
-    const left = parts[0].replace(/^(the|a|an)\s+(equation|formula|relation|expression)\s+(is|for)\s+/i, "").trim();
+    const left = parts[0].trim();
     const right = parts[1].replace(/[.;]$/, "").trim();
     if (left && left.length <= 32 && !/\b(is|are|was|were|means|explains)\b/i.test(left) && right.length <= 60) {
       return `${left} = ${right}`.replace(/\s+/g, " ").trim();
     }
   }
-  if (/\bproportional to\b/i.test(trimmed) && trimmed.length <= 160) return trimmed;
+  if (/\bproportional to\b/i.test(trimmed) && trimmed.length <= 96 && !/\b(states?|says?|that|explains?|describes?)\b/i.test(trimmed)) {
+    return trimmed;
+  }
   return null;
 }
 

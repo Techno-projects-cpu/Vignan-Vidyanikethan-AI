@@ -1262,7 +1262,8 @@ async function handleAsk(event) {
       if (!answer) {
         answer = composeGroundedAnswer({
           query, evidenceQuery: effectiveQuery, hits, mode: requestMode,
-          reason: retrieval.reason, confidence: retrieval.confidence, webResults, webEnabled, language: state.settings.language,
+          reason: retrieval.reason, confidence: retrieval.confidence, webResults, webEnabled,
+          language: state.settings.language, depth: state.settings.answerDepth,
         });
         answer.meta = modelError ? "Model unavailable — cited excerpts shown"
           : hits.length ? "Bolt · cited library excerpts" : "Bolt · no matching source";
