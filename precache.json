@@ -1,6 +1,6 @@
 {
-  "version": 17,
-  "generatedAt": "2026-10-29T02:09:51.300Z",
+  "version": 18,
+  "generatedAt": "2026-10-29T02:33:59.702Z",
   "urls": [
     "./",
     "./index.html",
@@ -19,6 +19,7 @@
     "./icons/icon-maskable-512.png",
     "./icons/icon.svg",
     "./js/ai-nicknames.js",
+    "./js/answer-quality.js",
     "./js/answer.js",
     "./js/app.js",
     "./js/auth.js",
@@ -53,6 +54,8 @@
     "./js/password-policy.js",
     "./js/play-ui.js",
     "./js/premium-ui.js",
+    "./js/pro-mode.js",
+    "./js/pro-ui.js",
     "./js/progress.js",
     "./js/providers.js",
     "./js/question-copy.js",
@@ -80,6 +83,7 @@
     "./styles-identity.css",
     "./styles-legal.css",
     "./styles-premium.css",
+    "./styles-pro.css",
     "./styles-social.css",
     "./styles.css",
     "./sw.js",

@@ -1,11 +1,11 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=17";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=17";
-import { parseApiKeys } from "./key-pool.js?v=17";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=17";
-import { aiProfile } from "./ai-nicknames.js?v=17";
-import { LANGUAGE_CODES } from "./languages.js?v=17";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=18";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=18";
+import { parseApiKeys } from "./key-pool.js?v=18";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=18";
+import { aiProfile } from "./ai-nicknames.js?v=18";
+import { LANGUAGE_CODES } from "./languages.js?v=18";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -41,6 +41,10 @@ export const DEFAULT_SETTINGS = {
   profile: "Student",
   // Monogram avatar (`p0`-`p7`), kept locally so guests get one too.
   avatar: "",
+  // Pro Mode: the JARVIS-style easter egg. Off unless it has been activated.
+  pro: false,
+  // How long an answer should be: brief, balanced or a model exam answer.
+  answerDepth: "balanced",
   disclaimerSeen: false,
   freeRouterDismissed: false,
 };
@@ -109,6 +113,8 @@ export function normalizeSettings(value = {}) {
   // Only the eight known patterns are accepted, so a stored value can never
   // become markup or an arbitrary CSS class.
   merged.avatar = /^p[0-7]$/.test(String(raw.avatar || "")) ? String(raw.avatar) : "";
+  merged.pro = Boolean(raw.pro);
+  merged.answerDepth = ["brief", "balanced", "exam"].includes(raw.answerDepth) ? raw.answerDepth : "balanced";
   return merged;
 }
 

@@ -1,0 +1,100 @@
+/**
+ * Answer-quality helpers: how long an answer should be, whether it kept its
+ * citations, and what the student should do next.
+ *
+ * Pure functions only, so the behaviour is unit-tested without a browser and
+ * works offline. None of this changes a fact — it changes shape and honesty.
+ */
+
+export const DEPTHS = [
+  { id: "brief", label: "Brief", hint: "One short answer, about 80 words." },
+  { id: "balanced", label: "Balanced", hint: "A clear answer with the key steps." },
+  { id: "exam", label: "Exam", hint: "A model exam answer with labelled points." },
+];
+
+export const DEFAULT_DEPTH = "balanced";
+
+export function normalizeDepth(value) {
+  return DEPTHS.some((depth) => depth.id === value) ? value : DEFAULT_DEPTH;
+}
+
+/** Appended to the model prompt so length and shape are deliberate. */
+export function depthDirective(depth = DEFAULT_DEPTH) {
+  switch (normalizeDepth(depth)) {
+    case "brief":
+      return "LENGTH: brief. Answer in at most 80 words, one short paragraph or three bullet points, with citations. No preamble.";
+    case "exam":
+      return [
+        "LENGTH: model exam answer, 180-260 words, in this shape:",
+        "1. **Definition** — a one-sentence definition with a citation.",
+        "2. **Key points** — 3 to 5 numbered points, each cited.",
+        "3. **Formula or example** — include it only if a passage contains one.",
+        "4. **Examiner note** — one closing line naming the detail students usually miss.",
+        "Do not add facts that are not in the passages.",
+      ].join("\n");
+    default:
+      return "LENGTH: balanced. 110-180 words. Lead with the answer, then the reasoning in short steps, each with a citation. Use a list only when the passage is itself a list.";
+  }
+}
+
+/**
+ * How much of a written answer actually points at a page.
+ * Returns sentence counts plus a 0-1 ratio; a short answer with one citation
+ * is not penalised for being short.
+ */
+export function citationCoverage(text = "") {
+  const sentences = String(text || "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 24 && !/^\|/.test(line) && !/^[-*]\s*$/.test(line));
+  if (!sentences.length) return { sentences: 0, cited: 0, ratio: 0 };
+  const cited = sentences.filter((line) => /\[\d+\]|\[W\d+\]/.test(line)).length;
+  return { sentences: sentences.length, cited, ratio: cited / sentences.length };
+}
+
+/**
+ * True when a written answer leans on too many uncited claims to present as a
+ * grounded answer. Short answers are exempt: one sentence cannot be "mostly
+ * uncited" in any meaningful way.
+ */
+export function looksUncited(text = "", { minimumSentences = 4, threshold = 0.5 } = {}) {
+  const coverage = citationCoverage(text);
+  if (coverage.sentences < minimumSentences) return false;
+  return coverage.ratio < threshold;
+}
+
+/**
+ * The next sensible moves after an answer. Each one is something this app can
+ * actually do, which is why they are prompts and actions rather than moods.
+ */
+export function followUpsFor({ query = "", mode = "answer", hits = [], hasSheet = false, depth = DEFAULT_DEPTH } = {}) {
+  const topic = cleanTopic(query);
+  const grounded = hits.length > 0;
+  const chips = [];
+
+  if (grounded && mode !== "explain" && depth !== "exam") {
+    chips.push({ id: "explain", label: "Explain step by step", prompt: `Explain step by step: ${topic}`, mode: "explain" });
+  }
+  if (depth !== "exam") {
+    chips.push({ id: "exam", label: "Model exam answer", prompt: `Write a model exam answer: ${topic}`, mode: "answer", depth: "exam" });
+  }
+  if (!hasSheet) {
+    chips.push({ id: "sheet", label: "Key terms sheet", prompt: `Key terms of ${topic}`, mode: "answer" });
+  }
+  if (grounded) {
+    chips.push({ id: "quiz", label: "Quiz me on this", action: "quiz" });
+  }
+  return chips.slice(0, 3);
+}
+
+/** Keep a quoted topic short and free of the request wording. */
+function cleanTopic(query = "") {
+  const text = String(query || "")
+    .replace(/^(please\s+)?(can you\s+)?(key ?terms?|keywords?|study sheet|cheat sheet|formula sheet|revision notes?|glossary)\s+(of|for|on|in)\s+/i, "")
+    .replace(/^(please\s+)?(can you\s+)?(explain|tell me|what is|what are|how does|why is|why do|write a model exam answer( for| on)?)\s*/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const trimmed = text || String(query || "").trim();
+  return trimmed.length > 90 ? `${trimmed.slice(0, 87).trimEnd()}…` : trimmed;
+}

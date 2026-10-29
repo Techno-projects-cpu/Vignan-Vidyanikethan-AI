@@ -10,26 +10,27 @@
   <meta property="og:title" content="Vignan Vidyanikethan AI — learn from your own textbooks">
   <meta property="og:description" content="Turn your textbooks into cited answers, quizzes and revision tools. A student project for INSPIRE-MANAK.">
   <meta property="og:url" content="https://vignanvidyanikethanai.onrender.com/">
-  <meta property="og:image" content="https://vignanvidyanikethanai.onrender.com/icons/icon-512.png?v=17">
+  <meta property="og:image" content="https://vignanvidyanikethanai.onrender.com/icons/icon-512.png?v=18">
   <meta name="twitter:card" content="summary">
   <title>Vignan Vidyanikethan AI — learn from your own textbooks</title>
   <link rel="canonical" href="https://vignanvidyanikethanai.onrender.com/">
-  <link rel="manifest" href="./manifest.webmanifest?v=17">
-  <link rel="icon" href="./icons/icon.svg?v=17" type="image/svg+xml">
-  <link rel="icon" href="./icons/icon-48.png?v=17" type="image/png" sizes="48x48">
-  <link rel="shortcut icon" href="./favicon.ico?v=17">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=17">
+  <link rel="manifest" href="./manifest.webmanifest?v=18">
+  <link rel="icon" href="./icons/icon.svg?v=18" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-48.png?v=18" type="image/png" sizes="48x48">
+  <link rel="shortcut icon" href="./favicon.ico?v=18">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=18">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./styles-premium.css?v=17">
-  <link rel="stylesheet" href="./styles-identity.css?v=17">
-  <link rel="stylesheet" href="./styles-social.css?v=17">
+  <link rel="stylesheet" href="./styles-premium.css?v=18">
+  <link rel="stylesheet" href="./styles-identity.css?v=18">
+  <link rel="stylesheet" href="./styles-social.css?v=18">
+  <link rel="stylesheet" href="./styles-pro.css?v=18">
 </head>
 <body class="minimal-ui premium-ui auth-locked">
 
   <section class="startup-screen" id="startup-screen" role="dialog" aria-modal="true" aria-labelledby="startup-title" hidden>
     <div class="startup-frame">
       <header class="startup-top">
-        <span class="startup-wordmark"><img src="./icons/icon.svg?v=17" alt="" width="29" height="29">VIGNAN<span> / AI</span></span>
+        <span class="startup-wordmark"><img src="./icons/icon.svg?v=18" alt="" width="29" height="29">VIGNAN<span> / AI</span></span>
         <div class="startup-top-right"><span class="startup-edition">A STUDENT PROJECT &nbsp; / &nbsp; 01</span><button type="button" id="startup-skip">Skip intro ↗</button></div>
       </header>
       <div class="startup-body">
@@ -55,7 +56,7 @@
     <div class="auth-gate-shell">
       <header class="auth-gate-top">
         <a class="auth-gate-brand" href="./">
-          <span class="auth-gate-mark" aria-hidden="true"><img src="./icons/icon.svg?v=17" alt="" width="37" height="37"></span>
+          <span class="auth-gate-mark" aria-hidden="true"><img src="./icons/icon.svg?v=18" alt="" width="37" height="37"></span>
           <span>VIGNAN <b>VIDYANIKETHAN AI</b></span>
         </a>
         <span class="auth-gate-badge">YOUR STUDY SPACE</span>
@@ -199,7 +200,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="./" aria-label="Vignan Vidyanikethan AI home">
-        <span class="brand-mark" aria-hidden="true"><img src="./icons/icon.svg?v=17" alt="" width="38" height="38"></span>
+        <span class="brand-mark" aria-hidden="true"><img src="./icons/icon.svg?v=18" alt="" width="38" height="38"></span>
         <span class="brand-text"><strong>Vignan</strong><small>Vidyanikethan AI</small></span>
       </a>
       <div class="sidebar-label">WORKSPACE</div>
@@ -230,7 +231,7 @@
     <div class="workspace">
       <header class="topbar premium-topbar">
         <div class="premium-brand">
-          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home"><img src="./icons/icon.svg?v=17" alt="" width="38" height="38"></a>
+          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home"><img src="./icons/icon.svg?v=18" alt="" width="38" height="38"></a>
           <span class="premium-wordmark">VIGNAN <span>AI</span></span>
         </div>
         <div class="premium-view-chip" aria-live="polite"><span class="premium-view-dot"></span><span id="premium-view-label">Ask</span></div>
@@ -243,6 +244,7 @@
           </div>
           <button type="button" class="premium-menu-button" id="command-menu-button" aria-haspopup="dialog" aria-controls="command-overlay">Menu <kbd>⌘K</kbd></button>
           <span class="chip premium-hidden" id="offline-chip"><span class="chip-dot"></span><span data-i18n="app.offlineReady">Offline ready</span></span>
+          <button type="button" class="chip pro-chip" id="pro-chip" hidden aria-pressed="false" title="Pro Mode is on — click to power down">◆ PRO</button>
           <button type="button" class="icon-button premium-icon-button" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme"><svg><use href="#i-moon"></use></svg></button>
           <button type="button" class="icon-button premium-icon-button social-bell" id="social-bell" aria-label="Alerts" title="Alerts"><svg><use href="#i-bell"></use></svg><span class="social-bell-count" id="social-bell-count" hidden>0</span></button>
           <button type="button" class="profile-chip account-chip" id="profile-button" aria-label="Account" title="Account"><span id="profile-initial">S</span><span class="account-dot" id="account-dot"></span></button>
@@ -299,7 +301,7 @@
                 </div>
               </div>
               <div class="chat-log" id="chat-log" aria-live="polite"></div>
-              <div class="typing hidden" id="typing"><span class="spinner"></span><span>Reading your textbooks…</span></div>
+              <div class="typing hidden" id="typing"><span class="spinner"></span><span id="typing-label">Reading your textbooks…</span></div>
               <form class="composer" id="ask-form">
                 <div class="composer-input-row">
                   <textarea id="ask-input" rows="2" aria-label="Ask, paste a public link, or request a quiz" placeholder="Ask, paste a link, or say ‘quiz me on…’" data-i18n-placeholder="ask.placeholder" data-i18n-aria="ask.inputLabel"></textarea>
@@ -318,6 +320,11 @@
                     <button type="button" class="mode-chip" data-mode="summarize" data-i18n="mode.summarize">Summary</button>
                     <button type="button" class="mode-chip" data-mode="practice" data-i18n="mode.practice">Practice</button>
                     <button type="button" class="mode-chip" data-mode="flashcards" data-i18n="mode.flashcards">Flashcards</button>
+                  </div></details>
+                  <details class="response-modes"><summary>Answer length</summary><div class="mode-row" id="depth-row" role="group" aria-label="Answer length">
+                    <button type="button" class="mode-chip" data-depth="brief" title="One short answer, about 80 words">Brief</button>
+                    <button type="button" class="mode-chip active" data-depth="balanced" title="A clear answer with the key steps">Balanced</button>
+                    <button type="button" class="mode-chip" data-depth="exam" title="A model exam answer with labelled points">Exam</button>
                   </div></details>
                   <button type="button" class="text-button" id="clear-chat" data-i18n="ask.clear">Clear chat</button>
                 </div>
@@ -713,7 +720,7 @@
   <div class="command-overlay" id="command-overlay" hidden aria-hidden="true">
     <div class="command-panel" role="dialog" aria-modal="true" aria-labelledby="command-title">
       <div class="command-head">
-        <span class="command-mark" aria-hidden="true"><img src="./icons/icon.svg?v=17" alt="" width="38" height="38"></span>
+        <span class="command-mark" aria-hidden="true"><img src="./icons/icon.svg?v=18" alt="" width="38" height="38"></span>
         <div class="command-title-wrap">
           <strong id="command-title">Everything, in one menu.</strong>
           <span>Search pages, actions and AI nicknames.</span>
@@ -765,7 +772,25 @@
     </div>
   </div>
 
+  <div class="pro-overlay" id="pro-overlay" hidden aria-hidden="true">
+    <div class="pro-hud" aria-hidden="true">
+      <span class="pro-grid"></span>
+      <span class="pro-ring pro-ring-a"></span>
+      <span class="pro-ring pro-ring-b"></span>
+      <span class="pro-ring pro-ring-c"></span>
+      <span class="pro-sweep"></span>
+      <span class="pro-cross pro-cross-a"></span>
+      <span class="pro-cross pro-cross-b"></span>
+    </div>
+    <div class="pro-boot">
+      <div class="pro-console" id="pro-console"></div>
+      <p class="pro-title" id="pro-title">PRO MODE</p>
+      <p class="pro-subtitle">V.I.G.N.A.N. · cited engine, lights on</p>
+    </div>
+    <button type="button" class="pro-skip" id="pro-skip">Skip</button>
+  </div>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./js/boot.js?v=17"></script>
+  <script type="module" src="./js/boot.js?v=18"></script>
 </body>
 </html>

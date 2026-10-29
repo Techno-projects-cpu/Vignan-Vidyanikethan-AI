@@ -5,7 +5,7 @@
  * passages to existing AI providers and asks them to reason over that context.
  */
 
-import { truncate } from "./util.js?v=17";
+import { truncate } from "./util.js?v=18";
 
 export const SYSTEM_PROMPT = `You are Vignan Vidyanikethan AI, a careful study assistant for school students.
 
@@ -16,7 +16,9 @@ RULES:
 4. If the passages do not contain the answer, say exactly: "I could not find this in your textbooks." Then suggest what to study or upload.
 5. Never claim a web result is from a textbook. Never invent a page number.
 6. Write for a school student: clear, friendly, step-by-step when helpful. Keep it concise.
-7. Do not output HTML, markdown tables, or JSON unless the user explicitly asks for JSON.`;
+7. If the passages answer only part of the question, answer the part they support and name the missing detail in one short sentence. Never pad an answer with facts from memory, and never reply that a question is "too complex".
+8. Use the student's own syllabus words for definitions. Put a number, formula or date only when a passage states it.
+9. Do not output HTML, markdown tables, or JSON unless the user explicitly asks for JSON.`;
 
 /**
  * Outside-the-books prompt. Passages here are web sources, never textbooks, and
@@ -41,6 +43,12 @@ export const MODE_INSTRUCTION = {
   summarize: "Write a short revision summary with bullet points and citations.",
   practice: "Write three short practice questions from the passages, then give brief answers with citations.",
   flashcards: "Write five question-and-answer flashcards from the passages with citations.",
+};
+
+export const DEPTH_INSTRUCTION = {
+  brief: "LENGTH: brief. At most 80 words, one short paragraph or three bullets, each cited. No preamble.",
+  balanced: "LENGTH: balanced. 110-180 words. Answer first, then the reasoning in short steps, each with a citation.",
+  exam: "LENGTH: model exam answer, 180-260 words: Definition, then 3-5 numbered Key points, then a Formula or example only if the passages contain one, then one Examiner note naming the detail students usually miss. Cite every point.",
 };
 
 export const QUIZ_SCHEMA = `Return ONLY valid JSON, no markdown, shaped like:

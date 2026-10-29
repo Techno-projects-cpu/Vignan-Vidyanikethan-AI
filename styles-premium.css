@@ -1793,3 +1793,17 @@ body.premium-ui .message-body .rich-heading {
 body.premium-ui .message-body .rich-heading:first-child {
   margin-top: 0;
 }
+
+/* ------------------------------------------------------------------------- */
+/* "Next" chips after an answer, and the answer-length control.              */
+/* ------------------------------------------------------------------------- */
+
+body.premium-ui .chat-suggestions { align-items: center; }
+body.premium-ui .chat-suggestions .suggestion-label {
+  margin-right: 2px;
+  color: var(--p-muted);
+  font: 700 9px var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+body.premium-ui .chat-suggestions.hidden { display: none; }

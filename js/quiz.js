@@ -6,9 +6,9 @@
  * can show the student what to revise instead of just a score.
  */
 
-import { questionCopy } from "./question-copy.js?v=17";
-import { hashFeature } from "./vector.js?v=17";
-import { splitSentences, tokenize } from "./text.js?v=17";
+import { questionCopy } from "./question-copy.js?v=18";
+import { hashFeature } from "./vector.js?v=18";
+import { splitSentences, tokenize } from "./text.js?v=18";
 import {
   clamp,
   levenshtein,
@@ -18,7 +18,7 @@ import {
   uid,
   unique,
   wordOverlap,
-} from "./util.js?v=17";
+} from "./util.js?v=18";
 
 const FILLER = new Set(
   `about above after again against because before being below between could during each every first following from have into itself more most other second should some such than that their these those through where which while would your textbook chapter page section notes`.split(

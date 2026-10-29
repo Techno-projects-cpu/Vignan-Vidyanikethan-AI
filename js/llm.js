@@ -7,6 +7,7 @@
  */
 
 import {
+  DEPTH_INSTRUCTION,
   FLASHCARD_SCHEMA,
   MODE_INSTRUCTION,
   OUTSIDE_SYSTEM_PROMPT,
@@ -15,16 +16,16 @@ import {
   extractJson,
   formatContext,
   formatOutsideContext,
-} from "./context.js?v=17";
-import { languageName } from "./i18n.js?v=17";
+} from "./context.js?v=18";
+import { languageName } from "./i18n.js?v=18";
 import {
   callProvider,
   callRoutedModel,
   gradeShortWithModel,
   testProvider,
   verifyAnswer,
-} from "./model-router.js?v=17";
-import { truncate, uid } from "./util.js?v=17";
+} from "./model-router.js?v=18";
+import { truncate, uid } from "./util.js?v=18";
 
 export {
   FLASHCARD_SCHEMA,
@@ -51,7 +52,7 @@ function languageInstruction(language = "en") {
 
 
 
-export function buildMessages({ query, hits, mode = "answer", history = [], language = "en" }) {
+export function buildMessages({ query, hits, mode = "answer", history = [], language = "en", depth = "balanced" }) {
   const context = formatContext(hits);
   const recent = history.slice(-6).map(({ role, content }) => ({ role, content: truncate(content, 700) }));
   return [
@@ -59,7 +60,7 @@ export function buildMessages({ query, hits, mode = "answer", history = [], lang
     ...recent,
     {
       role: "user",
-      content: `${MODE_INSTRUCTION[mode] || MODE_INSTRUCTION.answer}\n${languageInstruction(language)}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}\n\nQUESTION: ${query}\n\nRemember: cite [n] after each claim. If the passages are insufficient, say you could not find it in the library.`,
+      content: `${MODE_INSTRUCTION[mode] || MODE_INSTRUCTION.answer}\n${DEPTH_INSTRUCTION[depth] || DEPTH_INSTRUCTION.balanced}\n${languageInstruction(language)}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}\n\nQUESTION: ${query}\n\nRemember: cite [n] after each claim. If the passages are insufficient, say you could not find it in the library.`,
     },
   ];
 }
@@ -123,7 +124,11 @@ export async function answerOutsideWithModel({ query, results = [], history = []
 }
 
 export async function answerWithModel({ query, hits, mode, history, settings, signal, verify = true } = {}) {
-  const messages = buildMessages({ query, hits, mode, history, language: settings?.language });
+  const messages = buildMessages({
+    query, hits, mode, history,
+    language: settings?.language,
+    depth: settings?.answerDepth,
+  });
   const result = await callModel({ settings, messages, task: "answer", signal });
   if (result.offline) return { ...result, verification: { enabled: false } };
   const hasCitation = /\[\d+\]/.test(result.content);

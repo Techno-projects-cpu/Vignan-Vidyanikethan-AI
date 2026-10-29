@@ -280,6 +280,70 @@ Pure modules, so both are unit-tested without a browser:
 - `js/study-sheet.js` — `asksForStudySheet`, `studySheetTopic`, `buildStudySheet`, `studySheetMarkdown`
 - `js/revision-plan.js` — `buildRevisionPlan`, `revisionPlanText`
 
+### Answer length, follow-ups and citation honesty
+
+Three additions make the chat behave like a teacher rather than a search box,
+and all three work with the offline engine too.
+
+**Answer length.** Next to *Answer style* in the composer, *Answer length*
+offers **Brief** (about 80 words), **Balanced** (110-180 words with short steps)
+and **Exam** (a model exam answer: definition, numbered key points, a formula or
+example only if the passage has one, and an examiner note). The choice is stored
+in settings and sent to the connected model as an explicit length directive; the
+extractive engine ignores it because it can only quote what the page says.
+
+**Next chips.** After an answer built from real pages, the suggestion row offers
+the next useful move: *Explain step by step*, *Model exam answer*, or *Quiz me
+on this*. They reuse the same pipeline, so a follow-up is grounded exactly like
+the first answer. *Key terms sheet* appears only when no sheet was already made.
+
+**Citation honesty.** A long model answer with fewer than half of its sentences
+carrying a citation is not presented as grounded: a short note is added asking
+the student to check the sources panel. Short answers are exempt — one sentence
+cannot be "mostly uncited".
+
+Pure module: `js/answer-quality.js` (`depthDirective`, `citationCoverage`,
+`looksUncited`, `followUpsFor`).
+
+### Pro Mode (easter egg)
+
+Type **"Hi, I am Nezaad, from Nezaad Industries"** in the Ask box. The screen
+boots a short HUD sequence — rotating rings, a scrolling console with real
+numbers from your own device, then **PRO MODE** — and the assistant introduces
+itself as **V.I.G.N.A.N.**, a JARVIS-style interface wrapped around the same
+cited engine. Pro Mode is skippable (click, Esc, Enter, or *Skip*), stays on
+across reloads, and adds:
+
+- a briefing with the live readout: books and pages indexed, decks, cards due,
+  answer route, streak and accuracy;
+- **status report** or **run diagnostics** for a fresh readout at any time;
+- **power down** (or clicking the ◆ PRO chip in the top bar) to return to Bolt.
+
+The persona changes voice and chrome only. Every answer still comes from the
+same retrieval, with the same citations, and nothing is invented — if the pages
+do not contain it, Pro Mode says so too. Reduced-motion users get a cross-fade
+instead of the animation. `js/pro-mode.js` is pure logic, `js/pro-ui.js` runs
+the sequence, and `styles-pro.css` styles it.
+
+### Offline behaviour of the newest features
+
+The service worker precaches every module, so the whole study loop is available
+with no connection:
+
+| Feature | Offline |
+| --- | --- |
+| Cited answers from saved books | Yes — retrieved from IndexedDB |
+| Cited study sheets | Yes — built locally from the matched pages |
+| Today's revision | Yes — computed from local decks and results |
+| Flashcards, quizzes, evaluation | Yes |
+| Pro Mode and its briefing | Yes — no network call |
+| Web fallback | Skipped, and the answer says so instead of offering a dead link |
+| Friends, Chat, Play, leaderboard | Needs the server; the UI explains that |
+
+`tests/offline-coverage.test.mjs` fails the build if any imported module, script
+or stylesheet is missing from the worker's cache list — the quiet failure mode
+where a feature works online and breaks the moment a judge turns off Wi-Fi.
+
 ### Ollama, fully offline
 
 ```bash

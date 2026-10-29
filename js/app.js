@@ -6,20 +6,26 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=17";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=17";
-import { ingestPdf, ingestText } from "./ingest.js?v=17";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=17";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=17";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=17";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=17";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=17";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=17";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=17";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=17";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=17";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=17";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=17";
+import * as db from "./db.js?v=18";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=18";
+import { ingestPdf, ingestText } from "./ingest.js?v=18";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=18";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=18";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=18";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=18";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=18";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=18";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=18";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=18";
+import {
+  PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery,
+  proBootLines, proBriefing, proGreeting, proStatusReport,
+} from "./pro-mode.js?v=18";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=18";
+import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=18";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=18";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=18";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=18";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -27,8 +33,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=17";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=17";
+} from "./llm.js?v=18";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=18";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -40,9 +46,9 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=17";
-import { TASKS } from "./model-router.js?v=17";
-import { PROVIDERS, providerList } from "./providers.js?v=17";
+} from "./local-ai.js?v=18";
+import { TASKS } from "./model-router.js?v=18";
+import { PROVIDERS, providerList } from "./providers.js?v=18";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -51,30 +57,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=17";
-import { parseApiKeys } from "./key-pool.js?v=17";
+} from "./settings.js?v=18";
+import { parseApiKeys } from "./key-pool.js?v=18";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=17";
+} from "./student-keys.js?v=18";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=17";
+} from "./quiz.js?v=18";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=17";
+} from "./flashcards.js?v=18";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=17";
+} from "./study-decks.js?v=18";
 import {
   accuracy,
   currentStreak,
@@ -85,14 +91,14 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=17";
-import { externalSearchUrl, searchWeb } from "./web.js?v=17";
-import { openEditStudio } from "./edit-studio.js?v=17";
-import { openReader } from "./reader.js?v=17";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=17";
-import { languageLabel, languageGroups } from "./languages.js?v=17";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=17";
-import * as ui from "./ui.js?v=17";
+} from "./progress.js?v=18";
+import { externalSearchUrl, searchWeb } from "./web.js?v=18";
+import { openEditStudio } from "./edit-studio.js?v=18";
+import { openReader } from "./reader.js?v=18";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=18";
+import { languageLabel, languageGroups } from "./languages.js?v=18";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=18";
+import * as ui from "./ui.js?v=18";
 import {
   clearReferral,
   getLeaderboard,
@@ -102,8 +108,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=17";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=17";
+} from "./auth.js?v=18";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=18";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -111,12 +117,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=17";
-import { initMotion, revealVisible } from "./motion.js?v=17";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=17";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=17";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=17";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=17";
+} from "./premium-ui.js?v=18";
+import { initMotion, revealVisible } from "./motion.js?v=18";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=18";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=18";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=18";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=18";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -203,6 +209,7 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     state.lastAnswer = [...state.messages].reverse().find((message) => message.role === "assistant" && (message.sources?.length || message.webSources?.length)) || {};
     setLanguage(state.settings.language);
     setTheme(state.settings.theme, { save: false });
+    setProChrome(Boolean(state.settings.pro));
     await reloadIndexes();
     if (!state.messages.length) addWelcomeMessage();
     bindEvents();
@@ -330,7 +337,16 @@ function setView(view, { skipHistory = false } = {}) {
 function setMode(mode) {
   if (!mode) return;
   state.mode = mode;
-  $$(".mode-chip").forEach((chip) => chip.classList.toggle("active", chip.dataset.mode === mode));
+  $$(".mode-chip[data-mode]").forEach((chip) => chip.classList.toggle("active", chip.dataset.mode === mode));
+}
+
+/** Answer length: brief, balanced or a model exam answer. */
+async function setAnswerDepth(depth) {
+  state.settings.answerDepth = normalizeDepth(depth || DEFAULT_DEPTH);
+  $$(".mode-chip[data-depth]").forEach((chip) => chip.classList.toggle("active", chip.dataset.depth === state.settings.answerDepth));
+  await saveSettings();
+  const chosen = state.settings.answerDepth;
+  ui.showToast(chosen === "exam" ? "Answers will come as model exam answers." : chosen === "brief" ? "Answers will stay brief." : "Answers will be balanced.", "info", 2200);
 }
 
 function setTheme(theme, { save = true } = {}) {
@@ -420,6 +436,9 @@ function renderAll() {
     button.title = label;
     button.setAttribute("aria-label", label);
   }
+  $$(".mode-chip[data-depth]").forEach((chip) =>
+    chip.classList.toggle("active", chip.dataset.depth === normalizeDepth(state.settings.answerDepth)));
+  $$(".mode-chip[data-mode]").forEach((chip) => chip.classList.toggle("active", chip.dataset.mode === state.mode));
   const meta = VIEW_META[state.currentView];
   if (meta) {
     $("#view-kicker").textContent = t(meta.kicker);
@@ -764,9 +783,21 @@ async function prepareQuizFromText(topic = "", bookId = "", sources = []) {
 
 function renderSuggestions() {
   const container = $("#chat-suggestions");
-  container.classList.toggle("hidden", state.messages.some((message) => message.role === "user"));
+  const lastAnswer = [...state.messages].reverse().find((message) => message.role === "assistant");
+  const asked = state.messages.some((message) => message.role === "user");
+  const suggestions = asked && lastAnswer?.sources?.length
+    ? followUpsFor({
+        query: [...state.messages].reverse().find((message) => message.role === "user")?.content || "",
+        hits: lastAnswer.sources,
+        hasSheet: Boolean(lastAnswer.studySheet),
+        depth: state.settings.answerDepth,
+      })
+    : SUGGESTIONS;
+  container.classList.toggle("hidden", asked && !suggestions.length);
   container.replaceChildren();
-  for (const suggestion of SUGGESTIONS) {
+  const heading = ui.element("span", "suggestion-label", asked ? "Next" : "Try");
+  container.appendChild(heading);
+  for (const suggestion of suggestions) {
     const button = ui.element("button", "suggestion-chip", suggestion.label);
     button.type = "button";
     button.addEventListener("click", () => {
@@ -774,6 +805,14 @@ function renderSuggestions() {
         void prepareQuizFromText(suggestion.prompt);
         return;
       }
+      if (suggestion.action === "quiz") {
+        const sources = lastAnswer?.sources || [];
+        const question = [...state.messages].reverse().find((message) => message.role === "user")?.content || "";
+        const ids = [...new Set(sources.map((source) => source.bookId).filter(Boolean))];
+        void prepareQuizFromText(question, ids.length === 1 ? ids[0] : "", sources);
+        return;
+      }
+      if (suggestion.depth) void setAnswerDepth(suggestion.depth);
       $("#ask-input").value = suggestion.prompt;
       setMode(suggestion.mode);
       $("#ask-form").requestSubmit();
@@ -847,6 +886,8 @@ function renderChat() {
 
 function showTyping(visible) {
   $("#typing").classList.toggle("hidden", !visible);
+  const label = $("#typing-label");
+  if (label) label.textContent = state.settings.pro ? PRO_TYPING : "Reading your textbooks…";
   $("#ask-send").disabled = visible;
 }
 
@@ -930,6 +971,72 @@ async function executeChatAction(intent, history) {
   return { text: "I could not complete that action.", sources: [] };
 }
 
+/** Swap the assistant's name for the Pro Mode voice without touching the answer. */
+function proPersonaMeta(meta = "") {
+  const base = String(meta || "").replace(/^Bolt\s*·\s*/, "").replace(/^V\.I\.G\.N\.A\.N\..*?·\s*/, "");
+  return base ? `${PRO_NAME} · pro · ${base}` : PRO_META;
+}
+
+/** Live numbers for Pro Mode readouts: real state, never invented. */
+function proStatus() {
+  const books = Array.isArray(state.books) ? state.books : [];
+  const decks = normalizeDeckCollection(state.studyDecks).decks;
+  const today = localDay();
+  const pageTotal = books.reduce((sum, book) => sum + (Array.isArray(book?.pages) ? book.pages.length : Number(book?.pageCount) || 0), 0);
+  const route = state.settings.routing.answer;
+  const offline = route === "offline" || navigator.onLine === false;
+  return {
+    books: books.length,
+    pages: pageTotal,
+    decks: decks.length,
+    dueCards: decks.reduce((sum, deck) => sum + dueCards(deck.cards, deck.progress, today).length, 0),
+    streaks: currentStreak(state.studyProgress),
+    quizzes: state.studyProgress.totalQuizzes || 0,
+    accuracy: accuracy(state.studyProgress),
+    model: route === "offline" ? "local engine" : aiProfile(route).nickname,
+    offline,
+  };
+}
+
+async function engageProMode({ announce = true } = {}) {
+  const status = proStatus();
+  state.settings.pro = true;
+  await saveSettings();
+  setProChrome(true);
+  await playProActivation({
+    lines: proBootLines({
+      books: status.books, pages: status.pages, dueCards: status.dueCards,
+      decks: status.decks, streaks: status.streaks, offline: status.offline, model: status.model,
+    }),
+  });
+  updateStatus();
+  if (!announce) return;
+  const answer = {
+    text: proBriefing(status, { date: new Date() }),
+    sources: [], webSources: [], flashcards: [], grounded: false, confidence: 0,
+    meta: PRO_META, verification: { enabled: false },
+  };
+  state.lastAnswer = answer;
+  addMessage({ role: "assistant", content: answer.text, meta: answer.meta });
+  renderSources(answer);
+  ui.showToast("Pro Mode engaged.", "success");
+}
+
+async function disengageProMode() {
+  state.settings.pro = false;
+  await saveSettings();
+  setProChrome(false);
+  updateStatus();
+  const answer = {
+    text: `Pro Mode powered down. ${PRO_NAME} returns to plain Bolt — same cited engine, fewer lights.`,
+    sources: [], webSources: [], flashcards: [], grounded: false, confidence: 0,
+    meta: "Bolt · pro mode off", verification: { enabled: false },
+  };
+  state.lastAnswer = answer;
+  addMessage({ role: "assistant", content: answer.text, meta: answer.meta });
+  ui.showToast("Pro Mode off.", "info");
+}
+
 async function handleAsk(event) {
   event.preventDefault();
   if (state.askBusy) return;
@@ -956,6 +1063,31 @@ async function handleAsk(event) {
     let answer = null;
     let hits = [];
     const language = state.settings.language;
+    // The easter egg: "Hi, I am Nezaad, from Nezaad Industries" boots Pro Mode.
+    if (matchesActivation(query)) {
+      showTyping(false);
+      state.askBusy = false;
+      await engageProMode();
+      return;
+    }
+    if (matchesPowerDown(query) && state.settings.pro) {
+      showTyping(false);
+      state.askBusy = false;
+      await disengageProMode();
+      return;
+    }
+    if (matchesStatusQuery(query) && state.settings.pro) {
+      showTyping(false);
+      state.askBusy = false;
+      const report = {
+        text: proStatusReport(proStatus()), sources: [], webSources: [], flashcards: [],
+        grounded: false, confidence: 0, meta: PRO_META, verification: { enabled: false },
+      };
+      state.lastAnswer = report;
+      addMessage({ role: "assistant", content: report.text, meta: report.meta });
+      renderSources(report);
+      return;
+    }
     const safety = safetyReply(query, language);
     const intent = !safety && !asksAboutCreator(query) ? parseChatIntent(query) : null;
     const greeting = conversationReply(query, language);
@@ -982,8 +1114,11 @@ async function handleAsk(event) {
       }
       return;
     } else if (greeting || casual) {
+      // In Pro Mode a greeting gets an in-character readout rather than a
+      // generic hello; the wording still comes from the same local replies.
+      const persona = state.settings.pro && greeting ? `${proGreeting(new Date())} Systems nominal.\n\n` : "";
       answer = {
-        text: greeting || casual, sources: [], webSources: [], flashcards: [],
+        text: persona + (greeting || casual), sources: [], webSources: [], flashcards: [],
         grounded: false, confidence: 0, meta: greeting ? "Bolt · conversation" : "Bolt · casual", verification: { enabled: false },
       };
     } else if (requestedLink || (recentLink && isFollowUp(query))) {
@@ -1021,7 +1156,9 @@ async function handleAsk(event) {
         }
       }
 
-      const webEnabled = Boolean(state.settings.webEnabled);
+      const online = navigator.onLine !== false;
+      const webEnabled = Boolean(state.settings.webEnabled) && online;
+      const webSkippedOffline = Boolean(state.settings.webEnabled) && !online;
       let webResults = [];
       let searchProvider = "Web search";
       let searchProviders = [];
@@ -1055,8 +1192,12 @@ async function handleAsk(event) {
             const webImportNotice = hits.some((hit) => hit.sourceUrl)
               ? "_This answer includes a website you imported; it is not an independently verified textbook._\n\n"
               : "";
+            // A long answer with few citations is the failure mode judges notice.
+            const thinCitations = looksUncited(model.content)
+              ? "_Some sentences here are not tied to a page. Check the sources panel before you rely on them._\n\n"
+              : "";
             answer = {
-              text: webImportNotice + model.content,
+              text: webImportNotice + thinCitations + model.content,
               sources: sourcesFromHits(hits), webSources: [], grounded: true,
               confidence: retrieval.confidence, verification: model.verification,
               meta: `${aiProfile(model.engine).nickname} · AI answer${model.fallbackUsed ? " (fallback)" : ""}`,
@@ -1095,19 +1236,27 @@ async function handleAsk(event) {
         // No library page, no usable web text: fall back to the built-in fact pack.
         answer = knowledgeFactAnswer(effectiveQuery, language) || knowledgeFactAnswer(query, language);
       }
-      if (!answer && !hits.length && webEnabled && !webResults.length
-        && retrieval.reason !== "too-vague") {
+      if (!answer && !hits.length && !webResults.length && retrieval.reason !== "too-vague"
+        && (webEnabled || webSkippedOffline)) {
+        // Offline is not a failure mode: say what still works instead of
+        // offering a web link that cannot open.
         const query$ = searchTopic(effectiveQuery) || effectiveQuery;
+        const webLines = [
+          `**${t("knowledge.notFound")}**`,
+          t("knowledge.outsideHelp"),
+          `- [DuckDuckGo](${externalSearchUrl(query$, "duckduckgo")})`,
+          `- [Google](${externalSearchUrl(query$, "google")})`,
+          searchError ? `_${searchError.message}_` : t("knowledge.webEmpty"),
+        ];
+        const offlineLines = [
+          `**${t("knowledge.notFound")}**`,
+          "_You are offline, so web search was skipped. Your books, quizzes, flashcards, cited study sheets and today's revision all still work; saved pages answer questions with their page numbers._",
+        ];
         answer = {
-          text: [
-            `**${t("knowledge.notFound")}**`,
-            t("knowledge.outsideHelp"),
-            `- [DuckDuckGo](${externalSearchUrl(query$, "duckduckgo")})`,
-            `- [Google](${externalSearchUrl(query$, "google")})`,
-            searchError ? `_${searchError.message}_` : t("knowledge.webEmpty"),
-          ].join("\n\n"),
+          text: (webSkippedOffline ? offlineLines : webLines).join("\n\n"),
           sources: [], webSources: [], flashcards: [], grounded: false, confidence: 0,
-          meta: "Bolt · outside search unavailable", verification: { enabled: false },
+          meta: webSkippedOffline ? "Bolt · offline" : "Bolt · outside search unavailable",
+          verification: { enabled: false },
         };
       }
       if (!answer) {
@@ -1119,7 +1268,7 @@ async function handleAsk(event) {
           : hits.length ? "Bolt · cited library excerpts" : "Bolt · no matching source";
         answer.verification = { enabled: false };
         if (!hits.length && !webEnabled) {
-          answer.text = `${answer.text}\n\n_${t("knowledge.webOff")}_`;
+          answer.text = `${answer.text}\n\n_${webSkippedOffline ? "Offline — saved pages only." : t("knowledge.webOff")}_`;
         }
         showKeyExhaustedToast(modelError);
       }
@@ -1128,6 +1277,7 @@ async function handleAsk(event) {
       }
       }
     }
+    if (state.settings.pro) answer.meta = proPersonaMeta(answer.meta);
     state.lastAnswer = answer;
     addMessage({
       role: "assistant", content: answer.text, sources: answer.sources,
@@ -3059,7 +3209,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=17");
+            const { social } = await import("./social.js?v=18");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -3503,6 +3653,7 @@ function bindEvents() {
   });
   window.addEventListener("online", updateOfflineChip);
   window.addEventListener("offline", updateOfflineChip);
+  $("#pro-chip")?.addEventListener("click", () => { void disengageProMode(); });
 
   $("#ask-form").addEventListener("submit", handleAsk);
   $("#ask-web-fallback").addEventListener("change", (event) => void setWebChoice(event.target.checked));
@@ -3517,6 +3668,14 @@ function bindEvents() {
     const chip = event.target.closest(".mode-chip");
     if (chip) {
       setMode(chip.dataset.mode);
+      const disclosure = chip.closest("details");
+      if (disclosure) disclosure.open = false;
+    }
+  });
+  $("#depth-row")?.addEventListener("click", (event) => {
+    const chip = event.target.closest(".mode-chip[data-depth]");
+    if (chip) {
+      void setAnswerDepth(chip.dataset.depth);
       const disclosure = chip.closest("details");
       if (disclosure) disclosure.open = false;
     }
