@@ -1030,28 +1030,37 @@ function setupPage() {
       purpose: "The secret key. Server only; bypasses row-level security.",
     },
   ];
-  const ready = accountsBackend === "supabase";
+  // `local` is a working backend (JSON store on the server), not a broken one:
+  // only `unavailable` means registration is actually down.
+  const usingSupabase = accountsBackend === "supabase";
+  const ready = accountsBackend !== "unavailable";
+  const wantsSupabase = requestedAccountsBackend === "supabase";
+  // Every problem is reported at once: fixing one variable only to be told
+  // about the next is how an evening disappears.
   const problems = [];
-  if (!rows[0].ok) problems.push("<code>SUPABASE_URL</code> is empty or not a URL.");
-  if (rows[1].ok === false && keyKind(SUPABASE_ANON_KEY) === "secret key") {
-    problems.push("<code>SUPABASE_ANON_KEY</code> holds a <strong>secret</strong> key. Put the <strong>publishable</strong> key there instead.");
-  } else if (!rows[1].ok) {
-    problems.push("<code>SUPABASE_ANON_KEY</code> is empty. Paste the <strong>publishable</strong> key, which starts <code>sb_publishable_</code>.");
-  }
-  if (rows[2].ok === false && keyKind(SUPABASE_SERVICE_ROLE_KEY) === "publishable key") {
-    problems.push("<code>SUPABASE_SERVICE_ROLE_KEY</code> holds a <strong>publishable</strong> key. Put the <strong>secret</strong> key there instead.");
-  } else if (!rows[2].ok) {
-    problems.push("<code>SUPABASE_SERVICE_ROLE_KEY</code> is empty. Paste the <strong>secret</strong> key, which starts <code>sb_secret_</code>.");
-  }
-  if (rows[2].ok && keyKind(SUPABASE_SERVICE_ROLE_KEY) === "legacy service_role JWT") {
-    problems.push("<code>SUPABASE_SERVICE_ROLE_KEY</code> still uses a <strong>legacy</strong> service_role key. It works, but Supabase retires it at the end of 2026 — replace it with a new secret key when convenient.");
+  if (wantsSupabase || usingSupabase) {
+    if (!rows[0].ok) {
+      problems.push("<code>SUPABASE_URL</code> is empty or not a URL.");
+    }
+    if (keyKind(SUPABASE_ANON_KEY) === "secret key") {
+      problems.push("<code>SUPABASE_ANON_KEY</code> holds a <strong>secret</strong> key. Put the <strong>publishable</strong> key there instead.");
+    } else if (!rows[1].ok) {
+      problems.push("<code>SUPABASE_ANON_KEY</code> is empty. Paste the <strong>publishable</strong> key, which starts <code>sb_publishable_</code>.");
+    }
+    if (keyKind(SUPABASE_SERVICE_ROLE_KEY) === "publishable key") {
+      problems.push("<code>SUPABASE_SERVICE_ROLE_KEY</code> holds a <strong>publishable</strong> key. Put the <strong>secret</strong> key there instead.");
+    } else if (!rows[2].ok) {
+      problems.push("<code>SUPABASE_SERVICE_ROLE_KEY</code> is empty. Paste the <strong>secret</strong> key, which starts <code>sb_secret_</code>.");
+    } else if (keyKind(SUPABASE_SERVICE_ROLE_KEY) === "legacy service_role JWT") {
+      problems.push("<code>SUPABASE_SERVICE_ROLE_KEY</code> still uses a <strong>legacy</strong> service_role key. It works, but Supabase retires it at the end of 2026, so replace it with a new secret key when convenient.");
+    }
   }
 
   const keysPage = ref ? `https://supabase.com/dashboard/project/${ref}/settings/api-keys` : "https://supabase.com/dashboard";
   const keyRows = rows.map((row) => `
         <tr>
           <td><code>${row.name}</code><span class="purpose">${row.purpose}</span></td>
-          <td class="state ${row.ok ? "ok" : "bad"}">${row.ok ? "set" : "missing or wrong"}</td>
+          <td class="state ${row.ok ? "ok" : "bad"}">${row.ok ? "set" : "fix"}</td>
           <td class="detail">${escapeHtml(row.detail)}</td>
         </tr>`).join("");
 
@@ -1082,8 +1091,8 @@ function setupPage() {
     td code { font-size: 12.5px; color: #fff; }
     td.purpose, .purpose { display: block; margin-top: 5px; color: #9a9a9a; font-size: 12px; line-height: 1.6; }
     td.state { white-space: nowrap; font-weight: 700; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
-    td.state.ok::before { content: "✓ "; }
-    td.state.bad::before { content: "✕ "; }
+    td.state.ok::before, td.state.bad::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 7px; border: 1px solid #fff; vertical-align: 1px; }
+    td.state.bad::before { background: #fff; }
     td.state.bad { border-left: 2px solid #fff; }
     td.detail { color: #b8b8b8; font-family: ui-monospace, monospace; font-size: 11.5px; overflow-wrap: anywhere; }
     .steps { counter-reset: step; list-style: none; padding: 0; margin: 18px 0; }
@@ -1107,15 +1116,21 @@ function setupPage() {
     <div class="legal-intro" style="position:static">
       <p class="eyebrow">SETUP CHECK / LIVE</p>
       <h1 style="font-size:clamp(42px,6vw,72px)">Is it<br><span>connected?</span></h1>
-      <p style="max-width:560px">This page reads the deployment's own configuration and reports what is set, what is missing and which key is the wrong shape. It shows variable names and formats only — never a key value, so it is safe to open in front of anyone.</p>
+      <p style="max-width:560px">This page reads the deployment's own configuration and reports what is set, what is missing and which key is the wrong shape. It shows variable names and formats only, never a key value, so it is safe to open in front of anyone.</p>
     </div>
 
     <div class="verdict">
-      <div class="mark">${ready ? "✓" : "!"}</div>
+      <div class="mark">${ready ? "OK" : "!"}</div>
       <div>
-        <h2>${ready ? "Accounts are connected." : "Accounts are not connected yet."}</h2>
+        <h2>${ready
+          ? usingSupabase
+            ? "Accounts are connected to Supabase."
+            : "Accounts are working on this server's local store."
+          : "Accounts are not connected yet."}</h2>
         <p>${ready
-          ? "Registration, login, sessions, progress, referrals, friends and the leaderboard all run on Supabase."
+          ? usingSupabase
+            ? "Registration, login, sessions, progress, referrals, friends and the leaderboard all run on Supabase, so they survive a redeploy."
+            : "Registration, login, progress and referrals work, but they are stored in a JSON file on the server. On Render's free tier that file is erased by a redeploy or a cold restart, so use Supabase for anything lasting."
           : `Registration and login will fail until this is fixed. Guest mode, the library, answers from saved pages and the offline mode all still work.${problems.length ? " " + problems.length + " problem" + (problems.length === 1 ? "" : "s") + " to fix, below." : ""}`}</p>
       </div>
     </div>
@@ -1124,14 +1139,15 @@ function setupPage() {
       <thead><tr><th>Variable</th><th>State</th><th>What the server sees</th></tr></thead>
       <tbody>${keyRows}</tbody>
     </table>
-    <p class="note">The last column describes the <em>shape</em> of the value, not the value itself. A publishable key starts <code>sb_publishable_</code>; a secret key starts <code>sb_secret_</code>; an older project may still hold long <code>eyJ…</code> keys, which work but are being retired.</p>
+    <p class="note"><strong>set</strong> means the variable is present and looks like the right kind of key; <strong>fix</strong> means it is missing, malformed, or the wrong kind of key. The last column describes the <em>shape</em> of the value, not the value itself. A publishable key starts <code>sb_publishable_</code>; a secret key starts <code>sb_secret_</code>; an older project may still hold long <code>eyJ…</code> keys, which work but are being retired.</p>
 
     ${problems.length ? `<ol class="steps">${problems.map((problem) => `<li>${problem}</li>`).join("")}</ol>` : ""}
+    ${ready && !usingSupabase ? `<p class="note">The three Supabase rows above are optional in this mode; they only matter once accounts should outlive a redeploy.</p>` : ""}
 
     <h2 style="font-size:20px;margin:34px 0 0">Where to fix it</h2>
     <ol class="steps">
-      <li>Open <a href="${keysPage}" target="_blank" rel="noopener noreferrer">Supabase → Settings → API Keys</a>. There is no separate “Settings → API” page any more, and the old names are gone: the <strong>anon</strong> key is now the <strong>publishable</strong> key, and the <strong>service_role</strong> key is now the <strong>secret</strong> key.</li>
-      <li>In <a href="https://dashboard.render.com/" target="_blank" rel="noopener noreferrer">Render → your service → Environment</a>, paste the publishable key into <code>SUPABASE_ANON_KEY</code> and the secret key into <code>SUPABASE_SERVICE_ROLE_KEY</code>. The variable names are historical; the values are the new ones.</li>
+      <li>Open <a href="${keysPage}" target="_blank" rel="noopener noreferrer">Supabase: Settings, then API Keys</a>. There is no separate “Settings, API” page any more, and the old names are gone: the <strong>anon</strong> key is now the <strong>publishable</strong> key, and the <strong>service_role</strong> key is now the <strong>secret</strong> key.</li>
+      <li>In <a href="https://dashboard.render.com/" target="_blank" rel="noopener noreferrer">Render: your service, then Environment</a>, paste the publishable key into <code>SUPABASE_ANON_KEY</code> and the secret key into <code>SUPABASE_SERVICE_ROLE_KEY</code>. The variable names are historical; the values are the new ones.</li>
       <li>Save. Render redeploys by itself; this page refreshes every 15 seconds while something is wrong.</li>
       <li>If registration still fails after this page shows all three as set, check that both SQL migrations have been run in the Supabase SQL editor.</li>
     </ol>
@@ -1322,8 +1338,42 @@ const server = http.createServer(async (request, response) => {
       await handleFetch(request, response);
       return;
     }
+    // A known endpoint called with the wrong method is a mistake, not a 404.
+    // Say which method it wants and give a body that would actually work, so
+    // opening /api/ai in a browser tab explains itself instead of looking broken.
+    const API_METHODS = {
+      "/api/health": ["GET"],
+      "/api/ai": ["POST"],
+      "/api/search": ["POST"],
+      "/api/fetch": ["POST"],
+      "/api/auth/register": ["POST"],
+      "/api/auth/login": ["POST"],
+      "/api/auth/logout": ["POST"],
+      "/api/auth/me": ["GET"],
+      "/api/leaderboard": ["GET"],
+      "/api/progress": ["POST"],
+    };
+    if (API_METHODS[apiPath]) {
+      const allowed = API_METHODS[apiPath];
+      const examples = {
+        "/api/ai": '{"messages":[{"role":"user","content":"Explain photosynthesis"}]}',
+        "/api/search": '{"query":"Kakatiya dynasty"}',
+        "/api/fetch": '{"url":"https://example.com/page"}',
+      };
+      response.setHeader("Allow", allowed.join(", "));
+      const example = examples[apiPath];
+      sendError(
+        response,
+        405,
+        `${apiPath} accepts ${allowed.join(" or ")} only.` +
+          (example ? ` Send a POST with a JSON body such as ${example}.` : " Change the method and try again."),
+        authOptions(request),
+        example ? { allow: allowed, example } : { allow: allowed },
+      );
+      return;
+    }
     if (apiPath.startsWith("/api/")) {
-      sendError(response, 404, "Unknown API endpoint.");
+      sendError(response, 404, `There is no API endpoint at ${apiPath}.`);
       return;
     }
     if (!["GET", "HEAD"].includes(request.method)) {

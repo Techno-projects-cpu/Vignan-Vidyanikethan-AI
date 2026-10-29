@@ -333,8 +333,9 @@ test("/setup names the missing variables and never prints a key", async () => {
     for (const name of ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"]) {
       assert.match(html, new RegExp(name), `${name} should be listed`);
     }
-    assert.match(html, /missing or wrong/);
-    assert.match(html, /Settings → API Keys/, "should name the current dashboard page");
+    assert.match(html, /class="state bad">fix</);
+    assert.match(html, /Settings, then API Keys/, "should name the current dashboard page");
+    assert.doesNotMatch(html, /Settings \u2192 API/, "the removed Settings -> API page must not be mentioned");
     assert.match(html, /noindex/);
   });
 });
@@ -363,5 +364,68 @@ test("/setup reports a connected deployment honestly", async () => {
     assert.match(html, /local/);
     assert.match(html, /offline mode/);
     assert.match(html, /Machine-readable health/);
+  });
+});
+
+test("a known endpoint called with the wrong method explains itself", async () => {
+  await withServer({ STUDY_AI_ACCOUNTS_FILE: path.join(os.tmpdir(), `vignan-method-${Date.now()}.json`) }, async (origin) => {
+    const response = await fetch(`${origin}/api/ai`);
+    assert.equal(response.status, 405);
+    assert.equal(response.headers.get("allow"), "POST");
+    const body = await response.json();
+    assert.equal(body.ok, false);
+    assert.match(body.error, /\/api\/ai accepts POST only/);
+    assert.match(body.error, /messages/);
+    assert.deepEqual(body.allow, ["POST"]);
+    assert.match(body.example, /messages/);
+
+    const health = await fetch(`${origin}/api/health`, { method: "POST" });
+    assert.equal(health.status, 405);
+    assert.equal(health.headers.get("allow"), "GET");
+
+    const unknown = await fetch(`${origin}/api/does-not-exist`);
+    assert.equal(unknown.status, 404);
+    assert.match((await unknown.json()).error, /no API endpoint at \/api\/does-not-exist/);
+  });
+});
+
+test("pages avoid glyphs the bundled latin fonts cannot draw", async () => {
+  // The two bundled subsets stop at latin: the rupee sign, arrows, ticks and
+  // crosses fall back to a system font, and on some Android phones that shows
+  // as a box. These pages are read by judges, so keep them font-safe.
+  const unsafe = ["\u20B9", "\u2713", "\u2715", "\u2716", "\u2714", "\u2192", "\u00D7"];
+  const files = ["judge.html", "security.html", "copyright.html"];
+  for (const file of files) {
+    const text = await fs.readFile(path.join(root, file), "utf8");
+    for (const glyph of unsafe) {
+      assert.ok(!text.includes(glyph), `${file} contains ${JSON.stringify(glyph)}, which the bundled font cannot draw`);
+    }
+  }
+  await withServer(NO_SUPABASE, async (origin) => {
+    const html = await (await fetch(`${origin}/setup`)).text();
+    for (const glyph of unsafe) {
+      assert.ok(!html.includes(glyph), `/setup contains ${JSON.stringify(glyph)}`);
+    }
+    assert.match(html, /class="state bad">fix</);
+  });
+});
+
+test("/setup reports every problem at once, not one per reload", async () => {
+  await withServer(NO_SUPABASE, async (origin) => {
+    const html = await (await fetch(`${origin}/setup`)).text();
+    for (const variable of ["SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"]) {
+      assert.match(html, new RegExp(`<li><code>${variable}</code>`), `${variable} should have its own fix`);
+    }
+  });
+});
+
+test("/setup does not call a working local store broken", async () => {
+  await withServer({
+    STUDY_AI_ACCOUNTS_FILE: path.join(os.tmpdir(), `vignan-local-${Date.now()}.json`),
+  }, async (origin) => {
+    const html = await (await fetch(`${origin}/setup`)).text();
+    assert.match(html, /Accounts are working on this server's local store/);
+    assert.match(html, /optional in this mode/);
+    assert.doesNotMatch(html, /Accounts are not connected yet/);
   });
 });
