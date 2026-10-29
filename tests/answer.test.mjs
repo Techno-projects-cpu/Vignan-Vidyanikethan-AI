@@ -83,6 +83,20 @@ test("the offline answer is shaped like a teacher's answer, not a quote dump", (
   assert.match(answer.text, /Every line is taken from the cited pages/);
 });
 
+test("a definition the question never names does not become the headline", () => {
+  const index = buildBookIndex({ id: "b1", title: "Physics", subject: "Physics" }, [
+    { page: 1, text: "Measurement in physics begins with a unit. Every other unit is derived from these, for example the newton for force." },
+    { page: 3, text: "The laws of motion were stated by Isaac Newton. The second law states that force equals mass times acceleration." },
+  ]);
+  const hits = retrievePreferBooks("What does Newton's second law say about force and acceleration?", [index], { topK: 5 }).hits;
+  const answer = composeGroundedAnswer({ query: "What does Newton's second law say about force and acceleration?", hits, mode: "answer" });
+  // The right sentence has to be there...
+  assert.match(answer.text, /force equals mass times acceleration/);
+  // ...and an unrelated definition must not be dressed up as the answer.
+  assert.doesNotMatch(answer.text, /\*\*Every other unit\*\*/);
+  assert.doesNotMatch(answer.text, /\*\*[^*]+\*\* — /, "no definition headline when the question names no definition");
+});
+
 test("a question that only matches one definition is not padded with other facts", () => {
   const index = buildBookIndex({ id: "b1", title: "Science", subject: "Science" }, [
     { page: 12, text: "Photosynthesis is the process by which green plants use sunlight to make food." },

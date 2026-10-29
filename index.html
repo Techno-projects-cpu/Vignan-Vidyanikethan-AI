@@ -10,27 +10,27 @@
   <meta property="og:title" content="Vignan Vidyanikethan AI — learn from your own textbooks">
   <meta property="og:description" content="Turn your textbooks into cited answers, quizzes and revision tools. A student project for INSPIRE-MANAK.">
   <meta property="og:url" content="https://vignanvidyanikethanai.onrender.com/">
-  <meta property="og:image" content="https://vignanvidyanikethanai.onrender.com/icons/icon-512.png?v=21">
+  <meta property="og:image" content="https://vignanvidyanikethanai.onrender.com/icons/icon-512.png?v=22">
   <meta name="twitter:card" content="summary">
   <title>Vignan Vidyanikethan AI — learn from your own textbooks</title>
   <link rel="canonical" href="https://vignanvidyanikethanai.onrender.com/">
-  <link rel="manifest" href="./manifest.webmanifest?v=21">
-  <link rel="icon" href="./icons/icon.svg?v=21" type="image/svg+xml">
-  <link rel="icon" href="./icons/icon-48.png?v=21" type="image/png" sizes="48x48">
-  <link rel="shortcut icon" href="./favicon.ico?v=21">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=21">
+  <link rel="manifest" href="./manifest.webmanifest?v=22">
+  <link rel="icon" href="./icons/icon.svg?v=22" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-48.png?v=22" type="image/png" sizes="48x48">
+  <link rel="shortcut icon" href="./favicon.ico?v=22">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=22">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./styles-premium.css?v=21">
-  <link rel="stylesheet" href="./styles-identity.css?v=21">
-  <link rel="stylesheet" href="./styles-social.css?v=21">
-  <link rel="stylesheet" href="./styles-pro.css?v=21">
+  <link rel="stylesheet" href="./styles-premium.css?v=22">
+  <link rel="stylesheet" href="./styles-identity.css?v=22">
+  <link rel="stylesheet" href="./styles-social.css?v=22">
+  <link rel="stylesheet" href="./styles-pro.css?v=22">
 </head>
 <body class="minimal-ui premium-ui auth-locked">
 
   <section class="startup-screen" id="startup-screen" role="dialog" aria-modal="true" aria-labelledby="startup-title" hidden>
     <div class="startup-frame">
       <header class="startup-top">
-        <span class="startup-wordmark"><img src="./icons/icon.svg?v=21" alt="" width="29" height="29">VIGNAN<span> / AI</span></span>
+        <span class="startup-wordmark"><img src="./icons/icon.svg?v=22" alt="" width="29" height="29">VIGNAN<span> / AI</span></span>
         <div class="startup-top-right"><span class="startup-edition">A STUDENT PROJECT &nbsp; / &nbsp; 01</span><button type="button" id="startup-skip">Skip intro ↗</button></div>
       </header>
       <div class="startup-body">
@@ -56,7 +56,7 @@
     <div class="auth-gate-shell">
       <header class="auth-gate-top">
         <a class="auth-gate-brand" href="./">
-          <span class="auth-gate-mark" aria-hidden="true"><img src="./icons/icon.svg?v=21" alt="" width="37" height="37"></span>
+          <span class="auth-gate-mark" aria-hidden="true"><img src="./icons/icon.svg?v=22" alt="" width="37" height="37"></span>
           <span>VIGNAN <b>VIDYANIKETHAN AI</b></span>
         </a>
         <span class="auth-gate-badge">YOUR STUDY SPACE</span>
@@ -213,7 +213,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="./" aria-label="Vignan Vidyanikethan AI home">
-        <span class="brand-mark" aria-hidden="true"><img src="./icons/icon.svg?v=21" alt="" width="38" height="38"></span>
+        <span class="brand-mark" aria-hidden="true"><img src="./icons/icon.svg?v=22" alt="" width="38" height="38"></span>
         <span class="brand-text"><strong>Vignan</strong><small>Vidyanikethan AI</small></span>
       </a>
       <div class="sidebar-label">WORKSPACE</div>
@@ -245,7 +245,7 @@
     <div class="workspace">
       <header class="topbar premium-topbar">
         <div class="premium-brand">
-          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home"><img src="./icons/icon.svg?v=21" alt="" width="38" height="38"></a>
+          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home"><img src="./icons/icon.svg?v=22" alt="" width="38" height="38"></a>
           <span class="premium-wordmark">VIGNAN <span>AI</span></span>
         </div>
         <div class="premium-view-chip" aria-live="polite"><span class="premium-view-dot"></span><span id="premium-view-label">Ask</span></div>
@@ -368,8 +368,20 @@
           <div class="section-toolbar">
             <div class="section-copy"><span class="eyebrow" data-i18n="view.library.kicker">YOUR LIBRARY</span><h2 data-i18n="view.library.title">Add your class books</h2><p data-i18n="view.library.subtitle">PDFs, readable text, public links or pasted notes. Indexed and kept locally.</p></div>
           </div>
-          <p class="library-rights" data-i18n="library.rights">No textbooks are preinstalled. Add material you have permission to use. Telangana SCERT and NCERT books require publisher permission before they can be included here.</p>
+          <p class="library-rights" data-i18n="library.rights">No publisher's textbook is preinstalled. The starter pages are written for this project and work like any note you add. Telangana SCERT and NCERT books require publisher permission before they can be included here.</p>
           <div class="library-grid">
+            <section class="card starter-card" id="starter-card">
+              <div class="starter-copy">
+                <span class="eyebrow">STARTER SHELF</span>
+                <h3>Start with pages we wrote ourselves</h3>
+                <p class="hint">Physics, Chemistry, Biology and Mathematics, covering the chapters JEE, NEET and AP EAPCET practice draws from. Written for this project, not copied from any textbook. They behave like ordinary pages: searchable, cited, usable in quizzes and removable in one click.</p>
+              </div>
+              <div class="starter-actions">
+                <button type="button" class="button primary" id="starter-add">Add the starter pages</button>
+                <button type="button" class="button ghost" id="starter-remove" hidden>Remove them</button>
+                <p class="hint" id="starter-status" aria-live="polite"></p>
+              </div>
+            </section>
             <section class="card upload-card">
               <h3 data-i18n="library.uploadTitle">Upload a book</h3>
               <div class="dropzone" id="dropzone" tabindex="0" role="button">
@@ -769,7 +781,7 @@
   <div class="command-overlay" id="command-overlay" hidden aria-hidden="true">
     <div class="command-panel" role="dialog" aria-modal="true" aria-labelledby="command-title">
       <div class="command-head">
-        <span class="command-mark" aria-hidden="true"><img src="./icons/icon.svg?v=21" alt="" width="38" height="38"></span>
+        <span class="command-mark" aria-hidden="true"><img src="./icons/icon.svg?v=22" alt="" width="38" height="38"></span>
         <div class="command-title-wrap">
           <strong id="command-title">Everything, in one menu.</strong>
           <span>Search pages, actions and AI nicknames.</span>
@@ -853,6 +865,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./js/boot.js?v=21"></script>
+  <script type="module" src="./js/boot.js?v=22"></script>
 </body>
 </html>

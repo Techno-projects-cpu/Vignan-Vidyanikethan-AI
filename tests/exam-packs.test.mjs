@@ -194,6 +194,11 @@ test("advice is honest about what the score means", () => {
     examAdvice(jee, { questions: 10, correct: 2, wrong: 6, skipped: 2, negativeMarking: true, accuracy: 25, percent: 5 }),
     /More wrong than right/,
   );
+  // All wrong is not the same as all blank: with negative marking it costs marks.
+  assert.match(
+    examAdvice(jee, { questions: 5, correct: 0, wrong: 5, skipped: 0, attempted: 5, marks: -5, accuracy: 0, percent: 0 }),
+    /5 attempted, none right, and 5 marks lost/,
+  );
   assert.match(
     examAdvice(jee, { questions: 10, correct: 7, wrong: 0, skipped: 3, accuracy: 100, percent: 70 }),
     /left blank/,
@@ -225,7 +230,7 @@ test("the exam practice page is reachable and uses the existing quiz pipeline", 
   }
   assert.match(html, /class="command-item" data-view="exam"/, "the command menu lists it");
   assert.match(html, /<symbol id="i-target"/, "the nav icon exists");
-  assert.match(app, /from "\.\/exam-packs\.js\?v=21"/, "the app imports the packs");
+  assert.match(app, /from "\.\/exam-packs\.js\?v=22"/, "the app imports the packs");
   assert.match(app, /if \(view === "exam"\) renderExamView\(\);/, "opening the view renders it");
   assert.match(app, /scoreExam\(exam, items\)/, "exam sessions are marked with the exam's own marking");
   assert.match(app, /result\.exam = \{/, "the result carries the exam readout");

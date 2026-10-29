@@ -1,6 +1,6 @@
 {
-  "version": 21,
-  "generatedAt": "2026-10-29T14:44:38.684Z",
+  "version": 22,
+  "generatedAt": "2026-10-29T15:06:55.876Z",
   "urls": [
     "./",
     "./index.html",
@@ -70,6 +70,7 @@
     "./js/revision-plan.js",
     "./js/settings.js",
     "./js/social.js",
+    "./js/starter-shelf.js",
     "./js/startup.js",
     "./js/student-keys.js",
     "./js/study-decks.js",

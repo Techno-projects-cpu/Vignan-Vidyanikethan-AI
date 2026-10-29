@@ -6,30 +6,30 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=21";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=21";
-import { ingestPdf, ingestText } from "./ingest.js?v=21";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=21";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=21";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=21";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=21";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=21";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=21";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=21";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=21";
+import * as db from "./db.js?v=22";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=22";
+import { ingestPdf, ingestText } from "./ingest.js?v=22";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=22";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=22";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=22";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=22";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=22";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=22";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=22";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=22";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=21";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=21";
+} from "./pro-mode.js?v=22";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=22";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=21";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=21";
-import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=21";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=21";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=21";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=21";
+} from "./updates.js?v=22";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=22";
+import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth } from "./answer-quality.js?v=22";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=22";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=22";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=22";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -37,8 +37,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=21";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=21";
+} from "./llm.js?v=22";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=22";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -50,7 +50,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=21";
+} from "./local-ai.js?v=22";
 import {
   EXAMS,
   MODES,
@@ -65,9 +65,10 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=21";
-import { TASKS } from "./model-router.js?v=21";
-import { PROVIDERS, providerList } from "./providers.js?v=21";
+} from "./exam-packs.js?v=22";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=22";
+import { TASKS } from "./model-router.js?v=22";
+import { PROVIDERS, providerList } from "./providers.js?v=22";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -76,30 +77,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=21";
-import { parseApiKeys } from "./key-pool.js?v=21";
+} from "./settings.js?v=22";
+import { parseApiKeys } from "./key-pool.js?v=22";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=21";
+} from "./student-keys.js?v=22";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=21";
+} from "./quiz.js?v=22";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=21";
+} from "./flashcards.js?v=22";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=21";
+} from "./study-decks.js?v=22";
 import {
   accuracy,
   currentStreak,
@@ -110,14 +111,14 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=21";
-import { externalSearchUrl, searchWeb } from "./web.js?v=21";
-import { openEditStudio } from "./edit-studio.js?v=21";
-import { openReader } from "./reader.js?v=21";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=21";
-import { languageLabel, languageGroups } from "./languages.js?v=21";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=21";
-import * as ui from "./ui.js?v=21";
+} from "./progress.js?v=22";
+import { externalSearchUrl, searchWeb } from "./web.js?v=22";
+import { openEditStudio } from "./edit-studio.js?v=22";
+import { openReader } from "./reader.js?v=22";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=22";
+import { languageLabel, languageGroups } from "./languages.js?v=22";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=22";
+import * as ui from "./ui.js?v=22";
 import {
   clearReferral,
   getLeaderboard,
@@ -127,8 +128,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=21";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=21";
+} from "./auth.js?v=22";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=22";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -136,12 +137,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=21";
-import { initMotion, revealVisible } from "./motion.js?v=21";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=21";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=21";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=21";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=21";
+} from "./premium-ui.js?v=22";
+import { initMotion, revealVisible } from "./motion.js?v=22";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=22";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=22";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=22";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=22";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -236,6 +237,7 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     state.updateStatus = { status: "unsupported", remote: "" };
     state.lastUpdateCheck = "";
     await reloadIndexes();
+    await ensureStarterShelf();
     if (!state.messages.length) addWelcomeMessage();
     bindEvents();
     subscribeLocalAI((snapshot) => {
@@ -891,9 +893,12 @@ function addMessage(message, { persist = true } = {}) {
 }
 
 function addWelcomeMessage() {
+  const starter = state.books.some((book) => isStarterBookId(book.id));
   addMessage({
     role: "assistant",
-    content: "**Welcome.** Add study material you have permission to use in Library, then ask a question for cited answers. When books have no match, web search can look on Wikipedia.",
+    content: starter
+      ? "**Welcome.** Starter pages written for this project are already in your library, so you can ask a question and get a cited answer straight away. Add your own books whenever you like; they are searched first."
+      : "**Welcome.** Add study material you have permission to use in Library, then ask a question for cited answers. When books have no match, web search can look on Wikipedia.",
     meta: "Offline ready",
   });
 }
@@ -1655,6 +1660,7 @@ function topicSearchMessage(reason) {
 }
 
 function renderLibrary() {
+  renderStarterCard();
   renderPaperSources();
   const list = $("#book-list");
   list.replaceChildren();
@@ -1967,6 +1973,110 @@ async function handleBookAction(event) {
   }
 }
 
+/* ------------------------------------------------------------ starter shelf */
+
+const STARTER_SHELF_FLAG = "starterShelfAdded";
+
+/**
+ * Add our own study pages to the library.
+ *
+ * These are the pages the app can always answer from, written for this project
+ * so that nothing here depends on a publisher's permission. They are stored
+ * exactly like a pasted note, which means a citation points at a real page a
+ * student can open, and deleting them deletes them for good.
+ */
+async function installStarterShelf({ announce = true } = {}) {
+  const books = shelfBooks();
+  const existing = new Set(state.books.map((book) => book.id));
+  let added = 0;
+  let pages = 0;
+  for (const book of books) {
+    if (existing.has(book.id)) continue;
+    const index = ingestText(shelfMarkdown(book), {
+      id: book.id,
+      title: book.title,
+      subject: book.subject,
+      grade: book.grade,
+      board: "Starter pages",
+      language: "English",
+      fileName: "starter-pages.txt",
+    });
+    await db.saveBookIndex(index);
+    added += 1;
+    pages += index.book.pageCount;
+  }
+  await reloadIndexes();
+  renderBookScopes();
+  renderLibrary();
+  if ($("#view-exam")?.classList.contains("active")) renderExamView();
+  if (announce) {
+    ui.showToast(
+      added
+        ? `Starter pages added: ${pages} pages across ${added} ${added === 1 ? "book" : "books"}. Replace them with your own books any time.`
+        : "The starter pages are already in your library.",
+      added ? "success" : "info",
+      7000,
+    );
+  }
+  return { added, pages };
+}
+
+/** On the first open only: a student should never meet an empty workspace. */
+async function ensureStarterShelf() {
+  try {
+    if (await db.getSetting(STARTER_SHELF_FLAG, false)) return false;
+    await db.setSetting(STARTER_SHELF_FLAG, true);
+    if (state.indexes.length) return false;
+    await installStarterShelf({ announce: false });
+    return true;
+  } catch (error) {
+    console.error("[vignan-ai] starter pages", error);
+    return false;
+  }
+}
+
+async function removeStarterShelf() {
+  const starter = state.books.filter((book) => isStarterBookId(book.id));
+  if (!starter.length) return false;
+  const confirmed = await ui.confirmDialog({
+    title: "Remove the starter pages?",
+    message: `This deletes ${starter.length} ${starter.length === 1 ? "book" : "books"} written for this project. Your own uploads, notes and results stay untouched.`,
+    confirmLabel: "Remove them",
+  });
+  if (!confirmed) return false;
+  for (const book of starter) {
+    try { await db.deleteBook(book.id); } catch (error) { console.error(error); }
+  }
+  await reloadIndexes();
+  renderBookScopes();
+  renderLibrary();
+  if ($("#view-exam")?.classList.contains("active")) renderExamView();
+  ui.showToast("Starter pages removed. Add them again from Library whenever you want.", "info", 6000);
+  return true;
+}
+
+function renderStarterCard() {
+  const card = $("#starter-card");
+  if (!card) return;
+  const starter = state.books.filter((book) => isStarterBookId(book.id));
+  const summary = shelfSummary();
+  const status = $("#starter-status");
+  const add = $("#starter-add");
+  const remove = $("#starter-remove");
+  if (starter.length) {
+    const pages = starter.reduce((total, book) => total + (book.pageCount || 0), 0);
+    card.classList.add("installed");
+    if (status) status.textContent = `${starter.length} ${starter.length === 1 ? "book" : "books"} · ${pages} pages · written for this project`;
+    if (add) add.hidden = true;
+    if (remove) remove.hidden = false;
+  } else {
+    card.classList.remove("installed");
+    if (status) status.textContent = `${summary.pages} pages across ${summary.books} subjects, ready in one click.`;
+    if (add) add.hidden = false;
+    if (remove) remove.hidden = true;
+  }
+}
+
 /* ------------------------------------------------------------------ exams */
 
 const EXAM_COUNTS = [5, 10, 15, 20];
@@ -2219,7 +2329,20 @@ function renderExamMock(preferences, exam, coverage) {
   start.id = "exam-start";
   start.addEventListener("click", () => void startExamSession({ mode: "mock", examId: exam.id }));
   actions.appendChild(start);
-  if (!coverage.covered) {
+  if (!state.indexes.length) {
+    const shelf = ui.element("button", "button ghost small", "Add the starter pages");
+    shelf.type = "button";
+    shelf.addEventListener("click", async () => {
+      ui.setBusy(shelf, true, "Adding pages…");
+      try {
+        await installStarterShelf();
+        renderExamView();
+      } finally {
+        ui.setBusy(shelf, false);
+      }
+    });
+    actions.appendChild(shelf);
+  } else if (!coverage.covered) {
     actions.appendChild(ui.element("span", "hint", "Nothing in your library matches this syllabus yet, so the paper may come up short."));
   }
   card.appendChild(actions);
@@ -3899,7 +4022,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=21");
+            const { social } = await import("./social.js?v=22");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -4443,6 +4566,12 @@ function bindEvents() {
     try { window.print(); } finally { document.body.classList.remove("paper-printing"); }
   });
 
+  $("#starter-add")?.addEventListener("click", async () => {
+    const button = $("#starter-add");
+    ui.setBusy(button, true, "Adding pages…");
+    try { await installStarterShelf(); } finally { ui.setBusy(button, false); renderStarterCard(); }
+  });
+  $("#starter-remove")?.addEventListener("click", () => void removeStarterShelf());
   $("#quiz-generate").addEventListener("click", generateQuizHandler);
   $("#quiz-use-model").addEventListener("change", renderQuizEngineNote);
   $("#quiz-topic").addEventListener("input", renderQuizEngineNote);

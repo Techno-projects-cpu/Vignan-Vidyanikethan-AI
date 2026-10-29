@@ -1,11 +1,11 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=21";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=21";
-import { parseApiKeys } from "./key-pool.js?v=21";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=21";
-import { aiProfile } from "./ai-nicknames.js?v=21";
-import { LANGUAGE_CODES } from "./languages.js?v=21";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=22";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=22";
+import { parseApiKeys } from "./key-pool.js?v=22";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=22";
+import { aiProfile } from "./ai-nicknames.js?v=22";
+import { LANGUAGE_CODES } from "./languages.js?v=22";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 

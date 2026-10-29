@@ -437,6 +437,12 @@ export function examAdvice(exam, score = {}) {
   if (!exam || !score.questions) return "Answer a few questions first and this becomes a readout.";
   const negative = Boolean(score.negativeMarking);
   if (score.correct === 0) {
+    // Attempts that all went wrong are not the same as leaving the paper blank,
+    // and with negative marking they are worse: say so in marks, not in feelings.
+    if (score.attempted) {
+      const lost = Math.abs(Number(score.marks) || 0);
+      return `${score.attempted} attempted, none right${lost ? `, and ${lost} ${lost === 1 ? "mark" : "marks"} lost to wrong answers` : ""}. Stop guessing: open the chapter, read one page, then drill it.`;
+    }
     return "Nothing scored yet. Start with a chapter drill on one chapter you have read, then come back to the mock.";
   }
   if (negative && score.wrong > score.correct) {

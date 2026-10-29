@@ -10,8 +10,8 @@
  * point at the original passage.
  */
 
-import { CORE_STRINGS } from "./translations-core.js?v=21";
-import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=21";
+import { CORE_STRINGS } from "./translations-core.js?v=22";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=22";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 
@@ -124,7 +124,7 @@ const EN = {
   "library.addNotes": "Add notes",
   "library.yourBooks": "Books in this device",
   "library.empty": "No books yet. Add a PDF or notes you have permission to use.",
-  "library.rights": "No textbooks are preinstalled. Add material you have permission to use. Telangana SCERT and NCERT books require publisher permission before they can be included here.",
+  "library.rights": "No publisher's textbook is preinstalled. The starter pages are written for this project and behave like any note you add. Telangana SCERT and NCERT books need the publisher's permission before they can be included here.",
   "library.askThis": "Ask from this book",
   "library.quizThis": "Make a quiz",
   "library.openReader": "Reader",
@@ -304,7 +304,7 @@ const TE = {
   "library.addNotes": "గమనికలు చేర్చు",
   "library.yourBooks": "ఈ పరికరంలోని పుస్తకాలు",
   "library.empty": "ఇంకా పుస్తకాలు లేవు. ఉపయోగించడానికి అనుమతి ఉన్న PDF లేదా నోట్స్ జోడించండి.",
-  "library.rights": "ఇక్కడ ముందుగానే పుస్తకాలు లేవు. ఉపయోగించడానికి మీకు అనుమతి ఉన్న విషయాలను జోడించండి. తెలంగాణ SCERT, NCERT పుస్తకాలను ఇక్కడ చేర్చడానికి ప్రచురణకర్తల అనుమతి అవసరం.",
+  "library.rights": "ప్రచురణకర్తల పాఠ్యపుస్తకం ముందుగానే లేదు. స్టార్టర్ పేజీలు ఈ ప్రాజెక్ట్ కోసం రాసినవి, అవి మీరు జోడించే నోట్స్ లాగానే పనిచేస్తాయి. తెలంగాణ SCERT, NCERT పుస్తకాలను చేర్చడానికి ప్రచురణకర్తల అనుమతి అవసరం.",
   "quiz.topicLabel": "పాఠ్యాంశం లేదా అంశం",
   "quiz.topicPlaceholder": "ఉదా. కిరణజన్య సంయోగక్రియ, బలాలు",
   "quiz.typeLabel": "ప్రశ్న రకం",
@@ -422,7 +422,7 @@ const HI = {
   "library.pasteTitle": "या नोट्स चिपकाएँ", "library.pastePlaceholder": "यहाँ नोट्स चिपकाएँ। पृष्ठों के लिए [[page:1]], [[page:2]] लिखें।",
   "library.addNotes": "नोट्स जोड़ें", "library.yourBooks": "इस उपकरण की किताबें",
   "library.empty": "अभी किताबें नहीं हैं। इस्तेमाल की अनुमति वाले PDF या नोट्स जोड़ें।",
-  "library.rights": "यहाँ कोई किताब पहले से नहीं है। इस्तेमाल की अनुमति वाली सामग्री जोड़ें। तेलंगाना SCERT और NCERT की किताबें यहाँ शामिल करने के लिए प्रकाशक की अनुमति आवश्यक है।",
+  "library.rights": "किसी प्रकाशक की किताब पहले से नहीं है। स्टार्टर पेज इस प्रोजेक्ट के लिए लिखे गए हैं और आपके जोड़े नोट्स की तरह काम करते हैं। तेलंगाना SCERT और NCERT किताबों के लिए प्रकाशक की अनुमति आवश्यक है.",
   "quiz.topicLabel": "अध्याय या विषय", "quiz.topicPlaceholder": "जैसे प्रकाश संश्लेषण, बल",
   "quiz.typeLabel": "प्रश्न का प्रकार", "quiz.difficultyLabel": "कठिनाई", "quiz.easy": "आसान",
   "quiz.medium": "मध्यम", "quiz.hard": "कठिन", "quiz.countLabel": "प्रश्न", "quiz.timed": "समयबद्ध क्विज़",

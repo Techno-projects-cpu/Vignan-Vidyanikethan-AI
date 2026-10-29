@@ -28,7 +28,7 @@ Open:
 
 The server binds to `0.0.0.0`, so it also works in the Arena live preview. A plain static server (`python3 -m http.server`) can serve the app too, but the `/api/ai`, `/api/search`, `/api/fetch` and `/api/auth/*` endpoints will not exist — the offline engine and guest progress still work.
 
-A first-time visitor can enter or skip the branded startup screen, then choose **Log in**, **Register**, or **Continue as guest** beneath the account options. The intro is remembered for the current tab when session storage is available. Existing signed-in sessions and a guest choice reopen the workspace; the guest choice is remembered only in the current tab. The guest path remains available when the account server is offline. The library starts empty; add material you have permission to use in **Library**. The old sample pack is retired, while student uploads and study history are preserved. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — enable the server route in **Settings → Advanced settings**; it rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback. The minimal UI keeps those controls tucked behind **Settings → Advanced settings**.
+A first-time visitor can enter or skip the branded startup screen, then choose **Log in**, **Register**, or **Continue as guest** beneath the account options. The intro is remembered for the current tab when session storage is available. Existing signed-in sessions and a guest choice reopen the workspace; the guest choice is remembered only in the current tab. The guest path remains available when the account server is offline. The library starts with a **starter shelf** of pages written for this project - four subject books covering the chapters JEE, NEET and AP EAPCET practice draws from - so the first question, quiz or mock test works immediately; add your own books in **Library** whenever you like, and they are searched first. The starter pages are our own text, not a publisher's, and they can be deleted in one click; the old auto-installed sample pack stays retired, while student uploads and study history are preserved. For a real AI answer with **no server key**, open **Settings → Real local model**, choose a model, and press **Download & enable** (first download needs internet; later runs are offline). To enable optional cloud AI answers, copy `.env.example` to `.env`, add one or more official free keys from your own accounts (comma/newline separated), and restart the server — enable the server route in **Settings → Advanced settings**; it rotates through the key pool, keeps student keys as a last resort, and retains the offline engine as a fallback. The minimal UI keeps those controls tucked behind **Settings → Advanced settings**.
 
 ---
 
@@ -70,6 +70,7 @@ For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLL
 | Zero-budget AI runtime | Server-side **free AI router** tries Gemini, Groq, Cloudflare Workers AI, OpenRouter free models, Mistral, Cohere and an optional Arena AI workspace key in order; supports multiple keys per provider, auto-rotates on quota limits, cools down exhausted keys, skips rate-limited providers and keeps school keys off student devices. |
 | Student BYOK fallback | After all Render keys are exhausted, students can add one or more of their own keys in account settings. Keys stay browser-local, are used only through the site's own proxy, and never appear in exports, accounts or leaderboards. |
 | Official key links | Settings shows safe signup links for eight free/keyless providers and explicitly warns against leaked or shared keys. |
+| Starter shelf | Four books of pages written for this project (Physics, Chemistry, Biology, Mathematics) are installed on the first open, so citations, quizzes, flashcards and exam mocks work before a student adds anything. They are ordinary library pages - searchable, cited and removable - not a reproduction of any published textbook. |
 | Library | Upload PDFs and readable text (for example TXT, Markdown, CSV and JSON), paste notes, or import a public webpage/PDF/text URL. Scripts, executables and archives are rejected. Web imports retain their origin and are labelled separately. |
 | Quizzes | MCQ, fill-in-the-blank, short-answer and mixed quizzes; easy/medium/hard; timed or untimed; AI-written or offline-generated; instant grading with per-question review, topic breakdown and a revise list. |
 | Exam practice | **JEE Main**, **NEET (UG)**, **AP EAPCET** (Engineering and Agriculture) and **JEE Advanced** as three modes each: a **mock test** in the real paper's shape (question count, subject split, marking and pace per question), a **chapter drill** (untimed, no penalty) and **syllabus coverage** (which chapters your own pages already answer, and what to study next). Marking is the exam's own, including negative totals. No past papers, coaching PDFs or textbook scans are bundled, fetched or indexed: the pattern is public, the questions are written from the student's own pages, and every pack links the official page. |
@@ -373,8 +374,8 @@ npm run offline:check
 ```
 
 ```
-Release v21
-Cached after install: 360 files in vignan-vidyanikethan-ai-v21
+Release v22
+Cached after install: 362 files in vignan-vidyanikethan-ai-v22
   ok  200   75099 B  ./
   ok  200   166698 B  ./js/app.js?v=18
   ...
@@ -446,6 +447,7 @@ with no connection:
 | Today's revision | Yes — computed from local decks and results |
 | Flashcards, quizzes, evaluation | Yes |
 | Exam practice: mocks, drills, coverage | Yes — exam patterns are local data; questions come from your saved pages |
+| Starter shelf pages | Yes — bundled with the app and installed on first open |
 | Pro Mode and its briefing | Yes — no network call |
 | Web fallback | Skipped, and the answer says so instead of offering a dead link |
 | Friends, Chat, Play, leaderboard | Needs the server; the UI explains that |
@@ -595,7 +597,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-349 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
+356 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 

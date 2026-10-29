@@ -7,11 +7,11 @@
  * labelled as being outside the textbooks.
  */
 
-import { salientSentences, splitSentences } from "./text.js?v=21";
-import { truncate } from "./util.js?v=21";
-import { buildFlashcards } from "./flashcards.js?v=21";
-import { buildStudySheet } from "./study-sheet.js?v=21";
-import { t } from "./i18n.js?v=21";
+import { salientSentences, splitSentences } from "./text.js?v=22";
+import { truncate } from "./util.js?v=22";
+import { buildFlashcards } from "./flashcards.js?v=22";
+import { buildStudySheet } from "./study-sheet.js?v=22";
+import { t } from "./i18n.js?v=22";
 
 export function sourcesFromHits(hits = []) {
   return hits.map((hit, index) => ({
@@ -169,6 +169,24 @@ function sameSentence(a = "", b = "") {
 }
 
 /**
+ * A definition may open the answer only when the question names it.
+ *
+ * Without this, a page's most "definition-like" sentence wins the headline even
+ * when it has nothing to do with the question: asking about Newton's second law
+ * once produced the headline "Every other unit - derived from these". The
+ * bullets still carried the right sentences; the headline did not. A teacher
+ * opens with the definition of the thing you asked about, or with nothing.
+ */
+function leadNamesQuery(term, query = "") {
+  const label = String(term?.term || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").trim();
+  if (!label) return false;
+  const asked = String(query || "").toLowerCase();
+  if (asked.includes(label)) return true;
+  const words = new Set(asked.replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter((word) => word.length > 3));
+  return label.split(/\s+/).filter((word) => word.length > 3).some((word) => [...words].some((entry) => entry.includes(word) || word.includes(entry)));
+}
+
+/**
  * The offline answer, shaped like a teacher wrote it: lead with the definition,
  * then the cited points, then a formula if the page has one. Every line still
  * comes from a page — this only changes the order and the framing.
@@ -181,10 +199,14 @@ function teacherAnswer(evidenceQuery, sources, depth = "balanced") {
   const blocks = [];
   const used = new Set();
 
-  const lead = pickLeadTerm(sheet.terms, evidenceQuery);
+  const best = pickLeadTerm(sheet.terms, evidenceQuery);
+  const lead = best && leadNamesQuery(best, evidenceQuery) ? best : null;
   if (lead) {
     const source = sourceForEntry(sources, lead);
-    blocks.push(`**${lead.term}** — ${lead.definition.replace(/[.。]$/, "")}. _(${origin(source)}${source.title}, ${location(source)})_ ${citation(source.n)}`);
+    // The extractor can return a term from mid-sentence; a headline starts with
+    // a capital letter.
+    const label = lead.term.charAt(0).toUpperCase() + lead.term.slice(1);
+    blocks.push(`**${label}** — ${lead.definition.replace(/[.。]$/, "")}. _(${origin(source)}${source.title}, ${location(source)})_ ${citation(source.n)}`);
     used.add(lead.quote);
     if (!brief) blocks.push("");
   }
