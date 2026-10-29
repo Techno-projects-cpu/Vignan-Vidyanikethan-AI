@@ -6,6 +6,7 @@
  * with a light MMR pass so the model sees more than one page of context.
  */
 
+import { isStarterBookId } from "./starter-shelf.js?v=22";
 import { bigrams, chapterReference, chunkPages, parsePages, tokenize } from "./text.js?v=22";
 import { clamp } from "./util.js?v=22";
 import { computeStats, cosine, queryVector, vectorize } from "./vector.js?v=22";
@@ -215,7 +216,10 @@ export function retrieve(query, indexes, { topK = 5, threshold = GROUNDING_THRES
 export function retrievePreferBooks(query, indexes, options = {}) {
   const bookIds = options.bookIds || [];
   const active = indexes.filter((index) => index?.book && (!bookIds.length || bookIds.includes(index.book.id)));
-  const local = active.filter((index) => !index.book.sourceUrl);
+  // A student's own book outranks the starter pages, and both outrank a web
+  // import. The shelf exists so nothing is ever empty, not so it wins.
+  const local = active.filter((index) => !index.book.sourceUrl && !isStarterBookId(index.book.id));
+  const starter = active.filter((index) => !index.book.sourceUrl && isStarterBookId(index.book.id));
   const imported = active.filter((index) => Boolean(index.book.sourceUrl));
   const match = (indexGroup) => {
     const result = retrieve(query, indexGroup, { ...options, bookIds: [] });
@@ -228,9 +232,12 @@ export function retrievePreferBooks(query, indexes, options = {}) {
   };
   const first = match(local);
   if (first.grounded) return first;
+  const shelf = starter.length ? match(starter) : null;
+  if (shelf?.grounded) return shelf;
   const second = match(imported);
   if (second.grounded) return second;
-  return first.reason === "empty-library" ? second : first;
+  if (first.reason === "empty-library") return shelf || second;
+  return first;
 }
 
 /** Search a named topic; only an intentionally blank topic samples general material. */

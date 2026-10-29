@@ -137,3 +137,23 @@ test("the app installs the shelf on first open and lets the student remove it", 
   // deletes demo books, which would silently bring the empty workspace back.
   assert.doesNotMatch(read("js/starter-shelf.js"), /demo\s*:/);
 });
+
+test("a student's own book outranks the starter pages, and the shelf outranks the web", async () => {
+  const { buildBookIndex, retrievePreferBooks } = await import("../js/retrieval.js");
+  const shelfIndex = ingestText(shelfMarkdown(books[0]), { id: "starter-physics", title: books[0].title, subject: "Physics" });
+  const ownIndex = buildBookIndex(
+    { id: "my-physics-notes", title: "My Physics Notes", subject: "Physics" },
+    [{ page: 7, text: "Newton's second law says force equals mass times acceleration, and a body keeps its state of rest unless a force acts on it." }],
+  );
+  const webIndex = buildBookIndex(
+    { id: "web-import", title: "Some Web Page", subject: "Physics", sourceUrl: "https://example.org/physics" },
+    [{ page: 1, text: "Newton's second law says force equals mass times acceleration, and a body keeps its state of rest unless a force acts on it." }],
+  );
+  const question = "What does Newton's second law say about force?";
+  const withOwn = retrievePreferBooks(question, [shelfIndex, ownIndex, webIndex], { topK: 5 });
+  assert.equal(withOwn.hits[0].title, "My Physics Notes", "the student's own book wins");
+  const shelfOnly = retrievePreferBooks(question, [shelfIndex, webIndex], { topK: 5 });
+  assert.match(shelfOnly.hits[0].title, /Starter Physics/, "the shelf is preferred to a web import");
+  const webOnly = retrievePreferBooks(question, [webIndex], { topK: 5 });
+  assert.equal(webOnly.hits[0].title, "Some Web Page", "a web import still answers when it is all there is");
+});
