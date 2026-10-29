@@ -197,6 +197,7 @@ const EN = {
   "knowledge.notFoundHint": "Try different words, add the chapter in Library, or keep web search on for a clearly labelled outside answer.",
   "knowledge.webEmpty": "Web search returned nothing this time. Check your connection and try again.",
   "knowledge.outsideHelp": "I could not reach an outside source for this one. You can search it directly:",
+  "knowledge.keepReading": "More sources:",
 };
 
 const TE = {
@@ -360,6 +361,7 @@ const TE = {
   "knowledge.notFoundHint": "వేరే పదాలతో అడగండి, Library లో ఆ అధ్యాయాన్ని చేర్చండి, లేదా స్పష్టంగా గుర్తించిన బయటి సమాధానం కోసం వెబ్ శోధన ఆన్‌లో ఉంచండి.",
   "knowledge.webEmpty": "ఈసారి వెబ్ శోధనలో ఫలితాలు రాలేదు. కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.",
   "knowledge.outsideHelp": "దీనికి బయటి మూలం అందుబాటులో లేదు. మీరే నేరుగా వెతకవచ్చు:",
+  "knowledge.keepReading": "మరిన్ని మూలాలు:",
 };
 
 const HI = {
@@ -437,6 +439,7 @@ const HI = {
   "knowledge.notFoundHint": "दूसरे शब्दों में पूछें, Library में अध्याय जोड़ें, या स्पष्ट रूप से चिह्नित बाहरी उत्तर के लिए वेब खोज चालू रखें।",
   "knowledge.webEmpty": "इस बार वेब खोज से कुछ नहीं मिला। कनेक्शन जाँचकर फिर कोशिश करें।",
   "knowledge.outsideHelp": "इसके लिए कोई बाहरी स्रोत नहीं मिला। आप सीधे खोज सकते हैं:",
+  "knowledge.keepReading": "अधिक स्रोत:",
 };
 
 const FULL_DICTIONARIES = { en: EN, te: TE, hi: HI };

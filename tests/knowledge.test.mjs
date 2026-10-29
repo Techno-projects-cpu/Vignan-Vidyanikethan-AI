@@ -100,3 +100,50 @@ test("outside answers quote real source passages with W citations and a warning 
   assert.equal(composeWebAnswer, composeOutsideAnswer);
   assert.equal(composeOutsideAnswer({ query: "what is photosynthesis", results: [{ title: "Maths", url: "https://example.org/m", snippet: "Addition and subtraction." }] }), null);
 });
+
+test("a complex, multi-part question gets a quote for each part and more links", () => {
+  const results = [{
+    title: "1994 FIFA World Cup",
+    url: "https://en.wikipedia.org/wiki/1994_FIFA_World_Cup",
+    domain: "en.wikipedia.org",
+    passage: "The 1994 FIFA World Cup was the 15th edition, hosted by the United States. Brazil won the title, beating Italy 3-2 on penalties. The tournament was the first to be staged in the United States. Romário and Bebeto led the Brazilian attack.",
+    snippet: "",
+  }, {
+    title: "Final standings",
+    url: "https://example.org/standings",
+    domain: "example.org",
+    passage: "Italy finished as runner-up for the third time.",
+    snippet: "",
+  }, {
+    title: "Football records",
+    url: "https://example.org/records",
+    domain: "example.org",
+    passage: "The 1994 final was the first World Cup final decided on penalties.",
+    snippet: "",
+  }, {
+    title: "Attendance figures",
+    url: "https://example.org/attendance",
+    domain: "example.org",
+    passage: "Average attendance at the 1994 World Cup was the highest of any tournament.",
+    snippet: "",
+  }];
+  const answer = composeOutsideAnswer({
+    query: "Who won the 1994 World Cup and what happened in the final?",
+    results,
+    providers: ["Wikipedia", "DuckDuckGo"],
+  });
+  assert.ok(answer, "a multi-part question is answered");
+  assert.match(answer.text, /penalties/i);
+  assert.ok((answer.text.match(/\[W\d\]/g) || []).length >= 2, "more than one quoted source");
+  assert.ok(answer.webSources.length <= 3, "at most three quoted sources");
+  assert.match(answer.text, /More sources/i);
+  assert.match(answer.text, /\[Attendance figures\]\(https:\/\/example\.org\/attendance\)/);
+  assert.match(answer.text, /not independently verified/i);
+});
+
+test("multi-part splitting ignores one-part questions", async () => {
+  const { questionParts } = await import("../js/external-answer.js");
+  assert.deepEqual(questionParts("What is photosynthesis?"), []);
+  assert.equal(questionParts("Who won in 1994 and who was runner-up?").length, 2);
+  assert.ok(questionParts("Why did the Cold War end; what changed for India?").length === 2);
+});

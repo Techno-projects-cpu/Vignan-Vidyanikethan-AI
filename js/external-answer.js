@@ -5,10 +5,42 @@ import { salientSentences, splitSentences, tokenize } from "./text.js?v=16";
 import { truncate } from "./util.js?v=16";
 import { t } from "./i18n.js?v=16";
 
-function quoteFrom(text, query, { opening = false } = {}) {
-  const raw = opening ? splitSentences(text).slice(0, 2) : salientSentences(text, query, 2);
+function quoteFrom(text, query, { opening = false, limit = 2, maxChars = 600 } = {}) {
+  const raw = opening ? splitSentences(text).slice(0, limit) : salientSentences(text, query, limit);
   const quote = (raw.length ? raw : [text]).join(" ").replace(/\s+/g, " ").trim();
-  return truncate(quote, 600);
+  return truncate(quote, maxChars);
+}
+
+/**
+ * A question with several parts ("who won in 1994 and who was runner-up?")
+ * needs a sentence for each part, not two sentences for the whole string.
+ * Returns "" when the question is a single ask, so callers can stay simple.
+ */
+export function questionParts(query = "") {
+  const parts = String(query)
+    .split(/\?|;|\band\b|\balso\b|\bplus\b|،|؟/i)
+    .map((part) => part.replace(/\s+/g, " ").trim())
+    .filter((part) => part.length >= 3 && tokenize(part).length >= 1);
+  return parts.length > 1 ? parts.slice(0, 3) : [];
+}
+
+/** Quote one sentence for each part of a multi-part question, without repeats. */
+function quotePerPart(text, query, maxChars = 900) {
+  const parts = questionParts(query);
+  if (!parts.length) return "";
+  const used = new Set();
+  const picks = [];
+  for (const part of parts) {
+    for (const sentence of salientSentences(text, part, 3)) {
+      const key = sentence.slice(0, 60);
+      if (used.has(key)) continue;
+      used.add(key);
+      picks.push(sentence);
+      break;
+    }
+  }
+  if (picks.length < 2) return "";
+  return truncate(picks.join(" ").replace(/\s+/g, " ").trim(), maxChars);
 }
 
 /**
@@ -21,6 +53,8 @@ function quoteFrom(text, query, { opening = false } = {}) {
  */
 export function composeWebAnswer({ query = "", results = [], provider = "Web search", providers = [] } = {}) {
   const words = new Set(tokenize(searchTopic(query)));
+  // Multi-part questions also match a source that only covers one of the parts.
+  for (const part of questionParts(query)) for (const word of tokenize(part)) words.add(word);
   const sourceLabel = [...new Set(providers.length ? providers : [provider])].filter(Boolean).join(" + ") || "Web search";
   const relevant = results.filter((result) => {
     if (!result?.url) return false;
@@ -28,19 +62,29 @@ export function composeWebAnswer({ query = "", results = [], provider = "Web sea
     if (!body || result.snippet === "Open this source to read more.") return false;
     const textWords = new Set(tokenize(`${result.title} ${body}`));
     return words.size && [...words].some((word) => textWords.has(word));
-  }).slice(0, 2);
+  }).slice(0, 3);
   if (!relevant.length) return null;
   const lines = relevant.map((result, index) => {
     const body = String(result.passage || result.snippet || "").trim();
-    const quote = quoteFrom(body, query, { opening: !result.passage });
+    // The first source carries the detail; the others add a second angle.
+    const quote = (index === 0 && quotePerPart(body, query))
+      || quoteFrom(body, query, index === 0
+        ? { opening: !result.passage, limit: 3, maxChars: 900 }
+        : { opening: !result.passage });
     return `- “${quote}” — **${result.title}** (${result.domain || new URL(result.url).hostname}) [W${index + 1}]`;
   });
+  const quoted = new Set(relevant.map((result) => result.url));
+  const more = results
+    .filter((result) => result?.url && !quoted.has(result.url) && result.title)
+    .slice(0, 3)
+    .map((result) => `[${result.title}](${result.url})`);
   return {
     text: [
       "**I could not find this in your textbooks, so this answer comes from outside sources.**",
       `**${t("knowledge.outsideTitle")} · ${sourceLabel}**`,
       "Here is what those sources actually say:",
       ...lines,
+      ...(more.length ? [`**${t("knowledge.keepReading")}** ${more.join(" · ")}`] : []),
       `_${t("knowledge.verifyNote")}_`,
     ].join("\n\n"),
     sources: [], webSources: relevant, flashcards: [], grounded: false, confidence: 0,
