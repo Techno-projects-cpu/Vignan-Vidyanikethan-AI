@@ -281,6 +281,135 @@ body.premium-ui .section-copy h2 { font-size: clamp(20px, 2.4vw, 28px); }
   .goal-copy small { display: none; }
 }
 
+/* ---- My note on this page ------------------------------------------------
+   Sits directly under the page text, so the sentence a student wants to keep is
+   still on screen when they decide to write it down. Square, hairline-bordered,
+   no shadow — a notebook margin, not a chat bubble.                          */
+body.premium-ui .reader-notes {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+body.premium-ui .reader-notes-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+}
+
+body.premium-ui .reader-notes-count {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+body.premium-ui .reader-note-input {
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 11px;
+  min-height: 56px;
+  resize: vertical;
+  border: 1px solid var(--line-strong, var(--line));
+  border-radius: 0;
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+body.premium-ui .reader-note-input:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+body.premium-ui .reader-note-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+body.premium-ui .reader-note-hint {
+  margin: 7px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+body.premium-ui .reader-note-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+body.premium-ui .reader-note-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  background: var(--surface-2);
+  border-left: 3px solid var(--brand);
+}
+
+body.premium-ui .reader-note-drop {
+  margin-left: auto;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+body.premium-ui .reader-note-drop:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+@media (max-width: 480px) {
+  body.premium-ui .reader-note-row .button { flex: 1 1 auto; min-height: 40px; }
+}
+
+/* ---- The closest page, as a button ---------------------------------------
+   When the books do not answer a question, the reply names the page nearest to
+   it. This is that sentence made tappable — a sharp rectangle, not a pill, so it
+   reads as a step to take rather than another chip to ignore.                 */
+body.premium-ui .message-suggest {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  min-height: 40px;
+  padding: 9px 13px;
+  text-align: left;
+  border: 1px solid var(--line-strong, var(--line));
+  border-left: 3px solid var(--brand);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+body.premium-ui .message-suggest:hover {
+  background: var(--surface-2);
+}
+
+body.premium-ui .message-suggest:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
 /* ---- Locked switches ------------------------------------------------------
    Four styles fix their own palette, so light/dark has nothing to do there.
    The control stays in place — hiding it would make students think it broke —

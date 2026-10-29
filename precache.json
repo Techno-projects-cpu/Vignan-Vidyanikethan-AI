@@ -1,6 +1,6 @@
 {
-  "version": 34,
-  "generatedAt": "2026-10-29T16:52:55.582Z",
+  "version": 35,
+  "generatedAt": "2026-10-29T17:03:18.141Z",
   "urls": [
     "./",
     "./index.html",
@@ -55,6 +55,7 @@
     "./js/model-paper.js",
     "./js/model-router.js",
     "./js/motion.js",
+    "./js/notes.js",
     "./js/offline-check.js",
     "./js/password-policy.js",
     "./js/play-ui.js",

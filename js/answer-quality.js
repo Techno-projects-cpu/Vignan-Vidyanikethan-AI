@@ -122,6 +122,66 @@ function cleanTopic(query = "") {
 }
 
 /* ------------------------------------------------------------------------- */
+/* Do the citations point at anything?                                      */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * Every `[n]` and `[Wn]` marker in a written answer.
+ *
+ * `[n](url)` is a Markdown link, not a citation, so it is skipped. Anything the
+ * model writes that is not a marker is ignored: this counts pointers, it does
+ * not judge prose.
+ */
+export function citedMarkers(text = "") {
+  const body = String(text || "").replace(/```[\s\S]*?```/g, " ");
+  const library = [...new Set([...body.matchAll(/\[(\d+)\](?!\()/g)].map((m) => Number(m[1])))]
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  const web = [...new Set([...body.matchAll(/\[W(\d+)\]/gi)].map((m) => Number(m[1])))]
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  return { library, web };
+}
+
+/**
+ * Compare the citations an answer uses with the passages that were open.
+ *
+ * A connected model is told to cite by number. If it writes `[4]` when four
+ * passages were not supplied, that line is not backed by anything the student
+ * owns — and a student cannot see that by looking at the page. The panel can.
+ */
+export function citationAudit(text = "", sources = []) {
+  const { library, web } = citedMarkers(text);
+  const available = sources
+    .map((source) => Number(source?.n))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  return {
+    library,
+    web,
+    available,
+    unknown: library.filter((n) => !available.includes(n)),
+    used: available.filter((n) => library.includes(n)),
+    unused: available.filter((n) => !library.includes(n)),
+  };
+}
+
+/** One plain sentence for a citation that points at nothing. Empty when fine. */
+export function citationWarning(audit) {
+  if (!audit?.unknown?.length) return "";
+  const marks = audit.unknown.map((n) => `[${n}]`).join(", ");
+  const open = audit.available.length;
+  const noun = open === 1 ? "passage was" : "passages were";
+  return `_This answer cites ${marks}, but only ${open} ${noun} open. Treat those lines as unchecked — they did not come from your books._`;
+}
+
+/** "2 of 3 pages cited" for the meta line, or "" when there is nothing to say. */
+export function citationSummary(audit) {
+  if (!audit?.available?.length || !audit.used.length) return "";
+  if (!audit.unused.length) return `all ${audit.available.length} pages cited`;
+  return `${audit.used.length} of ${audit.available.length} pages cited`;
+}
+
+/* ------------------------------------------------------------------------- */
 /* Naming what is missing, and checking what a model added                      */
 /* ------------------------------------------------------------------------- */
 

@@ -6,31 +6,31 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=34";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=34";
-import { ingestPdf, ingestText } from "./ingest.js?v=34";
-import { splitSentences } from "./text.js?v=34";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=34";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=34";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=34";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=34";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=34";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=34";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=34";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=34";
+import * as db from "./db.js?v=35";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=35";
+import { ingestPdf, ingestText } from "./ingest.js?v=35";
+import { splitSentences } from "./text.js?v=35";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=35";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=35";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=35";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=35";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=35";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=35";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=35";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=35";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=34";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=34";
+} from "./pro-mode.js?v=35";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=35";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=34";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=34";
-import { DEFAULT_DEPTH, followUpsFor, looksUncited, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=34";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=34";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=34";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=34";
+} from "./updates.js?v=35";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=35";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=35";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=35";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=35";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=35";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -38,8 +38,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=34";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=34";
+} from "./llm.js?v=35";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=35";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -51,7 +51,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=34";
+} from "./local-ai.js?v=35";
 import {
   EXAMS,
   MODES,
@@ -66,12 +66,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=34";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=34";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=34";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=34";
-import { TASKS } from "./model-router.js?v=34";
-import { PROVIDERS, providerList } from "./providers.js?v=34";
+} from "./exam-packs.js?v=35";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=35";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=35";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=35";
+import { TASKS } from "./model-router.js?v=35";
+import { PROVIDERS, providerList } from "./providers.js?v=35";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -80,30 +80,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=34";
-import { parseApiKeys } from "./key-pool.js?v=34";
+} from "./settings.js?v=35";
+import { parseApiKeys } from "./key-pool.js?v=35";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=34";
+} from "./student-keys.js?v=35";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=34";
+} from "./quiz.js?v=35";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=34";
+} from "./flashcards.js?v=35";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=34";
+} from "./study-decks.js?v=35";
 import {
   accuracy,
   currentStreak,
@@ -114,16 +114,16 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=34";
-import { externalSearchUrl, searchWeb } from "./web.js?v=34";
-import { openEditStudio } from "./edit-studio.js?v=34";
-import { openReader } from "./reader.js?v=34";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=34";
-import { languageLabel, languageGroups, languageMeta, languageGlyph } from "./languages.js?v=34";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=34";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=34";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=34";
-import * as ui from "./ui.js?v=34";
+} from "./progress.js?v=35";
+import { externalSearchUrl, searchWeb } from "./web.js?v=35";
+import { openEditStudio } from "./edit-studio.js?v=35";
+import { openReader } from "./reader.js?v=35";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=35";
+import { languageLabel, languageGroups, languageMeta, languageGlyph } from "./languages.js?v=35";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=35";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=35";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=35";
+import * as ui from "./ui.js?v=35";
 import {
   clearReferral,
   getLeaderboard,
@@ -133,8 +133,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=34";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=34";
+} from "./auth.js?v=35";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=35";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -142,12 +142,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=34";
-import { initMotion, revealVisible } from "./motion.js?v=34";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=34";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=34";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=34";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=34";
+} from "./premium-ui.js?v=35";
+import { initMotion, revealVisible } from "./motion.js?v=35";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=35";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=35";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=35";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=35";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -1118,6 +1118,8 @@ function addMessage(message, { persist = true } = {}) {
     verification: message.verification || null,
     flashcards: message.flashcards || [],
     studySheet: message.studySheet && !message.studySheet.empty ? message.studySheet : null,
+    suggest: message.suggest || null,
+    citationAudit: message.citationAudit || null,
   };
   state.messages.push(full);
   if (persist) db.addMessage(full).catch(() => {});
@@ -1304,10 +1306,26 @@ function renderChat() {
       const meta = ui.element("div", "message-meta");
       if (message.meta) meta.appendChild(ui.element("span", "", message.meta));
       if (message.confidence) meta.appendChild(ui.element("span", "", `${Math.round(message.confidence * 100)}% text match`));
+      const cited = citationSummary(message.citationAudit);
+      if (cited) meta.appendChild(ui.element("span", "", cited));
       if (message.verification?.enabled && message.verification.supported) {
         meta.appendChild(ui.element("span", "", "✓ Second AI check"));
       }
       if (meta.childNodes.length) body.appendChild(meta);
+      if (message.suggest?.bookId) {
+        // A refusal that names a page should also be able to open it. One tap
+        // beats the student hunting through Library for the book mentioned.
+        const nearest = message.suggest;
+        const openNearest = ui.element(
+          "button",
+          "message-suggest",
+          `Open the closest page · ${truncate(nearest.title || "your book", 32)} p. ${nearest.page ?? 1}`,
+        );
+        openNearest.type = "button";
+        openNearest.setAttribute("aria-label", "Open the closest page found for this question");
+        openNearest.addEventListener("click", () => openSource(nearest));
+        body.appendChild(openNearest);
+      }
       if (lastQuestion) {
         const actions = ui.element("div", "message-actions");
         const copy = ui.element("button", "message-action", "Copy answer");
@@ -1610,6 +1628,10 @@ async function handleAsk(event) {
       const bookIds = scopeIds("#ask-book-scope");
       const retrieval = retrievePreferBooks(effectiveQuery, state.indexes, { topK: 5, bookIds });
       hits = retrieval.hits;
+      // Grounded hits go empty when retrieval refuses, which used to leave the
+      // refusal with nothing to point at. The pages it considered but did not
+      // stand behind are still real pages in the student's library.
+      const contextHits = (retrieval.allHits?.length ? retrieval.allHits : hits).slice(0, 3);
       // Books first: the built-in notes are a fallback for topics no uploaded
       // page covers, not a shortcut past the student's own textbook.
       const schoolAnswer = retrieval.grounded
@@ -1679,14 +1701,19 @@ async function handleAsk(event) {
             // A figure no cited page contains is the clearest sign a connected
             // model added something. Name the figures rather than hiding it.
             const strayNumbers = ungroundedNumbers(model.content, sourcesFromHits(hits));
+            // A marker like [4] with three passages open is a citation to
+            // nothing. The student cannot see that; this can.
+            const audit = citationAudit(model.content, sourcesFromHits(hits));
+            const citationNote = citationWarning(audit);
             const numbersWarning = strayNumbers.length
               ? `_These figures do not appear on the cited pages: ${strayNumbers.join(", ")}. Check them against your book before you write them down._\n\n`
               : "";
             answer = {
-              text: webImportNotice + thinCitations + numbersWarning + model.content,
+              text: webImportNotice + thinCitations + numbersWarning + (citationNote ? `${citationNote}\n\n` : "") + model.content,
               sources: sourcesFromHits(hits), webSources: [], grounded: true,
               confidence: retrieval.confidence, verification: model.verification,
               meta: `${aiProfile(model.engine).nickname} · AI answer${model.fallbackUsed ? " (fallback)" : ""}`,
+              citationAudit: audit,
               flashcards: [],
             };
           } else if (model.error) modelError = model.error;
@@ -1754,6 +1781,7 @@ async function handleAsk(event) {
           // Grounded but not a strong match: the pages answer part of the
           // question. Say so in the body instead of only in a tag.
           partial: retrieval.confidence > 0 && retrieval.confidence < 0.62,
+          contextHits,
         });
         answer.meta = modelError ? "Model unavailable — cited excerpts shown"
           : hits.length ? "Bolt · cited library excerpts" : "Bolt · no matching source";
@@ -1762,6 +1790,15 @@ async function handleAsk(event) {
           answer.text = `${answer.text}\n\n_${webSkippedOffline ? "Offline — saved pages only." : t("knowledge.webOff")}_`;
         }
         showKeyExhaustedToast(modelError);
+      }
+      // A refusal is only useful if the student can get somewhere. Offer the
+      // closest page as a button, not just a sentence they have to re-find.
+      if (!answer.sources?.length && contextHits.length) {
+        const nearest = contextHits[0];
+        answer.suggest = {
+          bookId: nearest.bookId, title: nearest.title,
+          page: nearest.page, section: nearest.section, text: nearest.text,
+        };
       }
       if (requestMode === "flashcards" && hits.length && !answer.flashcards?.length) {
         answer.flashcards = buildFlashcards(hits, 6, { language: state.settings.language });
@@ -1774,7 +1811,7 @@ async function handleAsk(event) {
       role: "assistant", content: answer.text, sources: answer.sources,
       webSources: answer.webSources, meta: answer.meta, confidence: answer.confidence,
       verification: answer.verification, flashcards: answer.flashcards,
-      studySheet: answer.studySheet,
+      studySheet: answer.studySheet, suggest: answer.suggest, citationAudit: answer.citationAudit,
     });
     renderSources(answer);
     if (answer.flashcards?.length) {
@@ -4824,7 +4861,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=34");
+            const { social } = await import("./social.js?v=35");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));

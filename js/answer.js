@@ -7,12 +7,12 @@
  * labelled as being outside the textbooks.
  */
 
-import { salientSentences, splitSentences } from "./text.js?v=34";
-import { truncate } from "./util.js?v=34";
-import { missingTerms } from "./answer-quality.js?v=34";
-import { buildFlashcards } from "./flashcards.js?v=34";
-import { buildStudySheet } from "./study-sheet.js?v=34";
-import { t } from "./i18n.js?v=34";
+import { salientSentences, splitSentences } from "./text.js?v=35";
+import { truncate } from "./util.js?v=35";
+import { missingTerms } from "./answer-quality.js?v=35";
+import { buildFlashcards } from "./flashcards.js?v=35";
+import { buildStudySheet } from "./study-sheet.js?v=35";
+import { t } from "./i18n.js?v=35";
 
 export function sourcesFromHits(hits = []) {
   return hits.map((hit, index) => ({
@@ -324,11 +324,15 @@ export function composeGroundedAnswer({
   language = "en",
   depth = "balanced",
   partial = false,
+  // The pages retrieval considered but did not stand behind. They are the only
+  // honest basis for a refusal that says "the closest page was…", because the
+  // grounded hits are empty by the time a refusal is written.
+  contextHits = [],
 } = {}) {
   const sources = sourcesFromHits(hits);
   if (!sources.length) {
     return {
-      text: notFoundMessage(reason, webResults, webEnabled, language, { query, hits }),
+      text: notFoundMessage(reason, webResults, webEnabled, language, { query, hits: contextHits.length ? contextHits : hits }),
       sources: [],
       webSources: webResults,
       flashcards: [],

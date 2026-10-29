@@ -9,7 +9,7 @@
  * The pure helpers are exported so they can be tested without a browser.
  */
 
-/** Release the page itself was loaded from: "./js/app.js?v=34" → "33". */
+/** Release the page itself was loaded from: "./js/app.js?v=35" → "33". */
 export const RELEASE = new URL(import.meta.url).searchParams.get("v") || "dev";
 
 const CACHE_PREFIX = "vignan-vidyanikethan-ai-v";

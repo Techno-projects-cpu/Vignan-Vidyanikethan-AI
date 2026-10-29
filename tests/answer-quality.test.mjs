@@ -3,7 +3,17 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { composeGroundedAnswer, evidenceNote, notFoundMessage } from "../js/answer.js";
-import { citationCoverage, looksUncited, missingTerms, queryTerms, ungroundedNumbers } from "../js/answer-quality.js";
+import {
+  citationAudit,
+  citationCoverage,
+  citationSummary,
+  citationWarning,
+  citedMarkers,
+  looksUncited,
+  missingTerms,
+  queryTerms,
+  ungroundedNumbers,
+} from "../js/answer-quality.js";
 
 const root = new URL("../", import.meta.url);
 const app = readFileSync(fileURLToPath(new URL("js/app.js", root)), "utf8");
@@ -78,4 +88,48 @@ test("the app uses all three checks where the text is written", () => {
   assert.match(app, /ungroundedNumbers\(model\.content, sourcesFromHits\(hits\)\)/);
   assert.match(app, /These figures do not appear on the cited pages/);
   assert.match(app, /partial: retrieval\.confidence > 0 && retrieval\.confidence < 0\.62/);
+});
+
+test("a citation that points at a passage that was never open is caught", () => {
+  const sources = [{ n: 1 }, { n: 2 }, { n: 3 }];
+  const text = "Plants use light [1]. Chlorophyll absorbs it [2]. See [4] for more. Also [W1].";
+  assert.deepEqual(citedMarkers(text), { library: [1, 2, 4], web: [1] });
+  const audit = citationAudit(text, sources);
+  assert.deepEqual(audit.unknown, [4], "four passages were never open");
+  assert.deepEqual(audit.used, [1, 2]);
+  assert.deepEqual(audit.unused, [3]);
+  assert.match(citationWarning(audit), /cites \[4\], but only 3 passages were open/);
+  assert.match(citationWarning(audit), /may not have come from your books|did not come from your books/);
+  assert.equal(citationWarning(citationAudit("Only [1] and [2].", sources)), "", "nothing to warn about");
+  assert.equal(citationSummary(audit), "2 of 3 pages cited");
+  assert.equal(citationSummary(citationAudit("[1] [2] [3]", sources)), "all 3 pages cited");
+  assert.equal(citationSummary(citationAudit("no citations at all", sources)), "");
+});
+
+test("a Markdown link is not a citation", () => {
+  assert.deepEqual(citedMarkers("Read [2](https://example.org/page) first.").library, []);
+  assert.deepEqual(citedMarkers("[1] and [2]").library, [1, 2]);
+});
+
+test("the closest page survives a refusal, as text and as a button", () => {
+  // Retrieval empties `hits` when it refuses, so the page it considered has to
+  // be carried separately or the refusal cannot name anything.
+  const nearest = { n: 1, bookId: "b1", title: "Physics Notes", page: 4, text: "A lever balances when the moments are equal." };
+  const answer = composeGroundedAnswer({
+    query: "What is entropy?", hits: [], reason: "not-in-books", contextHits: [nearest],
+  });
+  assert.match(answer.text, /does not appear|do not appear in the pages that came closest/);
+  assert.match(answer.text, /Physics Notes, p\. 4/);
+  assert.match(app, /const contextHits = \(retrieval\.allHits\?\.length \? retrieval\.allHits : hits\)\.slice\(0, 3\)/);
+  assert.match(app, /answer\.suggest = \{/);
+  assert.match(app, /contextHits,/);
+  assert.match(app, /class="message-suggest"|"message-suggest"/, "the page is offered as a button");
+  assert.match(app, /addEventListener\("click", \(\) => openSource\(nearest\)\)/);
+});
+
+test("the audit reaches the answer and its meta line", () => {
+  assert.match(app, /const audit = citationAudit\(model\.content, sourcesFromHits\(hits\)\)/);
+  assert.match(app, /citationNote \? `\$\{citationNote\}\\n\\n` : ""/, "the warning leads the answer");
+  assert.match(app, /citationAudit: audit,/);
+  assert.match(app, /const cited = citationSummary\(message\.citationAudit\)/);
 });

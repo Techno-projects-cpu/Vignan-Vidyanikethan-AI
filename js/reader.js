@@ -1,7 +1,17 @@
 /** Page-level textbook reader used by every citation. */
 
-import { element, openModal, qs, showToast } from "./ui.js?v=34";
-import { safeUrl, truncate } from "./util.js?v=34";
+import { element, openModal, qs, showToast } from "./ui.js?v=35";
+import { downloadBlob, safeUrl, truncate } from "./util.js?v=35";
+import {
+  addNote,
+  notesFor,
+  notesForBook,
+  notesMarkdown,
+  notesStorage,
+  readNotes,
+  removeNote,
+  writeNotes,
+} from "./notes.js?v=35";
 
 /** Resolve a cited page number, which may not equal its position in pasted notes. */
 export function pageIndexForCitation(pages = [], pageNumber = 1) {
@@ -113,7 +123,36 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
   }
   const pageText = element("div", "reader-page-text");
   const sourceNote = element("div", "reader-note");
-  content.append(toolbar, searchWrap, pageText, sourceNote);
+
+  /* ---- My note on this page ------------------------------------------- */
+  // Reading and writing belong on one screen: the sentence a student wants to
+  // remember is on screen when they decide to write it down.
+  const storage = notesStorage();
+  let notes = readNotes(storage);
+  const bookId = String(book?.id || book?.title || "book");
+  const notesBlock = element("section", "reader-notes");
+  const notesHead = element("div", "reader-notes-head");
+  notesHead.appendChild(element("strong", "", "My note on this page"));
+  const notesCount = element("span", "reader-notes-count", "");
+  notesHead.appendChild(notesCount);
+  const noteInput = document.createElement("textarea");
+  noteInput.className = "reader-note-input";
+  noteInput.rows = 2;
+  noteInput.maxLength = 280;
+  noteInput.placeholder = "In your own words — what must you remember from this page?";
+  noteInput.setAttribute("aria-label", "My note on this page");
+  const noteRow = element("div", "reader-note-row");
+  const noteSave = element("button", "button small", "Save note");
+  noteSave.type = "button";
+  const noteDelete = element("button", "button ghost small", "Delete note");
+  noteDelete.type = "button";
+  const noteHint = element("p", "reader-note-hint", "Kept on this device only. Nothing here is sent to a model.");
+  noteRow.append(noteSave, noteDelete);
+  const noteList = element("ul", "reader-note-list");
+  const exportNotes = element("button", "button ghost small", "Save my notes (.md)");
+  exportNotes.type = "button";
+  notesBlock.append(notesHead, noteInput, noteRow, noteHint, noteList, exportNotes);
+  content.append(toolbar, searchWrap, pageText, sourceNote, notesBlock);
   wrapper.append(sidebar, content);
 
   const pageButtons = pageList.map((page, index) => {
@@ -129,6 +168,67 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
     return button;
   });
 
+  function paintNotes(page) {
+    const pageNumber = page.page || current;
+    const existing = notesFor(notes, bookId, pageNumber)[0];
+    noteInput.value = existing ? existing.text : "";
+    noteSave.textContent = existing ? "Update note" : "Save note";
+    noteDelete.hidden = !existing;
+    noteList.replaceChildren();
+    for (const note of notesFor(notes, bookId, pageNumber)) {
+      const item = element("li", "reader-note-item", note.text);
+      const drop = element("button", "reader-note-drop", "×");
+      drop.type = "button";
+      drop.setAttribute("aria-label", `Delete the note on page ${note.page}`);
+      drop.addEventListener("click", () => {
+        notes = writeNotes(removeNote(notes, note.id), storage);
+        paintNotes(page);
+      });
+      item.appendChild(drop);
+      noteList.appendChild(item);
+    }
+    const total = notesForBook(notes, bookId).length;
+    notesCount.textContent = total ? `${total} on this book` : "";
+    exportNotes.hidden = total === 0;
+  }
+
+  function saveNote() {
+    if (!noteInput.value.trim()) {
+      showToast("Write something first — one line is enough.", "warning");
+      return;
+    }
+    const page = pageList[current - 1];
+    const pageNumber = page.page || current;
+    const wasThere = Boolean(notesFor(notes, bookId, pageNumber)[0]);
+    notes = writeNotes(addNote(notes, { bookId, page: pageNumber, text: noteInput.value }), storage);
+    paintNotes(page);
+    showToast(wasThere ? "Note updated." : "Note saved on this page.", "success", 2200);
+  }
+
+  noteSave.addEventListener("click", saveNote);
+  noteInput.addEventListener("keydown", (event) => {
+    // Ctrl/Cmd+Enter saves without leaving the keyboard.
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      saveNote();
+    }
+  });
+  noteDelete.addEventListener("click", () => {
+    const page = pageList[current - 1];
+    const existing = notesFor(notes, bookId, page.page || current)[0];
+    if (!existing) return;
+    notes = writeNotes(removeNote(notes, existing.id), storage);
+    paintNotes(page);
+    showToast("Note deleted.", "info", 1800);
+  });
+  exportNotes.addEventListener("click", () => {
+    const mine = notesForBook(notes, bookId);
+    if (!mine.length) return;
+    const name = String(book?.title || "notes").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "notes";
+    downloadBlob(new Blob([notesMarkdown(mine, { title: book?.title || "My book" })], { type: "text/markdown;charset=utf-8" }), `${name}-notes.md`);
+    showToast("Your notes were saved as a Markdown file.", "success");
+  });
+
   function render(pageNumber, searchText = "") {
     current = Math.min(Math.max(1, pageNumber), pageList.length);
     const page = pageList[current - 1];
@@ -141,6 +241,7 @@ export function openReader({ book, pages = [], initialPage = 1, highlight = "" }
     sourceNote.textContent = book?.sourceUrl
       ? `Imported from a public website. Verify the original.${book?.type !== "pdf" ? " Text sections are approximate." : ""}`
       : `${book?.subject || "Textbook"}${book?.board ? ` · ${book.board}` : ""}${book?.grade ? ` · Class ${book.grade}` : ""}`;
+    paintNotes(page);
     if (pdfUrl) openPdf.href = `${pdfUrl}#page=${page.page || current}`;
     pageButtons.forEach((button, index) => button.classList.toggle("active", index + 1 === current));
     qs(".reader-pages", wrapper)?.querySelector(".active")?.scrollIntoView({ block: "nearest" });

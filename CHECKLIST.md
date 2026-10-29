@@ -76,6 +76,10 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 3.19 | Ask a question the book does not cover: the refusal names the words it could not find and the closest page, and never offers a guess | ☐ | ☐ | ☐ |
 | 3.19b | An answer that only partly matches says so inside the answer body, not just in a tag | ☐ | ☐ | ☐ |
 | 3.19c | Open a citation: the reader highlights the passage, `A+` makes the text bigger, "Only pages with your quote" filters the page list, and arrow keys turn pages | ☐ | ☐ | ☐ |
+| 3.19d | Under a cited page, write a note and press Save; turn two pages and come back — the note is still there, and saving again updates it instead of adding a second one | ☐ | ☐ | ☐ |
+| 3.19e | `Save my notes (.md)` downloads a file that lists the notes in page order, and the note text never appears in any request to a model | ☐ | ☐ | ☐ |
+| 3.19f | Ask something the books do not cover: the reply names the closest page and a button opens it; nothing is guessed | ☐ | ☐ | ☐ |
+| 3.19g | A connected answer that cites more pages than were found shows the warning above the text and `n of m pages cited` in the meta line | ☐ | ☐ | ☐ |
 | 3.19 | Library: the "coming soon" card is visible, says publisher permission, and its button cannot be pressed | ☐ | ☐ | ☐ |
 | 3.20 | A link ending in `?ask=…` fills the composer on open and does not send by itself | ☐ | ☐ | ☐ |
 
@@ -139,5 +143,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (420 checks) plus
+The quickest regression test for a UI fix is `npm test` (431 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.
