@@ -287,6 +287,34 @@ export function createSocialService({ store, now = () => Date.now(), lookupByNam
       .slice(0, 12);
   }
 
+  /**
+   * Students to suggest on the Add-a-friend screen.
+   *
+   * Typing a username first was a dead end for most students: nobody knows
+   * anyone's handle when they open the tab. This returns the same `person`
+   * shape as `search()` without needing a query, so the screen can offer a few
+   * classmates with an Add button next to each one.
+   */
+  async function suggestions(user, limit = 6) {
+    await touchProfile(user);
+    const [profiles, friendships, requests] = await Promise.all([
+      store.searchProfiles("", 24),
+      store.listFriendships(user.id),
+      store.listRequests(user.id),
+    ]);
+    const friendIds = new Set(friendships.map((row) => (row.user_a === user.id ? row.user_b : row.user_a)));
+    const outgoing = new Set(requests.filter((row) => row.from_id === user.id).map((row) => row.to_id));
+    const incoming = new Set(requests.filter((row) => row.to_id === user.id).map((row) => row.from_id));
+    return profiles
+      .filter((profile) => profile.user_id !== user.id && !friendIds.has(profile.user_id))
+      .map((profile) =>
+        person(profile, {
+          relationship: outgoing.has(profile.user_id) ? "requested" : incoming.has(profile.user_id) ? "incoming" : "none",
+        }),
+      )
+      .slice(0, limit);
+  }
+
   async function requestFriend(user, username) {
     const handle = String(username || "").trim().replace(/^@/, "").toLowerCase();
     if (!handle) throw new SocialError("Type a username to add.");
@@ -591,6 +619,7 @@ export function createSocialService({ store, now = () => Date.now(), lookupByNam
     findProfile,
     state,
     search,
+    suggestions,
     requestFriend,
     respondToRequest,
     removeFriend,

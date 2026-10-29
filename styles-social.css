@@ -1300,3 +1300,15 @@ body.premium-ui .account-dot.has-alerts {
   justify-self: start;
   min-height: 44px;
 }
+
+/* The empty Friends and Requests tabs both lead straight to the search box. */
+#friends-empty-add,
+#friends-requests-add {
+  justify-self: start;
+  min-height: 46px;
+  padding-inline: 22px;
+}
+
+#friends-add-more {
+  min-height: 36px;
+}

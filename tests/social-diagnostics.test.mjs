@@ -112,6 +112,7 @@ test("a missing migration becomes a 503 that says exactly what to run", async ()
   assert.equal(sent[0].status, 503);
   assert.match(sent[0].error, /20261028000000_vignan_social\.sql/);
   assert.match(sent[0].error, /not set up/i);
+  assert.doesNotMatch(sent[0].error, /admin/i, "no jargon the student has to decode");
 });
 
 test("a database outage is a 503 anyone can understand", async () => {
@@ -141,6 +142,25 @@ test("classroom errors keep their own wording and status", async () => {
   await router({ request, response, apiPath: "/api/social/state", url });
   assert.equal(sent[0].status, 404);
   assert.equal(sent[0].error, "That username does not exist.");
+});
+
+test("the Add-a-friend screen never comes back empty-handed", async () => {
+  const people = [{ id: "usr_2", username: "bharat", relationship: "none", xp: 40, streak: 2, online: true }];
+  let askedWith = null;
+  const { router, sent } = harness({
+    state: async () => ({}),
+    suggestions: async () => { askedWith = ""; return people; },
+    search: async () => { askedWith = "typed"; return []; },
+  });
+  await router({ request, response, apiPath: "/api/social/people", url: new URL("http://localhost/api/social/people?q=") });
+  assert.equal(sent[0].status, 200);
+  assert.equal(askedWith, "", "an empty query asks for suggestions, not a search");
+  assert.equal(sent[0].payload.people.length, 1);
+  assert.equal(sent[0].payload.suggested, true);
+
+  await router({ request, response, apiPath: "/api/social/people", url: new URL("http://localhost/api/social/people?q=bha") });
+  assert.equal(askedWith, "typed");
+  assert.equal(sent[1].payload.suggested, false);
 });
 
 test("a healthy call still answers 200", async () => {

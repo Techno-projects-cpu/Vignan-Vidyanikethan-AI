@@ -165,6 +165,8 @@ export function stopSocialPolling() {
 export const social = {
   state: () => api("social/state"),
   people: (query) => api(`social/people?q=${encodeURIComponent(query)}`),
+  /** Classmates to suggest when the student has not typed anything yet. */
+  suggestions: () => api("social/people?q="),
   requestFriend: (username) => api("social/friends/request", { method: "POST", body: { username } }),
   respondFriend: (requestId, accept) => api("social/friends/respond", { method: "POST", body: { requestId, accept } }),
   removeFriend: (userId) => api("social/friends/remove", { method: "POST", body: { userId } }),

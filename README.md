@@ -148,8 +148,13 @@ When Supabase is requested but its URL or keys are missing or obviously invalid,
 That message means the request reached the server and the social store could not answer. The usual cause is the second migration: login and the leaderboard use `vignan_ai.sql`, while friends, chat and games need the tables from `vignan_social.sql`. The app now diagnoses it instead of hiding it:
 
 - Friends shows a sentence naming the fix, with a **Try again** button.
+- The school project already has this migration applied; it is only needed when you start a new Supabase project.
 - The server logs one line at boot and answers `503` with *"Friends, chat and games are not set up on this server yet…"* until the tables exist.
 - `GET /api/health?social=1` returns `socialReady`, `socialCheck.missing` and `socialCheck.detail`.
+
+### Adding friends
+
+Open **Friends**. The empty tab has an **Add a friend** button, and the Find tab lists classmates you can add with one tap — no username needed. Anyone who has opened Friends, Chat or Play once appears there; only usernames, XP and streak are shown, never age, gender or exact results. Students who have never opened those screens are found by typing two or more letters of their username.
 
 Fix: Supabase dashboard → **SQL Editor** → paste `supabase/migrations/20261028000000_vignan_social.sql` (or run `npm run sql:social` and copy the output) → **Run** → wait ten seconds → reload. With `STUDY_AI_ACCOUNTS_BACKEND=local`, the same check reports whether the JSON file under `server/data/` is writable — a read-only mount produces the same 503. For a larger public deployment, add verified guardian consent, account recovery, moderation, backups and distributed rate limiting. Never put the Supabase secret/service-role key in the browser, chat or Git.
 

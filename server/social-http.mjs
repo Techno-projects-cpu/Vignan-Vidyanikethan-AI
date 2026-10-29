@@ -11,8 +11,9 @@ import { isMissingTable } from "./social-store.mjs";
 
 const LOGIN_MESSAGE = "Log in with your student account to use friends, chat and games.";
 const SETUP_MESSAGE =
-  "Friends, chat and games are not set up on this server yet. An admin needs to run "
-  + "supabase/migrations/20261028000000_vignan_social.sql in the Supabase SQL editor, then retry.";
+  "Friends is not set up on this server yet. If you own this site, run "
+  + "supabase/migrations/20261028000000_vignan_social.sql once in the Supabase SQL editor "
+  + "(npm run sql:social prints it), wait ten seconds, then reload. No redeploy is needed.";
 const OUTAGE_MESSAGE =
   "Friends, chat and games could not reach the account database just now. Please try again in a minute.";
 
@@ -117,8 +118,14 @@ export function createSocialRouter({ service, accounts, accountsBackend, current
 
     if (apiPath === "/api/social/people" && method === "GET") {
       if (!limited(request, response, `social-people:${user.id}`, 40, 60_000)) return true;
-      const people = await service.search(user, url.searchParams.get("q") || "");
-      json(request, response, { people });
+      const term = String(url.searchParams.get("q") || "").trim();
+      // No query = "show me classmates I could add", so the screen is never empty.
+      if (!term) {
+        json(request, response, { people: await service.suggestions(user), suggested: true });
+        return true;
+      }
+      const people = await service.search(user, term);
+      json(request, response, { people, suggested: false });
       return true;
     }
 

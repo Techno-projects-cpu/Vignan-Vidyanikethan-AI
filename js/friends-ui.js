@@ -16,6 +16,8 @@ let activeTab = "friends";
 let searchResults = [];
 let searchTerm = "";
 let searchBusy = false;
+let suggested = [];
+let suggestBusy = false;
 let initialised = false;
 let lastSignature = "";
 
@@ -133,15 +135,43 @@ function renderTabs(root) {
   root.appendChild(wrap);
 }
 
+/**
+ * Open the Find tab with the cursor already in the search box.
+ *
+ * The empty Friends tab used to say "find a classmate by username" without
+ * giving the student anything to press, which is why "add friends" seemed to be
+ * missing. Every empty state now links straight here.
+ */
+export function openAddFriend() {
+  activeTab = "find";
+  lastSignature = "";
+  renderFriends();
+  const input = $("#friends-search-input");
+  if (input) {
+    input.focus({ preventScroll: false });
+    input.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+}
+
 function renderFriendsTab(body, data) {
   const friends = data.friends || [];
   if (!friends.length) {
-    body.appendChild(ui.emptyState("◇", "No friends yet", "Find a classmate by username and send a request. You can also share a game code from Play."));
+    body.appendChild(ui.emptyState("◇", "No friends yet", "Type a classmate's username and send a request. You can also share a game code from Play."));
+    const add = button("Add a friend", "button primary", () => openAddFriend(), { action: "add-friend" });
+    add.id = "friends-empty-add";
+    body.appendChild(add);
     if (data.requests?.outgoing?.length) {
       body.appendChild(ui.element("p", "social-hint", `${data.requests.outgoing.length} request waiting for an answer.`));
     }
     return;
   }
+  const head = ui.element("div", "social-alerts-head");
+  head.appendChild(ui.element("h3", "social-subhead", `${friends.length} friend${friends.length === 1 ? "" : "s"}`));
+  const addMore = button("Add friend", "button ghost small", () => openAddFriend(), { action: "add-friend" });
+  addMore.id = "friends-add-more";
+  head.appendChild(addMore);
+  body.appendChild(head);
+
   const list = ui.element("div", "social-list");
   for (const friend of friends) {
     const actions = [
@@ -182,6 +212,9 @@ function renderRequestsTab(body, data) {
   const outgoing = data.requests?.outgoing || [];
   if (!incoming.length && !outgoing.length) {
     body.appendChild(ui.emptyState("↗", "No open requests", "When a classmate wants to connect, it will appear here."));
+    const find = button("Find a friend to add", "button primary", () => openAddFriend(), { action: "add-friend" });
+    find.id = "friends-requests-add";
+    body.appendChild(find);
     return;
   }
   if (incoming.length) {
@@ -243,6 +276,21 @@ async function runSearch() {
   }
 }
 
+async function loadSuggestions() {
+  if (suggestBusy) return;
+  suggestBusy = true;
+  try {
+    const data = await social.suggestions();
+    suggested = data.people || [];
+  } catch {
+    suggested = [];
+  } finally {
+    suggestBusy = false;
+    lastSignature = "";
+    renderFriends();
+  }
+}
+
 function renderFindTab(body) {
   const form = ui.element("form", "social-search");
   const input = document.createElement("input");
@@ -271,14 +319,19 @@ function renderFindTab(body) {
   body.appendChild(form);
   body.appendChild(ui.element("p", "social-hint", "Usernames are public. Age, gender and exact results stay private."));
 
-  if (!searchResults.length) {
-    if (searchTerm && !searchBusy) {
-      body.appendChild(ui.emptyState("⌕", "No student found", "Check the spelling, or ask them to open Friends once so their profile appears."));
-    }
+  if (searchTerm && !searchResults.length && !searchBusy) {
+    body.appendChild(ui.emptyState("⌕", "No student found", "Check the spelling, or ask them to open Friends once so their profile appears."));
     return;
   }
+  const rows = searchResults.length ? searchResults : suggested;
+  if (!rows.length) {
+    if (!suggestBusy) loadSuggestions();
+    body.appendChild(ui.element("p", "social-hint", suggestBusy ? "Looking for classmates…" : "No other students yet. Share the site with your class — everyone who opens Friends appears here."));
+    return;
+  }
+  if (!searchResults.length) body.appendChild(ui.element("h3", "social-subhead", "Classmates you can add"));
   const list = ui.element("div", "social-list");
-  for (const person of searchResults) {
+  for (const person of rows) {
     let action;
     if (person.relationship === "friend") {
       action = button("Message", "button ghost small", () => openChat({ friendId: person.id }), { action: "message" });
@@ -387,6 +440,7 @@ export function renderFriends() {
     tab: activeTab,
     results: searchResults.map((row) => `${row.id}:${row.relationship}:${row.online}`),
     term: searchTerm,
+    suggested: suggested.map((row) => `${row.id}:${row.relationship}`),
     busy: searchBusy,
     unread: data?.unread,
     friends: data?.friends?.map((row) => `${row.id}:${row.online}:${row.xp}:${row.streak}`),
@@ -431,7 +485,10 @@ export function renderFriends() {
   root.appendChild(body);
   if (activeTab === "friends") renderFriendsTab(body, data);
   else if (activeTab === "requests") renderRequestsTab(body, data);
-  else if (activeTab === "find") renderFindTab(body);
+  else if (activeTab === "find") {
+    renderFindTab(body);
+    if (!searchTerm && !suggested.length && !suggestBusy) loadSuggestions();
+  }
   else renderAlertsTab(body, data);
 }
 

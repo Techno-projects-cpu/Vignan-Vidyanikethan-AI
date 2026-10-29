@@ -76,6 +76,8 @@ curl -s https://YOUR-SERVICE.onrender.com/api/health?social=1
 
 `socialReady: true` means every table answered. When it is `false`, `socialCheck.missing` lists the tables that are still missing and `socialCheck.detail` says why. `npm start` also prints one line at boot — either `Social store: 7 tables` or a warning naming the migration to run.
 
+> The project used by this school (`dwmzbrrnqxzdoxrxbrna`) already has both migrations applied, so Friends, Chat and Play work there today. Run them yourself only on a **new** Supabase project.
+
 ## 4. Use a real local AI — or add your own free keys
 
 **No API keys are bundled.** Public, leaked or shared keys are not safe: they can expose private data, exhaust someone else's quota, and create surprise bills. Generate keys from your own provider accounts and paste only the secret value into Render → Environment. The app's **Settings → Advanced settings → Official free-tier API keys** panel links directly to every official key page.

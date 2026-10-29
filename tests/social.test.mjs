@@ -316,3 +316,27 @@ test("game catalogue stays academic and full", () => {
     assert.ok(game.title && game.blurb && game.subject);
   }
 });
+
+test("classmates are suggested before anything is typed, minus existing friends", async () => {
+  const { service, cleanup } = await harness();
+  try {
+    await service.state(A);
+    await service.state(B);
+    await service.state(C);
+    const first = await service.suggestions(A);
+    assert.equal(first.length, 2, "both other students are offered");
+    assert.ok(first.every((row) => row.id !== A.id), "never suggests yourself");
+    assert.ok(first.every((row) => row.relationship === "none"), "nobody is already a friend");
+    assert.ok(first.every((row) => row.username && row.xp !== undefined), "carries the public profile only");
+
+    await befriend(service, A, B);
+    const after = await service.suggestions(A);
+    assert.deepEqual(after.map((row) => row.username), ["chitra"], "existing friends drop out");
+
+    await service.requestFriend(A, "chitra");
+    const pending = await service.suggestions(A);
+    assert.equal(pending[0].relationship, "requested", "a pending request is still shown as pending");
+  } finally {
+    await cleanup();
+  }
+});
