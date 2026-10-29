@@ -1131,13 +1131,17 @@ async function handleAsk(event) {
     } else {
       state.linkContext = null;
       const effectiveQuery = contextualQuery(query, history);
-      const schoolAnswer = knowledgeTopicAnswer(effectiveQuery, language) || knowledgeTopicAnswer(query, language);
-      if (schoolAnswer) {
-        answer = schoolAnswer;
-      } else {
       const bookIds = scopeIds("#ask-book-scope");
       const retrieval = retrievePreferBooks(effectiveQuery, state.indexes, { topK: 5, bookIds });
       hits = retrieval.hits;
+      // Books first: the built-in notes are a fallback for topics no uploaded
+      // page covers, not a shortcut past the student's own textbook.
+      const schoolAnswer = retrieval.grounded
+        ? null
+        : knowledgeTopicAnswer(effectiveQuery, language) || knowledgeTopicAnswer(query, language);
+      if (schoolAnswer) {
+        answer = schoolAnswer;
+      } else {
       // "Key terms of chapter 3" is a revision request, not a question: build a
       // cited sheet from the matched pages instead of asking a model to guess.
       if (hits.length && asksForStudySheet(effectiveQuery)) {
@@ -1232,8 +1236,9 @@ async function handleAsk(event) {
             || composeWebAnswer({ query: effectiveQuery, results: webResults, provider: searchProvider });
         }
       }
-      if (!answer) {
-        // No library page, no usable web text: fall back to the built-in fact pack.
+      if (!answer && !hits.length) {
+        // Nothing in the library and no usable web text: the built-in fact pack
+        // is the last resort, never a substitute for a page the student owns.
         answer = knowledgeFactAnswer(effectiveQuery, language) || knowledgeFactAnswer(query, language);
       }
       if (!answer && !hits.length && !webResults.length && retrieval.reason !== "too-vague"

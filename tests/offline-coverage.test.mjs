@@ -66,3 +66,11 @@ test("offline answers never promise a web search they cannot run", () => {
   assert.doesNotMatch(read("/js/revision-plan.js"), /fetch\(|await import\(/, "revision plans are pure");
   assert.doesNotMatch(read("/js/pro-mode.js"), /fetch\(/, "pro mode is local");
 });
+
+test("student pages outrank the built-in notes and the fact pack", () => {
+  const app = read("/js/app.js");
+  // Built-in topic notes only when retrieval found nothing.
+  assert.match(app, /const schoolAnswer = retrieval\.grounded[\s\S]{0,40}\? null/);
+  // The quick-fact pack is the last resort, not a shortcut past the library.
+  assert.match(app, /if \(!answer && !hits\.length\) \{[\s\S]{0,220}?knowledgeFactAnswer/);
+});

@@ -297,6 +297,11 @@ the next useful move: *Explain step by step*, *Model exam answer*, or *Quiz me
 on this*. They reuse the same pipeline, so a follow-up is grounded exactly like
 the first answer. *Key terms sheet* appears only when no sheet was already made.
 
+**Books beat the built-in notes.** Answers now always try the student's own
+pages first. The built-in topic notes and the quick-fact pack are fallbacks for
+topics no uploaded page covers, so a chapter the student added is never
+skipped in favour of generic notes.
+
 **Citation honesty.** A long model answer with fewer than half of its sentences
 carrying a citation is not presented as grounded: a short note is added asking
 the student to check the sources panel. Short answers are exempt — one sentence
