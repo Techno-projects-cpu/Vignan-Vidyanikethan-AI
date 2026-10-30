@@ -78,8 +78,8 @@ test("the worker waits for permission instead of swapping itself in", () => {
 
 test("the offline report counts what the worker really stored", () => {
   const ready = summarize({
-    expected: ["./index.html", "./js/app.js?v=37", "./styles.css"],
-    cached: ["./index.html", "./js/app.js?v=37", "./styles.css"],
+    expected: ["./index.html", "./js/app.js?v=38", "./styles.css"],
+    cached: ["./index.html", "./js/app.js?v=38", "./styles.css"],
     critical: ["./index.html"],
   });
   assert.equal(ready.total, 3);
@@ -87,7 +87,7 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(ready.summary, /Ready offline: 3 of 3/);
 
   const broken = summarize({
-    expected: ["./index.html", "./js/app.js?v=37"],
+    expected: ["./index.html", "./js/app.js?v=38"],
     cached: [],
     critical: ["./index.html"],
   });
@@ -97,8 +97,8 @@ test("the offline report counts what the worker really stored", () => {
 
   // A release is not "ready" when a file every lesson needs is missing.
   const missingShell = summarize({
-    expected: ["./index.html", "./js/app.js?v=37"],
-    cached: ["./js/app.js?v=37"],
+    expected: ["./index.html", "./js/app.js?v=38"],
+    cached: ["./js/app.js?v=38"],
     critical: CRITICAL_FILES,
   });
   assert.equal(missingShell.ready, false);
@@ -109,8 +109,8 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(nothing.summary, /Open the app once while online/);
 
   // Query strings and absolute URLs compare equal.
-  assert.equal(normalizeUrl("./js/app.js?v=37"), "js/app.js");
-  assert.equal(normalizeUrl("https://app.local/js/app.js?v=37"), "js/app.js");
+  assert.equal(normalizeUrl("./js/app.js?v=38"), "js/app.js");
+  assert.equal(normalizeUrl("https://app.local/js/app.js?v=38"), "js/app.js");
   assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v33"], "18"), "vignan-vidyanikethan-ai-v33");
 });
 

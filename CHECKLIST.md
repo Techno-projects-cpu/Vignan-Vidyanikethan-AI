@@ -93,6 +93,7 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 3.21d | Type `zzz`: the message quotes what you typed and a "Show all 33 languages" button clears the box and brings every tile back | ☐ | ☐ | ☐ |
 | 3.21e | Tap the language that is already selected: a short note says you are already using it, instead of nothing happening | ☐ | ☐ | ☐ |
 | 3.21f | On a 360px phone the glyph is still clearly larger than the name — around 22px, not 17px | ☐ | ☐ | ☐ |
+| 3.22 | No stray markup anywhere: no line reading `id="view-friends" data-panel="friends">`, and each of the ten screens appears once (Settings → as you tab through Ask, Library, Quiz, Exams, Flashcards, Friends, Chat, Play, Progress, Settings) | ☐ | ☐ | ☐ |
 | 3.19 | Library: the "coming soon" card is visible, says publisher permission, and its button cannot be pressed | ☐ | ☐ | ☐ |
 | 3.20 | A link ending in `?ask=…` fills the composer on open and does not send by itself | ☐ | ☐ | ☐ |
 
@@ -156,5 +157,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (452 checks) plus
+The quickest regression test for a UI fix is `npm test` (455 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.

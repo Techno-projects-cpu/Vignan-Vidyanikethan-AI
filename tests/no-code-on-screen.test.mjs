@@ -6,6 +6,11 @@ import { fileURLToPath } from "node:url";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(fileURLToPath(new URL(path, root)), "utf8");
 const html = read("index.html");
+const PAGES = ["index.html", "judge.html", "privacy.html", "terms.html", "security.html", "copyright.html"];
+const pageBody = (source) => {
+  const body = source.slice(source.indexOf("<body"));
+  return body.replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<style[\s\S]*?<\/style>/g, " ");
+};
 const app = read("js/app.js");
 const i18n = read("js/i18n.js");
 const css = read("styles.css");
@@ -118,4 +123,55 @@ test("the hidden wrapper really hides, in every style", () => {
   assert.match(premium, /body\.premium-ui \[hidden\] \{ display: none !important; \}/);
   assert.ok(css.includes("[hidden]") || premium.includes("[hidden]"), "something styles the attribute");
   assert.match(app, /fields\.hidden = mode !== "custom"/, "and the app sets it from the chosen source");
+});
+
+/* ------------------------------------------------------------------------- */
+/* Markup that leaked onto the page — the 2.8.0 defect, and its class         */
+/* ------------------------------------------------------------------------- */
+
+test("every element id in every page is unique", () => {
+  // index.html shipped four screens twice and one opening tag that had lost its
+  // `<section class="view"` prefix. Duplicate ids break screen readers and make
+  // every $("#id") quietly pick whichever copy came first.
+  for (const page of PAGES) {
+    const source = read(page);
+    const ids = [...source.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
+    const seen = new Map();
+    const duplicates = [];
+    for (const id of ids) {
+      if (seen.has(id)) duplicates.push(id);
+      seen.set(id, true);
+    }
+    assert.deepEqual(duplicates, [], `${page} repeats ids: ${duplicates.join(", ")}`);
+  }
+});
+
+test("no visible text is a fragment of markup", () => {
+  // The defect looked like this on screen:   id="view-friends" data-panel="friends">
+  // Nothing that reads like an attribute may ever reach a student.
+  const attributeText = /^\s*(?:id|class|data-[a-z-]+|aria-[a-z-]+|href|src)\s*=|["']?\s*data-[a-z-]+="/m;
+  for (const page of PAGES) {
+    const body = pageBody(read(page));
+    const texts = [...body.matchAll(/>([^<]+)</g)].map((match) => match[1]).filter((text) => text.trim().length > 2);
+    const offenders = texts.filter((text) => attributeText.test(text));
+    assert.deepEqual(offenders.slice(0, 3), [], `${page} shows markup as text: ${offenders.slice(0, 3).join(" | ")}`);
+  }
+});
+
+test("index.html has one screen per navigation item, and balanced tags", () => {
+  // The default screen carries "view active", so the class is matched loosely.
+  const views = [...html.matchAll(/<section class="view(?: active)?"[^>]*id="([^"]+)"/g)].map((match) => match[1]);
+  assert.equal(views.length, 10, "ten screens: ask, library, quiz, exam, flashcards, friends, chat, play, progress, settings");
+  const navViews = [...html.matchAll(/data-view="([^"]+)"/g)].map((match) => match[1]);
+  const uniqueNav = [...new Set(navViews)];
+  for (const view of uniqueNav) {
+    assert.ok(views.includes(`view-${view}`), `the ${view} view exists exactly once`);
+  }
+  assert.equal(views.length, new Set(views).size, "no screen is shipped twice");
+  for (const tag of ["section", "div", "main", "aside"]) {
+    const open = (html.match(new RegExp(`<${tag}\\b`, "g")) || []).length;
+    const close = (html.match(new RegExp(`</${tag}>`, "g")) || []).length;
+    assert.equal(open, close, `<${tag}> is balanced (${open} open, ${close} close)`);
+  }
+  assert.equal((html.match(/<!--/g) || []).length, (html.match(/-->/g) || []).length, "comments are closed");
 });
