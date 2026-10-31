@@ -93,6 +93,12 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 3.21d | Type `zzz`: the message quotes what you typed and a "Show all 33 languages" button clears the box and brings every tile back | ☐ | ☐ | ☐ |
 | 3.21e | Tap the language that is already selected: a short note says you are already using it, instead of nothing happening | ☐ | ☐ | ☐ |
 | 3.21f | On a 360px phone the glyph is still clearly larger than the name — around 22px, not 17px | ☐ | ☐ | ☐ |
+| 3.24 | Ask any question that finds a page: the answer appears with its source cards and **no** second bubble saying "I could not complete that answer" | ☐ | ☐ | ☐ |
+| 3.24b | Open a source card: "Read this page" and "Copy quote" are both present and work | ☐ | ☐ | ☐ |
+| 3.23 | Library → Add the starter pages, then ask "What is photosynthesis and why does it matter?": the answer cites the Biology photosynthesis page, not a chemistry page about matter | ☐ | ☐ | ☐ |
+| 3.23b | Ask "Why does a body float in water?" and "What is pH?": each is answered from a page that actually explains it | ☐ | ☐ | ☐ |
+| 3.23c | Ask something the pages do not cover, such as "what is the Pauli exclusion principle": the answer refuses and names the closest page instead of inventing one | ☐ | ☐ | ☐ |
+| 3.23d | Open judge.html → section 06: the answer benchmark paragraph is there and names the test file that enforces it | ☐ | ☐ | ☐ |
 | 3.22 | No stray markup anywhere: no line reading `id="view-friends" data-panel="friends">`, and each of the ten screens appears once (Settings → as you tab through Ask, Library, Quiz, Exams, Flashcards, Friends, Chat, Play, Progress, Settings) | ☐ | ☐ | ☐ |
 | 3.19 | Library: the "coming soon" card is visible, says publisher permission, and its button cannot be pressed | ☐ | ☐ | ☐ |
 | 3.20 | A link ending in `?ask=…` fills the composer on open and does not send by itself | ☐ | ☐ | ☐ |
@@ -157,5 +163,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (455 checks) plus
+The quickest regression test for a UI fix is `npm test` (468 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.

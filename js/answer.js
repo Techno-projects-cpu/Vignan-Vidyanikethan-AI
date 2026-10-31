@@ -7,12 +7,12 @@
  * labelled as being outside the textbooks.
  */
 
-import { salientSentences, splitSentences } from "./text.js?v=38";
-import { truncate } from "./util.js?v=38";
-import { missingTerms } from "./answer-quality.js?v=38";
-import { buildFlashcards } from "./flashcards.js?v=38";
-import { buildStudySheet } from "./study-sheet.js?v=38";
-import { t } from "./i18n.js?v=38";
+import { salientSentences, splitSentences } from "./text.js?v=39";
+import { truncate } from "./util.js?v=39";
+import { missingTerms } from "./answer-quality.js?v=39";
+import { buildFlashcards } from "./flashcards.js?v=39";
+import { buildStudySheet } from "./study-sheet.js?v=39";
+import { t } from "./i18n.js?v=39";
 
 export function sourcesFromHits(hits = []) {
   return hits.map((hit, index) => ({
@@ -43,7 +43,9 @@ function citation(n) {
 }
 
 function intro(query, mode, language = "en") {
-  const topic = truncate(query.replace(/[?.!]+$/, ""), 90);
+  // The question mark stays: a heading that reads "why does it matter" looks
+  // like a statement, and this heading is also what an exported answer shows.
+  const topic = truncate(String(query || "").replace(/\s+/g, " ").replace(/[!]+$/, "").trim(), 90);
   if (language === "te") return `**మీ పుస్తకాల నుండి — ${topic}**`;
   if (language === "hi") return `**आपकी किताबों से — ${topic}**`;
   if (language !== "en") return `**${t("view.ask.title")} — ${topic}**`;

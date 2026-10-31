@@ -941,7 +941,7 @@ async function socialDiagnostics({ fresh = false } = {}) {
 function health() {
   return {
     ok: true,
-    version: "2.12.1",
+    version: "2.13.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,
@@ -1169,7 +1169,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.12.1</strong></div>
+      <div><span>release</span><strong>2.13.0</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1283,7 +1283,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.12.1",
+    release: "2.13.0",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);

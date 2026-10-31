@@ -65,6 +65,18 @@ const PHYSICS = [
     heading: "Ray Optics and Optical Instruments",
     text: "In ray optics light travels in straight lines and its path is traced as a ray. Reflection at a plane mirror makes the angle of incidence equal to the angle of reflection. Refraction happens because light changes speed when it passes from one medium to another, and Snell's law relates the angles of incidence and refraction to the refractive indices. A converging lens bends parallel rays to a focus, and the lens formula connects the object distance, the image distance and the focal length. A microscope magnifies very small objects, and a telescope collects light from distant objects.",
   },
+  {
+    heading: "Mechanical Properties of Fluids",
+    text: "Pressure in a fluid is the force it exerts per unit area, and at a given depth it depends on the depth, the density of the fluid and gravity, not on the shape of the container. A body placed in a fluid feels an upward buoyant force equal to the weight of the fluid it displaces, which is Archimedes' principle. An object floats when the buoyant force balances its weight, so a body floats in water if its average density is less than the density of water, and a heavy ship floats because its hollow shape lowers its average density. A hydrometer uses this rule to measure density. Bernoulli's principle says that where the speed of a fluid rises, its pressure falls.",
+  },
+  {
+    heading: "Magnetic Effects of Current",
+    text: "A magnetic field is the region around a magnet or a current carrying wire in which a magnetic force can be felt. Oersted found that an electric current produces a magnetic field around it, and the field lines around a straight wire form circles whose direction is given by the right hand thumb rule. A coil carrying current behaves like a magnet, and a solenoid produces a nearly uniform field inside it. A current carrying conductor placed in a magnetic field experiences a force, which is the working principle of an electric motor. An electromagnet is a soft iron core wound with a coil, and its strength rises with the current and with the number of turns.",
+  },
+  {
+    heading: "Electromagnetic Induction",
+    text: "Electromagnetic induction is the production of an electric current in a conductor when the magnetic flux linked with it changes. Faraday's law states that the induced emf equals the rate of change of magnetic flux, so a faster change gives a larger emf. Lenz's law fixes the direction of the induced current: it opposes the change that produced it, which is another way of stating conservation of energy. Moving a magnet into a coil, or rotating a coil in a magnetic field, both change the flux and induce a current. A generator converts mechanical energy into electrical energy this way, and a transformer changes voltage using mutual induction.",
+  },
 ];
 
 const CHEMISTRY = [
@@ -107,6 +119,14 @@ const CHEMISTRY = [
   {
     heading: "Biomolecules",
     text: "Biomolecules are the molecules found in living organisms, and they include carbohydrates, proteins, lipids and nucleic acids. Carbohydrates are a source of energy, and glucose is the simplest sugar used by cells. Proteins are chains of amino acids joined by peptide bonds, and they act as enzymes, hormones and structural material. Enzymes are biological catalysts that are highly specific for their substrate. Nucleic acids are the molecules that store and transfer genetic information.",
+  },
+  {
+    heading: "Acids, Bases and Salts",
+    text: "An acid gives hydrogen ions in water, a base gives hydroxide ions, and a salt forms when an acid and a base neutralise each other. The pH scale measures the concentration of hydrogen ions from 0 to 14: a pH below 7 is acidic, exactly 7 is neutral, and a pH above 7 is basic. Each step of one pH unit means a tenfold change in hydrogen ion concentration, so pH 3 is a hundred times more acidic than pH 5. Strong acids and bases ionise almost completely while weak ones ionise only partly. Indicators such as litmus, methyl orange and phenolphthalein change colour over particular pH ranges, and pH is measured with a pH meter or with universal indicator paper.",
+  },
+  {
+    heading: "Electrochemistry",
+    text: "Electrolysis is the decomposition of an electrolyte by passing an electric current through it. In the electrolysis of water a little acid is added so that the water conducts, and the current splits water into hydrogen at the cathode and oxygen at the anode in the volume ratio two to one, because every water molecule holds two hydrogen atoms for each oxygen atom. Oxidation happens at the anode and reduction at the cathode. Electroplating, the refining of metals and the extraction of reactive metals all use electrolysis. An electrolyte conducts because it contains free ions, and the amount of substance deposited depends on the charge passed.",
   },
 ];
 
@@ -151,6 +171,14 @@ const BIOLOGY = [
     heading: "Ecosystem",
     text: "An ecosystem is a community of living organisms together with the non living environment in which they live. Producers such as green plants convert solar energy into food, consumers feed on other organisms, and decomposers break down dead matter. A food chain shows the path of energy from one organism to the next, and a food web shows how several chains are linked. Energy flow is one way, and only about ten per cent of it passes from one trophic level to the next. Nutrients, unlike energy, are recycled within the ecosystem.",
   },
+  {
+    heading: "Transport in Plants",
+    text: "Water moves through a plant from the soil into the root hair cells, across the root and up the stem to the leaves. This movement depends on osmosis, the passage of water through a semipermeable membrane from a region of higher water potential to one of lower water potential. Root hair cells have a large surface area and concentrated cell sap, so water enters them by osmosis. Water rises in the xylem mainly because of the transpiration pull, the tension created when water evaporates from the leaves, helped by cohesion between water molecules. Minerals are absorbed actively, and the phloem carries the food made in the leaves to the rest of the plant.",
+  },
+  {
+    heading: "Water Cycle and Natural Resources",
+    text: "Water moves between the oceans, the atmosphere and the land in a continuous cycle. Heat from the sun evaporates water from seas, rivers and the leaves of plants, and the vapour rises and cools into clouds by condensation. Water returns to the ground as rain, hail or snow in precipitation, sinks into the soil and runs over the surface into rivers, and finally reaches the sea, from where it evaporates again. Plants return water to the air through transpiration. The same water is used again and again, but only a small part of the earth's water is fresh.",
+  },
 ];
 
 const MATHEMATICS = [
@@ -193,6 +221,10 @@ const MATHEMATICS = [
   {
     heading: "Integrals",
     text: "Integration is the reverse of differentiation, and an antiderivative of a function is a function whose derivative is the original function. An indefinite integral carries a constant of integration because many functions share the same derivative. A definite integral gives the exact area under a curve between two limits, and the fundamental theorem of calculus connects the two ideas. Substitution and integration by parts are the standard techniques for integrals that are not in the basic table. Definite integrals also give the area between two curves and the displacement from a velocity curve.",
+  },
+  {
+    heading: "Probability",
+    text: "Probability measures how likely an event is, on a scale from 0 for an impossible event to 1 for a certain event. In a random experiment every possible outcome is listed in the sample space, and when the outcomes are equally likely the probability of an event is the number of favourable outcomes divided by the total number of outcomes. The probability of the complement of an event is one minus the probability of the event. For two events the addition rule subtracts the probability that both happen together, and for mutually exclusive events that term is zero. Conditional probability is the chance of one event given that another event has already happened.",
   },
 ];
 
