@@ -6,31 +6,41 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=40";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=40";
-import { ingestPdf, ingestText } from "./ingest.js?v=40";
-import { splitSentences } from "./text.js?v=40";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=40";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=40";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=40";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=40";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=40";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=40";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=40";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=40";
+import * as db from "./db.js?v=41";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=41";
+import { ingestPdf, ingestText } from "./ingest.js?v=41";
+import { splitSentences } from "./text.js?v=41";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=41";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=41";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=41";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=41";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=41";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=41";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=41";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=41";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=40";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=40";
+} from "./pro-mode.js?v=41";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=41";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=40";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=40";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=40";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=40";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=40";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=40";
+} from "./updates.js?v=41";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=41";
+import {
+  OFFLINE_MODE_LABEL,
+  OFFLINE_MODE_NOTE,
+  deferVersion,
+  deferredVersion,
+  isOfflineMode,
+  networkAllowed,
+  setOfflineMode,
+  shouldAnnounceUpdate,
+} from "./offline-mode.js?v=41";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=41";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=41";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=41";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=41";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -38,8 +48,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=40";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=40";
+} from "./llm.js?v=41";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=41";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -51,7 +61,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=40";
+} from "./local-ai.js?v=41";
 import {
   EXAMS,
   MODES,
@@ -66,12 +76,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=40";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=40";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=40";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=40";
-import { TASKS } from "./model-router.js?v=40";
-import { PROVIDERS, providerList } from "./providers.js?v=40";
+} from "./exam-packs.js?v=41";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=41";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=41";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=41";
+import { TASKS } from "./model-router.js?v=41";
+import { PROVIDERS, providerList } from "./providers.js?v=41";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -80,30 +90,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=40";
-import { parseApiKeys } from "./key-pool.js?v=40";
+} from "./settings.js?v=41";
+import { parseApiKeys } from "./key-pool.js?v=41";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=40";
+} from "./student-keys.js?v=41";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=40";
+} from "./quiz.js?v=41";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=40";
+} from "./flashcards.js?v=41";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=40";
+} from "./study-decks.js?v=41";
 import {
   accuracy,
   currentStreak,
@@ -114,16 +124,16 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=40";
-import { externalSearchUrl, searchWeb } from "./web.js?v=40";
-import { openEditStudio } from "./edit-studio.js?v=40";
-import { openReader } from "./reader.js?v=40";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=40";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=40";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=40";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=40";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=40";
-import * as ui from "./ui.js?v=40";
+} from "./progress.js?v=41";
+import { externalSearchUrl, searchWeb } from "./web.js?v=41";
+import { openEditStudio } from "./edit-studio.js?v=41";
+import { openReader } from "./reader.js?v=41";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=41";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=41";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=41";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=41";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=41";
+import * as ui from "./ui.js?v=41";
 import {
   clearReferral,
   getLeaderboard,
@@ -133,8 +143,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=40";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=40";
+} from "./auth.js?v=41";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=41";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -142,12 +152,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=40";
-import { initMotion, revealVisible } from "./motion.js?v=40";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=40";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=40";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=40";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=40";
+} from "./premium-ui.js?v=41";
+import { initMotion, revealVisible } from "./motion.js?v=41";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=41";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=41";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=41";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=41";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -217,6 +227,8 @@ const state = {
   authAvailable: false,
   serverLeaderboard: [],
   referral: "",
+  // The release the banner is offering, so "Later" can remember this version.
+  pendingUpdate: "",
   bound: false,
 };
 
@@ -228,6 +240,9 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     const healthPromise = serverHealth();
     const stored = await db.getSetting("settings", null);
     state.settings = normalizeSettings(stored || DEFAULT_SETTINGS);
+    // The settings value is the source of truth; the standalone key exists so the
+    // network modules can refuse without importing the settings model.
+    setOfflineMode(Boolean(state.settings.offlineMode));
     state.studyProgress = readStudyProgress();
     state.storageMode = await db.getStorageMode();
     state.studyDecks = normalizeDeckCollection(await db.getSetting(STUDY_DECKS_KEY, null));
@@ -251,6 +266,9 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     await ensureStarterShelf();
     if (!state.messages.length) addWelcomeMessage();
     bindEvents();
+    // The switch and the chip must be right before the first frame, not after a
+    // visit to Settings.
+    renderOfflineMode();
     applyLinkedQuestion();
     maybeStartFirstRun();
     subscribeLocalAI((snapshot) => {
@@ -351,6 +369,17 @@ function registerServiceWorker() {
 function showUpdateBanner({ remote = "" } = {}) {
   const banner = $("#update-banner");
   if (!banner) return;
+  // "Later" means later: a release the student postponed does not come back on
+  // the next page load, and offline mode has nothing to offer it anyway.
+  const allowed = shouldAnnounceUpdate({
+    remote,
+    release: RELEASE,
+    deferred: deferredVersion(),
+    offlineMode: Boolean(state.settings?.offlineMode),
+    online: navigator.onLine !== false,
+  });
+  if (!allowed) return;
+  state.pendingUpdate = remote || RELEASE;
   const detail = $("#update-detail");
   if (detail) detail.textContent = updateBannerText({ current: RELEASE, remote });
   banner.hidden = false;
@@ -364,6 +393,12 @@ function hideUpdateBanner() {
 }
 
 function watchForUpdates(registration) {
+  if (state.settings?.offlineMode) {
+    updateLastCheckLabel("Offline mode — update checks are off");
+    return;
+  }
+  // updates.js reads this so a background check cannot slip past offline mode.
+  globalThis.__vignanOfflineMode = () => Boolean(state.settings?.offlineMode);
   startUpdateWatch(registration, {
     onAvailable: ({ remote }) => showUpdateBanner({ remote }),
     onStatus: (result) => {
@@ -422,6 +457,12 @@ async function runUpdateCheck({ userInitiated = false } = {}) {
     return;
   }
   if (result) result.textContent = "Checking…";
+  if (state.settings?.offlineMode) {
+    updateLastCheckLabel("Offline mode — update checks are off");
+    if (result) result.textContent = "Offline mode is on, so there is nothing to check.";
+    if (userInitiated) ui.showToast("Offline mode is on. Turn it off in Settings to check for a new version.", "info", 4500);
+    return;
+  }
   const outcome = swRegistration
     ? await checkForUpdate(swRegistration)
     : { status: "unsupported", remote: "" };
@@ -735,6 +776,14 @@ function maybeStartFirstRun() {
 
 function updateOfflineChip() {
   const chip = $("#offline-chip");
+  if (chip && state.settings?.offlineMode) {
+    chip.classList.remove("offline");
+    chip.classList.add("mode");
+    const modeLabel = $("#offline-chip span[data-i18n]") || $("#offline-chip span");
+    if (modeLabel) modeLabel.textContent = t("app.offlineMode");
+    return;
+  }
+  if (chip) chip.classList.remove("mode");
   const online = navigator.onLine !== false;
   chip.classList.toggle("offline", !online);
   const label = $("span[data-i18n]", chip);
@@ -1666,8 +1715,14 @@ async function handleAsk(event) {
       }
 
       const online = navigator.onLine !== false;
-      const webEnabled = Boolean(state.settings.webEnabled) && online;
-      const webSkippedOffline = Boolean(state.settings.webEnabled) && !online;
+      // Offline mode overrides the web preference without erasing it: switching
+      // offline mode off restores exactly what the student had chosen.
+      const webEnabled = networkAllowed({
+        offlineMode: state.settings.offlineMode,
+        webEnabled: state.settings.webEnabled,
+        online,
+      });
+      const webSkippedOffline = Boolean(state.settings.webEnabled) && (!online || state.settings.offlineMode);
       let webResults = [];
       let searchProvider = "Web search";
       let searchProviders = [];
@@ -1771,7 +1826,9 @@ async function handleAsk(event) {
         ];
         const offlineLines = [
           `**${t("knowledge.notFound")}**`,
-          "_You are offline, so web search was skipped. Your books, quizzes, flashcards, cited study sheets and today's revision all still work; saved pages answer questions with their page numbers._",
+          state.settings.offlineMode
+            ? "_Offline mode is on, so outside search was skipped on purpose. Your books, quizzes, flashcards, cited study sheets and today's revision all still work._"
+            : "_You are offline, so web search was skipped. Your books, quizzes, flashcards, cited study sheets and today's revision all still work; saved pages answer questions with their page numbers._",
         ];
         answer = {
           text: (webSkippedOffline ? offlineLines : webLines).join("\n\n"),
@@ -4710,8 +4767,10 @@ function renderProviderEditor() {
 function renderWebChoice() {
   const enabled = Boolean(state.settings.webEnabled);
   $("#settings-web-enabled").checked = enabled;
-  $("#ask-web-fallback").checked = enabled;
-  const label = t(enabled ? "ask.webOn" : "ask.webOff");
+  $("#ask-web-fallback").checked = enabled && !state.settings.offlineMode;
+  const label = state.settings.offlineMode
+    ? (state.settings.language === "en" ? "Off — offline mode" : t("ask.webOff"))
+    : t(enabled ? "ask.webOn" : "ask.webOff");
   $("#web-search-state").textContent = label;
   $("#settings-web-state").textContent = label;
 }
@@ -4748,8 +4807,70 @@ function syncCustomSearchFields() {
   if (fields) fields.hidden = mode !== "custom";
 }
 
+/**
+ * The offline mode row, its note, and the web switch it overrides.
+ *
+ * The switch is left visible and its own value is kept, so turning offline mode
+ * off restores the student's real preference instead of silently rewriting it.
+ */
+function renderOfflineMode() {
+  const toggle = $("#offline-mode");
+  const on = Boolean(state.settings.offlineMode);
+  if (toggle) toggle.checked = on;
+  const note = $("#offline-mode-note");
+  if (note) {
+    note.textContent = on ? OFFLINE_MODE_NOTE : "Off. The app uses the network when it helps: update checks, web fallback, friends and the leaderboard.";
+    note.classList.toggle("on", on);
+  }
+  const chip = $("#offline-mode-chip");
+  if (chip) {
+    chip.hidden = !on;
+    chip.textContent = "Offline mode";
+  }
+  const web = $("#ask-web-fallback");
+  if (web) {
+    web.disabled = on;
+    web.setAttribute("aria-disabled", String(on));
+  }
+  const webSetting = $("#settings-web-enabled");
+  if (webSetting) {
+    webSetting.disabled = on;
+    webSetting.setAttribute("aria-disabled", String(on));
+  }
+  const help = $("#web-search-help");
+  if (help) {
+    if (on) help.textContent = "Offline mode is on, so questions never leave this device. Turn it off in Settings to use outside search.";
+  }
+  updateOfflineChip();
+}
+
+async function setOfflineModeOn(on) {
+  state.settings.offlineMode = Boolean(on);
+  setOfflineMode(Boolean(on));
+  if (on) {
+    hideUpdateBanner();
+    setOfflineMode(Boolean(on));
+  }
+  renderOfflineMode();
+  renderWebChoice();
+  updateStatus();
+  try {
+    await saveSettings();
+  } catch {
+    ui.showToast("Offline mode could not be saved; it applies to this session.", "warning");
+  }
+  ui.showToast(
+    on
+      ? "Offline mode is on: answers come from this device only, and update checks are paused."
+      : "Offline mode is off: outside search, friends and update checks are available again.",
+    on ? "success" : "info",
+    5200,
+  );
+}
+
 function renderWebSettings() {
   renderWebChoice();
+  renderOfflineMode();
   $("#settings-web-mode").value = state.settings.webMode;
   $("#settings-web-endpoint").value = state.settings.searchEndpoint || "";
   $("#settings-web-token").value = state.settings.searchToken || "";
@@ -4926,7 +5047,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=40");
+            const { social } = await import("./social.js?v=41");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -5384,9 +5505,13 @@ function bindEvents() {
   $("#pro-chip")?.addEventListener("click", () => { void disengageProMode(); });
   $("#update-now")?.addEventListener("click", () => { void takeUpdate(); });
   $("#update-later")?.addEventListener("click", () => {
+    // Remembered, so the same release does not greet the student again on the
+    // next page load. A newer release gets its own chance.
+    deferVersion(state.pendingUpdate || RELEASE);
     hideUpdateBanner();
-    ui.showToast("Fine — it will wait. Update from Settings whenever you like.", "info", 3600);
+    ui.showToast("Fine — it will wait, and it will not ask again for this version. Update from Settings whenever you like.", "info", 4200);
   });
+  $("#offline-mode")?.addEventListener("change", (event) => void setOfflineModeOn(event.target.checked));
   $("#check-updates")?.addEventListener("click", () => { void runUpdateCheck({ userInitiated: true }); });
   $("#run-offline-check")?.addEventListener("click", () => { void checkOfflineReadiness(); });
 

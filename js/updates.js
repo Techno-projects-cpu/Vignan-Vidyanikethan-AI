@@ -9,7 +9,7 @@
  * The pure helpers are exported so they can be tested without a browser.
  */
 
-/** Release the page itself was loaded from: "./js/app.js?v=40" → "33". */
+/** Release the page itself was loaded from: "./js/app.js?v=41" → "33". */
 export const RELEASE = new URL(import.meta.url).searchParams.get("v") || "dev";
 
 const CACHE_PREFIX = "vignan-vidyanikethan-ai-v";
@@ -52,8 +52,13 @@ export async function fetchRemoteVersion(fetchImpl = globalThis.fetch) {
  * Ask the browser to look for a new worker.
  * @returns {Promise<{status:'updated'|'available'|'current'|'offline'|'unsupported', remote:string}>}
  */
-export async function checkForUpdate(registration, { online = globalThis.navigator?.onLine !== false } = {}) {
+export async function checkForUpdate(
+  registration,
+  { online = globalThis.navigator?.onLine !== false, offlineMode = false } = {},
+) {
   if (!registration) return { status: "unsupported", remote: "" };
+  // Offline mode is a promise to the student, not a hint: no request is made.
+  if (offlineMode) return { status: "offline", remote: "", reason: "offline-mode" };
   if (!online) return { status: "offline", remote: "" };
   const remote = await fetchRemoteVersion();
   try {
@@ -108,7 +113,10 @@ export function startUpdateWatch(registration, { onAvailable, onStatus, interval
   };
 
   const look = async () => {
-    const result = await checkForUpdate(registration, { online: container.navigator?.onLine !== false });
+    const result = await checkForUpdate(registration, {
+      online: container.navigator?.onLine !== false,
+      offlineMode: container.__vignanOfflineMode?.() ?? false,
+    });
     onStatus?.(result);
     if (result.status === "available") await announce(result.remote);
     return result;

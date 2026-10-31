@@ -1749,3 +1749,41 @@ body.minimal-ui {
   background: transparent; color: var(--muted); font-size: 11px; cursor: pointer;
 }
 .voice-help-close:hover { color: var(--ink); border-color: var(--ink-2); }
+
+/* Offline mode ------------------------------------------------------------- */
+.offline-mode-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 4px 0 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--line, #dcdcdc);
+  background: var(--surface-2, #f4f4f4);
+  font-weight: 600;
+}
+
+.offline-mode-row input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex: none;
+  accent-color: var(--ink, #111);
+}
+
+.offline-mode-note {
+  margin: 0 0 16px;
+  max-width: 70ch;
+}
+
+/* When the mode is on, the note states it instead of describing a setting. */
+.offline-mode-note.on {
+  color: var(--ink, #111);
+  border-left: 3px solid var(--ink, #111);
+  padding-left: 10px;
+}
+
+#offline-mode-chip.mode {
+  border-color: var(--ink, #111);
+  color: var(--ink, #111);
+  font-weight: 700;
+}

@@ -3,10 +3,10 @@
  * a student logs in, registers, or chooses guest mode. Guest mode is available
  * even when the account server is asleep or the device is offline.
  */
-import { clearReferral, getSession, login, register } from "./auth.js?v=40";
-import { newPasswordProblem } from "./password-policy.js?v=40";
-import { setupStartup } from "./startup.js?v=40";
-import { showToast } from "./ui.js?v=40";
+import { clearReferral, getSession, login, register } from "./auth.js?v=41";
+import { newPasswordProblem } from "./password-policy.js?v=41";
+import { setupStartup } from "./startup.js?v=41";
+import { showToast } from "./ui.js?v=41";
 
 const GUEST_SESSION_KEY = "vignan_guest_session";
 const USERNAME_RE = /^[a-zA-Z0-9_-]{3,20}$/;
@@ -137,7 +137,7 @@ function removeAuthParameter() {
 }
 function loadApp() {
   if (!appModulePromise) {
-    appModulePromise = import("./app.js?v=40").catch((error) => {
+    appModulePromise = import("./app.js?v=41").catch((error) => {
       appModulePromise = null;
       throw error;
     });

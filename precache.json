@@ -1,6 +1,6 @@
 {
-  "version": 40,
-  "generatedAt": "2026-10-31T07:38:47.793Z",
+  "version": 41,
+  "generatedAt": "2026-10-31T07:47:06.763Z",
   "urls": [
     "./",
     "./index.html",
@@ -57,6 +57,7 @@
     "./js/motion.js",
     "./js/notes.js",
     "./js/offline-check.js",
+    "./js/offline-mode.js",
     "./js/password-policy.js",
     "./js/play-ui.js",
     "./js/premium-ui.js",

@@ -10,8 +10,8 @@
  * point at the original passage.
  */
 
-import { CORE_STRINGS } from "./translations-core.js?v=40";
-import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=40";
+import { CORE_STRINGS } from "./translations-core.js?v=41";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=41";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 
@@ -31,6 +31,9 @@ const EN = {
   "app.offlineReady": "Offline ready",
   "app.online": "Online",
   "app.offline": "Offline",
+  "app.offlineMode": "Offline mode",
+  "offline.toggle": "Offline mode — use only what is on this device",
+  "offline.help": "Answers come only from the pages on this device. No update checks, no web search, no friends or leaderboard. Everything you study keeps working.",
   "app.private": "Private by default",
   "common.cancel": "Cancel",
   "common.close": "Close",
@@ -269,6 +272,9 @@ const TE = {
   "app.offlineReady": "ఆఫ్\u200cలైన్\u200cకు సిద్ధం",
   "app.online": "ఆన్\u200cలైన్",
   "app.offline": "ఆఫ్\u200cలైన్",
+  "app.offlineMode": "ఆఫ్\u200cలైన్ మోడ్",
+  "offline.toggle": "ఆఫ్\u200cలైన్ మోడ్ — ఈ పరికరంలో ఉన్నవి మాత్రమే వాడండి",
+  "offline.help": "సమాధానాలు ఈ పరికరంలోని పేజీల నుండే వస్తాయి. అప్\u200cడేట్ తనిఖీలు, వెబ్ శోధన, స్నేహితులు, లీడర్\u200cబోర్డ్ ఉండవు. మీ చదువు మాత్రం అలాగే కొనసాగుతుంది.",
   "app.private": "సాధారణంగా ప్రైవేట్",
   "common.cancel": "రద్దు",
   "common.close": "మూసివేయి",
@@ -442,7 +448,7 @@ const HI = {
   "view.play.title": "खेल",
   "view.play.subtitle": "शतरंज, क्विज़ ड्यूअल और गणित की दौड़ — हर जवाब सर्वर पर जाँचा जाता है।",
   "app.tagline": "आपकी किताबें इसी उपकरण में रहती हैं।", "app.schoolSite": "मुख्य पृष्ठ",
-  "app.offlineReady": "ऑफ़लाइन तैयार", "app.online": "ऑनलाइन", "app.offline": "ऑफ़लाइन", "app.private": "निजता पहले",
+  "app.offlineReady": "ऑफ़लाइन तैयार", "app.online": "ऑनलाइन", "app.offline": "ऑफ़लाइन", "app.private": "निजता पहले", "app.offlineMode": "ऑफ़लाइन मोड", "offline.toggle": "ऑफ़लाइन मोड — सिर्फ़ इस डिवाइस पर जो है वही इस्तेमाल करें", "offline.help": "जवाब सिर्फ़ इस डिवाइस के पन्नों से आते हैं। कोई अपडेट जाँच, वेब खोज, दोस्त या लीडरबोर्ड नहीं। पढ़ाई का सब कुछ चलता रहता है।",
   "common.cancel": "रद्द करें", "common.close": "बंद करें", "common.save": "सहेजें", "common.delete": "हटाएँ",
   "common.generate": "बनाएँ", "common.tryAgain": "फिर कोशिश करें", "common.loading": "कार्य जारी है…",
   "common.pages": "पृष्ठ", "common.page": "पृष्ठ", "common.allBooks": "सभी पाठ्यपुस्तकें", "common.of": "में से",

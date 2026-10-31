@@ -1,12 +1,12 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=40";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=40";
-import { parseApiKeys } from "./key-pool.js?v=40";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=40";
-import { aiProfile } from "./ai-nicknames.js?v=40";
-import { LANGUAGE_CODES } from "./languages.js?v=40";
-import { DEFAULT_STYLE, THEMES } from "./themes.js?v=40";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=41";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=41";
+import { parseApiKeys } from "./key-pool.js?v=41";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=41";
+import { aiProfile } from "./ai-nicknames.js?v=41";
+import { LANGUAGE_CODES } from "./languages.js?v=41";
+import { DEFAULT_STYLE, THEMES } from "./themes.js?v=41";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -50,6 +50,9 @@ export const DEFAULT_SETTINGS = {
   answerDepth: "balanced",
   disclaimerSeen: false,
   freeRouterDismissed: false,
+  // Offline mode: no update checks, no web search, no account or social calls.
+  // The device-only study loop keeps working, which is what a demo needs.
+  offlineMode: false,
 };
 
 function cleanProviderConfig(config = {}, fallback = {}) {
@@ -113,6 +116,7 @@ export function normalizeSettings(value = {}) {
   if (!LANGUAGE_CODES.includes(merged.language)) merged.language = "en";
   if (!THEMES.some((theme) => theme.id === merged.style)) merged.style = DEFAULT_STYLE;
   merged.freeRouterDismissed = Boolean(raw.freeRouterDismissed);
+  merged.offlineMode = raw.offlineMode === true;
   merged.profile = String(merged.profile || "Student").slice(0, 32);
   // Only the eight known patterns are accepted, so a stored value can never
   // become markup or an arbitrary CSS class.

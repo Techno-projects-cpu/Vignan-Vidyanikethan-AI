@@ -6,7 +6,8 @@
  * sync and makes retries readable.
  */
 
-import { authApiUrl } from "./auth.js?v=40";
+import { authApiUrl } from "./auth.js?v=41";
+import { blockInOfflineMode } from "./offline-mode.js?v=41";
 
 const REQUEST_TIMEOUT = 15000;
 const CSRF_COOKIE = "vignan_csrf";
@@ -74,6 +75,8 @@ async function api(path, { method = "GET", body, signal } = {}) {
     if (body !== undefined) headers["Content-Type"] = "application/json";
     const token = csrfToken();
     if (token) headers["X-CSRF-Token"] = token;
+    const blocked = blockInOfflineMode();
+    if (blocked) throw blocked;
     const response = await fetch(authApiUrl(path), {
       method,
       credentials: "include",

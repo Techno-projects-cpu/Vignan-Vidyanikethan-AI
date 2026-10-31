@@ -6,14 +6,24 @@
  * a purely static export) the app continues as a guest with local progress.
  */
 
-import * as ui from "./ui.js?v=40";
-import { truncate } from "./util.js?v=40";
-import { newPasswordProblem } from "./password-policy.js?v=40";
+import * as ui from "./ui.js?v=41";
+import { blockInOfflineMode } from "./offline-mode.js?v=41";
+import { truncate } from "./util.js?v=41";
+import { newPasswordProblem } from "./password-policy.js?v=41";
 
 const API_BASE = new URL("../api/", import.meta.url);
 const REQUEST_TIMEOUT = 12000;
 const USERNAME_RE = /^[a-zA-Z0-9_-]{3,20}$/;
 const CSRF_COOKIE = "vignan_csrf";
+
+/**
+ * Offline mode must stop account calls before a request is made, and with a
+ * sentence the interface can show. Callers already handle a thrown error.
+ */
+function refuseWhenOffline() {
+  const blocked = blockInOfflineMode();
+  if (blocked) throw blocked;
+}
 
 export function authApiUrl(path = "") {
   return new URL(String(path || "").replace(/^\/+/, ""), API_BASE).toString();
@@ -68,6 +78,7 @@ async function request(path, { method = "GET", body, timeout = REQUEST_TIMEOUT, 
   signal?.addEventListener("abort", cancelRequest, { once: true });
   const timer = setTimeout(() => controller.abort(), timeout);
   try {
+    refuseWhenOffline();
     const response = await fetch(authApiUrl(path), {
       method,
       credentials: "include",
