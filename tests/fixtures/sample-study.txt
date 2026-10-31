@@ -1,0 +1,55 @@
+[[page:1]]
+# Studying Science
+Science begins with careful observation of the world around us. A student asks a question, suggests a hypothesis, and then tests the idea with a fair experiment. Measurements are recorded in tables so that another learner can repeat the work later. A conclusion is trusted only when the evidence supports it again and again. In this study pack every short chapter ends with a few words worth revising before a test.
+
+[[page:2]]
+# Photosynthesis — the big idea
+Photosynthesis is the process by which green plants make their own food. A plant takes in carbon dioxide from the air and water from the soil. Sunlight supplies the energy needed to change these simple materials into glucose. Oxygen is released as a useful by-product into the atmosphere. The overall word equation is carbon dioxide plus water gives glucose plus oxygen in the presence of light. This chapter explains each part of that equation with simple classroom examples.
+
+[[page:3]]
+# Chlorophyll and Stomata: Why leaves look green
+Leaves look green because chlorophyll reflects green light while absorbing red and blue light. Chlorophyll is the light-capturing pigment stored inside chloroplasts. Most chloroplasts are found in the palisade cells near the upper surface of a leaf. Stomata are tiny pores that allow carbon dioxide to enter and oxygen to leave. Guard cells open and close each stoma to balance gas exchange with water loss. A variegated leaf is pale where chlorophyll is absent, which is why only the green parts stain blue-black with iodine.
+
+[[page:4]]
+# Respiration in plants
+Respiration is the release of energy from glucose inside living cells. Plant cells use oxygen to break down glucose and produce carbon dioxide, water and usable energy. Mitochondria are the organelles where most aerobic respiration takes place. Respiration continues day and night, while photosynthesis needs light. The two processes form a cycle: the products of one process are the reactants of the other. A germinating seed respires quickly and warms a vacuum flask slightly.
+
+[[page:5]]
+# Transport in plants
+Xylem vessels carry water and dissolved minerals from the roots to the leaves. Phloem tubes move dissolved sugars from the leaves to the rest of the plant. Transpiration is the loss of water vapour mainly through the stomata. A tall tree pulls water upward because evaporation from leaves creates a continuous transpiration stream. Wilting happens when a plant loses water faster than its roots can replace it. A celery stalk placed in coloured water shows the path of xylem clearly.
+
+[[page:6]]
+# Newton's second law of motion
+Newton's second law of motion states that the acceleration of an object depends on the net force and the mass of the object. The law is usually written as force equals mass times acceleration, or F = ma. A larger resultant force produces a larger acceleration in the same direction. A heavier object needs a greater force to gain the same acceleration as a lighter one. Force is measured in newtons, mass in kilograms and acceleration in metres per second squared. A cricket ball accelerates faster than a heavy shot put when the same push is applied.
+
+[[page:7]]
+# Inertia and action-reaction pairs
+Newton's first law says that an object remains at rest or moves at constant speed in a straight line unless a resultant force acts on it. This tendency to resist a change in motion is called inertia. A passenger jerks forward when a bus stops suddenly because the body tries to keep moving. Newton's third law says that every action has an equal and opposite reaction. A rocket moves upward because hot gases rush downward with an equal force in the opposite direction. Seat belts and airbags reduce injury by increasing the time over which a stopping force acts.
+
+[[page:8]]
+# Friction
+Friction is the force that opposes the relative motion of two surfaces in contact. Rough surfaces usually produce more friction than smooth surfaces. Friction changes kinetic energy into heat, so rubbing your hands together makes them warm. Static friction stops an object from starting to move, while sliding friction acts while it is already moving. Lubricants such as oil reduce friction between machine parts. Friction is useful for walking and braking, but it also causes wear in moving machinery.
+
+[[page:9]]
+# The water cycle
+The water cycle describes the continuous movement of water between the land, the oceans and the atmosphere. Evaporation changes liquid water into water vapour when the sun heats rivers, lakes and seas. Condensation forms tiny droplets that gather as clouds when moist air cools. Precipitation returns water to the ground as rain, snow or hail. Collection happens when water flows into streams, rivers and eventually the sea. The monsoon is a seasonal wind pattern that brings heavy rainfall to many parts of India.
+
+[[page:10]]
+# Algebraic expressions
+An algebraic expression uses letters called variables to stand for unknown numbers. A constant is a fixed number, while a coefficient multiplies a variable. Like terms contain exactly the same variable part and can be added or subtracted. For example, 4y and 7y are like terms, but 4y and 7z are unlike terms. To simplify an expression, collect like terms and keep the sign of each term. Substituting a value for a variable lets us evaluate the expression numerically.
+
+[[page:11]]
+# Linear equations in one variable
+A linear equation in one variable has the highest power of the variable equal to one. To solve 3x + 7 = 22, subtract 7 from both sides to get 3x = 15. Then divide both sides by 3 to find x = 5. The balance method keeps an equation true by doing the same operation to each side. A solution can be checked by substituting x = 5 back into the original equation. Word problems about ages, prices and distances are often written as linear equations.
+
+[[page:12]]
+# Nouns and pronouns
+A noun names a person, place, animal, thing or idea. Common nouns name general items, while proper nouns name particular people or places and begin with capital letters. A pronoun replaces a noun so that writing does not repeat the same word. Words such as I, you, he, she, it, we and they are personal pronouns. Collective nouns such as team, herd and bunch describe a group as one unit. Abstract nouns such as honesty, courage and freedom name things we cannot touch.
+
+[[page:13]]
+# Active and passive voice
+Active and passive voice describe two ways of building a sentence with an action verb. In the active voice, the subject performs the action: the chef cooked the rice. In the passive voice, the subject receives the action: the rice was cooked by the chef. The passive voice is formed with a form of the verb be followed by a past participle. Writers use the passive voice when the action or the result is more important than the doer. Scientific reports often prefer passive constructions such as the solution was heated gently. Changing voice should never change the original meaning of a sentence.
+
+[[page:14]]
+# How to revise
+Good revision is active, short and spread over several days. Read one heading, close the book, and try to explain the idea aloud in your own words. Write three questions from the page and answer them without looking at the notes. Mix easy and difficult topics so that your brain keeps making connections. Mark the questions you missed and return to them after a night of sleep. A small daily streak is more useful than one very long session before an exam.

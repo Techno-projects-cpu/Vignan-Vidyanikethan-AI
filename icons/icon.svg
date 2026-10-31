@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="404 84 600 600" role="img" aria-labelledby="title">
+  <title id="title">Vignan Vidyanikethan AI logo</title>
+  <rect x="404" y="84" width="600" height="600" fill="#fafaf8"/>
+  <g fill="#111111">
+    <!-- Upper V and the open-sided frame. -->
+    <path d="M444 135h25l112 291 117-291h265v498H616l11-24h313V159H713L581 488Z"/>
+    <!-- Lower V, left frame, and the A's lower crossbar. -->
+    <path d="M445 282l140 316 52-102h179l44 85h-25l-31-62H650l-54 114h-19L468 389v220h77l11 24H445Z"/>
+    <!-- Central triangular counter. -->
+    <path fill-rule="evenodd" d="M715 286l81 171H645Zm0 57-35 91h80Z"/>
+    <!-- Right diagonal and upright. -->
+    <path d="M726 175l237 458h-21L716 202Z"/>
+    <path d="M870 202h23v295h-23Z"/>
+  </g>
+</svg>

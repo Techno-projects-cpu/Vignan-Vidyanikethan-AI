@@ -1,0 +1,99 @@
+# Render Blueprint for Vignan Vidyanikethan AI.
+# Free web service: sleeps after inactivity, so use Supabase for persistent data.
+# Add the secret values marked sync:false in the Render dashboard.
+
+services:
+  - type: web
+    name: vignan-vidyanikethan-ai
+    env: node
+    plan: free
+    region: singapore
+    buildCommand: npm run precache
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: STUDY_AI_FREE_ROUTER
+        value: "true"
+      - key: STUDY_AI_FREE_ROUTER_ORDER
+        value: gemini,groq,cloudflare,openrouter,mistral,cohere,arena,primary
+      # A quota-limited key is paused for one minute; student keys are tried
+      # only after every Render key has failed.
+      - key: STUDY_AI_KEY_COOLDOWN_MS
+        value: "60000"
+      - key: STUDY_AI_STUDENT_KEY_FALLBACK
+        value: "true"
+      - key: STUDY_AI_ACCOUNTS_BACKEND
+        value: supabase
+      - key: STUDY_AI_COOKIE_SECURE
+        value: "true"
+      - key: STUDY_AI_GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: STUDY_AI_GROQ_MODEL
+        value: openai/gpt-oss-20b
+      - key: STUDY_AI_CLOUDFLARE_MODEL
+        value: "@cf/openai/gpt-oss-20b"
+      - key: STUDY_AI_OPENROUTER_MODEL
+        value: openrouter/free
+      - key: STUDY_AI_MISTRAL_MODEL
+        value: open-mistral-nemo
+      - key: STUDY_AI_COHERE_MODEL
+        value: command-r-08-2024
+      - key: STUDY_AI_ARENA_MODEL
+        value: coding-router-preview
+      - key: STUDY_AI_SUPABASE_EMAIL_DOMAIN
+        value: students.vignanvidyanikethan.org
+
+      # Secrets: paste these in Render → Environment. Never commit them.
+      # Paste one OR many keys into each singular secret (comma/newline separated),
+      # or use the optional plural aliases below. Vignan rotates automatically.
+      - key: STUDY_AI_GEMINI_KEY
+        sync: false
+      - key: STUDY_AI_GROQ_KEY
+        sync: false
+      - key: STUDY_AI_CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      - key: STUDY_AI_CLOUDFLARE_TOKEN
+        sync: false
+      - key: STUDY_AI_OPENROUTER_KEY
+        sync: false
+      - key: STUDY_AI_MISTRAL_KEY
+        sync: false
+      - key: STUDY_AI_COHERE_KEY
+        sync: false
+      - key: STUDY_AI_ARENA_KEY
+        sync: false
+      # Optional plural aliases. Leave empty if you used comma-separated values
+      # in the singular secrets above.
+      - key: STUDY_AI_GEMINI_KEYS
+        sync: false
+      - key: STUDY_AI_GROQ_KEYS
+        sync: false
+      - key: STUDY_AI_CLOUDFLARE_TOKENS
+        sync: false
+      - key: STUDY_AI_OPENROUTER_KEYS
+        sync: false
+      - key: STUDY_AI_MISTRAL_KEYS
+        sync: false
+      - key: STUDY_AI_COHERE_KEYS
+        sync: false
+      - key: STUDY_AI_ARENA_KEYS
+        sync: false
+      - key: STUDY_AI_OPENROUTER_REFERER
+        sync: false
+      - key: SUPABASE_URL
+        value: https://dwmzbrrnqxzdoxrxbrna.supabase.co
+      # Supabase renamed its keys: anon -> publishable (sb_publishable_…),
+      # service_role -> secret (sb_secret_…). The variable names below are
+      # historical; paste the publishable key here and the secret key below.
+      # Dashboard path is Settings -> API Keys.
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: STUDY_AI_ALLOWED_ORIGINS
+        sync: false
+      # Operator console at /admin. Leave unset to keep it switched off.
+      # 24 characters minimum; 64 random hex characters recommended.
+      - key: STUDY_AI_ADMIN_TOKEN
+        sync: false

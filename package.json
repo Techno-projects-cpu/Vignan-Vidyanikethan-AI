@@ -1,0 +1,20 @@
+{
+  "name": "vignan-vidyanikethan-ai",
+  "version": "2.13.1",
+  "private": true,
+  "type": "module",
+  "description": "Vignan Vidyanikethan AI \u2014 offline-first, textbook-grounded study assistant for Vignan Vidyanikethan E.M. School.",
+  "scripts": {
+    "start": "node serve.mjs",
+    "dev": "node serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "precache": "node tools/generate-precache.mjs",
+    "sql:social": "node tools/print-social-sql.mjs",
+    "offline:check": "node tools/offline-sim.mjs",
+    "check": "node tools/scan-secrets.mjs && node tools/generate-precache.mjs && node --test tests/*.test.mjs && node tools/offline-sim.mjs",
+    "secrets": "node tools/scan-secrets.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design check — starting blocks and language picker</title>
+<!--
+  A development page, not part of the app: it renders the two components with the
+  real stylesheets so the design can be judged without logging in and without the
+  chat column competing for space. Not precached; excluded from the release list.
+-->
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../styles-premium.css">
+<link rel="stylesheet" href="../styles-custom.css">
+<style>
+  body { margin: 0; padding: 28px 20px 60px; background: var(--bg); color: var(--ink); font-family: var(--font); }
+  .frame { max-width: 940px; margin: 0 auto; display: grid; gap: 34px; }
+  h1 { font-size: 13px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600; }
+  .note { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+  .panel { border: 1px solid var(--line); background: var(--surface); padding: 0; }
+  .panel-inner { padding: 18px 18px 22px; }
+  .small { font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <h1>Design check 01 — starting blocks</h1>
+    <p class="note">Full width, square, joined, each row stretching to share the height. Hover a row, then press one to see the launch colour.</p>
+  </header>
+
+  <section class="panel">
+    <div class="panel-inner">
+      <div class="goal-cards" id="goal-cards">
+        <div class="goal-head">
+          <h3>Where are you stuck?</h3>
+          <p>Pick one. It is asked straight away, with your own pages cited.</p>
+        </div>
+        <div class="goal-stack" id="goal-stack"></div>
+      </div>
+      <p class="small" id="last-press">Pressing a row prints what it would ask here.</p>
+    </div>
+  </section>
+
+  <header>
+    <h1>Design check 03 — styles</h1>
+    <p class="note">Tap a tile: the whole page changes, because the tiles write the same attribute the app writes.</p>
+  </header>
+
+  <section class="panel">
+    <div class="panel-inner">
+      <div class="panel-head">
+        <div>
+          <span class="eyebrow">CUSTOMIZE</span>
+          <h2 style="font-size:17px;margin:4px 0 0">Choose a look</h2>
+          <p class="hint">Six styles. The same app underneath — only the surface, the type and the corners change.</p>
+        </div>
+        <span class="chip" id="style-chip">Minimal</span>
+      </div>
+      <div class="style-grid" id="style-grid" role="group"></div>
+      <p class="style-hint">The light / dark switch only changes the Minimal and Terminal styles; the other four are designed to be read as they are.</p>
+    </div>
+  </section>
+
+  <header>
+    <h1>Design check 02 — language picker</h1>
+    <p class="note">Every language in its own script, 31px. Type in the box to filter. The selected tile keeps a brand border and a tick.</p>
+  </header>
+
+  <section class="panel">
+    <div class="panel-inner">
+      <div class="panel-head">
+        <div>
+          <span class="eyebrow">LANGUAGE</span>
+          <h2 style="font-size:17px;margin:4px 0 0">Choose your language</h2>
+          <p class="hint">Interface labels, answers and web search follow this language.</p>
+        </div>
+        <span class="chip" id="language-chip">English</span>
+      </div>
+      <div class="language-filter-row">
+        <input type="search" class="language-filter" id="language-filter" placeholder="Search 33 languages…" autocomplete="off" spellcheck="false">
+        <span class="language-count" id="language-count"></span>
+      </div>
+      <div class="language-grid" id="language-grid" role="radiogroup"></div>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+import { GOAL_CARDS, cardIndex } from "../js/goal-cards.js";
+import { LANGUAGE_CATALOGUE, languageGlyph, languageGroups, languageMeta } from "../js/languages.js";
+import { THEMES } from "../js/themes.js";
+
+// --- blocks ------------------------------------------------------------------
+const stack = document.getElementById("goal-stack");
+const lastPress = document.getElementById("last-press");
+GOAL_CARDS.forEach((card, index) => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "goal-card";
+  button.dataset.goal = card.id;
+  button.dataset.num = cardIndex(index, GOAL_CARDS.length);
+
+  const head = document.createElement("span");
+  head.className = "goal-top";
+  const idx = document.createElement("span");
+  idx.className = "goal-index";
+  idx.textContent = cardIndex(index, GOAL_CARDS.length);
+  head.appendChild(idx);
+
+  const copy = document.createElement("span");
+  copy.className = "goal-copy";
+  const strong = document.createElement("strong");
+  strong.textContent = card.title;
+  const small = document.createElement("small");
+  small.textContent = card.note;
+  copy.append(strong, small);
+
+  const arrow = document.createElement("span");
+  arrow.className = "goal-arrow";
+  arrow.textContent = "↗";
+
+  button.append(head, copy, arrow);
+  button.addEventListener("click", () => {
+    button.classList.add("goal-card-launching");
+    setTimeout(() => button.classList.remove("goal-card-launching"), 620);
+    lastPress.textContent = card.prompt
+      ? `Would send: “${card.prompt}”`
+      : `Would open: ${card.action === "quiz" ? "the Quiz screen, topic field focused" : "Exams, already in viva mode"}`;
+  });
+  stack.appendChild(button);
+});
+
+// --- styles ------------------------------------------------------------------
+const styleGrid = document.getElementById("style-grid");
+const styleChip = document.getElementById("style-chip");
+let currentStyle = "minimal";
+
+function applyStyle(id) {
+  currentStyle = id;
+  if (id === "minimal") document.documentElement.removeAttribute("data-style");
+  else document.documentElement.dataset.style = id;
+  styleChip.textContent = THEMES.find((theme) => theme.id === id)?.name || id;
+  renderStyles();
+}
+
+function renderStyles() {
+  styleGrid.replaceChildren();
+  for (const theme of THEMES) {
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = `style-tile${theme.id === currentStyle ? " active" : ""}`;
+    tile.dataset.style = theme.id;
+    tile.setAttribute("aria-pressed", String(theme.id === currentStyle));
+    const preview = document.createElement("span");
+    preview.className = "style-preview";
+    for (const colour of theme.swatches) {
+      const swatch = document.createElement("span");
+      swatch.style.background = colour;
+      preview.appendChild(swatch);
+    }
+    const name = document.createElement("span");
+    name.className = "style-name";
+    name.textContent = theme.name;
+    const note = document.createElement("span");
+    note.className = "style-note";
+    note.textContent = theme.note;
+    const tags = document.createElement("span");
+    tags.className = "style-tags";
+    for (const tag of theme.tags) {
+      const tagNode = document.createElement("span");
+      tagNode.className = "style-tag";
+      tagNode.textContent = tag;
+      tags.appendChild(tagNode);
+    }
+    tile.append(preview, name, note, tags);
+    tile.addEventListener("click", () => applyStyle(theme.id));
+    styleGrid.appendChild(tile);
+  }
+}
+
+// --- languages ---------------------------------------------------------------
+const grid = document.getElementById("language-grid");
+const filter = document.getElementById("language-filter");
+const count = document.getElementById("language-count");
+const chip = document.getElementById("language-chip");
+let current = "en";
+
+function matches(language, term) {
+  const needle = String(term || "").trim().toLowerCase();
+  if (!needle) return true;
+  const meta = languageMeta(language.code);
+  return [meta.native, meta.name, meta.code].filter(Boolean).some((v) => String(v).toLowerCase().includes(needle));
+}
+
+function render() {
+  grid.replaceChildren();
+  let shown = 0;
+  for (const group of languageGroups()) {
+    const visible = group.languages.filter((language) => matches(language, filter.value));
+    if (!visible.length) continue;
+    shown += visible.length;
+    const section = document.createElement("div");
+    section.className = "language-group";
+    const label = document.createElement("span");
+    label.className = "eyebrow";
+    label.textContent = group.label;
+    section.appendChild(label);
+    const tiles = document.createElement("div");
+    tiles.className = "language-tiles";
+    for (const language of visible) {
+      const meta = languageMeta(language.code);
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = `language-tile${current === language.code ? " active" : ""}`;
+      tile.setAttribute("role", "radio");
+      tile.setAttribute("aria-checked", String(current === language.code));
+      tile.lang = language.code;
+      if (meta.dir === "rtl") tile.dir = "rtl";
+      const glyph = document.createElement("span");
+      glyph.className = "language-glyph";
+      glyph.textContent = languageGlyph(meta.native);
+      const name = document.createElement("span");
+      name.className = "language-name";
+      name.textContent = meta.native;
+      tile.append(glyph, name);
+      if (meta.name !== meta.native) {
+        const latin = document.createElement("span");
+        latin.className = "language-latin";
+        latin.textContent = meta.name;
+        tile.appendChild(latin);
+      }
+      tile.addEventListener("click", () => {
+        current = language.code;
+        chip.textContent = meta.native;
+        render();
+      });
+      tiles.appendChild(tile);
+    }
+    section.appendChild(tiles);
+    grid.appendChild(section);
+  }
+  if (!shown) {
+    const empty = document.createElement("p");
+    empty.className = "language-empty";
+    empty.textContent = "No language matches that search. Clear it to see all 33.";
+    grid.appendChild(empty);
+  }
+  count.textContent = shown === LANGUAGE_CATALOGUE.length ? `${LANGUAGE_CATALOGUE.length} LANGUAGES` : `${shown} OF ${LANGUAGE_CATALOGUE.length}`;
+}
+
+filter.addEventListener("input", render);
+render();
+renderStyles();
+</script>
+</body>
+</html>

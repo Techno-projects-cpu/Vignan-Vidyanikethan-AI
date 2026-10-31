@@ -1,0 +1,41 @@
+@font-face { font-family: Manrope; src: url('./assets/fonts/manrope-latin.woff2') format('woff2'); font-style: normal; font-weight: 200 800; font-display: swap; }
+@font-face { font-family: 'Space Grotesk'; src: url('./assets/fonts/space-grotesk-latin.woff2') format('woff2'); font-style: normal; font-weight: 300 700; font-display: swap; }
+:root { color-scheme: dark; font-family: Manrope, system-ui, sans-serif; background: #080808; color: #f5f5f5; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0 clamp(20px, 5vw, 80px); }
+a { color: #f5f5f5; text-underline-offset: 4px; }
+a:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+.skip { position: absolute; top: -100px; left: 16px; padding: 10px; background: #fff; color: #080808; }
+.skip:focus { top: 16px; z-index: 3; }
+.legal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 1400px; min-height: 90px; margin: auto; border-bottom: 1px solid #383838; }
+.legal-header a { font-size: 11px; font-weight: 700; text-decoration: none; }
+.legal-header a:hover, .legal-footer a:hover { text-decoration: underline; }
+.legal-header .wordmark { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 17px; letter-spacing: -.03em; }
+.wordmark span { color: #aaa; }
+.legal-main { display: grid; grid-template-columns: minmax(260px, .85fr) minmax(0, 1.15fr); gap: clamp(50px, 9vw, 150px); max-width: 1200px; margin: 0 auto; padding: 90px 0 110px; }
+.legal-intro { align-self: start; position: sticky; top: 36px; }
+.eyebrow, .updated { color: #aaa; font-family: ui-monospace, monospace; font-size: 10px; font-weight: 700; letter-spacing: .11em; }
+h1, h2 { font-family: 'Space Grotesk', system-ui, sans-serif; letter-spacing: -.055em; }
+h1 { margin: 22px 0; font-size: clamp(58px, 6vw, 90px); line-height: .93; }
+h1 span { color: #999; }
+.legal-intro > p:not(.eyebrow):not(.updated) { max-width: 360px; color: #c8c8c8; font-size: 15px; line-height: 1.7; }
+.updated { margin-top: 35px; letter-spacing: 0; }
+.legal-copy { min-width: 0; }
+.legal-copy section { padding: 0 0 30px; margin: 0 0 30px; border-bottom: 1px solid #303030; }
+.legal-copy h2 { margin: 0 0 15px; font-size: 21px; line-height: 1.25; }
+.legal-copy p { margin: 0 0 15px; color: #d0d0d0; font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
+.legal-copy p:last-child { margin-bottom: 0; }
+.legal-copy strong { color: #fff; }
+.legal-footer { display: flex; justify-content: space-between; gap: 30px; max-width: 1400px; margin: auto; padding: 28px 0 50px; border-top: 1px solid #383838; }
+.legal-footer strong { font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: .12em; }
+.legal-footer p { color: #aaa; font-size: 11px; line-height: 1.6; }
+.legal-footer nav { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 18px; }
+.legal-footer a { font-size: 11px; font-weight: 700; }
+@media (max-width: 760px) {
+  .legal-header { min-height: 70px; }
+  .legal-main { grid-template-columns: 1fr; gap: 38px; padding: 50px 0 70px; }
+  .legal-intro { position: static; }
+  h1 { font-size: clamp(56px, 14vw, 80px); }
+  .updated { margin-top: 22px; }
+  .legal-footer { flex-direction: column; }
+}

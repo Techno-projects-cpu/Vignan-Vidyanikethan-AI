@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin
+Disallow: /setup
+Allow: /
+Disallow: /api/
+
+Sitemap: https://vignanvidyanikethanai.onrender.com/sitemap.xml
