@@ -1,6 +1,6 @@
 /** Small, bounded conversational helpers for Bolt's extractive engine. */
-import { tokenize } from "./text.js?v=39";
-import { LOCALE_REPLIES } from "./replies.js?v=39";
+import { tokenize } from "./text.js?v=40";
+import { LOCALE_REPLIES } from "./replies.js?v=40";
 
 export const CREATOR_ANSWER = "I was made by a student of Vignan Vidyanikethan English Medium High School for the INSPIRE-MANAK science fair. I use existing AI tools and textbook search; I am not a newly trained model.";
 
