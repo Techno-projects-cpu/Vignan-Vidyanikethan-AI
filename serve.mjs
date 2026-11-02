@@ -28,6 +28,7 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { parseSearchResults } from "./js/web.js";
 import { buildUpstreams, callFreeRouter, getKeyCooldownStatus } from "./server/free-router.mjs";
 import { buildStudentUpstreams } from "./server/student-keys.mjs";
+import { compress, createCompressionCache, isCompressible, pickEncoding } from "./server/compress.mjs";
 import { fetchPublicResource, PublicFetchError } from "./server/safe-fetch.mjs";
 import { limitedText, searchOutside } from "./server/web-search.mjs";
 import { extractHtmlText } from "./js/files.js";
@@ -941,7 +942,7 @@ async function socialDiagnostics({ fresh = false } = {}) {
 function health() {
   return {
     ok: true,
-    version: "2.15.0",
+    version: "2.16.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,
@@ -1169,7 +1170,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.15.0</strong></div>
+      <div><span>release</span><strong>2.16.0</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1283,7 +1284,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.15.0",
+    release: "2.16.0",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);
@@ -1425,16 +1426,43 @@ async function serveStatic(request, response, pathname) {
   // Unversioned files keep a short cache so a fix is never stuck for a year.
   const versioned = new URL(request.url || "/", "http://local").searchParams.has("v");
   const buffer = await fs.readFile(target);
+  // Text assets are worth compressing on every release: a phone on school Wi-Fi
+  // gets the whole app in about a fifth of the bytes.
+  const encoding = isCompressible(extension, buffer.length)
+    ? pickEncoding(request.headers["accept-encoding"])
+    : "identity";
+  let body = buffer;
+  if (encoding !== "identity") {
+    body = compressionCache.get(target, stat.mtimeMs, encoding);
+    if (!body) {
+      try {
+        body = compress(buffer, encoding);
+        compressionCache.set(target, stat.mtimeMs, encoding, body);
+      } catch {
+        // A platform without brotli still has gzip; a platform without either
+        // still serves the file. Compression must never be a single point of
+        // failure.
+        body = buffer;
+      }
+    }
+  }
   const headers = {
     ...baseSecurityHeaders(request),
     "Content-Type": contentType,
-    "Content-Length": buffer.length,
+    "Content-Length": body.length,
     "Cache-Control": noCache ? "no-cache" : versioned ? "public, max-age=31536000, immutable" : "public, max-age=3600",
     "Content-Security-Policy": CONTENT_SECURITY_POLICY,
+    // Caches must key on the encoding, or a gzip copy could be handed to a
+    // client that cannot read it.
+    Vary: "Accept-Encoding",
   };
+  if (encoding !== "identity" && body !== buffer) headers["Content-Encoding"] = encoding;
   response.writeHead(200, headers);
-  response.end(request.method === "HEAD" ? undefined : buffer);
+  response.end(request.method === "HEAD" ? undefined : body);
 }
+
+/** Compressed copies of the release, keyed by file and mtime. */
+const compressionCache = createCompressionCache();
 
 const server = http.createServer(async (request, response) => {
   // Remember the request on the response so JSON helpers can pick HSTS/security

@@ -1,6 +1,6 @@
 {
-  "version": 42,
-  "generatedAt": "2026-11-02T14:54:44.933Z",
+  "version": 43,
+  "generatedAt": "2026-11-02T15:23:11.636Z",
   "urls": [
     "./",
     "./index.html",
@@ -85,6 +85,7 @@
     "./js/updates.js",
     "./js/util.js",
     "./js/vector.js",
+    "./js/viewport.js",
     "./js/viva.js",
     "./js/voice.js",
     "./js/web.js",

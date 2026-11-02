@@ -10,24 +10,24 @@
   <meta property="og:title" content="Vignan Vidyanikethan AI — learn from your own textbooks">
   <meta property="og:description" content="Turn your textbooks into cited answers, quizzes and revision tools. A student project for INSPIRE-MANAK.">
   <meta property="og:url" content="https://vignanvidyanikethanai.onrender.com/">
-  <meta property="og:image" content="https://vignanvidyanikethanai.onrender.com/icons/icon-512.png?v=42">
+  <meta property="og:image" content="https://vignanvidyanikethanai.onrender.com/icons/icon-512.png?v=43">
   <meta name="twitter:card" content="summary">
   <title>Vignan Vidyanikethan AI — learn from your own textbooks</title>
   <link rel="canonical" href="https://vignanvidyanikethanai.onrender.com/">
-  <link rel="manifest" href="./manifest.webmanifest?v=42">
+  <link rel="manifest" href="./manifest.webmanifest?v=43">
   <link rel="preload" href="./assets/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="./assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="icon" href="./icons/icon.svg?v=42" type="image/svg+xml">
-  <link rel="icon" href="./icons/icon-48.png?v=42" type="image/png" sizes="48x48">
-  <link rel="shortcut icon" href="./favicon.ico?v=42">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=42">
+  <link rel="icon" href="./icons/icon.svg?v=43" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-48.png?v=43" type="image/png" sizes="48x48">
+  <link rel="shortcut icon" href="./favicon.ico?v=43">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=43">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./styles-premium.css?v=42">
-  <link rel="stylesheet" href="./styles-identity.css?v=42">
-  <link rel="stylesheet" href="./styles-social.css?v=42">
-  <link rel="stylesheet" href="./styles-pro.css?v=42">
-  <link rel="stylesheet" href="./styles-custom.css?v=42">
-  <link rel="stylesheet" href="./styles-next.css?v=42">
+  <link rel="stylesheet" href="./styles-premium.css?v=43">
+  <link rel="stylesheet" href="./styles-identity.css?v=43">
+  <link rel="stylesheet" href="./styles-social.css?v=43">
+  <link rel="stylesheet" href="./styles-pro.css?v=43">
+  <link rel="stylesheet" href="./styles-custom.css?v=43">
+  <link rel="stylesheet" href="./styles-next.css?v=43">
   <script>
     // Paint the saved look before the first frame. The full settings live in the
     // database, which is async; this mirror is only a hint, and applyStyle() is
@@ -49,7 +49,7 @@
   <section class="startup-screen" id="startup-screen" role="dialog" aria-modal="true" aria-labelledby="startup-title" hidden>
     <div class="startup-frame">
       <header class="startup-top">
-        <span class="startup-wordmark"><img src="./icons/icon.svg?v=42" alt="" width="29" height="29">VIGNAN<span> / AI</span></span>
+        <span class="startup-wordmark"><img src="./icons/icon.svg?v=43" alt="" width="29" height="29">VIGNAN<span> / AI</span></span>
         <div class="startup-top-right"><span class="startup-edition">A STUDENT PROJECT &nbsp; / &nbsp; 01</span><button type="button" id="startup-skip">Skip intro ↗</button></div>
       </header>
       <div class="startup-body">
@@ -75,7 +75,7 @@
     <div class="auth-gate-shell">
       <header class="auth-gate-top">
         <a class="auth-gate-brand" href="./">
-          <span class="auth-gate-mark" aria-hidden="true"><img src="./icons/icon.svg?v=42" alt="" width="37" height="37"></span>
+          <span class="auth-gate-mark" aria-hidden="true"><img src="./icons/icon.svg?v=43" alt="" width="37" height="37"></span>
           <span>VIGNAN <b>VIDYANIKETHAN AI</b></span>
         </a>
         <span class="auth-gate-badge">YOUR STUDY SPACE</span>
@@ -215,11 +215,19 @@
     <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.2 2.7-5.2 6-5.2s6 2 6 5.2"/><path d="M16 5.4a3 3 0 0 1 0 5.6"/><path d="M17.5 14.6c2.1.6 3.5 2.4 3.5 5.4"/></symbol>
     <symbol id="i-message" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12.5h5"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M8 8h2v8H8zM14 8h2v8h-2zM10 10h4M10 14h4"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 20V4m0 0-7 7m7-7 7 7"/></symbol>
     <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></symbol>
     <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></symbol>
   </svg>
 
   <a class="skip-link" href="#main">Skip to content</a>
+  <!-- How far through a long screen you are, and the way back up. Both are
+       driven by one scroll listener in js/app.js and drawn in styles-next.css. -->
+  <div class="read-progress" id="read-progress" aria-hidden="true"><span id="read-progress-bar"></span></div>
+  <button type="button" class="to-top" id="to-top" hidden>
+    <svg aria-hidden="true"><use href="#i-arrow-up"></use></svg>
+    <span class="to-top-label">Top</span>
+  </button>
   <div class="update-banner" id="update-banner" hidden role="status" aria-live="polite">
     <span class="update-banner-dot" aria-hidden="true"></span>
     <div class="update-banner-copy">
@@ -235,7 +243,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="./" aria-label="Vignan Vidyanikethan AI home">
-        <span class="brand-mark" aria-hidden="true"><img src="./icons/icon.svg?v=42" alt="" width="38" height="38"></span>
+        <span class="brand-mark" aria-hidden="true"><img src="./icons/icon.svg?v=43" alt="" width="38" height="38"></span>
         <span class="brand-text"><strong>Vignan</strong><small>Vidyanikethan AI</small></span>
       </a>
       <div class="sidebar-label">WORKSPACE</div>
@@ -267,7 +275,7 @@
     <div class="workspace">
       <header class="topbar premium-topbar">
         <div class="premium-brand">
-          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home"><img src="./icons/icon.svg?v=42" alt="" width="38" height="38"></a>
+          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home"><img src="./icons/icon.svg?v=43" alt="" width="38" height="38"></a>
           <span class="premium-wordmark">VIGNAN <span>AI</span></span>
         </div>
         <div class="premium-view-chip" aria-live="polite"><span class="premium-view-dot"></span><span id="premium-view-label">Ask</span></div>
@@ -854,10 +862,24 @@
     </nav>
   </div>
 
+  <!-- The keys that work, listed once. The list is generated from
+       SHORTCUTS in js/viewport.js so the sheet cannot claim a key that does
+       nothing. -->
+  <div class="shortcuts-overlay" id="shortcuts-overlay" hidden aria-hidden="true">
+    <div class="shortcuts-panel" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+      <div class="shortcuts-head">
+        <strong id="shortcuts-title">Keyboard shortcuts</strong>
+        <button type="button" class="text-button" id="shortcuts-close">Close</button>
+      </div>
+      <dl class="shortcuts-list" id="shortcuts-list"></dl>
+      <p class="hint">On a phone, ⌘K is the menu button in the top bar, and / is the microphone button beside the question box.</p>
+    </div>
+  </div>
+
   <div class="command-overlay" id="command-overlay" hidden aria-hidden="true">
     <div class="command-panel" role="dialog" aria-modal="true" aria-labelledby="command-title">
       <div class="command-head">
-        <span class="command-mark" aria-hidden="true"><img src="./icons/icon.svg?v=42" alt="" width="38" height="38"></span>
+        <span class="command-mark" aria-hidden="true"><img src="./icons/icon.svg?v=43" alt="" width="38" height="38"></span>
         <div class="command-title-wrap">
           <strong id="command-title">Everything, in one menu.</strong>
           <span>Search pages, actions and AI nicknames.</span>
@@ -941,7 +963,7 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./js/boot.js?v=42"></script>
+  <script type="module" src="./js/boot.js?v=43"></script>
 
   <aside class="first-run" id="first-run" role="dialog" aria-modal="false" aria-labelledby="first-run-title" hidden>
     <span class="first-run-step" id="first-run-step">STEP 1 OF 3</span>

@@ -1475,3 +1475,245 @@ body.premium-ui .update-row strong {
   body.premium-ui .main { padding: 0; }
   body.premium-ui .card { border: 0; padding: 0; }
 }
+
+/* --------------------------------------------------------------------------
+   14. Reading position, back to top, shortcut sheet
+   -------------------------------------------------------------------------- */
+
+/* A 2px hairline at the very top: how far through this screen you are. It is
+   painted with a transform, so it never triggers layout while you scroll. */
+.read-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  height: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--vn-fast) var(--vn-ease);
+}
+
+.read-progress.on {
+  opacity: 1;
+}
+
+.read-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--vn-ink);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 60ms linear;
+  will-change: transform;
+}
+
+/* Back to top: square, ink on paper, 44px, above the phone tab bar. */
+.to-top {
+  position: fixed;
+  right: var(--vn-space-5);
+  bottom: calc(var(--vn-space-5) + env(safe-area-inset-bottom));
+  z-index: 70;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vn-space-2);
+  min-height: 44px;
+  padding: 0 var(--vn-space-3) 0 var(--vn-space-2);
+  border: var(--vn-hairline) solid var(--vn-ink);
+  border-radius: 0;
+  background: var(--vn-canvas);
+  color: var(--vn-ink);
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  animation: vn-rise var(--vn-slow) var(--vn-ease) both;
+}
+
+.to-top svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.to-top:hover {
+  background: var(--vn-ink);
+  color: var(--vn-canvas);
+}
+
+@keyframes vn-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Shortcut sheet: the same shape as the command menu, so it feels like one app. */
+.shortcuts-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: var(--vn-space-5);
+  background: color-mix(in srgb, var(--vn-canvas) 82%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+.shortcuts-overlay[hidden] {
+  display: none;
+}
+
+.shortcuts-panel {
+  width: min(520px, 100%);
+  max-height: min(80vh, 640px);
+  overflow: auto;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  border-radius: 0;
+  background: var(--vn-panel);
+  padding: var(--vn-space-5);
+}
+
+.shortcuts-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vn-space-4);
+  padding-bottom: var(--vn-space-4);
+  margin-bottom: var(--vn-space-4);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+.shortcuts-head strong {
+  font-family: var(--vn-font-display);
+  font-size: var(--vn-h3);
+}
+
+.shortcuts-list {
+  display: grid;
+  gap: 0;
+  margin: 0 0 var(--vn-space-4);
+}
+
+.shortcut-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--vn-space-4);
+  padding: var(--vn-space-3) 0;
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+.shortcut-row:last-child {
+  border-bottom: 0;
+}
+
+.shortcut-keys {
+  display: flex;
+  gap: 4px;
+}
+
+.shortcut-keys kbd {
+  min-width: 26px;
+  text-align: center;
+  padding: 3px 6px;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  font-family: var(--vn-font-mono);
+  font-size: 11px;
+  color: var(--vn-ink);
+}
+
+.shortcut-label {
+  font-size: var(--vn-small);
+  color: var(--vn-ink-2);
+}
+
+.shortcuts-panel .hint {
+  margin: 0;
+  padding-top: var(--vn-space-3);
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.shortcuts-open {
+  overflow: hidden;
+}
+
+@media (max-width: 860px) {
+  .to-top {
+    right: var(--vn-space-4);
+    bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+
+  .to-top-label {
+    display: none;
+  }
+
+  .to-top {
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   15. The composer grows, answers stay readable, nothing hides the keyboard
+   -------------------------------------------------------------------------- */
+
+/* The question box was two fixed rows: a long question scrolled inside a box
+   the size of a business card, and students could not read back what they had
+   written. It now grows with the text (js/viewport.js decides the height) and
+   stops at eight rows, then scrolls — Send never leaves the screen. */
+.composer-input-row textarea {
+  max-height: 210px;
+  overflow-y: auto;
+  transition: height var(--vn-fast) var(--vn-ease);
+}
+
+/* At the ceiling, the bottom edge goes solid so it is obvious you can scroll. */
+.composer-input-row textarea.composer-capped {
+  border-bottom-color: var(--vn-ink-3);
+  box-shadow: inset 0 -12px 12px -12px var(--vn-ink-3);
+}
+
+/* Answers carry tables and code. On a phone they scroll sideways, but a plain
+   `overflow-x` gives no sign that there is more, so the edges fade. */
+.message-body pre,
+.message-body table {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.message-body pre {
+  background: linear-gradient(to right, transparent 92%, var(--vn-rule) 100%);
+  background-size: 100% 100%;
+}
+
+/* Every control the keyboard can reach shows where the keyboard is. The mouse
+   does not get a different frame, so nothing looks "stuck on" after a click. */
+.to-top:focus-visible,
+.shortcuts-panel .icon-button:focus-visible,
+.shortcuts-panel button:focus-visible {
+  outline: 2px solid var(--vn-accent, var(--vn-ink));
+  outline-offset: 3px;
+}
+
+/* A shortcut row lights up under the pointer, so the list reads as seven
+   separate things rather than one block of monospace. */
+.shortcut-row {
+  padding: 6px 4px;
+  margin: 0 -4px;
+  transition: background var(--vn-fast) var(--vn-ease);
+}
+
+.shortcut-row:hover {
+  background: var(--vn-surface-2, var(--vn-surface));
+}
+
+@media (max-width: 640px) {
+  /* Eight rows is too much of a small screen; five is the phone ceiling. */
+  .composer-input-row textarea {
+    max-height: 150px;
+  }
+}

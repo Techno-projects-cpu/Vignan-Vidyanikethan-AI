@@ -6,27 +6,36 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=42";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=42";
-import { ingestPdf, ingestText } from "./ingest.js?v=42";
-import { splitSentences } from "./text.js?v=42";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=42";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=42";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=42";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=42";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=42";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=42";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=42";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=42";
+import * as db from "./db.js?v=43";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=43";
+import { ingestPdf, ingestText } from "./ingest.js?v=43";
+import { splitSentences } from "./text.js?v=43";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=43";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=43";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=43";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=43";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=43";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=43";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=43";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=43";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=42";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=42";
+} from "./pro-mode.js?v=43";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=43";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=42";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=42";
+} from "./updates.js?v=43";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=43";
+import {
+  SHORTCUTS,
+  fitComposerHeight,
+  prefersReducedMotion,
+  readingState,
+  shouldShowToTop,
+  shortcutForKey,
+  windowScrollState,
+} from "./viewport.js?v=43";
 import {
   OFFLINE_MODE_LABEL,
   OFFLINE_MODE_NOTE,
@@ -36,11 +45,11 @@ import {
   networkAllowed,
   setOfflineMode,
   shouldAnnounceUpdate,
-} from "./offline-mode.js?v=42";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=42";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=42";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=42";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=42";
+} from "./offline-mode.js?v=43";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=43";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=43";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=43";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=43";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -48,8 +57,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=42";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=42";
+} from "./llm.js?v=43";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=43";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -61,7 +70,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=42";
+} from "./local-ai.js?v=43";
 import {
   EXAMS,
   MODES,
@@ -76,12 +85,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=42";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=42";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=42";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=42";
-import { TASKS } from "./model-router.js?v=42";
-import { PROVIDERS, providerList } from "./providers.js?v=42";
+} from "./exam-packs.js?v=43";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=43";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=43";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=43";
+import { TASKS } from "./model-router.js?v=43";
+import { PROVIDERS, providerList } from "./providers.js?v=43";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -90,30 +99,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=42";
-import { parseApiKeys } from "./key-pool.js?v=42";
+} from "./settings.js?v=43";
+import { parseApiKeys } from "./key-pool.js?v=43";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=42";
+} from "./student-keys.js?v=43";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=42";
+} from "./quiz.js?v=43";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=42";
+} from "./flashcards.js?v=43";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=42";
+} from "./study-decks.js?v=43";
 import {
   accuracy,
   currentStreak,
@@ -124,16 +133,16 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=42";
-import { externalSearchUrl, searchWeb } from "./web.js?v=42";
-import { openEditStudio } from "./edit-studio.js?v=42";
-import { openReader } from "./reader.js?v=42";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=42";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=42";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=42";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=42";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=42";
-import * as ui from "./ui.js?v=42";
+} from "./progress.js?v=43";
+import { externalSearchUrl, searchWeb } from "./web.js?v=43";
+import { openEditStudio } from "./edit-studio.js?v=43";
+import { openReader } from "./reader.js?v=43";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=43";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=43";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=43";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=43";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=43";
+import * as ui from "./ui.js?v=43";
 import {
   clearReferral,
   getLeaderboard,
@@ -143,8 +152,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=42";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=42";
+} from "./auth.js?v=43";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=43";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -152,12 +161,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=42";
-import { initMotion, revealVisible } from "./motion.js?v=42";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=42";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=42";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=42";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=42";
+} from "./premium-ui.js?v=43";
+import { initMotion, revealVisible } from "./motion.js?v=43";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=43";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=43";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=43";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=43";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -536,6 +545,8 @@ function setView(view, { skipHistory = false } = {}) {
     if (view === "play") renderSocialPlay();
   }
   restoreScroll(view);
+  queueScrollPaint();
+  if (view === "ask") queueComposerFit();
   setPremiumView(view);
   requestAnimationFrame(() => revealVisible());
 }
@@ -575,6 +586,145 @@ function restoreScroll(view) {
   scrollTo();
   // The view was not laid out yet on the first paint; once it is, put it back.
   requestAnimationFrame(scrollTo);
+}
+
+/* ------------------------------------------------- reading position & keys */
+
+let scrollFrame = 0;
+
+/** One listener, one frame: the scroll path never does work it does not paint. */
+function paintScrollTools() {
+  scrollFrame = 0;
+  const numbers = windowScrollState(window);
+  const state = readingState(numbers);
+  const bar = $("#read-progress-bar");
+  const track = $("#read-progress");
+  if (bar && track) {
+    bar.style.transform = `scaleX(${state.fraction})`;
+    // The hairline only belongs on a page you can actually scroll.
+    track.classList.toggle("on", state.scrollable && state.fraction > 0.01);
+  }
+  const top = $("#to-top");
+  if (top) {
+    const show = shouldShowToTop(numbers);
+    if (show !== !top.hidden) top.hidden = !show;
+  }
+}
+
+function queueScrollPaint() {
+  if (scrollFrame) return;
+  scrollFrame = requestAnimationFrame(paintScrollTools);
+}
+
+/**
+ * The question box grows with the question.
+ *
+ * Measured from `scrollHeight` after a reset to `auto` (the only way to read the
+ * content's own height), then clamped so a pasted paragraph scrolls instead of
+ * eating the screen. The arithmetic is in js/viewport.js and tested there.
+ */
+let composerFrame = 0;
+
+function fitComposer() {
+  composerFrame = 0;
+  const input = $("#ask-input");
+  if (!input) return;
+  input.style.height = "auto";
+  const styles = getComputedStyle(input);
+  const lineHeight = parseFloat(styles.lineHeight) || 24;
+  const border = (parseFloat(styles.borderTopWidth) || 0) + (parseFloat(styles.borderBottomWidth) || 0);
+  const { height, capped } = fitComposerHeight(
+    { scrollHeight: input.scrollHeight, lineHeight, border },
+    { minRows: 2, maxRows: 8 },
+  );
+  input.style.height = `${height}px`;
+  input.classList.toggle("composer-capped", capped);
+}
+
+function queueComposerFit() {
+  if (composerFrame) return;
+  composerFrame = requestAnimationFrame(fitComposer);
+}
+
+function backToTop() {
+  const behavior = prefersReducedMotion(window) ? "auto" : "smooth";
+  const scroller = mainScrollTop();
+  if (scroller) scroller.scrollTo({ top: 0, behavior });
+  else window.scrollTo({ top: 0, left: 0, behavior });
+}
+
+/** The sheet lists what SHORTCUTS says, so it can never claim a dead key. */
+function renderShortcuts() {
+  const list = $("#shortcuts-list");
+  if (!list) return;
+  list.replaceChildren();
+  for (const shortcut of SHORTCUTS) {
+    const row = ui.element("div", "shortcut-row");
+    const keys = ui.element("span", "shortcut-keys");
+    for (const key of shortcut.keys) keys.appendChild(ui.element("kbd", "", key));
+    row.append(keys, ui.element("span", "shortcut-label", shortcut.label));
+    list.appendChild(row);
+  }
+}
+
+function openShortcuts() {
+  const overlay = $("#shortcuts-overlay");
+  if (!overlay) return;
+  renderShortcuts();
+  overlay.hidden = false;
+  overlay.setAttribute("aria-hidden", "false");
+  document.body.classList.add("shortcuts-open");
+  $("#shortcuts-close")?.focus();
+}
+
+function closeShortcuts() {
+  const overlay = $("#shortcuts-overlay");
+  if (!overlay || overlay.hidden) return false;
+  overlay.hidden = true;
+  overlay.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("shortcuts-open");
+  return true;
+}
+
+/**
+ * Keyboard shortcuts.
+ *
+ * "/" and "?" are the two everyone tries, and both are only useful if they do
+ * not fire while a student is typing — that check is in js/viewport.js, tested
+ * there. Escape closes whatever is open, in the order a person would expect.
+ */
+function initShortcuts() {
+  document.addEventListener("keydown", (event) => {
+    if (event.defaultPrevented) return;
+    const action = shortcutForKey(event);
+    if (!action) return;
+    if (action === "escape") {
+      if (closeShortcuts()) { event.preventDefault(); return; }
+      const overlay = $("#command-overlay");
+      if (overlay && !overlay.hidden) { document.querySelector("#command-close")?.click(); event.preventDefault(); }
+      return;
+    }
+    if (action === "help") { event.preventDefault(); openShortcuts(); return; }
+    if (action === "focus-ask") {
+      event.preventDefault();
+      if (state.currentView !== "ask") setView("ask");
+      const input = $("#ask-input");
+      input?.focus();
+      return;
+    }
+    if (action === "menu") {
+      event.preventDefault();
+      document.querySelector("#command-menu-button")?.click();
+    }
+  });
+  $("#shortcuts-close")?.addEventListener("click", closeShortcuts);
+  $("#shortcuts-overlay")?.addEventListener("click", (event) => {
+    if (event.target?.id === "shortcuts-overlay") closeShortcuts();
+  });
+  window.addEventListener("scroll", queueScrollPaint, { passive: true });
+  window.addEventListener("resize", queueScrollPaint, { passive: true });
+  $("#to-top")?.addEventListener("click", backToTop);
+  paintScrollTools();
 }
 
 function setMode(mode) {
@@ -1311,6 +1461,7 @@ function renderSuggestions() {
       }
       if (suggestion.depth) void setAnswerDepth(suggestion.depth);
       $("#ask-input").value = suggestion.prompt;
+      queueComposerFit();
       setMode(suggestion.mode);
       $("#ask-form").requestSubmit();
     });
@@ -1385,6 +1536,7 @@ function openGoal(card, element) {
   setMode(card.mode || "answer");
   const input = $("#ask-input");
   input.value = card.prompt;
+  queueComposerFit();
   setView("ask");
   $("#ask-form")?.requestSubmit();
 }
@@ -1398,6 +1550,7 @@ function applyLinkedQuestion(search = location.search) {
   const question = askFromUrl(search);
   if (!input || !question) return "";
   input.value = question;
+  queueComposerFit();
   setView("ask");
   input.focus({ preventScroll: true });
   ui.showToast("Your question is ready. Edit it or send it.", "info", 3600);
@@ -1658,6 +1811,7 @@ async function handleAsk(event) {
   const history = state.messages.slice(-12);
   addMessage({ role: "user", content: query });
   input.value = "";
+  queueComposerFit();
   state.askBusy = true;
   showTyping(true);
 
@@ -5111,7 +5265,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=42");
+            const { social } = await import("./social.js?v=43");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -5552,6 +5706,7 @@ function bindEvents() {
     const input = $("#ask-input");
     if (!input) return;
     input.value = String(event.detail?.question || "");
+    queueComposerFit();
     setMode("answer");
     setView("ask");
     input.focus({ preventScroll: true });
@@ -5568,6 +5723,7 @@ function bindEvents() {
   window.addEventListener("offline", updateOfflineChip);
   $("#pro-chip")?.addEventListener("click", () => { void disengageProMode(); });
   // The phone tab bar carries five screens; this is the way to the other five.
+  initShortcuts();
   $("#mobile-more")?.addEventListener("click", () => {
     const button = $("#command-menu-button");
     if (button) button.click();
@@ -5589,6 +5745,8 @@ function bindEvents() {
   $("#ask-mic")?.addEventListener("click", (event) => void dictateQuestion(event.currentTarget));
   $("#ask-web-fallback").addEventListener("change", (event) => void setWebChoice(event.target.checked));
   $("#settings-web-enabled").addEventListener("change", (event) => void setWebChoice(event.target.checked));
+  $("#ask-input").addEventListener("input", queueComposerFit);
+  $("#ask-input").addEventListener("paste", queueComposerFit);
   $("#ask-input").addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
