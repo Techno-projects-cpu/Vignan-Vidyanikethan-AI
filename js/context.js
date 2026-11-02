@@ -5,7 +5,7 @@
  * passages to existing AI providers and asks them to reason over that context.
  */
 
-import { truncate } from "./util.js?v=47";
+import { truncate } from "./util.js?v=48";
 
 export const SYSTEM_PROMPT = `You are Vignan Vidyanikethan AI, a careful study assistant for school students.
 

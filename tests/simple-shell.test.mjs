@@ -35,7 +35,7 @@ test("the page opens on a chat, with a logo in the corner", () => {
 
 test("the logo opens a menu with every screen in it", () => {
   const menu = html.slice(html.indexOf('id="app-menu"'), html.indexOf('id="history-overlay"'));
-  for (const view of ["library", "quiz", "exam", "flashcards", "progress", "friends", "chat", "play", "settings"]) {
+  for (const view of ["ask", "library", "quiz", "exam", "flashcards", "progress", "friends", "chat", "play", "settings"]) {
     assert.match(menu, new RegExp(`data-menu-view="${view}"`), `${view} is reachable from the menu`);
   }
   for (const action of ["new-chat", "history", "upload", "install", "theme"]) {
@@ -148,4 +148,15 @@ test("the keyboard cannot walk out of an open menu or sheet", () => {
   assert.match(esc, /if \(closeAppMenu\(\)\)/);
   assert.match(esc, /if \(closeAttach\(\)\)/);
   assert.match(esc, /"history-overlay", "install-overlay"/);
+});
+
+test("going home keeps the conversation; starting a new one asks first", () => {
+  // The menu has both: "Chat" returns, "New chat" clears — and only clearing
+  // asks, because only clearing loses something.
+  const menu = html.slice(html.indexOf('id="app-menu"'), html.indexOf('id="history-overlay"'));
+  assert.match(menu, /data-menu-view="ask"[^>]*>[\s\S]{0,120}<span>Chat<\/span>/);
+  assert.match(menu, /data-menu-action="new-chat"/);
+  assert.match(app, /const asked = hasConversation\(state\.messages\);/);
+  assert.match(app, /title: "Start a new chat\?"/);
+  assert.match(app, /message: "The conversation on this device is cleared/);
 });

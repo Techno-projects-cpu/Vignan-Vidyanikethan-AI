@@ -140,7 +140,8 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | # | Check | P | T | L |
 | --- | --- | --- | --- | --- |
 | 5.6 | The app opens on a chat: greeting, four chips, a question box. No sidebar, no top bar, no numbered header | ☐ | ☐ | ☐ |
-| 5.7 | The logo sits in the bottom-left corner, is 44px, and opens the menu with account, history, library, quiz, exams, flashcards, progress, friends, Study Hall, play, settings, install and theme | ☐ | ☐ | ☐ |
+| 5.7 | The logo sits in the bottom-left corner, is 44px, and opens the menu with account, chat, history, library, quiz, exams, flashcards, progress, friends, Study Hall, play, settings, install and theme | ☐ | ☐ | ☐ |
+| 5.7b | In Library, **Chat** returns to the conversation with every message intact; **New chat** asks before clearing it | ☐ | ☐ | ☐ |
 | 5.8 | On a phone the question box sits **above** the logo, so neither covers the other, and the menu opens as a bottom sheet | ☐ | ☐ | ☐ |
 | 5.9 | The **+** beside the question box opens the sheet; **Upload a textbook** opens the file picker without visiting Settings, and the book answers questions afterwards | ☐ | ☐ | ☐ |
 | 5.10 | **Fetch a website** reads a public page, the question box is pre-filled about it, and the answer is labelled outside your textbooks | ☐ | ☐ | ☐ |
@@ -186,5 +187,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (535 checks) plus
+The quickest regression test for a UI fix is `npm test` (536 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.

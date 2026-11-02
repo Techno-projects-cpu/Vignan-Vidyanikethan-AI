@@ -5,9 +5,9 @@
  * and tabs that scroll sideways instead of wrapping.
  */
 
-import * as ui from "./ui.js?v=47";
-import { onSocialChange, social, socialState, syncSocial } from "./social.js?v=47";
-import { AVATAR_PATTERNS, avatarSeed, decorateAvatar } from "./avatars.js?v=47";
+import * as ui from "./ui.js?v=48";
+import { onSocialChange, social, socialState, syncSocial } from "./social.js?v=48";
+import { AVATAR_PATTERNS, avatarSeed, decorateAvatar } from "./avatars.js?v=48";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];

@@ -3,9 +3,9 @@
  * PDF text extraction uses a vendored copy of PDF.js so it also works offline.
  */
 
-import { buildBookIndex } from "./retrieval.js?v=47";
-import { cleanPageText, detectHeading } from "./text.js?v=47";
-import { uid } from "./util.js?v=47";
+import { buildBookIndex } from "./retrieval.js?v=48";
+import { cleanPageText, detectHeading } from "./text.js?v=48";
+import { uid } from "./util.js?v=48";
 
 const PDF_BASE = new URL("../vendor/pdfjs/", import.meta.url).href;
 const MAX_PDF_PAGES = 800;
