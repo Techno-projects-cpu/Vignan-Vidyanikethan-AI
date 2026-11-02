@@ -118,8 +118,10 @@ error. A funded team covers far more ground; this one goes deeper on less.
 | Back to top | Appears only after you have scrolled 480px **and** there is still 320px below you, so it never covers the reading you are about to do, never appears at the top of the page, and never sits uselessly at the end. It respects reduced motion, and on a phone it becomes a 44px square that sits above the tab bar. |
 | Keyboard shortcuts | `Ctrl/⌘ + K` opens the menu, `/` jumps to the question box, `?` opens a shortcuts sheet, `Esc` closes the sheet then the menu, `Enter` sends and `Shift + Enter` starts a new line. None of them fire while you are typing in a field — that check is one tested function, not a hope — and `Esc` is the only one that still works inside one. The sheet is generated from the same list the code reads, so it can never advertise a key that does nothing. |
 | A composer that grows | The question box was two fixed rows, so a long question scrolled inside a box the size of a business card. It now measures what is in it, grows to a ceiling of eight rows (five on a phone), and then scrolls with a solid bottom edge so Send never leaves the screen. Sending resets it, and a prefilled question — a starting block, a shared link, a page from the reader — arrives at the right height. |
-| Offline mode, that actually means it | A switch in Settings → App, updates & offline. When it is on there are no update checks and no banner, no web fallback, and no account, friends, chat or leaderboard calls — the answer comes only from the pages on the device, which is what a demo with bad Wi-Fi needs. The switch does not erase the student's web preference: turning it off restores exactly what they had chosen. The chip in the top bar says "Offline mode" while it is on. |
-| A banner that stops asking | "Later" used to hide the banner until the next page load, so the same release greeted the student again on every visit. The postponement is now remembered per release, and the banner never appears while offline mode is on or while the browser is offline. |
+| Offline mode, that actually means it | A switch in Settings → App & offline. When it is on there is no web fallback, and no account, friends, chat or leaderboard calls — the answer comes only from the pages on the device, which is what a demo with bad Wi-Fi needs. The switch does not erase the student's web preference: turning it off restores exactly what they had chosen. The chip in the top bar says "Offline mode" while it is on. |
+| A release that arrives by itself | The permission banner is gone, by the student's own decision: publishing is the whole gesture. The worker takes over immediately and the page reloads once, except while an answer is being written — that one case waits for the answer, then reloads. There is no button, no "Later", and no setting that can pin a device to an old release. |
+| Enter that does not send too early | The composer sent on any unguarded Enter, which in Hindi, Telugu, Japanese, Korean — or with any phone keyboard showing word suggestions — is the key that confirms the word being composed. Pressing it asked a half-finished word as a question. It now checks `isComposing` and the older 229 code, so only a real Enter sends; `Shift + Enter` still starts a new line. |
+| A shortcuts sheet you can leave | `?` opened the sheet and moved focus into it, but closing it dropped focus on the page body, so the next Tab started from the top of the document. Focus now returns to whatever had it, and Tab/Shift+Tab stay inside the sheet instead of walking into the page behind it. |
 | A crash between the answer and its sources | Since 2.11.0 the source card was assembled one line above the row it was assembling, so every cited answer drew a card that threw `cannot access 'actions' before initialization`. The throw was caught by the ask handler, so a student saw a correct answer followed by "I could not complete that answer". One line, fixed; and because no test had ever asked the app a question end to end, `tests/render-order.test.mjs` now fails the build if any element is appended before it is declared, and a headless run asks three real questions and checks the answer, its citations and the absence of the false failure.
 | Answers a visitor would actually ask | The offline engine is scored against thirty-one ordinary questions on every build (`tests/answer-bench.test.mjs`), and each one must be answered from a page carrying the question's own topic. Writing that list found two defects that reading the code had not: "what is photosynthesis and why does it matter" was answered from a chemistry page about *matter*, and "how does a transformer work" from a chapter about *work*. Retrieval now strips pronoun tails, weights topic words by how rare they are in the library, prefers the page that names most of the question, refuses when the topic is nowhere in the library, and matches "digestive" to "digestion" rather than refusing a correct page. The starter shelf grew from 41 to 49 original pages so ordinary questions have somewhere to land.
 | Markup that cannot leak | A duplicated block of four screens, with one opening tag that had lost its `<section class="view"` prefix, shipped from 2.8.0 to 2.12.0: the fragment `id="view-friends" data-panel="friends">` was printed on every screen, and six element ids existed twice. Both are gone, and three tests now fail the build if either returns: unique ids in every page, no visible text that reads like markup, one screen per navigation item with balanced tags.
@@ -413,21 +415,25 @@ do not contain it, Pro Mode says so too. Reduced-motion users get a cross-fade
 instead of the animation. `js/pro-mode.js` is pure logic, `js/pro-ui.js` runs
 the sequence, and `styles-pro.css` styles it.
 
-### Updates happen only with permission
+### Publishing is the whole gesture
 
-The service worker no longer swaps itself in. A new release installs, then
-**waits**; the page shows a banner — *"A new version is ready · your books, decks
-and chats stay on this device"* — with **Update now** and **Later**. Update now
-posts `SKIP_WAITING`, waits for the worker to take control, then reloads in
-place. Later leaves the lesson untouched.
+There is no update button, no banner and no "Later". A new release installs, the
+worker takes over immediately (`skipWaiting`, then `clients.claim`), and the page
+reloads itself once. Publishing reaches every device the next time it is open —
+which is how a website is supposed to behave, and the reason the old permission
+dance was removed: it only ever existed for offline users, and it slowed *them*
+down rather than helping.
 
-Checks run when the app comes back online, when the tab is shown again, and on a
-slow timer; they are skipped silently when the device is offline.
-`Settings → App, updates & offline` shows the current release, the last check
-time, a **Check for updates** button and an **offline readiness** button.
+One courtesy is kept, and it is a two-second delay rather than a question: a
+reload never lands while an answer is being written. The watcher waits for the
+answer to finish, then reloads. A hidden tab reloads at once.
 
-- `js/updates.js` — `parseCacheVersion`, `isNewer`, `checkForUpdate`, `applyUpdate`, `startUpdateWatch`
-- The worker's message handler is the only thing that calls `skipWaiting()`
+`Settings → App & offline` shows the current release, whether the offline copy is
+complete, and a **Check offline readiness** button. That is all that card does
+now: there is nothing to press to get a new version.
+
+- `js/updates.js` — `parseCacheVersion`, `isNewer`, `shouldReloadNow`, `startUpdateWatch`
+- `sw.js` — the only thing that calls `skipWaiting()`, in `install`
 
 ### Testing the offline version
 
@@ -460,7 +466,7 @@ new module is missing from the cache — this is exactly how `updates.js` and
 **By hand, in the browser.**
 
 1. Open the deployed app once while online and wait a few seconds.
-2. Go to **Settings → App, updates & offline** and press **Check offline
+2. Go to **Settings → App & offline** and press **Check offline
    readiness**. It should read *Ready · N/N files*.
 3. Open DevTools → Network → **Offline** (or switch the phone to aeroplane mode
    and reload).
@@ -669,7 +675,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-524 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, response compression (encoding negotiation, cache keys, and a spawned server proving a page arrives smaller and decodes back to the same bytes), the reading-position and shortcut arithmetic, the growing composer, and the server's security posture.
+525 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, response compression (encoding negotiation, cache keys, and a spawned server proving a page arrives smaller and decodes back to the same bytes), the reading-position and shortcut arithmetic, the growing composer, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 

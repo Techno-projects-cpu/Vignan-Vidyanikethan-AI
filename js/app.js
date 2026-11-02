@@ -6,50 +6,48 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=44";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=44";
-import { ingestPdf, ingestText } from "./ingest.js?v=44";
-import { splitSentences } from "./text.js?v=44";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=44";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=44";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=44";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=44";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=44";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=44";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=44";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=44";
+import * as db from "./db.js?v=45";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=45";
+import { ingestPdf, ingestText } from "./ingest.js?v=45";
+import { splitSentences } from "./text.js?v=45";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=45";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=45";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=45";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=45";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=45";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=45";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=45";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=45";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=44";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=44";
-import {
-  RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=44";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=44";
+} from "./pro-mode.js?v=45";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=45";
+import { RELEASE, startUpdateWatch } from "./updates.js?v=45";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=45";
 import {
   SHORTCUTS,
   fitComposerHeight,
+  focusableWithin,
+  nextFocusTarget,
   prefersReducedMotion,
+  shouldSendOnEnter,
   readingState,
   shouldShowToTop,
   shortcutForKey,
   windowScrollState,
-} from "./viewport.js?v=44";
+} from "./viewport.js?v=45";
 import {
   OFFLINE_MODE_LABEL,
   OFFLINE_MODE_NOTE,
-  deferVersion,
-  deferredVersion,
   isOfflineMode,
   networkAllowed,
   setOfflineMode,
-  shouldAnnounceUpdate,
-} from "./offline-mode.js?v=44";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=44";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=44";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=44";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=44";
+} from "./offline-mode.js?v=45";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=45";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=45";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=45";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=45";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -57,8 +55,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=44";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=44";
+} from "./llm.js?v=45";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=45";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -70,7 +68,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=44";
+} from "./local-ai.js?v=45";
 import {
   EXAMS,
   MODES,
@@ -85,12 +83,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=44";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=44";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=44";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=44";
-import { TASKS } from "./model-router.js?v=44";
-import { PROVIDERS, providerList } from "./providers.js?v=44";
+} from "./exam-packs.js?v=45";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=45";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=45";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=45";
+import { TASKS } from "./model-router.js?v=45";
+import { PROVIDERS, providerList } from "./providers.js?v=45";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -99,30 +97,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=44";
-import { parseApiKeys } from "./key-pool.js?v=44";
+} from "./settings.js?v=45";
+import { parseApiKeys } from "./key-pool.js?v=45";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=44";
+} from "./student-keys.js?v=45";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=44";
+} from "./quiz.js?v=45";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=44";
+} from "./flashcards.js?v=45";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=44";
+} from "./study-decks.js?v=45";
 import {
   accuracy,
   currentStreak,
@@ -133,16 +131,16 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=44";
-import { externalSearchUrl, searchWeb } from "./web.js?v=44";
-import { openEditStudio } from "./edit-studio.js?v=44";
-import { openReader } from "./reader.js?v=44";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=44";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=44";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=44";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=44";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=44";
-import * as ui from "./ui.js?v=44";
+} from "./progress.js?v=45";
+import { externalSearchUrl, searchWeb } from "./web.js?v=45";
+import { openEditStudio } from "./edit-studio.js?v=45";
+import { openReader } from "./reader.js?v=45";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=45";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=45";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=45";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=45";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=45";
+import * as ui from "./ui.js?v=45";
 import {
   clearReferral,
   getLeaderboard,
@@ -152,8 +150,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=44";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=44";
+} from "./auth.js?v=45";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=45";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -161,12 +159,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=44";
-import { initMotion, revealVisible } from "./motion.js?v=44";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=44";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=44";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=44";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=44";
+} from "./premium-ui.js?v=45";
+import { initMotion, revealVisible } from "./motion.js?v=45";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=45";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=45";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=45";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=45";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -201,8 +199,6 @@ const state = {
   mode: "answer",
   currentView: "ask",
   lastAnswer: {},
-  updateStatus: { status: "unsupported", remote: "" },
-  lastUpdateCheck: "",
   selectedFile: null,
   askBusy: false,
   linkContext: null,
@@ -236,8 +232,6 @@ const state = {
   authAvailable: false,
   serverLeaderboard: [],
   referral: "",
-  // The release the banner is offering, so "Later" can remember this version.
-  pendingUpdate: "",
   bound: false,
 };
 
@@ -269,8 +263,6 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     try { mirroredStyle = localStorage.getItem(STYLE_MIRROR_KEY) || ""; } catch { /* private mode */ }
     applyStyle(isKnownStyle(mirroredStyle) ? mirroredStyle : state.settings.style, { save: false, remember: false });
     setProChrome(Boolean(state.settings.pro));
-    state.updateStatus = { status: "unsupported", remote: "" };
-    state.lastUpdateCheck = "";
     await reloadIndexes();
     await ensureStarterShelf();
     if (!state.messages.length) addWelcomeMessage();
@@ -374,63 +366,26 @@ function registerServiceWorker() {
   }
 }
 
-/** Show the update banner; never swap a release under a student mid-lesson. */
-function showUpdateBanner({ remote = "" } = {}) {
-  const banner = $("#update-banner");
-  if (!banner) return;
-  // "Later" means later: a release the student postponed does not come back on
-  // the next page load, and offline mode has nothing to offer it anyway.
-  const allowed = shouldAnnounceUpdate({
-    remote,
-    release: RELEASE,
-    deferred: deferredVersion(),
-    offlineMode: Boolean(state.settings?.offlineMode),
-    online: navigator.onLine !== false,
-  });
-  if (!allowed) return;
-  state.pendingUpdate = remote || RELEASE;
-  const detail = $("#update-detail");
-  if (detail) detail.textContent = updateBannerText({ current: RELEASE, remote });
-  banner.hidden = false;
-  document.body.classList.add("has-update");
-}
-
-function hideUpdateBanner() {
-  const banner = $("#update-banner");
-  if (banner) banner.hidden = true;
-  document.body.classList.remove("has-update");
-}
-
+/**
+ * Releases arrive on their own.
+ *
+ * The worker takes over as soon as it is installed (sw.js) and this reloads the
+ * page once — but not while an answer is being written, because a reload would
+ * throw away the question the student just asked. There is nothing to press:
+ * Settings has no update button, and no banner ever appears.
+ */
 function watchForUpdates(registration) {
-  if (state.settings?.offlineMode) {
-    updateLastCheckLabel("Offline mode — update checks are off");
-    return;
-  }
-  // updates.js reads this so a background check cannot slip past offline mode.
-  globalThis.__vignanOfflineMode = () => Boolean(state.settings?.offlineMode);
   startUpdateWatch(registration, {
-    onAvailable: ({ remote }) => showUpdateBanner({ remote }),
-    onStatus: (result) => {
-      state.updateStatus = result;
-      renderAppVersion();
-    },
+    shouldWait: () => Boolean(state.askBusy),
   });
-  updateLastCheckLabel("Checked on load");
 }
 
+/** The version row in Settings. Honest, and the only place a release is named. */
 function renderAppVersion() {
   const version = $("#app-version");
   if (version) version.textContent = `Release ${RELEASE}`;
   const offline = $("#app-offline-state");
   if (offline && !offline.dataset.checked) offline.textContent = state.settings ? "Checking…" : "—";
-  const last = $("#app-last-check");
-  if (last && state.lastUpdateCheck) last.textContent = state.lastUpdateCheck;
-}
-
-function updateLastCheckLabel(text) {
-  state.lastUpdateCheck = text;
-  const node = $("#app-last-check");
-  if (node) node.textContent = text;
 }
 
 /** The "Check offline readiness" button: counts what the worker really stored. */
@@ -448,7 +403,7 @@ async function checkOfflineReadiness({ announce = true } = {}) {
   }
   if (announce) {
     ui.showToast(report.summary, report.ready ? "success" : "warning", 6000);
-    const result = $("#update-result");
+    const result = $("#offline-check-result");
     if (result) {
       result.textContent = report.ready
         ? `${report.summary} Answers, study sheets, revision and quizzes work with the network off.`
@@ -458,51 +413,14 @@ async function checkOfflineReadiness({ announce = true } = {}) {
   return report;
 }
 
-async function runUpdateCheck({ userInitiated = false } = {}) {
-  const result = $("#update-result");
-  if (navigator.onLine === false) {
-    if (userInitiated) ui.showToast(updateStatusLabel("offline"), "warning", 5000);
-    if (result) result.textContent = updateStatusLabel("offline");
-    return;
-  }
-  if (result) result.textContent = "Checking…";
-  if (state.settings?.offlineMode) {
-    updateLastCheckLabel("Offline mode — update checks are off");
-    if (result) result.textContent = "Offline mode is on, so there is nothing to check.";
-    if (userInitiated) ui.showToast("Offline mode is on. Turn it off in Settings to check for a new version.", "info", 4500);
-    return;
-  }
-  const outcome = swRegistration
-    ? await checkForUpdate(swRegistration)
-    : { status: "unsupported", remote: "" };
-  updateLastCheckLabel(new Date().toLocaleTimeString());
-  if (outcome.status === "available") {
-    showUpdateBanner({ remote: outcome.remote });
-    if (result) result.textContent = updateStatusLabel("available");
-    if (userInitiated) ui.showToast("A new version is ready — use Update now.", "info", 5000);
-    return;
-  }
-  if (result) result.textContent = updateStatusLabel(outcome.status);
-  if (userInitiated) ui.showToast(updateStatusLabel(outcome.status), outcome.status === "current" ? "success" : "warning", 4500);
-}
-
-async function takeUpdate() {
-  if (!swRegistration) {
-    location.reload();
-    return;
-  }
-  ui.showToast("Updating — the page will reload.", "info", 3000);
-  await applyUpdate(swRegistration);
-}
-
 /* ------------------------------------------------------------- navigation */
 
 function setView(view, { skipHistory = false } = {}) {
   if (!VIEW_META[view]) view = "ask";
+  if (view !== state.currentView) rememberScroll();
   if (view === "settings") {
     renderAppVersion();
     void checkOfflineReadiness({ announce: false });
-    void runUpdateCheck();
   }
   state.currentView = view;
   $$(".view").forEach((panel) => panel.classList.toggle("active", panel.dataset.panel === view));
@@ -574,10 +492,22 @@ function currentScroll() {
   return scroller ? scroller.scrollTop : window.scrollY || 0;
 }
 
+/**
+ * Remember where the screen being left was.
+ *
+ * This has to run *before* `state.currentView` changes. It used to be inside
+ * `restoreScroll`, which is called after the switch, so `previous` was already
+ * the incoming screen: every switch saved the old page's offset under the new
+ * page's name and then scrolled straight back to it — memory that could only
+ * ever remember the screen you had just left.
+ */
+function rememberScroll() {
+  const leaving = state.currentView;
+  if (leaving) scrollMemory.set(leaving, currentScroll());
+}
+
 function restoreScroll(view) {
   const scroller = mainScrollTop();
-  const previous = state.currentView;
-  if (previous) scrollMemory.set(previous, currentScroll());
   const top = scrollMemory.get(view) || 0;
   const scrollTo = () => {
     if (scroller) scroller.scrollTop = top;
@@ -670,10 +600,18 @@ function renderShortcuts() {
   }
 }
 
+/** Where focus was before the sheet opened, so it can be given back. */
+let shortcutReturnFocus = null;
+
 function openShortcuts() {
   const overlay = $("#shortcuts-overlay");
   if (!overlay) return;
   renderShortcuts();
+  // The element itself, not a check against the global element constructor:
+  // that name does not exist everywhere this app runs, and a <body> is not a
+  // useful place to return focus to.
+  const active = document.activeElement;
+  shortcutReturnFocus = active && active !== document.body && typeof active.focus === "function" ? active : null;
   overlay.hidden = false;
   overlay.setAttribute("aria-hidden", "false");
   document.body.classList.add("shortcuts-open");
@@ -686,7 +624,26 @@ function closeShortcuts() {
   overlay.hidden = true;
   overlay.setAttribute("aria-hidden", "true");
   document.body.classList.remove("shortcuts-open");
+  // Focus goes back where it came from. Without this a keyboard user who
+  // pressed "?" and Escape was left with no focus ring and no idea where they
+  // were, and the next Tab started from the top of the document.
+  const target = shortcutReturnFocus;
+  shortcutReturnFocus = null;
+  if (target?.isConnected) target.focus({ preventScroll: true });
+  else $("#ask-input")?.focus({ preventScroll: true });
   return true;
+}
+
+/** Tab and Shift+Tab stay inside the open sheet. */
+function trapShortcutsFocus(event) {
+  const panel = $(".shortcuts-panel");
+  if (!panel || event.key !== "Tab") return;
+  const items = focusableWithin(panel);
+  const next = nextFocusTarget({ items, active: document.activeElement, shift: event.shiftKey });
+  if (next) {
+    event.preventDefault();
+    next.focus();
+  }
 }
 
 /**
@@ -699,6 +656,7 @@ function closeShortcuts() {
 function initShortcuts() {
   document.addEventListener("keydown", (event) => {
     if (event.defaultPrevented) return;
+    if (!$("#shortcuts-overlay")?.hidden) trapShortcutsFocus(event);
     const action = shortcutForKey(event);
     if (!action) return;
     if (action === "escape") {
@@ -5040,7 +4998,7 @@ function renderOfflineMode() {
   if (toggle) toggle.checked = on;
   const note = $("#offline-mode-note");
   if (note) {
-    note.textContent = on ? OFFLINE_MODE_NOTE : "Off. The app uses the network when it helps: update checks, web fallback, friends and the leaderboard.";
+    note.textContent = on ? OFFLINE_MODE_NOTE : "Off. The app uses the network when it helps: web fallback, friends and the leaderboard.";
     note.classList.toggle("on", on);
   }
   const chip = $("#offline-mode-chip");
@@ -5068,10 +5026,6 @@ function renderOfflineMode() {
 async function setOfflineModeOn(on) {
   state.settings.offlineMode = Boolean(on);
   setOfflineMode(Boolean(on));
-  if (on) {
-    hideUpdateBanner();
-    setOfflineMode(Boolean(on));
-  }
   renderOfflineMode();
   renderWebChoice();
   updateStatus();
@@ -5082,8 +5036,8 @@ async function setOfflineModeOn(on) {
   }
   ui.showToast(
     on
-      ? "Offline mode is on: answers come from this device only, and update checks are paused."
-      : "Offline mode is off: outside search, friends and update checks are available again.",
+      ? "Offline mode is on: answers come from this device only, and nothing leaves the device."
+      : "Offline mode is off: outside search, friends and the leaderboard are available again.",
     on ? "success" : "info",
     5200,
   );
@@ -5268,7 +5222,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=44");
+            const { social } = await import("./social.js?v=45");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -5732,16 +5686,7 @@ function bindEvents() {
     if (button) button.click();
     else window.dispatchEvent(new CustomEvent("vignan:command-menu"));
   });
-  $("#update-now")?.addEventListener("click", () => { void takeUpdate(); });
-  $("#update-later")?.addEventListener("click", () => {
-    // Remembered, so the same release does not greet the student again on the
-    // next page load. A newer release gets its own chance.
-    deferVersion(state.pendingUpdate || RELEASE);
-    hideUpdateBanner();
-    ui.showToast("Fine — it will wait, and it will not ask again for this version. Update from Settings whenever you like.", "info", 4200);
-  });
   $("#offline-mode")?.addEventListener("change", (event) => void setOfflineModeOn(event.target.checked));
-  $("#check-updates")?.addEventListener("click", () => { void runUpdateCheck({ userInitiated: true }); });
   $("#run-offline-check")?.addEventListener("click", () => { void checkOfflineReadiness(); });
 
   $("#ask-form").addEventListener("submit", handleAsk);
@@ -5751,7 +5696,10 @@ function bindEvents() {
   $("#ask-input").addEventListener("input", queueComposerFit);
   $("#ask-input").addEventListener("paste", queueComposerFit);
   $("#ask-input").addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+    // Enter sends — unless it belongs to a keyboard that is still composing a
+    // word, which is every Hindi, Telugu, Japanese and suggestion-bar keyboard.
+    // Without this, the confirm key asked a half-finished word as a question.
+    if (shouldSendOnEnter(event)) {
       event.preventDefault();
       $("#ask-form").requestSubmit();
     }

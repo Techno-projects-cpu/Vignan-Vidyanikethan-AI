@@ -143,3 +143,55 @@ export function fitComposerHeight(
   const rows = Math.min(maxRows, Math.max(minRows, Math.ceil(needed / line)));
   return { height: rows * line + edge, rows, capped: Math.ceil(needed / line) > maxRows };
 }
+
+/**
+ * Is this Enter press the student's, or their keyboard's?
+ *
+ * With an IME — Hindi, Telugu, Japanese, Korean, and every phone keyboard that
+ * offers word suggestions — Enter confirms the candidate the student is
+ * composing. Sending on that keystroke would ask a half-finished word as a
+ * question. `isComposing` is the standard signal; keyCode 229 is the older one
+ * Safari and some Android keyboards still use.
+ */
+export function isComposingEnter(event = {}) {
+  if (event.isComposing) return true;
+  // Older Safari and several Android keyboards report the composition key as 229.
+  return event.keyCode === 229 || event.which === 229 || event.key === "Process";
+}
+
+/** Should this keydown send the question? */
+export function shouldSendOnEnter(event = {}) {
+  if (event.key !== "Enter") return false;
+  if (event.shiftKey) return false;
+  return !isComposingEnter(event);
+}
+
+/** Everything inside `root` that the Tab key can land on, in document order. */
+export function focusableWithin(root) {
+  if (!root?.querySelectorAll) return [];
+  const selector = [
+    "a[href]", "button:not([disabled])", "input:not([disabled])", "select:not([disabled])",
+    "textarea:not([disabled])", '[tabindex]:not([tabindex="-1"])',
+  ].join(",");
+  return [...root.querySelectorAll(selector)].filter(
+    (node) => !node.hidden && node.getAttribute?.("aria-hidden") !== "true",
+  );
+}
+
+/**
+ * Where Tab should go inside a dialog.
+ *
+ * Returns the element to move focus to, or null to let the browser handle it.
+ * Without this, Tab walks out of the sheet and into the page behind it, so a
+ * keyboard user ends up typing into a screen they cannot see.
+ */
+export function nextFocusTarget({ items = [], active = null, shift = false } = {}) {
+  if (!items.length) return null;
+  const first = items[0];
+  const last = items[items.length - 1];
+  const index = items.indexOf(active);
+  if (index === -1) return shift ? last : first;
+  if (shift && index === 0) return last;
+  if (!shift && index === items.length - 1) return first;
+  return null;
+}

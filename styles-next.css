@@ -1710,7 +1710,10 @@ body.premium-ui [hidden] {
 
 /* A shortcut row lights up under the pointer, so the list reads as seven
    separate things rather than one block of monospace. */
+/* Rows keep their hairline rhythm and still offer a finger-sized band. */
 .shortcut-row {
+  align-items: center;
+  min-height: 44px;
   padding: 6px 4px;
   margin: 0 -4px;
   transition: background var(--vn-fast) var(--vn-ease);

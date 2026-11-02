@@ -1,20 +1,24 @@
 /**
- * Update handling for the installed app.
+ * Releases are applied, not offered.
  *
- * The service worker no longer swaps itself in silently: a new worker installs,
- * then waits. The page decides when to take it — the student taps "Update now",
- * or keeps working and updates later. Everything here degrades quietly when the
- * browser has no service worker (Safari private mode, file://, older browsers).
+ * A new worker installs, takes over immediately (`skipWaiting` in sw.js) and the
+ * page reloads once, by itself. There is no banner, no "Later", no setting to
+ * press: publishing a release is the whole gesture, and every open tab picks it
+ * up within a minute.
  *
- * The pure helpers are exported so they can be tested without a browser.
+ * One thing is still respected — a student is never reloaded in the middle of a
+ * question. The watcher waits for the answer to finish (a couple of seconds),
+ * then reloads. That is a delay, not a permission prompt.
+ *
+ * Everything here degrades quietly when the browser has no service worker
+ * (Safari private mode, file://, older browsers): the page still loads the new
+ * release on its next visit, because the app is served network-first.
  */
 
-/** Release the page itself was loaded from: "./js/app.js?v=44" → "33". */
+/** Release the page itself was loaded from: "./js/app.js?v=45" → "45". */
 export const RELEASE = new URL(import.meta.url).searchParams.get("v") || "dev";
 
-const CACHE_PREFIX = "vignan-vidyanikethan-ai-v";
-
-/** "const CACHE_NAME = \"vignan-vidyanikethan-ai-v33\"" → "33". */
+/** "const CACHE_NAME = \"vignan-vidyanikethan-ai-v45\"" → "45". */
 export function parseCacheVersion(source = "") {
   const match = String(source || "").match(/vignan-vidyanikethan-ai-v(\d+)/);
   return match ? match[1] : "";
@@ -28,129 +32,78 @@ export function isNewer(remote, current) {
   return next > now;
 }
 
-/** The sentence shown in the update banner. Kept pure so it can be tested. */
-export function updateBannerText({ current = RELEASE, remote = "" } = {}) {
-  const versions = remote && remote !== current ? ` · ${current} → ${remote}` : "";
-  return `A new version is ready${versions}. Your books, decks and chats stay on this device.`;
+/**
+ * May the page reload right now?
+ *
+ * Only one reason to say no: an answer is being written and reloading would
+ * throw it away. `busy` covers that. Hidden tabs reload instantly — nobody is
+ * reading them.
+ */
+export function shouldReloadNow({ busy = false } = {}) {
+  return !busy;
 }
 
 /**
- * Read the worker's cache version from the server. Cache-busted, and never
- * allowed to throw: offline simply means "no answer".
+ * Watch the worker and reload once a new release takes control.
+ *
+ * `shouldWait()` is asked at the moment control changes; if it says yes, the
+ * watcher tries again shortly, so the update still lands without being asked.
+ *
+ * @returns {() => void} stop watching
  */
-export async function fetchRemoteVersion(fetchImpl = globalThis.fetch) {
-  try {
-    const response = await fetchImpl(`./sw.js?check=${Date.now()}`, { cache: "no-store" });
-    if (!response?.ok) return { ok: false, version: "", reason: "unreachable" };
-    return { ok: true, version: parseCacheVersion(await response.text()), reason: "" };
-  } catch {
-    return { ok: false, version: "", reason: "offline" };
-  }
-}
-
-/**
- * Ask the browser to look for a new worker.
- * @returns {Promise<{status:'updated'|'available'|'current'|'offline'|'unsupported', remote:string}>}
- */
-export async function checkForUpdate(
+export function startUpdateWatch(
   registration,
-  { online = globalThis.navigator?.onLine !== false, offlineMode = false } = {},
+  { container = globalThis, retryMs = 2000, shouldWait = () => false } = {},
 ) {
-  if (!registration) return { status: "unsupported", remote: "" };
-  // Offline mode is a promise to the student, not a hint: no request is made.
-  if (offlineMode) return { status: "offline", remote: "", reason: "offline-mode" };
-  if (!online) return { status: "offline", remote: "" };
-  const remote = await fetchRemoteVersion();
-  try {
-    await registration.update();
-  } catch {
-    return { status: remote.ok ? "current" : "offline", remote: remote.version };
-  }
-  if (registration.waiting || registration.installing) {
-    return { status: "available", remote: remote.version };
-  }
-  if (remote.ok && isNewer(remote.version, RELEASE)) return { status: "available", remote: remote.version };
-  return { status: "current", remote: remote.version };
-}
-
-/**
- * Hand control to the waiting worker and reload once it takes over.
- * Resolves after the reload is requested; the page may disappear first.
- */
-export async function applyUpdate(registration, { reload = true, container = globalThis } = {}) {
-  const waiting = registration?.waiting;
-  if (!waiting) return false;
-  await new Promise((resolve) => {
-    const timer = container.setTimeout(resolve, 3000);
-    const onChange = () => {
-      container.clearTimeout(timer);
-      container.navigator?.serviceWorker?.removeEventListener?.("controllerchange", onChange);
-      resolve();
-    };
-    container.navigator?.serviceWorker?.addEventListener?.("controllerchange", onChange);
-    waiting.postMessage({ type: "SKIP_WAITING" });
-  });
-  if (reload) container.location?.reload?.();
-  return true;
-}
-
-/**
- * Watch for updates: when the app comes back online, when the tab is shown, and
- * on a slow timer. Calls `onAvailable({ remote, registration })` at most once
- * per version so the banner does not nag.
- */
-export function startUpdateWatch(registration, { onAvailable, onStatus, intervalMs = 30 * 60 * 1000, container = globalThis } = {}) {
   if (!registration) return () => {};
-  let announced = "";
+  const workers = container.navigator?.serviceWorker;
+  if (!workers?.addEventListener) return () => {};
+
+  let reloading = false;
+  let retryTimer = 0;
   let stopped = false;
+  let hadController = Boolean(workers.controller);
 
-  const announce = async (remote = "") => {
-    if (stopped) return;
-    const key = remote || "waiting";
-    if (announced === key) return;
-    announced = key;
-    onAvailable?.({ remote, registration });
+  const reload = () => {
+    if (stopped || reloading) return;
+    if (!shouldReloadNow({ busy: shouldWait() })) {
+      container.clearTimeout?.(retryTimer);
+      retryTimer = container.setTimeout(reload, retryMs);
+      return;
+    }
+    reloading = true;
+    container.location?.reload?.();
   };
 
-  const look = async () => {
-    const result = await checkForUpdate(registration, {
-      online: container.navigator?.onLine !== false,
-      offlineMode: container.__vignanOfflineMode?.() ?? false,
-    });
-    onStatus?.(result);
-    if (result.status === "available") await announce(result.remote);
-    return result;
+  const onControlChange = () => {
+    // The first controller of a fresh install is not an update: the page in
+    // front of the student is already the new release.
+    if (!hadController) {
+      hadController = true;
+      return;
+    }
+    reload();
   };
 
-  // A worker that is already waiting (for example after a reload) counts too.
-  if (registration.waiting) announce("");
-  registration.addEventListener?.("updatefound", () => {
-    const worker = registration.installing;
-    worker?.addEventListener?.("statechange", () => {
-      if (worker.state === "installed" && container.navigator?.serviceWorker?.controller) announce("");
-    });
-  });
+  const onVisibility = () => {
+    if (container.document?.visibilityState === "hidden") reload();
+  };
 
-  container.addEventListener?.("online", look);
-  container.document?.addEventListener?.("visibilitychange", () => {
-    if (container.document.visibilityState === "visible") look();
-  });
-  const timer = container.setInterval(look, intervalMs);
+  const onOnline = () => {
+    // Not a promise to fetch anything: the browser decides, and offline simply
+    // means the call resolves with no new worker.
+    registration.update?.().catch?.(() => {});
+  };
+
+  workers.addEventListener("controllerchange", onControlChange);
+  container.document?.addEventListener?.("visibilitychange", onVisibility);
+  container.addEventListener?.("online", onOnline);
 
   return () => {
     stopped = true;
-    container.clearInterval(timer);
-    container.removeEventListener?.("online", look);
+    container.clearTimeout?.(retryTimer);
+    workers.removeEventListener?.("controllerchange", onControlChange);
+    container.document?.removeEventListener?.("visibilitychange", onVisibility);
+    container.removeEventListener?.("online", onOnline);
   };
-}
-
-/** Label used by the Settings card. */
-export function updateStatusLabel(status = "") {
-  switch (status) {
-    case "updated": return "Updated.";
-    case "available": return "A new version is available.";
-    case "current": return "You are on the latest version.";
-    case "offline": return "Offline — the update check needs a connection.";
-    default: return "This browser does not support app updates.";
-  }
 }

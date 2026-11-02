@@ -1,5 +1,9 @@
 /**
- * Updates with permission, and the offline readiness report.
+ * Releases are applied, and the offline readiness report.
+ *
+ * There is no permission step any more: pressing publish is the whole gesture,
+ * so these tests hold the opposite contract — the worker must take over on its
+ * own, no banner may exist, and no "Later" may come back.
  */
 
 import test from "node:test";
@@ -9,7 +13,7 @@ import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 
 import {
-  isNewer, parseCacheVersion, updateBannerText, fetchRemoteVersion, checkForUpdate, updateStatusLabel,
+  isNewer, parseCacheVersion, shouldReloadNow, startUpdateWatch,
 } from "../js/updates.js";
 import { CRITICAL_FILES, normalizeUrl, pickCacheName, runOfflineCheck, summarize } from "../js/offline-check.js";
 
@@ -27,14 +31,18 @@ test("the worker version is read from the cache name", () => {
   assert.equal(isNewer("abc", "18"), false);
 });
 
-test("the banner explains the update and promises the data stays", () => {
-  const text = updateBannerText({ current: "18", remote: "19" });
-  assert.match(text, /18 → 19/);
-  assert.match(text, /stay on this device/);
-  assert.doesNotMatch(updateBannerText({ current: "18", remote: "18" }), /→/);
-  assert.match(updateStatusLabel("available"), /new version/i);
-  assert.match(updateStatusLabel("offline"), /Offline/i);
-  assert.match(updateStatusLabel("nonsense"), /does not support/i);
+test("there is no banner, no permission and no postponement left", () => {
+  const index = read("/index.html");
+  const app = read("/js/app.js");
+  const offline = read("/js/offline-mode.js");
+  const css = read("/styles-premium.css");
+  assert.doesNotMatch(index, /update-banner/);
+  assert.doesNotMatch(index, /Update now/);
+  assert.doesNotMatch(index, /Check for updates/);
+  assert.doesNotMatch(app, /updateBannerText|applyUpdate|checkForUpdate|hideUpdateBanner|takeUpdate|deferVersion|deferredVersion/);
+  assert.doesNotMatch(offline, /deferVersion|deferredVersion|shouldAnnounceUpdate/);
+  assert.doesNotMatch(css, /update-banner/);
+  assert.doesNotMatch(offline, /vignan\.update-deferred/);
 });
 
 test("the release in the page matches the release in the worker", async () => {
@@ -47,39 +55,83 @@ test("the release in the page matches the release in the worker", async () => {
   assert.match(read("/js/app.js"), new RegExp(`updates\\.js\\?v=${swVersion}`));
 });
 
-test("an update check stays quiet when offline and never throws", async () => {
-  const registration = { update: async () => { throw new Error("should not run offline"); } };
-  assert.deepEqual(await checkForUpdate(registration, { online: false }), { status: "offline", remote: "" });
-  assert.deepEqual(await checkForUpdate(null), { status: "unsupported", remote: "" });
-
-  const offlineFetch = async () => { throw new Error("offline"); };
-  assert.deepEqual(await fetchRemoteVersion(offlineFetch), { ok: false, version: "", reason: "offline" });
-});
-
-test("a waiting worker means an update is ready, and the page decides when", async () => {
-  const registration = { waiting: { postMessage() {} }, update: async () => {} };
-  const result = await checkForUpdate(registration, { online: true });
-  assert.equal(result.status, "available");
-
-  const current = { waiting: null, installing: null, update: async () => {} };
-  const upToDate = await checkForUpdate(current, { online: true });
-  assert.equal(upToDate.status, "current");
-});
-
-test("the worker waits for permission instead of swapping itself in", () => {
+test("the worker takes over by itself, so a release reaches every device", () => {
   const sw = read("/sw.js");
-  assert.match(sw, /addEventListener\("message",[\s\S]{0,160}SKIP_WAITING[\s\S]{0,80}skipWaiting/);
-  // install must not call skipWaiting directly any more
   const installBlock = sw.slice(sw.indexOf('addEventListener("install"'), sw.indexOf('addEventListener("activate"'));
-  assert.doesNotMatch(installBlock, /await self\.skipWaiting\(\)/, "install no longer self-activates");
-  assert.match(read("/index.html"), /id="update-banner"/);
-  assert.match(read("/js/app.js"), /applyUpdate\(swRegistration\)/);
+  assert.match(installBlock, /await self\.skipWaiting\(\)/, "install activates immediately");
+  assert.doesNotMatch(sw, /SKIP_WAITING/, "nothing has to be asked for");
+  assert.match(read("/js/updates.js"), /addEventListener\("controllerchange", onControlChange\)/);
+  assert.match(read("/js/app.js"), /startUpdateWatch\(registration, \{/);
+});
+
+test("a reload waits for an answer to finish, and only for that", () => {
+  assert.equal(shouldReloadNow({}), true);
+  assert.equal(shouldReloadNow({ busy: false }), true);
+  assert.equal(shouldReloadNow({ busy: true }), false, "a question in flight is not thrown away");
+  const source = read("/js/app.js");
+  assert.match(source, /shouldWait: \(\) => Boolean\(state\.askBusy\)/);
+});
+
+test("a new controller reloads the page once, and a first install does not", () => {
+  const listeners = {};
+  const reloads = [];
+  const container = {
+    navigator: { serviceWorker: { controller: {}, addEventListener: (name, fn) => { listeners[name] = fn; }, removeEventListener() {} } },
+    document: { addEventListener() {}, removeEventListener() {}, visibilityState: "visible" },
+    addEventListener() {},
+    removeEventListener() {},
+    setTimeout: (fn) => { fn(); return 1; },
+    clearTimeout() {},
+    location: { reload: () => reloads.push("reload") },
+  };
+  const stop = startUpdateWatch({ update: async () => {} }, { container, shouldWait: () => false });
+  listeners.controllerchange();           // an update took over
+  assert.deepEqual(reloads, ["reload"]);
+  listeners.controllerchange();           // ... and must not reload twice
+  assert.deepEqual(reloads, ["reload"]);
+  stop();
+
+  // A page that never had a controller is on its first install: it is already
+  // the new release, so nothing reloads.
+  const firstListeners = {};
+  const firstReloads = [];
+  const firstContainer = {
+    navigator: { serviceWorker: { controller: null, addEventListener: (name, fn) => { firstListeners[name] = fn; }, removeEventListener() {} } },
+    document: { addEventListener() {}, removeEventListener() {}, visibilityState: "visible" },
+    addEventListener() {}, removeEventListener() {},
+    setTimeout: (fn) => { fn(); return 1; }, clearTimeout() {},
+    location: { reload: () => firstReloads.push("reload") },
+  };
+  startUpdateWatch({ update: async () => {} }, { container: firstContainer });
+  firstListeners.controllerchange();
+  assert.deepEqual(firstReloads, []);
+});
+
+test("the watcher keeps trying while an answer is being written", () => {
+  const listeners = {};
+  const reloads = [];
+  let busy = true;
+  const container = {
+    navigator: { serviceWorker: { controller: {}, addEventListener: (name, fn) => { listeners[name] = fn; }, removeEventListener() {} } },
+    document: { addEventListener() {}, removeEventListener() {}, visibilityState: "visible" },
+    addEventListener() {}, removeEventListener() {},
+    // Call the retry immediately so the test does not wait two seconds.
+    setTimeout: (fn) => { if (!busy) fn(); return 1; },
+    clearTimeout() {},
+    location: { reload: () => reloads.push("reload") },
+  };
+  startUpdateWatch({ update: async () => {} }, { container, shouldWait: () => busy });
+  listeners.controllerchange();
+  assert.deepEqual(reloads, [], "waits for the answer");
+  busy = false;
+  listeners.controllerchange();
+  assert.deepEqual(reloads, ["reload"], "and then applies it without asking");
 });
 
 test("the offline report counts what the worker really stored", () => {
   const ready = summarize({
-    expected: ["./index.html", "./js/app.js?v=44", "./styles.css"],
-    cached: ["./index.html", "./js/app.js?v=44", "./styles.css"],
+    expected: ["./index.html", "./js/app.js?v=45", "./styles.css"],
+    cached: ["./index.html", "./js/app.js?v=45", "./styles.css"],
     critical: ["./index.html"],
   });
   assert.equal(ready.total, 3);
@@ -87,7 +139,7 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(ready.summary, /Ready offline: 3 of 3/);
 
   const broken = summarize({
-    expected: ["./index.html", "./js/app.js?v=44"],
+    expected: ["./index.html", "./js/app.js?v=45"],
     cached: [],
     critical: ["./index.html"],
   });
@@ -97,8 +149,8 @@ test("the offline report counts what the worker really stored", () => {
 
   // A release is not "ready" when a file every lesson needs is missing.
   const missingShell = summarize({
-    expected: ["./index.html", "./js/app.js?v=44"],
-    cached: ["./js/app.js?v=44"],
+    expected: ["./index.html", "./js/app.js?v=45"],
+    cached: ["./js/app.js?v=45"],
     critical: CRITICAL_FILES,
   });
   assert.equal(missingShell.ready, false);
@@ -109,8 +161,8 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(nothing.summary, /Open the app once while online/);
 
   // Query strings and absolute URLs compare equal.
-  assert.equal(normalizeUrl("./js/app.js?v=44"), "js/app.js");
-  assert.equal(normalizeUrl("https://app.local/js/app.js?v=44"), "js/app.js");
+  assert.equal(normalizeUrl("./js/app.js?v=45"), "js/app.js");
+  assert.equal(normalizeUrl("https://app.local/js/app.js?v=45"), "js/app.js");
   assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v33"], "18"), "vignan-vidyanikethan-ai-v33");
 });
 
@@ -242,11 +294,12 @@ test("judge mode stays grayscale and does not overclaim", () => {
 
 test("the device checklist covers every area before a demo", () => {
   const checklist = read("/CHECKLIST.md");
-  for (const heading of ["First impression", "Books and citations", "Study loop", "Social and play", "Updates ask permission", "Offline", "Polish and trust"]) {
+  for (const heading of ["First impression", "Books and citations", "Study loop", "Social and play", "Offline", "Polish and trust"]) {
     assert.match(checklist, new RegExp(heading));
   }
   assert.match(checklist, /aeroplane mode/);
-  assert.match(checklist, /Later\*\* hides the banner/);
+  assert.match(checklist, /reloads \*\*by itself\*\*/);
+  assert.doesNotMatch(checklist, /Later\*\* hides the banner/);
 });
 
 test("the security page explains how the project's own keys are kept", () => {

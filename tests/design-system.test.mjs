@@ -148,9 +148,16 @@ test("the two faces are preloaded, not discovered late", () => {
 test("changing screen returns you to the top, and back to where you were", () => {
   // The window scrolls, not #main, so the old reset did nothing at all.
   assert.match(app, /function restoreScroll\(view\)/);
-  assert.match(app, /scrollMemory\.set\(previous, currentScroll\(\)\)/);
   assert.match(app, /window\.scrollTo\(\{ top, left: 0, behavior: "auto" \}\)/);
   assert.doesNotMatch(app, /\$\("#main"\)\.scrollTop = 0;/, "the ineffective reset is gone");
+  // The position is remembered *before* the view changes. Saving it inside
+  // restoreScroll (which runs after the switch) stored the incoming screen's
+  // offset under the incoming screen's name, and could only ever remember the
+  // page you had just left.
+  assert.match(app, /function rememberScroll\(\)\s*\{\s*\n\s*const leaving = state\.currentView;/);
+  assert.match(app, /if \(view !== state\.currentView\) rememberScroll\(\);/);
+  assert.doesNotMatch(app, /const previous = state\.currentView;/);
+  assert.ok(app.indexOf("rememberScroll()") < app.indexOf("state.currentView = view;"), "saved before the switch");
 });
 
 test("navigation tells a screen reader which screen it is", () => {

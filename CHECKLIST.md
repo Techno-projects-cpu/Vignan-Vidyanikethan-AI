@@ -98,10 +98,9 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 3.27c | On a phone the bar has Ask, Library, Quiz, Exams, Progress, More — and More opens a menu listing all ten screens | ☐ | ☐ | ☐ |
 | 3.27d | Scroll to the bottom of Settings, tap Ask, then tap Settings again: you return to where you were, not to a random offset | ☐ | ☐ | ☐ |
 | 3.27e | Tab through the page with a keyboard: every control shows a 2px outline, and the current screen is announced | ☐ | ☐ | ☐ |
-| 3.26 | Settings → App, updates & offline → switch **Offline mode** on: the chip in the top bar reads "Offline mode", the web switch is greyed out, and no update banner appears after a reload | ☐ | ☐ | ☐ |
+| 3.26 | Settings → App & offline → switch **Offline mode** on: the chip in the top bar reads "Offline mode" and the web switch is greyed out | ☐ | ☐ | ☐ |
 | 3.26b | With offline mode on, ask a question and check the network panel (or turn Wi-Fi off): no request is made, and the answer still cites your pages | ☐ | ☐ | ☐ |
-| 3.26c | Turn offline mode off: the web switch returns to whatever it was before, and "Check for updates" works again | ☐ | ☐ | ☐ |
-| 3.26d | When a new version is offered, tap **Later**, reload the page: the banner does **not** come back for that version | ☐ | ☐ | ☐ |
+| 3.26c | Turn offline mode off: the web switch returns to whatever it was before | ☐ | ☐ | ☐ |
 | 3.25 | judge.html: the "files precached" number, the sample offline output and the release number all match this build — a test runs the simulator and compares | ☐ | ☐ | ☐ |
 | 3.24 | Ask any question that finds a page: the answer appears with its source cards and **no** second bubble saying "I could not complete that answer" | ☐ | ☐ | ☐ |
 | 3.24b | Open a source card: "Read this page" and "Copy quote" are both present and work | ☐ | ☐ | ☐ |
@@ -125,15 +124,15 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 4.6 | Referral link copies and the referral is credited | ☐ | ☐ | ☐ |
 | 4.7 | Avatars stay small in every list — no layout jump when one loads | ☐ | ☐ | ☐ |
 
-## 5. Updates ask permission
+## 5. A released version reaches the device
 
 | # | Check | P | T | L |
 | --- | --- | --- | --- | --- |
-| 5.1 | Settings → *App, updates & offline* shows the current release number | ☐ | ☐ | ☐ |
-| 5.2 | **Check for updates** returns a clear message within a few seconds | ☐ | ☐ | ☐ |
-| 5.3 | When a new version exists: the banner offers **Update now** and **Later** | ☐ | ☐ | ☐ |
-| 5.4 | **Later** hides the banner and the page does **not** reload | ☐ | ☐ | ☐ |
-| 5.5 | **Update now** reloads once, and saved books/chats are still there afterwards | ☐ | ☐ | ☐ |
+| 5.1 | Settings → *App & offline* shows the current release number | ☐ | ☐ | ☐ |
+| 5.2 | There is no update button and no banner: publishing is the whole gesture | ☐ | ☐ | ☐ |
+| 5.3 | Publish a release, open the app on a phone that already has it: within a minute the page reloads **by itself** into the new release | ☐ | ☐ | ☐ |
+| 5.4 | Ask a question and publish a release while the answer is being written: the answer finishes first, then the page reloads — it is never cut off | ☐ | ☐ | ☐ |
+| 5.5 | Saved books, chats and streaks are still there after that reload | ☐ | ☐ | ☐ |
 
 ## 6. Offline — the part that matters at a science fair
 
@@ -173,5 +172,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (524 checks) plus
+The quickest regression test for a UI fix is `npm test` (525 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.

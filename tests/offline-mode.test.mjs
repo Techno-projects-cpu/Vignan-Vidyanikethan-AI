@@ -1,11 +1,13 @@
 /**
- * Offline mode, and the update banner that used to nag.
+ * Offline mode.
  *
- * Two complaints in one round: the app kept offering "A new version is ready"
- * (on every visit, because "Later" was forgotten on reload), and it had no way to
- * be *told* to work offline even though everything it needs is on the device.
+ * The app had no way to be *told* to work offline even though everything it
+ * needs is on the device. These tests cover that switch, at the level where the
+ * decisions are made: which calls are allowed, and what the student is told.
  *
- * These tests cover both, at the level where the decisions are made.
+ * The update banner these tests used to cover is gone: a release is applied by
+ * the worker itself (see tests/updates-security.test.mjs), so there is no
+ * deferral to remember and no permission to ask for.
  */
 
 import assert from "node:assert/strict";
@@ -14,17 +16,12 @@ import test from "node:test";
 
 import {
   OFFLINE_MODE_KEY,
-  UPDATE_DEFERRED_KEY,
-  deferVersion,
-  deferredVersion,
   isOfflineMode,
   networkAllowed,
   offlineRefusal,
   setOfflineMode,
-  shouldAnnounceUpdate,
 } from "../js/offline-mode.js";
 import { DEFAULT_SETTINGS, normalizeSettings } from "../js/settings.js";
-import { checkForUpdate } from "../js/updates.js";
 
 const memoryStorage = () => {
   const map = new Map();
@@ -69,31 +66,6 @@ test("a browser that blocks storage does not break the switch", () => {
   };
   assert.equal(isOfflineMode(hostile), false);
   assert.equal(setOfflineMode(true, hostile), false);
-  assert.equal(deferredVersion(hostile), "");
-  assert.equal(deferVersion("41", hostile), false);
-});
-
-test("the update banner is silent in offline mode, offline, or after Later", () => {
-  // Nothing to fetch, nothing to swap.
-  assert.equal(shouldAnnounceUpdate({ remote: "41", release: "40", offlineMode: true }), false);
-  // No connection: the check itself is what fails.
-  assert.equal(shouldAnnounceUpdate({ remote: "41", release: "40", online: false }), false);
-  // A release the student postponed stays postponed, on this visit and the next.
-  assert.equal(shouldAnnounceUpdate({ remote: "41", release: "40", deferred: "41" }), false);
-  // A genuinely newer release gets its own chance.
-  assert.equal(shouldAnnounceUpdate({ remote: "42", release: "40", deferred: "41" }), true);
-  // A waiting worker with no version is still worth mentioning, once.
-  assert.equal(shouldAnnounceUpdate({ remote: "", release: "40" }), true);
-});
-
-test("Later is remembered for one release only", () => {
-  const storage = memoryStorage();
-  assert.equal(deferredVersion(storage), "");
-  deferVersion("41", storage);
-  assert.equal(storage.getItem(UPDATE_DEFERRED_KEY), "41");
-  assert.equal(deferredVersion(storage), "41");
-  deferVersion("", storage);
-  assert.equal(deferredVersion(storage), "");
 });
 
 test("offline mode closes the network, not the study features", () => {
@@ -107,26 +79,12 @@ test("offline mode closes the network, not the study features", () => {
   assert.match(sentence, /Settings/);
 });
 
-test("a background update check makes no request in offline mode", async () => {
-  let called = false;
-  const registration = { update: async () => { called = true; }, waiting: null, installing: null };
-  const result = await checkForUpdate(registration, { offlineMode: true });
-  assert.equal(result.status, "offline");
-  assert.equal(called, false, "registration.update() is never reached");
-  assert.equal(result.reason, "offline-mode");
-});
-
 test("the app actually uses these rules", () => {
   const source = app();
   // The ask path asks the shared rule, not its own copy of it.
   assert.match(source, /networkAllowed\(\{[\s\S]{0,160}offlineMode: state\.settings\.offlineMode/);
-  // The banner consults offline mode, the deferral and the connection.
-  assert.match(source, /shouldAnnounceUpdate\(\{[\s\S]{0,200}deferred: deferredVersion\(\)/);
-  // "Later" writes the deferral instead of only hiding the banner.
-  assert.match(source, /deferVersion\(state\.pendingUpdate \|\| RELEASE\)/);
-  // Background checks stop when the mode is on.
-  assert.match(source, /watchForUpdates[\s\S]{0,200}state\.settings\?\.offlineMode/);
-  assert.match(source, /globalThis\.__vignanOfflineMode = \(\) =>/);
+  // No banner survives to consult it, so no rule may pretend otherwise.
+  assert.doesNotMatch(source, /shouldAnnounceUpdate|deferVersion|pendingUpdate/);
   // The switch is wired to the setter, and the setter persists.
   assert.match(source, /#offline-mode"\)\?\.addEventListener\("change"/);
   assert.match(source, /async function setOfflineModeOn\(on\)[\s\S]{0,300}setOfflineMode\(Boolean\(on\)\)/);
@@ -156,8 +114,12 @@ test("the switch is on screen, in plain language, in three languages", () => {
 
 test("the page says what offline mode turns off, not what breaks", () => {
   const note = readFileSync(new URL("../js/offline-mode.js", import.meta.url), "utf8");
-  assert.match(note, /no update checks, no web search, no friends or leaderboard/i);
-  assert.match(i18n(), /No update checks, no web search, no friends or leaderboard/i);
+  // The sentence must describe the switch, and must not still promise to stop
+  // update checks: there are none to stop any more, on any platform.
+  assert.match(note, /no web search, no friends or leaderboard/i);
+  assert.doesNotMatch(note, /update checks/i);
+  assert.match(i18n(), /No web search, no friends or leaderboard/i);
+  assert.doesNotMatch(i18n(), /No update checks/i, "every language dropped the claim");
   // The saved preference is not overwritten: turning the mode off restores it.
   const source = app();
   assert.match(source, /without erasing it|does not erase|restores exactly what the student had chosen/i);

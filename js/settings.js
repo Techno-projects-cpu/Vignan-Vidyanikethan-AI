@@ -1,12 +1,12 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=44";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=44";
-import { parseApiKeys } from "./key-pool.js?v=44";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=44";
-import { aiProfile } from "./ai-nicknames.js?v=44";
-import { LANGUAGE_CODES } from "./languages.js?v=44";
-import { DEFAULT_STYLE, THEMES } from "./themes.js?v=44";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=45";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=45";
+import { parseApiKeys } from "./key-pool.js?v=45";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=45";
+import { aiProfile } from "./ai-nicknames.js?v=45";
+import { LANGUAGE_CODES } from "./languages.js?v=45";
+import { DEFAULT_STYLE, THEMES } from "./themes.js?v=45";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -50,7 +50,7 @@ export const DEFAULT_SETTINGS = {
   answerDepth: "balanced",
   disclaimerSeen: false,
   freeRouterDismissed: false,
-  // Offline mode: no update checks, no web search, no account or social calls.
+  // Offline mode: no web search, no account or social calls.
   // The device-only study loop keeps working, which is what a demo needs.
   offlineMode: false,
 };

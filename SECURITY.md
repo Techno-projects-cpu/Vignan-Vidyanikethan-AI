@@ -53,6 +53,7 @@ identifiers and no data-broker integrations.
 
 ## Supported version
 
-Only the current release is supported. The app updates only when the student
-allows it; the release is shown in **Settings → App, updates & offline** and in
-the service worker cache name (`vignan-vidyanikethan-ai-v<N>`).
+Only the current release is supported. A published release is applied by the
+service worker on its own — there is no prompt and no way to stay on an older
+one — and the release is shown in **Settings → App & offline** and in the
+service worker cache name (`vignan-vidyanikethan-ai-v<N>`).

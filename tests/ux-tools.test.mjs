@@ -14,7 +14,11 @@ import test from "node:test";
 import {
   SHORTCUTS,
   fitComposerHeight,
+  focusableWithin,
+  isComposingEnter,
   isTypingTarget,
+  nextFocusTarget,
+  shouldSendOnEnter,
   prefersReducedMotion,
   readingState,
   shortcutForKey,
@@ -195,4 +199,55 @@ test("long answers can be read on a phone", () => {
   assert.match(css, /\.message-body pre,\s*\n\.message-body table \{[^}]*overflow-x: auto/, "tables and code scroll, not the page");
   assert.match(css, /@media \(max-width: 640px\)[\s\S]*max-height: 150px/, "a lower ceiling on a small screen");
   assert.match(css, /\.to-top:focus-visible/, "the keyboard can see where it is");
+});
+
+test("Enter sends, unless a keyboard is still composing a word", () => {
+  // The plain case.
+  assert.equal(shouldSendOnEnter({ key: "Enter" }), true);
+  assert.equal(shouldSendOnEnter({ key: "Enter", shiftKey: true }), false, "Shift+Enter is a new line");
+  assert.equal(shouldSendOnEnter({ key: "a" }), false);
+
+  // Hindi, Telugu, Japanese, Korean: the confirm key belongs to the IME.
+  assert.equal(isComposingEnter({ isComposing: true }), true);
+  assert.equal(shouldSendOnEnter({ key: "Enter", isComposing: true }), false);
+  // Older Safari and some Android keyboards send 229 instead of isComposing.
+  assert.equal(shouldSendOnEnter({ key: "Enter", keyCode: 229 }), false);
+  assert.equal(shouldSendOnEnter({ key: "Enter", which: 229 }), false);
+  assert.equal(shouldSendOnEnter({ key: "Process" }), false);
+  assert.equal(isComposingEnter({}), false);
+
+  // And the composer asks that function, instead of testing the key itself.
+  assert.match(app, /if \(shouldSendOnEnter\(event\)\)/);
+  assert.doesNotMatch(app, /event\.key === "Enter" && !event\.shiftKey/, "the old unguarded check is gone");
+});
+
+test("Tab cannot walk out of the shortcuts sheet", () => {
+  const items = ["close", "first", "last"];
+  assert.equal(nextFocusTarget({ items, active: "close", shift: false }), null, "let the browser move");
+  assert.equal(nextFocusTarget({ items, active: "last", shift: false }), "close", "wrap forward");
+  assert.equal(nextFocusTarget({ items, active: "close", shift: true }), "last", "wrap backward");
+  assert.equal(nextFocusTarget({ items, active: null, shift: false }), "close");
+  assert.equal(nextFocusTarget({ items, active: null, shift: true }), "last");
+  assert.equal(nextFocusTarget({ items: [] }), null);
+
+  // Only things a keyboard can actually land on are collected.
+  const fake = (list) => ({ querySelectorAll: () => list });
+  assert.deepEqual(
+    focusableWithin(fake([{ hidden: false, getAttribute: () => null }, { hidden: true, getAttribute: () => null }])).length,
+    1,
+  );
+  assert.deepEqual(focusableWithin({}), []);
+  assert.deepEqual(focusableWithin(null), []);
+
+  assert.match(app, /focusableWithin\(panel\)/);
+  assert.match(app, /if \(!\$\("#shortcuts-overlay"\)\?\.hidden\) trapShortcutsFocus\(event\)/);
+});
+
+test("closing the sheet gives focus back where it came from", () => {
+  assert.match(app, /shortcutReturnFocus = active && active !== document\.body/);
+  assert.doesNotMatch(app, /instanceof HTMLElement/, "no constructor that may not exist");
+  assert.match(app, /if \(target\?\.isConnected\) target\.focus\(\{ preventScroll: true \}\)/);
+  // And there is a sensible place to land if the old target is gone.
+  assert.match(app, /else \$\("#ask-input"\)\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(css, /\.shortcut-row \{[^}]*min-height: 44px/);
 });
