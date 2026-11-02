@@ -1,6 +1,6 @@
 {
-  "version": 46,
-  "generatedAt": "2026-11-02T15:49:55.144Z",
+  "version": 47,
+  "generatedAt": "2026-11-02T16:03:25.519Z",
   "urls": [
     "./",
     "./index.html",
@@ -72,6 +72,7 @@
     "./js/retrieval.js",
     "./js/revision-plan.js",
     "./js/settings.js",
+    "./js/shell.js",
     "./js/social.js",
     "./js/starter-shelf.js",
     "./js/startup.js",

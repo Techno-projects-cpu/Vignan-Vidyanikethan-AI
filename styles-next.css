@@ -1729,3 +1729,629 @@ body.premium-ui [hidden] {
     max-height: 150px;
   }
 }
+
+/* --------------------------------------------------------------------------
+   16. The simple shell — one chat, everything else behind the logo
+   --------------------------------------------------------------------------
+
+   A student who came here to study should not have to learn a workspace. The
+   app opens as a single conversation: a greeting, a question box, and a small
+   logo in the corner. The ten screens still exist, the design layer still
+   styles them, and the sidebar and top bar are still in the page — they are
+   just folded away behind one button instead of standing between the student
+   and their question. */
+
+body.premium-ui .sidebar,
+body.premium-ui .topbar,
+body.premium-ui .mobile-nav,
+body.premium-ui .premium-hero,
+body.premium-ui .goal-cards {
+  display: none;
+}
+
+body.premium-ui .app-shell {
+  display: block;
+  min-height: 100vh;
+}
+
+body.premium-ui .workspace {
+  min-height: 100vh;
+}
+
+body.premium-ui .main {
+  padding: 0;
+  max-width: none;
+}
+
+body.premium-ui .view {
+  max-width: none;
+}
+
+/* Other screens keep their numbered header — they are the "advanced" side of
+   the app now, and a title is the least they deserve. */
+body.premium-ui .page-head {
+  max-width: 760px;
+  margin: 0 auto;
+  border-bottom: 0;
+  padding-bottom: var(--vn-space-3);
+}
+
+body.premium-ui[data-view="ask"] .page-head {
+  display: none;
+}
+
+body.premium-ui .view:not(#view-ask) {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--vn-space-5) var(--vn-space-5) 96px;
+}
+
+/* --- the chat itself ------------------------------------------------------ */
+
+body.premium-ui .ask-layout {
+  display: block;
+  min-height: 100vh;
+}
+
+body.premium-ui .chat-column {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 760px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: var(--vn-space-6) var(--vn-space-5) 96px;
+  border: 0;
+  background: transparent;
+}
+
+body.premium-ui .chat-log {
+  flex: 1;
+  padding: 0;
+}
+
+/* The composer sits at the bottom of the conversation, where it belongs. */
+body.premium-ui .composer {
+  position: sticky;
+  bottom: 0;
+  margin-top: var(--vn-space-5);
+  padding: var(--vn-space-3) 0 var(--vn-space-2);
+  background: var(--vn-canvas);
+  border: 0;
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .composer-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--vn-space-2);
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  background: var(--vn-panel);
+  padding: 6px;
+}
+
+body.premium-ui .composer-input-row textarea {
+  border: 0;
+  background: transparent;
+  padding: var(--vn-space-2) var(--vn-space-2);
+  box-shadow: none;
+}
+
+body.premium-ui .composer-input-row textarea:focus {
+  box-shadow: none;
+}
+
+.attach-button {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--vn-hairline) solid var(--vn-rule);
+  background: transparent;
+  color: var(--vn-ink);
+  cursor: pointer;
+  transition: border-color var(--vn-fast) var(--vn-ease), background var(--vn-fast) var(--vn-ease);
+}
+
+.attach-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+
+.attach-button:hover {
+  border-color: var(--vn-ink);
+  background: var(--vn-raise);
+}
+
+/* Suggestions, in a plain row rather than five stacked blocks. */
+.chat-starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vn-space-2);
+  margin: 0 0 var(--vn-space-4);
+}
+
+.chat-starter {
+  border: var(--vn-hairline) solid var(--vn-rule);
+  background: transparent;
+  color: var(--vn-ink-2);
+  font-size: var(--vn-small);
+  padding: 8px 12px;
+  min-height: 40px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--vn-fast) var(--vn-ease), color var(--vn-fast) var(--vn-ease);
+}
+
+.chat-starter:hover {
+  border-color: var(--vn-ink);
+  color: var(--vn-ink);
+}
+
+/* Sources open below the conversation when asked for, never beside it. */
+body.premium-ui .source-column {
+  display: none;
+  max-width: 760px;
+  margin: 0 auto var(--vn-space-7);
+}
+
+body.premium-ui .ask-layout.show-sources .source-column {
+  display: block;
+}
+
+/* --- the logo, bottom left ----------------------------------------------- */
+
+.home-logo {
+  position: fixed;
+  left: var(--vn-space-4);
+  bottom: calc(var(--vn-space-4) + env(safe-area-inset-bottom));
+  z-index: 95;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  background: var(--vn-canvas);
+  cursor: pointer;
+  transition: border-color var(--vn-fast) var(--vn-ease), transform var(--vn-fast) var(--vn-ease);
+}
+
+.home-logo img {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.home-logo:hover {
+  border-color: var(--vn-ink);
+}
+
+.home-logo[aria-expanded="true"] {
+  border-color: var(--vn-ink);
+  background: var(--vn-raise);
+}
+
+.home-logo:focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 3px;
+}
+
+/* --- the menu it opens ---------------------------------------------------- */
+
+.app-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  background: color-mix(in srgb, var(--vn-canvas) 60%, transparent);
+}
+
+.app-menu-panel {
+  position: absolute;
+  left: var(--vn-space-4);
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(76vh, 640px);
+  display: flex;
+  flex-direction: column;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  background: var(--vn-panel);
+  animation: vn-rise var(--vn-slow) var(--vn-ease) both;
+}
+
+.app-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vn-space-3);
+  padding: var(--vn-space-4);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+.app-menu-head strong {
+  font-family: var(--vn-font-display);
+  font-size: var(--vn-small);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.app-menu-account {
+  padding: var(--vn-space-3) var(--vn-space-4);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+.app-menu-account-row {
+  display: flex;
+  align-items: center;
+  gap: var(--vn-space-3);
+}
+
+.app-menu-avatar {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  font-family: var(--vn-font-mono);
+  font-size: 12px;
+}
+
+.app-menu-account-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.app-menu-account-copy strong { font-size: var(--vn-small); }
+.app-menu-account-copy small { color: var(--vn-quiet); font-size: var(--vn-meta); }
+
+.app-menu-account-actions {
+  display: flex;
+  gap: var(--vn-space-2);
+  margin-top: var(--vn-space-3);
+}
+
+.app-menu-account-actions button {
+  flex: 1;
+  min-height: 36px;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  background: transparent;
+  color: var(--vn-ink);
+  font-size: var(--vn-meta);
+  cursor: pointer;
+}
+
+.app-menu-account-actions button.primary {
+  background: var(--vn-ink);
+  color: var(--vn-canvas);
+  border-color: var(--vn-ink);
+}
+
+.app-menu-scroll {
+  overflow: auto;
+  padding: var(--vn-space-2) 0;
+}
+
+.app-menu-group {
+  padding: var(--vn-space-2) 0;
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+.app-menu-group:last-child {
+  border-bottom: 0;
+}
+
+.app-menu-label {
+  display: block;
+  padding: var(--vn-space-2) var(--vn-space-4);
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--vn-quiet);
+}
+
+.app-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--vn-space-3);
+  min-height: 44px;
+  padding: 0 var(--vn-space-4);
+  border: 0;
+  background: transparent;
+  color: var(--vn-ink-2);
+  font-size: var(--vn-small);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--vn-fast) var(--vn-ease), color var(--vn-fast) var(--vn-ease);
+}
+
+.app-menu-item svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  opacity: 0.75;
+}
+
+.app-menu-item span {
+  flex: 1;
+}
+
+.app-menu-item small {
+  color: var(--vn-quiet);
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+}
+
+.app-menu-item:hover,
+.app-menu-item:focus-visible {
+  background: var(--vn-raise);
+  color: var(--vn-ink);
+  outline: none;
+}
+
+.app-menu-foot {
+  margin: 0;
+  padding: var(--vn-space-3) var(--vn-space-4);
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+  color: var(--vn-quiet);
+  font-size: var(--vn-meta);
+}
+
+@media (max-width: 640px) {
+  .app-menu-panel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 82vh;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+  }
+
+  body.premium-ui .chat-column {
+    padding: var(--vn-space-5) var(--vn-space-4) 88px;
+  }
+
+  .home-logo {
+    left: var(--vn-space-3);
+    bottom: calc(var(--vn-space-3) + env(safe-area-inset-bottom));
+  }
+}
+
+/* --- sheets: history, attach, install ------------------------------------ */
+
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: grid;
+  place-items: center;
+  padding: var(--vn-space-4);
+  background: color-mix(in srgb, var(--vn-canvas) 78%, transparent);
+}
+
+.sheet-overlay[hidden] { display: none; }
+
+.sheet-panel {
+  width: min(520px, 100%);
+  max-height: min(84vh, 680px);
+  overflow: auto;
+  padding: var(--vn-space-5);
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  background: var(--vn-panel);
+  animation: vn-rise var(--vn-slow) var(--vn-ease) both;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vn-space-3);
+  padding-bottom: var(--vn-space-3);
+  margin-bottom: var(--vn-space-3);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+.sheet-head strong {
+  font-family: var(--vn-font-display);
+  font-size: var(--vn-h3);
+}
+
+.sheet-note {
+  margin: 0 0 var(--vn-space-4);
+  color: var(--vn-ink-2);
+  font-size: var(--vn-small);
+  line-height: 1.55;
+}
+
+.sheet-fine {
+  color: var(--vn-quiet);
+  font-size: var(--vn-meta);
+  margin: var(--vn-space-3) 0 0;
+}
+
+.sheet-wide {
+  width: 100%;
+  min-height: 44px;
+}
+
+.attach-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--vn-space-3);
+  padding: var(--vn-space-3);
+  margin-bottom: var(--vn-space-2);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  background: transparent;
+  color: var(--vn-ink);
+  text-align: left;
+  cursor: pointer;
+  min-height: 60px;
+  transition: border-color var(--vn-fast) var(--vn-ease), background var(--vn-fast) var(--vn-ease);
+}
+
+.attach-item:hover {
+  border-color: var(--vn-ink);
+  background: var(--vn-raise);
+}
+
+.attach-item svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.attach-item span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.attach-item strong { font-size: var(--vn-small); }
+.attach-item small { color: var(--vn-quiet); font-size: var(--vn-meta); }
+
+.attach-link-form {
+  display: grid;
+  gap: var(--vn-space-2);
+  padding: var(--vn-space-3);
+  margin-bottom: var(--vn-space-3);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  background: var(--vn-raise);
+}
+
+.attach-link-form[hidden] { display: none; }
+
+.attach-link-form label {
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vn-quiet);
+}
+
+.attach-link-form input {
+  min-height: 44px;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  background: var(--vn-panel);
+  color: var(--vn-ink);
+  padding: 0 var(--vn-space-3);
+  font-size: var(--vn-small);
+}
+
+.attach-note {
+  margin: 0;
+  color: var(--vn-quiet);
+  font-size: var(--vn-meta);
+  line-height: 1.5;
+}
+
+.attach-split {
+  display: flex;
+  align-items: center;
+  gap: var(--vn-space-3);
+  margin: var(--vn-space-3) 0;
+  color: var(--vn-quiet);
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.attach-split::before,
+.attach-split::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--vn-rule);
+}
+
+/* --- history list --------------------------------------------------------- */
+
+.history-list {
+  display: grid;
+  gap: 0;
+  margin-bottom: var(--vn-space-4);
+}
+
+.history-item {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: var(--vn-space-3) 0;
+  border: 0;
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+  background: transparent;
+  color: var(--vn-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.history-item small {
+  color: var(--vn-quiet);
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.history-empty {
+  margin: 0 0 var(--vn-space-4);
+  color: var(--vn-quiet);
+  font-size: var(--vn-small);
+}
+
+/* --- install sheet -------------------------------------------------------- */
+
+.install-steps {
+  display: grid;
+  gap: var(--vn-space-3);
+  margin-top: var(--vn-space-3);
+}
+
+.install-step {
+  display: grid;
+  gap: 2px;
+  padding: var(--vn-space-3);
+  border: var(--vn-hairline) solid var(--vn-rule);
+}
+
+.install-step strong { font-size: var(--vn-small); }
+.install-step span { color: var(--vn-ink-2); font-size: var(--vn-meta); line-height: 1.55; }
+
+/* Scroll is locked while a menu or a sheet is over the page. */
+body.menu-open,
+body.sheet-open {
+  overflow: hidden;
+}
+
+/* On a phone there is no empty gutter for the logo, so the question box sits
+   above it instead of on top of it: the logo keeps its bottom-left corner and
+   stays reachable with a thumb. */
+@media (max-width: 640px) {
+  body.premium-ui .composer {
+    bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+
+  body.premium-ui .chat-column {
+    padding-bottom: 150px;
+  }
+
+  body.premium-ui .attach-button {
+    width: 44px;
+    height: 44px;
+  }
+}

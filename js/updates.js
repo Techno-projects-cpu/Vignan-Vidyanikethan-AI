@@ -16,7 +16,7 @@
  * release on its next visit, because the app is served network-first.
  */
 
-/** Release the page itself was loaded from: "./js/app.js?v=46" → "45". */
+/** Release the page itself was loaded from: "./js/app.js?v=47" → "45". */
 export const RELEASE = new URL(import.meta.url).searchParams.get("v") || "dev";
 
 /** "const CACHE_NAME = \"vignan-vidyanikethan-ai-v45\"" → "45". */

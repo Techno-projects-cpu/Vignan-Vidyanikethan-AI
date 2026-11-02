@@ -135,6 +135,19 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 5.4b | Publish a release while an answer is being written: the answer finishes first, then the page reloads — it is never cut off | ☐ | ☐ | ☐ |
 | 5.5 | Saved books, chats and streaks are still there after that reload | ☐ | ☐ | ☐ |
 
+## 5b. The simple shell — one chat, one logo
+
+| # | Check | P | T | L |
+| --- | --- | --- | --- | --- |
+| 5.6 | The app opens on a chat: greeting, four chips, a question box. No sidebar, no top bar, no numbered header | ☐ | ☐ | ☐ |
+| 5.7 | The logo sits in the bottom-left corner, is 44px, and opens the menu with account, history, library, quiz, exams, flashcards, progress, friends, Study Hall, play, settings, install and theme | ☐ | ☐ | ☐ |
+| 5.8 | On a phone the question box sits **above** the logo, so neither covers the other, and the menu opens as a bottom sheet | ☐ | ☐ | ☐ |
+| 5.9 | The **+** beside the question box opens the sheet; **Upload a textbook** opens the file picker without visiting Settings, and the book answers questions afterwards | ☐ | ☐ | ☐ |
+| 5.10 | **Fetch a website** reads a public page, the question box is pre-filled about it, and the answer is labelled outside your textbooks | ☐ | ☐ | ☐ |
+| 5.11 | **History** lists the questions asked on this device, newest first; tapping one puts it back in the box | ☐ | ☐ | ☐ |
+| 5.12 | **Install the app** installs the website (full screen, offline) and states plainly that an `.apk`/`.exe` needs a build machine | ☐ | ☐ | ☐ |
+| 5.13 | Escape closes the menu, then a sheet; focus returns to the logo; Tab stays inside the menu | ☐ | ☐ | ☐ |
+
 ## 6. Offline — the part that matters at a science fair
 
 Turn on aeroplane mode (or DevTools → Network → Offline) and reload the app.
@@ -173,5 +186,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (525 checks) plus
+The quickest regression test for a UI fix is `npm test` (535 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.

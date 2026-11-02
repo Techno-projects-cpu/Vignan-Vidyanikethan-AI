@@ -120,6 +120,11 @@ error. A funded team covers far more ground; this one goes deeper on less.
 | A composer that grows | The question box was two fixed rows, so a long question scrolled inside a box the size of a business card. It now measures what is in it, grows to a ceiling of eight rows (five on a phone), and then scrolls with a solid bottom edge so Send never leaves the screen. Sending resets it, and a prefilled question — a starting block, a shared link, a page from the reader — arrives at the right height. |
 | Offline mode, that actually means it | A switch in Settings → App & offline. When it is on there is no web fallback, and no account, friends, chat or leaderboard calls — the answer comes only from the pages on the device, which is what a demo with bad Wi-Fi needs. The switch does not erase the student's web preference: turning it off restores exactly what they had chosen. The chip in the top bar says "Offline mode" while it is on. |
 | A release that arrives by itself | The permission banner is gone, by the student's own decision: publishing is the whole gesture. The worker takes over immediately and the page reloads once — except over work in progress. An answer being written, or a question typed but not yet sent, is never thrown away; the reload waits for the box to be empty and then happens without asking. There is no button, no "Later", and no setting that can pin a device to an old release. |
+| One chat, and a logo | The app opens as a single conversation — a greeting, four ordinary suggestion chips, a question box — and nothing else. The sidebar, the numbered page header, the hero and the five stacked blocks are folded away behind the logo in the bottom-left corner, which opens a menu with account, history, library, quiz, exams, flashcards, progress, friends, Study Hall, play, settings, install and the theme switch. Nothing was deleted: the ten screens are the same screens, one tap from where the student is already looking. |
+| A textbook, without Settings | The "+" beside the question box opens one sheet: upload a PDF or text file, paste notes, fetch a website, or start a quiz, flashcards or exam practice. Uploading from chat opens the phone's own file picker directly — the same guarded ingest path as the Library, with the same limits and the same labels. |
+| Fetch a website, then ask about it | A public page can be read from the composer and asked about like any other source. The browser never fetches the page itself: the address goes through the Library's server-side importer, which refuses private addresses, scripts and archives, and the result is labelled **outside your textbooks**. The next question is pre-filled as *"Explain this page in simple words, then tell me how it works: …"*, and the page stays in the library as a web source for follow-ups. |
+| Install, honestly | **Install the app** in the menu installs the website as an app — full screen, offline, own icon — and says so. It also says plainly that a real `.apk` or `.exe` needs a build machine with Android Studio or Tauri, and links the exact commands in [PACKAGING.md](./PACKAGING.md) instead of offering a download that does not exist. |
+| History you can point at | The menu's History lists the student's own questions from this device, newest first, with times; tapping one puts it back in the composer. It is deliberately not dressed up as a list of separate conversations, because the app keeps one running chat. |
 | Enter that does not send too early | The composer sent on any unguarded Enter, which in Hindi, Telugu, Japanese, Korean — or with any phone keyboard showing word suggestions — is the key that confirms the word being composed. Pressing it asked a half-finished word as a question. It now checks `isComposing` and the older 229 code, so only a real Enter sends; `Shift + Enter` still starts a new line. |
 | A shortcuts sheet you can leave | `?` opened the sheet and moved focus into it, but closing it dropped focus on the page body, so the next Tab started from the top of the document. Focus now returns to whatever had it, and Tab/Shift+Tab stay inside the sheet instead of walking into the page behind it. |
 | A crash between the answer and its sources | Since 2.11.0 the source card was assembled one line above the row it was assembling, so every cited answer drew a card that threw `cannot access 'actions' before initialization`. The throw was caught by the ask handler, so a student saw a correct answer followed by "I could not complete that answer". One line, fixed; and because no test had ever asked the app a question end to end, `tests/render-order.test.mjs` now fails the build if any element is appended before it is declared, and a headless run asks three real questions and checks the answer, its citations and the absence of the false failure.
@@ -160,6 +165,31 @@ error. A funded team covers far more ground; this one goes deeper on less.
 | Languages | **33 languages.** 13 Indian languages (English, हिन्दी, বাংলা, मराठी, తెలుగు, தமிழ், ગુજરાતી, ಕನ್ನಡ, മലയാളം, ਪੰਜਾਬੀ, ଓଡ଼ିଆ, অসমীয়া, اردو) plus Nepali, العربية, فارسی, Français, Deutsch, Español, Português, Italiano, Nederlands, Polski, Русский, Українська, Türkçe, 中文, 日本語, 한국어, Bahasa Indonesia, Tiếng Việt, ไทย and Kiswahili. Core labels, screen titles, the composer, language-aware search and connected-model instructions all follow the choice; Urdu, Arabic and Persian switch the layout to right-to-left. Untranslated long help text falls back to English. Indic combining marks are preserved in retrieval and grading; older book indexes are rebuilt in memory without deleting the originals. Offline Bolt quotes the source language and does not translate. A connected AI is asked to respond in the selected language, but its translations and citations need checking. |
 
 ---
+
+## The simple shell
+
+A student who came here to study should not have to learn a workspace first. The
+app now opens as one chat: a greeting, a question box, and a small logo in the
+corner. Everything else is behind that logo, in a menu that reads like the
+account menu of any other AI tool.
+
+That is a deliberate reversal of the 2.0 redesign. The design layer is not gone
+— it still styles every one of the ten screens, the numbered headers still
+appear on the advanced screens, and the command menu (`⌘K`) still indexes
+everything. What changed is what is *in front* of a new visitor:
+
+| Before | Now |
+| --- | --- |
+| Sidebar with ten numbered screens | One chat, four suggestion chips, a question box |
+| Hero, project line, five stacked goal blocks | The same prompts as four ordinary chips, gone after the first question |
+| Library upload found in Settings-adjacent screens | "+" beside the question box |
+| Pasting a link and hoping | **Fetch a website** in the same sheet, labelled as outside your textbooks |
+| Account, theme and offline chip in a top bar | The same things in the menu the logo opens |
+
+On a phone the logo keeps its bottom-left corner and the question box sits just
+above it, so a thumb can reach either without covering the other. Two tests hold
+the arrangement: `tests/simple-shell.test.mjs` fails if the chat stops being the
+first thing on screen, or if any screen loses its way back in the menu.
 
 ## Premium minimal shell
 
@@ -676,7 +706,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-525 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, response compression (encoding negotiation, cache keys, and a spawned server proving a page arrives smaller and decodes back to the same bytes), the reading-position and shortcut arithmetic, the growing composer, and the server's security posture.
+535 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, response compression (encoding negotiation, cache keys, and a spawned server proving a page arrives smaller and decodes back to the same bytes), the reading-position and shortcut arithmetic, the growing composer, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 

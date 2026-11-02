@@ -6,25 +6,25 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=46";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=46";
-import { ingestPdf, ingestText } from "./ingest.js?v=46";
-import { splitSentences } from "./text.js?v=46";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=46";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=46";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=46";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=46";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=46";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=46";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=46";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=46";
+import * as db from "./db.js?v=47";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=47";
+import { ingestPdf, ingestText } from "./ingest.js?v=47";
+import { splitSentences } from "./text.js?v=47";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=47";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=47";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=47";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=47";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=47";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=47";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=47";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=47";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=46";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=46";
-import { RELEASE, startUpdateWatch } from "./updates.js?v=46";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=46";
+} from "./pro-mode.js?v=47";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=47";
+import { RELEASE, startUpdateWatch } from "./updates.js?v=47";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=47";
 import {
   SHORTCUTS,
   fitComposerHeight,
@@ -36,18 +36,18 @@ import {
   shouldShowToTop,
   shortcutForKey,
   windowScrollState,
-} from "./viewport.js?v=46";
+} from "./viewport.js?v=47";
 import {
   OFFLINE_MODE_LABEL,
   OFFLINE_MODE_NOTE,
   isOfflineMode,
   networkAllowed,
   setOfflineMode,
-} from "./offline-mode.js?v=46";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=46";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=46";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=46";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=46";
+} from "./offline-mode.js?v=47";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=47";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=47";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=47";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=47";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -55,8 +55,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=46";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=46";
+} from "./llm.js?v=47";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=47";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -68,7 +68,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=46";
+} from "./local-ai.js?v=47";
 import {
   EXAMS,
   MODES,
@@ -83,12 +83,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=46";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=46";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=46";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=46";
-import { TASKS } from "./model-router.js?v=46";
-import { PROVIDERS, providerList } from "./providers.js?v=46";
+} from "./exam-packs.js?v=47";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=47";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=47";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=47";
+import { TASKS } from "./model-router.js?v=47";
+import { PROVIDERS, providerList } from "./providers.js?v=47";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -97,30 +97,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=46";
-import { parseApiKeys } from "./key-pool.js?v=46";
+} from "./settings.js?v=47";
+import { parseApiKeys } from "./key-pool.js?v=47";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=46";
+} from "./student-keys.js?v=47";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=46";
+} from "./quiz.js?v=47";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=46";
+} from "./flashcards.js?v=47";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=46";
+} from "./study-decks.js?v=47";
 import {
   accuracy,
   currentStreak,
@@ -131,16 +131,17 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=46";
-import { externalSearchUrl, searchWeb } from "./web.js?v=46";
-import { openEditStudio } from "./edit-studio.js?v=46";
-import { openReader } from "./reader.js?v=46";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=46";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=46";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=46";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=46";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=46";
-import * as ui from "./ui.js?v=46";
+} from "./progress.js?v=47";
+import { externalSearchUrl, searchWeb } from "./web.js?v=47";
+import { openEditStudio } from "./edit-studio.js?v=47";
+import { openReader } from "./reader.js?v=47";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=47";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=47";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=47";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=47";
+import { badgeText, chatStarters, hasConversation, historyItems } from "./shell.js?v=47";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=47";
+import * as ui from "./ui.js?v=47";
 import {
   clearReferral,
   getLeaderboard,
@@ -150,8 +151,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=46";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=46";
+} from "./auth.js?v=47";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=47";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -159,12 +160,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=46";
-import { initMotion, revealVisible } from "./motion.js?v=46";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=46";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=46";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=46";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=46";
+} from "./premium-ui.js?v=47";
+import { initMotion, revealVisible } from "./motion.js?v=47";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=47";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=47";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=47";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=47";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -690,6 +691,439 @@ function initShortcuts() {
   window.addEventListener("resize", queueScrollPaint, { passive: true });
   $("#to-top")?.addEventListener("click", backToTop);
   paintScrollTools();
+}
+
+/* ------------------------------------------------------------ simple shell */
+
+/**
+ * One chat, and a logo in the corner.
+ *
+ * The ten screens are not gone — they are folded behind the logo. This section
+ * is the whole navigation of the simple app: a menu, a history sheet, and the
+ * "+" beside the question box that adds a textbook, fetches a website, or starts
+ * a quiz without ever sending the student to Settings.
+ */
+
+let menuReturnFocus = null;
+let installPromptEvent = null;
+
+function openAppMenu() {
+  const overlay = $("#app-menu");
+  const logo = $("#home-logo");
+  if (!overlay) return;
+  menuReturnFocus = document.activeElement && document.activeElement !== document.body ? document.activeElement : logo;
+  renderMenuAccount();
+  renderMenuBadges();
+  overlay.hidden = false;
+  overlay.setAttribute("aria-hidden", "false");
+  logo?.setAttribute("aria-expanded", "true");
+  document.body.classList.add("menu-open");
+  $("#app-menu-close")?.focus({ preventScroll: true });
+}
+
+function closeAppMenu({ restoreFocus = true } = {}) {
+  const overlay = $("#app-menu");
+  if (!overlay || overlay.hidden) return false;
+  overlay.hidden = true;
+  overlay.setAttribute("aria-hidden", "true");
+  $("#home-logo")?.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("menu-open");
+  if (restoreFocus && menuReturnFocus?.isConnected) menuReturnFocus.focus({ preventScroll: true });
+  menuReturnFocus = null;
+  return true;
+}
+
+function toggleAppMenu() {
+  const overlay = $("#app-menu");
+  if (!overlay) return;
+  if (overlay.hidden) openAppMenu();
+  else closeAppMenu();
+}
+
+/** Who is using the app, in one row at the top of the menu. */
+function renderMenuAccount() {
+  const host = $("#app-menu-account");
+  if (!host) return;
+  host.replaceChildren();
+  const row = ui.element("div", "app-menu-account-row");
+  if (state.account) {
+    const initials = avatarInitials(state.account.username || "Student") || "S";
+    row.appendChild(ui.element("span", "app-menu-avatar", initials));
+    const copy = ui.element("div", "app-menu-account-copy");
+    copy.appendChild(ui.element("strong", "", state.account.username || "Signed in"));
+    copy.appendChild(ui.element("small", "", "Progress is saved to this account"));
+    row.appendChild(copy);
+    host.appendChild(row);
+    const actions = ui.element("div", "app-menu-account-actions");
+    const account = ui.element("button", "", "Account");
+    account.type = "button";
+    account.addEventListener("click", () => { closeAppMenu({ restoreFocus: false }); openAccountModal("account"); });
+    actions.appendChild(account);
+    host.appendChild(actions);
+    return;
+  }
+  row.appendChild(ui.element("span", "app-menu-avatar", "G"));
+  const copy = ui.element("div", "app-menu-account-copy");
+  copy.appendChild(ui.element("strong", "", "Guest"));
+  copy.appendChild(ui.element("small", "", "Progress stays in this browser"));
+  row.appendChild(copy);
+  host.appendChild(row);
+  const actions = ui.element("div", "app-menu-account-actions");
+  const login = ui.element("button", "", "Log in");
+  login.type = "button";
+  login.addEventListener("click", () => {
+    closeAppMenu({ restoreFocus: false });
+    window.dispatchEvent(new CustomEvent("vignan:auth-required", { detail: { mode: "login" } }));
+  });
+  const register = ui.element("button", "primary", "Register");
+  register.type = "button";
+  register.addEventListener("click", () => {
+    closeAppMenu({ restoreFocus: false });
+    window.dispatchEvent(new CustomEvent("vignan:auth-required", { detail: { mode: "register" } }));
+  });
+  actions.append(login, register);
+  host.appendChild(actions);
+}
+
+/** Unread friend requests and messages, copied from the badges that already track them. */
+function renderMenuBadges() {
+  for (const kind of ["friends", "chat"]) {
+    const source = $(`[data-social-badge="${kind}"]`);
+    const target = $(`[data-menu-badge="${kind}"]`);
+    if (!target) continue;
+    target.textContent = badgeText(source && !source.hidden ? source.textContent : "");
+  }
+  const count = $("#app-menu-history-count");
+  if (count) {
+    const asked = state.messages.filter((message) => message.role === "user").length;
+    count.textContent = asked ? String(asked) : "";
+  }
+}
+
+/* --- sheets -------------------------------------------------------------- */
+
+function openSheet(id) {
+  const sheet = $(`#${id}`);
+  if (!sheet) return;
+  sheet.hidden = false;
+  sheet.setAttribute("aria-hidden", "false");
+  document.body.classList.add("sheet-open");
+  sheet.querySelector("button, input, [tabindex]")?.focus({ preventScroll: true });
+}
+
+function closeSheet(id, { restoreFocus = true } = {}) {
+  const sheet = $(`#${id}`);
+  if (!sheet || sheet.hidden) return false;
+  sheet.hidden = true;
+  sheet.setAttribute("aria-hidden", "true");
+  if (!document.querySelector(".sheet-overlay:not([hidden]), #app-menu:not([hidden])")) {
+    document.body.classList.remove("sheet-open");
+  }
+  if (restoreFocus) $("#ask-input")?.focus({ preventScroll: true });
+  return true;
+}
+
+/**
+ * History is what this device actually asked, newest first.
+ *
+ * It is deliberately not a list of separate conversations: the app keeps one
+ * running chat, so pretending otherwise would be a lie in a menu.
+ */
+function openHistory() {
+  const list = $("#history-list");
+  if (!list) return;
+  list.replaceChildren();
+  const items = historyItems(state.messages, { limit: 40 });
+  if (!items.length) {
+    list.appendChild(ui.element("p", "history-empty", "Nothing yet. Ask your first question and it will appear here."));
+  }
+  for (const entry of items) {
+    const item = ui.element("button", "history-item");
+    item.type = "button";
+    item.appendChild(ui.element("span", "", entry.text));
+    item.appendChild(ui.element("small", "", entry.when));
+    item.addEventListener("click", () => {
+      closeSheet("history-overlay", { restoreFocus: false });
+      const input = $("#ask-input");
+      if (!input) return;
+      input.value = entry.full;
+      queueComposerFit();
+      setView("ask");
+      input.focus({ preventScroll: true });
+    });
+    list.appendChild(item);
+  }
+  openSheet("history-overlay");
+}
+
+/* --- attach: textbook, website, practice --------------------------------- */
+
+function openAttach() {
+  $("#attach-link-form").hidden = true;
+  openSheet("attach-overlay");
+  $("#ask-attach")?.setAttribute("aria-expanded", "true");
+}
+
+function closeAttach() {
+  const closed = closeSheet("attach-overlay");
+  $("#ask-attach")?.setAttribute("aria-expanded", "false");
+  return closed;
+}
+
+/**
+ * A website the student wants to ask about.
+ *
+ * The reading happens on the server, through the same guarded fetcher the
+ * Library uses — the browser never fetches the page itself, so nothing in the
+ * app can bypass the private-address and redirect rules. What comes back is
+ * labelled as a web source, exactly like any other import.
+ */
+async function fetchWebsiteForChat(url) {
+  const input = $("#library-url");
+  const button = $("#library-url-submit");
+  if (!input || !button) return;
+  const before = new Set(state.indexes.map((index) => index.book.id));
+  input.value = url;
+  button.click();
+  // handleLinkImport is async and owns its own toasts; wait for the library to
+  // gain a book rather than for a network call we do not control.
+  const started = Date.now();
+  while (Date.now() - started < 45000) {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    const added = state.indexes.some((index) => !before.has(index.book.id));
+    if (added) {
+      const book = state.indexes.find((index) => !before.has(index.book.id))?.book;
+      const ask = $("#ask-input");
+      if (ask && book) {
+        ask.value = `Explain this page in simple words, then tell me how it works: ${url}`;
+        queueComposerFit();
+        setView("ask");
+        ask.focus({ preventScroll: true });
+        ui.showToast(`${book.title} is ready. Ask anything about it — answers will cite it.`, "success", 6000);
+      }
+      return;
+    }
+    if (!button.disabled && Date.now() - started > 1500) break;
+  }
+}
+
+function bindAttach() {
+  $("#ask-attach")?.addEventListener("click", () => openAttach());
+  $("#attach-overlay")?.addEventListener("click", (event) => {
+    if (event.target?.id === "attach-overlay") closeAttach();
+  });
+  $("#attach-overlay")?.addEventListener("click", (event) => {
+    const item = event.target.closest?.("[data-attach]");
+    if (!item) return;
+    const kind = item.dataset.attach;
+    if (kind === "link") {
+      const form = $("#attach-link-form");
+      if (form) {
+        form.hidden = false;
+        $("#attach-link-url")?.focus({ preventScroll: true });
+      }
+      return;
+    }
+    closeAttach();
+    if (kind === "upload") { setView("library"); $("#file-input")?.click(); return; }
+    if (kind === "notes") {
+      setView("library");
+      requestAnimationFrame(() => {
+        $("#paste-card")?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+        $("#paste-title")?.focus({ preventScroll: true });
+      });
+      return;
+    }
+    if (kind === "quiz") { void prepareQuizFromText(); return; }
+    if (kind === "flashcards") { void handlePremiumAction("flashcards"); return; }
+    if (kind === "exam") { setView("exam"); }
+  });
+  $("#attach-link-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const url = String($("#attach-link-url")?.value || "").trim();
+    if (!url) { ui.showToast("Paste the address of a public page.", "warning"); return; }
+    closeAttach();
+    void fetchWebsiteForChat(url);
+  });
+}
+
+/* --- install ------------------------------------------------------------- */
+
+/**
+ * The app is a website; what can be installed here is the website.
+ *
+ * A real APK or EXE is a build step on a machine that has the Android SDK or
+ * Tauri installed, not something a static host can hand out — so this sheet
+ * says that plainly and gives the two routes a student can actually take today.
+ */
+function renderInstallSheet() {
+  const steps = $("#install-steps");
+  const note = $("#install-note");
+  const fine = $("#install-fine");
+  const button = $("#install-now");
+  if (!steps) return;
+  steps.replaceChildren();
+  const rows = [
+    ["On Android", "Open this site in Chrome, tap the ⋮ menu, then Add to Home screen. It opens full screen and works offline."],
+    ["On a laptop", "In Chrome or Edge, click the install icon in the address bar. It gets its own window and Start-menu entry."],
+    ["A real .apk or .exe", "That needs a build machine with Android Studio or Tauri. PACKAGING.md in the repository has the exact commands; nothing here pretends to hand out a file that has not been built."],
+  ];
+  for (const [title, body] of rows) {
+    const row = ui.element("div", "install-step");
+    row.appendChild(ui.element("strong", "", title));
+    row.appendChild(ui.element("span", "", body));
+    steps.appendChild(row);
+  }
+  if (note) note.textContent = "Add Vignan to your home screen and it opens like an app, works offline, and keeps your books on this device.";
+  if (fine) fine.textContent = "The in-browser model downloads once and then runs on the device; a packaged build would ship it inside the installer, which is why those builds are hundreds of megabytes.";
+  if (button) button.hidden = !installPromptEvent;
+}
+
+function openInstallSheet() {
+  renderInstallSheet();
+  openSheet("install-overlay");
+}
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  installPromptEvent = event;
+});
+
+async function initSimpleShell() {
+  $("#home-logo")?.addEventListener("click", () => toggleAppMenu());
+  $("#app-menu")?.addEventListener("click", (event) => {
+    if (event.target?.id === "app-menu") closeAppMenu();
+  });
+  $("#app-menu-close")?.addEventListener("click", () => closeAppMenu());
+
+  $("#app-menu")?.addEventListener("click", (event) => {
+    const view = event.target.closest?.("[data-menu-view]");
+    if (view) {
+      closeAppMenu({ restoreFocus: false });
+      setView(view.dataset.menuView);
+      return;
+    }
+    const action = event.target.closest?.("[data-menu-action]");
+    if (!action) return;
+    const kind = action.dataset.menuAction;
+    if (kind === "new-chat") {
+      closeAppMenu({ restoreFocus: false });
+      setView("ask");
+      void clearChat().then(() => requestAnimationFrame(() => $("#ask-input")?.focus({ preventScroll: true })));
+      return;
+    }
+    if (kind === "history") { closeAppMenu({ restoreFocus: false }); openHistory(); return; }
+    if (kind === "upload") { closeAppMenu({ restoreFocus: false }); setView("library"); $("#file-input")?.click(); return; }
+    if (kind === "install") { closeAppMenu({ restoreFocus: false }); openInstallSheet(); return; }
+    if (kind === "theme") {
+      setTheme(state.settings.theme === "dark" ? "light" : "dark");
+      const label = $("#app-menu-theme-label");
+      if (label) label.textContent = state.settings.theme === "dark" ? "Light theme" : "Dark theme";
+    }
+  });
+
+  $("#history-clear")?.addEventListener("click", () => {
+    closeSheet("history-overlay", { restoreFocus: false });
+    void clearChat();
+  });
+  $("#install-now")?.addEventListener("click", async () => {
+    if (!installPromptEvent) return;
+    installPromptEvent.prompt();
+    try { await installPromptEvent.userChoice; } catch { /* dismissed */ }
+    installPromptEvent = null;
+    $("#install-now").hidden = true;
+  });
+
+  for (const button of $$("[data-sheet-close]")) {
+    button.addEventListener("click", () => {
+      const id = button.dataset.sheetClose;
+      if (id === "attach-overlay") closeAttach();
+      else closeSheet(id);
+    });
+  }
+  for (const id of ["history-overlay", "install-overlay"]) {
+    $(`#${id}`)?.addEventListener("click", (event) => {
+      if (event.target?.id === id) closeSheet(id);
+    });
+  }
+
+  bindAttach();
+
+  // Tab stays inside whatever is open, so the keyboard cannot end up in a page
+  // the student cannot see. Same rule the shortcuts sheet uses.
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Tab") return;
+    const open = !$("#app-menu")?.hidden
+      ? $("#app-menu .app-menu-panel")
+      : [".sheet-overlay:not([hidden]) .sheet-panel"].map((selector) => $(selector)).find(Boolean);
+    if (!open) return;
+    const next = nextFocusTarget({
+      items: focusableWithin(open),
+      active: document.activeElement,
+      shift: event.shiftKey,
+    });
+    if (next) {
+      event.preventDefault();
+      next.focus();
+    }
+  });
+
+  // Escape closes the menu first, then a sheet — the order a person expects.
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (closeAppMenu()) { event.preventDefault(); return; }
+    if (closeAttach()) { event.preventDefault(); return; }
+    for (const id of ["history-overlay", "install-overlay"]) {
+      if (closeSheet(id)) { event.preventDefault(); return; }
+    }
+  });
+
+  $("#ask-sources-toggle")?.addEventListener("click", () => {
+    const layout = $("#view-ask .ask-layout");
+    const open = !layout?.classList.contains("show-sources");
+    toggleSources();
+    $("#ask-sources-toggle")?.setAttribute("aria-expanded", String(open));
+    if (open) requestAnimationFrame(() => $(".source-column")?.scrollIntoView?.({ behavior: "smooth", block: "start" }));
+  });
+
+  globalThis.__vignanMenu = { open: openAppMenu, close: closeAppMenu };
+  renderMenuAccount();
+  renderChatStarters();
+}
+
+/**
+ * Four ordinary suggestion chips while the conversation is empty.
+ *
+ * The stacked goal blocks still exist for wide screens and the command menu;
+ * this is the same list, shown the way every chat app shows suggestions.
+ */
+function renderChatStarters() {
+  const host = $("#chat-starters");
+  if (!host) return;
+  const cards = chatStarters(
+    goalCards({ hasBooks: state.indexes.length > 0, starterReady: true }),
+    { hasConversation: hasConversation(state.messages), limit: 4 },
+  );
+  host.hidden = cards.length === 0;
+  host.replaceChildren();
+  if (!cards.length) return;
+  for (const card of cards) {
+    const chip = ui.element("button", "chat-starter", card.title);
+    chip.type = "button";
+    chip.dataset.goal = card.id;
+    chip.addEventListener("click", () => openGoal(card, chip));
+    host.appendChild(chip);
+  }
+}
+
+/** The Sources button only means something once an answer has sources. */
+function syncSourcesToggle() {
+  const button = $("#ask-sources-toggle");
+  if (!button) return;
+  const count = Number(state.lastAnswer?.sources?.length || 0) + Number(state.lastAnswer?.webSources?.length || 0);
+  button.hidden = count === 0;
+  button.textContent = count ? `Sources (${count})` : "Sources";
+  button.setAttribute("aria-expanded", String(Boolean($("#view-ask .ask-layout")?.classList.contains("show-sources"))));
 }
 
 function setMode(mode) {
@@ -1524,6 +1958,8 @@ function applyLinkedQuestion(search = location.search) {
 
 function renderChat() {
   const log = $("#chat-log");
+  renderChatStarters();
+  syncSourcesToggle();
   $("#view-ask")?.classList.toggle("has-conversation", state.messages.some((message) => message.role === "user"));
   log.replaceChildren();
   let lastQuestion = "";
@@ -5226,7 +5662,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=46");
+            const { social } = await import("./social.js?v=47");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -5685,6 +6121,7 @@ function bindEvents() {
   $("#pro-chip")?.addEventListener("click", () => { void disengageProMode(); });
   // The phone tab bar carries five screens; this is the way to the other five.
   initShortcuts();
+  void initSimpleShell();
   $("#mobile-more")?.addEventListener("click", () => {
     const button = $("#command-menu-button");
     if (button) button.click();

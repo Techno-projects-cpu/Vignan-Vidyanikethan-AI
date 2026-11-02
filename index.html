@@ -10,24 +10,24 @@
   <meta property="og:title" content="Vignan Vidyanikethan AI — learn from your own textbooks">
   <meta property="og:description" content="Turn your textbooks into cited answers, quizzes and revision tools. A student project for INSPIRE-MANAK.">
   <meta property="og:url" content="https://vignanvidyanikethanai.onrender.com/">
-  <meta property="og:image" content="https://vignanvidyanikethanai.onrender.com/icons/icon-512.png?v=46">
+  <meta property="og:image" content="https://vignanvidyanikethanai.onrender.com/icons/icon-512.png?v=47">
   <meta name="twitter:card" content="summary">
   <title>Vignan Vidyanikethan AI — learn from your own textbooks</title>
   <link rel="canonical" href="https://vignanvidyanikethanai.onrender.com/">
-  <link rel="manifest" href="./manifest.webmanifest?v=46">
+  <link rel="manifest" href="./manifest.webmanifest?v=47">
   <link rel="preload" href="./assets/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="./assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="icon" href="./icons/icon.svg?v=46" type="image/svg+xml">
-  <link rel="icon" href="./icons/icon-48.png?v=46" type="image/png" sizes="48x48">
-  <link rel="shortcut icon" href="./favicon.ico?v=46">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=46">
+  <link rel="icon" href="./icons/icon.svg?v=47" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-48.png?v=47" type="image/png" sizes="48x48">
+  <link rel="shortcut icon" href="./favicon.ico?v=47">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png?v=47">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./styles-premium.css?v=46">
-  <link rel="stylesheet" href="./styles-identity.css?v=46">
-  <link rel="stylesheet" href="./styles-social.css?v=46">
-  <link rel="stylesheet" href="./styles-pro.css?v=46">
-  <link rel="stylesheet" href="./styles-custom.css?v=46">
-  <link rel="stylesheet" href="./styles-next.css?v=46">
+  <link rel="stylesheet" href="./styles-premium.css?v=47">
+  <link rel="stylesheet" href="./styles-identity.css?v=47">
+  <link rel="stylesheet" href="./styles-social.css?v=47">
+  <link rel="stylesheet" href="./styles-pro.css?v=47">
+  <link rel="stylesheet" href="./styles-custom.css?v=47">
+  <link rel="stylesheet" href="./styles-next.css?v=47">
   <script>
     // Paint the saved look before the first frame. The full settings live in the
     // database, which is async; this mirror is only a hint, and applyStyle() is
@@ -49,7 +49,7 @@
   <section class="startup-screen" id="startup-screen" role="dialog" aria-modal="true" aria-labelledby="startup-title" hidden>
     <div class="startup-frame">
       <header class="startup-top">
-        <span class="startup-wordmark"><img src="./icons/icon.svg?v=46" alt="" width="29" height="29">VIGNAN<span> / AI</span></span>
+        <span class="startup-wordmark"><img src="./icons/icon.svg?v=47" alt="" width="29" height="29">VIGNAN<span> / AI</span></span>
         <div class="startup-top-right"><span class="startup-edition">A STUDENT PROJECT &nbsp; / &nbsp; 01</span><button type="button" id="startup-skip">Skip intro ↗</button></div>
       </header>
       <div class="startup-body">
@@ -75,7 +75,7 @@
     <div class="auth-gate-shell">
       <header class="auth-gate-top">
         <a class="auth-gate-brand" href="./">
-          <span class="auth-gate-mark" aria-hidden="true"><img src="./icons/icon.svg?v=46" alt="" width="37" height="37"></span>
+          <span class="auth-gate-mark" aria-hidden="true"><img src="./icons/icon.svg?v=47" alt="" width="37" height="37"></span>
           <span>VIGNAN <b>VIDYANIKETHAN AI</b></span>
         </a>
         <span class="auth-gate-badge">YOUR STUDY SPACE</span>
@@ -218,6 +218,10 @@
     <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 20V4m0 0-7 7m7-7 7 7"/></symbol>
     <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></symbol>
     <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/><path d="M12 8v4.5l3 1.7"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
   </svg>
 
   <a class="skip-link" href="#main">Skip to content</a>
@@ -228,10 +232,78 @@
     <svg aria-hidden="true"><use href="#i-arrow-up"></use></svg>
     <span class="to-top-label">Top</span>
   </button>
+  <!-- THE SIMPLE SHELL.
+
+       The app opens as one chat box, the way every other AI looks. Everything
+       that is not the chat lives behind the logo in the bottom-left corner:
+       account, history, library, friends, games, settings. Nothing is removed —
+       it is folded away, one tap from where a student is looking. -->
+  <button type="button" class="home-logo" id="home-logo" aria-haspopup="dialog" aria-controls="app-menu" aria-expanded="false" aria-label="Menu — account, history, library, friends, games and settings">
+    <img src="./icons/icon.svg?v=47" alt="" width="26" height="26">
+  </button>
+
+  <div class="app-menu-overlay" id="app-menu" hidden aria-hidden="true">
+    <div class="app-menu-panel" role="dialog" aria-modal="true" aria-labelledby="app-menu-title">
+      <div class="app-menu-head">
+        <strong id="app-menu-title">Vignan Vidyanikethan AI</strong>
+        <button type="button" class="icon-button" id="app-menu-close" aria-label="Close menu"><svg aria-hidden="true"><use href="#i-close"></use></svg></button>
+      </div>
+      <div class="app-menu-account" id="app-menu-account" aria-live="polite"></div>
+      <div class="app-menu-scroll">
+        <div class="app-menu-group">
+          <span class="app-menu-label">CHAT</span>
+          <button type="button" class="app-menu-item" data-menu-action="new-chat"><svg aria-hidden="true"><use href="#i-plus"></use></svg><span>New chat</span></button>
+          <button type="button" class="app-menu-item" data-menu-action="history"><svg aria-hidden="true"><use href="#i-history"></use></svg><span>History</span><small id="app-menu-history-count"></small></button>
+          <button type="button" class="app-menu-item" data-menu-action="upload"><svg aria-hidden="true"><use href="#i-upload"></use></svg><span>Add a textbook</span></button>
+        </div>
+        <div class="app-menu-group">
+          <span class="app-menu-label">STUDY</span>
+          <button type="button" class="app-menu-item" data-menu-view="library"><svg aria-hidden="true"><use href="#i-book"></use></svg><span>Library</span></button>
+          <button type="button" class="app-menu-item" data-menu-view="quiz"><svg aria-hidden="true"><use href="#i-quiz"></use></svg><span>Quiz</span></button>
+          <button type="button" class="app-menu-item" data-menu-view="exam"><svg aria-hidden="true"><use href="#i-target"></use></svg><span>Exam practice</span></button>
+          <button type="button" class="app-menu-item" data-menu-view="flashcards"><svg aria-hidden="true"><use href="#i-cards"></use></svg><span>Flashcards</span></button>
+          <button type="button" class="app-menu-item" data-menu-view="progress"><svg aria-hidden="true"><use href="#i-chart"></use></svg><span>Progress</span></button>
+        </div>
+        <div class="app-menu-group">
+          <span class="app-menu-label">TOGETHER</span>
+          <button type="button" class="app-menu-item" data-menu-view="friends"><svg aria-hidden="true"><use href="#i-users"></use></svg><span>Friends</span><small data-menu-badge="friends"></small></button>
+          <button type="button" class="app-menu-item" data-menu-view="chat"><svg aria-hidden="true"><use href="#i-message"></use></svg><span>Study Hall</span><small data-menu-badge="chat"></small></button>
+          <button type="button" class="app-menu-item" data-menu-view="play"><svg aria-hidden="true"><use href="#i-play"></use></svg><span>Play</span></button>
+        </div>
+        <div class="app-menu-group">
+          <span class="app-menu-label">THIS DEVICE</span>
+          <button type="button" class="app-menu-item" data-menu-view="settings"><svg aria-hidden="true"><use href="#i-settings"></use></svg><span>Settings</span></button>
+          <button type="button" class="app-menu-item" data-menu-action="install"><svg aria-hidden="true"><use href="#i-download"></use></svg><span>Install the app</span></button>
+          <button type="button" class="app-menu-item" data-menu-action="theme"><svg aria-hidden="true"><use href="#i-moon"></use></svg><span id="app-menu-theme-label">Dark theme</span></button>
+        </div>
+      </div>
+      <p class="app-menu-foot" id="app-menu-foot">Books stay on this device.</p>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" id="history-overlay" hidden aria-hidden="true">
+    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="history-title">
+      <div class="sheet-head"><strong id="history-title">History</strong><button type="button" class="icon-button" data-sheet-close="history-overlay" aria-label="Close history"><svg aria-hidden="true"><use href="#i-close"></use></svg></button></div>
+      <p class="sheet-note">Everything you have asked on this device, newest first. Tap one to ask it again.</p>
+      <div class="history-list" id="history-list"></div>
+      <button type="button" class="button ghost sheet-wide" id="history-clear">Clear the chat</button>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" id="install-overlay" hidden aria-hidden="true">
+    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="install-title">
+      <div class="sheet-head"><strong id="install-title">Install the app</strong><button type="button" class="icon-button" data-sheet-close="install-overlay" aria-label="Close"><svg aria-hidden="true"><use href="#i-close"></use></svg></button></div>
+      <p class="sheet-note" id="install-note">Add Vignan to your home screen and it opens like an app, works offline, and keeps your books on this device.</p>
+      <button type="button" class="button primary sheet-wide" id="install-now" hidden>Add to this device</button>
+      <div class="install-steps" id="install-steps"></div>
+      <p class="sheet-note sheet-fine" id="install-fine"></p>
+    </div>
+  </div>
+
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="./" aria-label="Vignan Vidyanikethan AI home">
-        <span class="brand-mark" aria-hidden="true"><img src="./icons/icon.svg?v=46" alt="" width="38" height="38"></span>
+        <span class="brand-mark" aria-hidden="true"><img src="./icons/icon.svg?v=47" alt="" width="38" height="38"></span>
         <span class="brand-text"><strong>Vignan</strong><small>Vidyanikethan AI</small></span>
       </a>
       <div class="sidebar-label">WORKSPACE</div>
@@ -263,7 +335,7 @@
     <div class="workspace">
       <header class="topbar premium-topbar">
         <div class="premium-brand">
-          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home"><img src="./icons/icon.svg?v=46" alt="" width="38" height="38"></a>
+          <a class="compact-brand" href="./" aria-label="Vignan Vidyanikethan AI home"><img src="./icons/icon.svg?v=47" alt="" width="38" height="38"></a>
           <span class="premium-wordmark">VIGNAN <span>AI</span></span>
         </div>
         <div class="premium-view-chip" aria-live="polite"><span class="premium-view-dot"></span><span id="premium-view-label">Ask</span></div>
@@ -329,6 +401,7 @@
             <div class="chat-column card">
               <div class="chat-log" id="chat-log" aria-live="polite"></div>
               <div class="typing hidden" id="typing"><span class="spinner"></span><span id="typing-label">Reading your textbooks…</span></div>
+              <div class="chat-starters" id="chat-starters" role="group" aria-label="Ways to start" hidden></div>
               <div class="goal-cards" id="goal-cards" role="group" aria-labelledby="goal-heading">
                 <div class="goal-head">
                   <h3 id="goal-heading" data-i18n="goal.heading">Where are you stuck?</h3>
@@ -338,6 +411,7 @@
               </div>
               <form class="composer" id="ask-form">
                 <div class="composer-input-row">
+                  <button type="button" class="attach-button" id="ask-attach" aria-haspopup="dialog" aria-controls="attach-overlay" aria-expanded="false" aria-label="Add a textbook, fetch a website, or start a quiz" title="Add a textbook, fetch a website, or start a quiz"><svg aria-hidden="true"><use href="#i-plus"></use></svg></button>
                   <textarea id="ask-input" rows="2" aria-label="Ask, paste a public link, or request a quiz" placeholder="Ask, paste a link, or say ‘quiz me on…’" data-i18n-placeholder="ask.placeholder" data-i18n-aria="ask.inputLabel"></textarea>
                   <button type="button" class="send-button ask-mic" id="ask-mic" aria-label="Ask by speaking" title="Ask by speaking"><svg><use href="#i-mic"></use></svg></button>
                   <button type="submit" class="send-button" id="ask-send" aria-label="Send question" data-i18n-aria="ask.send"><svg><use href="#i-send"></use></svg></button>
@@ -362,6 +436,7 @@
                     <button type="button" class="mode-chip active" data-depth="balanced" title="A clear answer with the key steps">Balanced</button>
                     <button type="button" class="mode-chip" data-depth="exam" title="A model exam answer with labelled points">Exam</button>
                   </div></details>
+                  <button type="button" class="text-button" id="ask-sources-toggle" aria-expanded="false">Sources</button>
                   <button type="button" class="text-button" id="clear-chat" data-i18n="ask.clear">Clear chat</button>
                 </div>
               </form>
@@ -427,7 +502,7 @@
               <button type="button" class="button primary full" id="upload-submit" data-i18n="library.addBook">Add to library</button>
               <div class="upload-progress hidden" id="upload-progress"><div class="meter"><span id="upload-meter"></span></div><p id="upload-status"></p></div>
             </section>
-            <section class="card paste-card">
+            <section class="card paste-card" id="paste-card">
               <h3 data-i18n="library.pasteTitle">Or paste notes</h3>
               <label><span data-i18n="library.titleLabel">Title</span><input type="text" id="paste-title" placeholder="My chapter notes"></label>
               <label class="grow"><span>Notes</span><textarea id="paste-text" rows="8" placeholder="Paste a chapter here. Use [[page:1]], [[page:2]] to keep page numbers." data-i18n-placeholder="library.pastePlaceholder"></textarea></label>
@@ -862,10 +937,34 @@
     </div>
   </div>
 
+  <div class="sheet-overlay" id="attach-overlay" hidden aria-hidden="true">
+    <div class="sheet-panel attach-panel" role="dialog" aria-modal="true" aria-labelledby="attach-title">
+      <div class="sheet-head"><strong id="attach-title">Add something</strong><button type="button" class="icon-button" data-sheet-close="attach-overlay" aria-label="Close"><svg aria-hidden="true"><use href="#i-close"></use></svg></button></div>
+      <p class="sheet-note">Your books, a website, or a quick way to practise — all from here.</p>
+
+      <button type="button" class="attach-item" data-attach="upload"><svg aria-hidden="true"><use href="#i-upload"></use></svg><span><strong>Upload a textbook</strong><small>PDF or text file from this device</small></span></button>
+      <button type="button" class="attach-item" data-attach="notes"><svg aria-hidden="true"><use href="#i-book"></use></svg><span><strong>Paste notes</strong><small>Type or paste a chapter</small></span></button>
+      <button type="button" class="attach-item" data-attach="link"><svg aria-hidden="true"><use href="#i-link"></use></svg><span><strong>Fetch a website</strong><small>Read a public page and ask about it</small></span></button>
+
+      <form class="attach-link-form" id="attach-link-form" hidden>
+        <label for="attach-link-url">Website address</label>
+        <input type="url" id="attach-link-url" maxlength="2048" placeholder="https://example.org/article" autocomplete="off" spellcheck="false">
+        <p class="attach-note">Public pages only. It is saved as a web source and labelled as outside your textbooks.</p>
+        <button type="submit" class="button primary" id="attach-link-go">Fetch the page</button>
+      </form>
+
+      <div class="attach-split" role="presentation"><span>OR PRACTISE</span></div>
+
+      <button type="button" class="attach-item" data-attach="quiz"><svg aria-hidden="true"><use href="#i-quiz"></use></svg><span><strong>Quiz me</strong><small>Questions from the chapter you are reading</small></span></button>
+      <button type="button" class="attach-item" data-attach="flashcards"><svg aria-hidden="true"><use href="#i-cards"></use></svg><span><strong>Make flashcards</strong><small>One card at a time, spaced out</small></span></button>
+      <button type="button" class="attach-item" data-attach="exam"><svg aria-hidden="true"><use href="#i-target"></use></svg><span><strong>Exam practice</strong><small>JEE, NEET and AP EAPCET timings</small></span></button>
+    </div>
+  </div>
+
   <div class="command-overlay" id="command-overlay" hidden aria-hidden="true">
     <div class="command-panel" role="dialog" aria-modal="true" aria-labelledby="command-title">
       <div class="command-head">
-        <span class="command-mark" aria-hidden="true"><img src="./icons/icon.svg?v=46" alt="" width="38" height="38"></span>
+        <span class="command-mark" aria-hidden="true"><img src="./icons/icon.svg?v=47" alt="" width="38" height="38"></span>
         <div class="command-title-wrap">
           <strong id="command-title">Everything, in one menu.</strong>
           <span>Search pages, actions and AI nicknames.</span>
@@ -949,7 +1048,7 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./js/boot.js?v=46"></script>
+  <script type="module" src="./js/boot.js?v=47"></script>
 
   <aside class="first-run" id="first-run" role="dialog" aria-modal="false" aria-labelledby="first-run-title" hidden>
     <span class="first-run-step" id="first-run-step">STEP 1 OF 3</span>
