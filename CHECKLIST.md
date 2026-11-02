@@ -93,6 +93,11 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 3.21d | Type `zzz`: the message quotes what you typed and a "Show all 33 languages" button clears the box and brings every tile back | ☐ | ☐ | ☐ |
 | 3.21e | Tap the language that is already selected: a short note says you are already using it, instead of nothing happening | ☐ | ☐ | ☐ |
 | 3.21f | On a 360px phone the glyph is still clearly larger than the name — around 22px, not 17px | ☐ | ☐ | ☐ |
+| 3.27 | Any screen: the title is visible above the content, numbered 01–10, and matches the sidebar item you tapped | ☐ | ☐ | ☐ |
+| 3.27b | Corners are square in Minimal and Terminal (Settings → Look & language) | ☐ | ☐ | ☐ |
+| 3.27c | On a phone the bar has Ask, Library, Quiz, Exams, Progress, More — and More opens a menu listing all ten screens | ☐ | ☐ | ☐ |
+| 3.27d | Scroll to the bottom of Settings, tap Ask, then tap Settings again: you return to where you were, not to a random offset | ☐ | ☐ | ☐ |
+| 3.27e | Tab through the page with a keyboard: every control shows a 2px outline, and the current screen is announced | ☐ | ☐ | ☐ |
 | 3.26 | Settings → App, updates & offline → switch **Offline mode** on: the chip in the top bar reads "Offline mode", the web switch is greyed out, and no update banner appears after a reload | ☐ | ☐ | ☐ |
 | 3.26b | With offline mode on, ask a question and check the network panel (or turn Wi-Fi off): no request is made, and the answer still cites your pages | ☐ | ☐ | ☐ |
 | 3.26c | Turn offline mode off: the web switch returns to whatever it was before, and "Check for updates" works again | ☐ | ☐ | ☐ |
@@ -168,5 +173,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (482 checks) plus
+The quickest regression test for a UI fix is `npm test` (498 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.

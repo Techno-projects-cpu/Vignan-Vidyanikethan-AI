@@ -1,6 +1,6 @@
 {
-  "version": 41,
-  "generatedAt": "2026-10-31T07:47:06.763Z",
+  "version": 42,
+  "generatedAt": "2026-11-02T14:54:44.933Z",
   "urls": [
     "./",
     "./index.html",
@@ -98,6 +98,7 @@
     "./styles-identity.css",
     "./styles-judge.css",
     "./styles-legal.css",
+    "./styles-next.css",
     "./styles-premium.css",
     "./styles-pro.css",
     "./styles-social.css",

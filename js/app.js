@@ -6,27 +6,27 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=41";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=41";
-import { ingestPdf, ingestText } from "./ingest.js?v=41";
-import { splitSentences } from "./text.js?v=41";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=41";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=41";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=41";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=41";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=41";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=41";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=41";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=41";
+import * as db from "./db.js?v=42";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=42";
+import { ingestPdf, ingestText } from "./ingest.js?v=42";
+import { splitSentences } from "./text.js?v=42";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=42";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=42";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=42";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=42";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=42";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=42";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=42";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=42";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=41";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=41";
+} from "./pro-mode.js?v=42";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=42";
 import {
   RELEASE, applyUpdate, checkForUpdate, startUpdateWatch, updateBannerText, updateStatusLabel,
-} from "./updates.js?v=41";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=41";
+} from "./updates.js?v=42";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=42";
 import {
   OFFLINE_MODE_LABEL,
   OFFLINE_MODE_NOTE,
@@ -36,11 +36,11 @@ import {
   networkAllowed,
   setOfflineMode,
   shouldAnnounceUpdate,
-} from "./offline-mode.js?v=41";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=41";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=41";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=41";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=41";
+} from "./offline-mode.js?v=42";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=42";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=42";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=42";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=42";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -48,8 +48,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=41";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=41";
+} from "./llm.js?v=42";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=42";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -61,7 +61,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=41";
+} from "./local-ai.js?v=42";
 import {
   EXAMS,
   MODES,
@@ -76,12 +76,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=41";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=41";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=41";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=41";
-import { TASKS } from "./model-router.js?v=41";
-import { PROVIDERS, providerList } from "./providers.js?v=41";
+} from "./exam-packs.js?v=42";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=42";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=42";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=42";
+import { TASKS } from "./model-router.js?v=42";
+import { PROVIDERS, providerList } from "./providers.js?v=42";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -90,30 +90,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=41";
-import { parseApiKeys } from "./key-pool.js?v=41";
+} from "./settings.js?v=42";
+import { parseApiKeys } from "./key-pool.js?v=42";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=41";
+} from "./student-keys.js?v=42";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=41";
+} from "./quiz.js?v=42";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=41";
+} from "./flashcards.js?v=42";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=41";
+} from "./study-decks.js?v=42";
 import {
   accuracy,
   currentStreak,
@@ -124,16 +124,16 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=41";
-import { externalSearchUrl, searchWeb } from "./web.js?v=41";
-import { openEditStudio } from "./edit-studio.js?v=41";
-import { openReader } from "./reader.js?v=41";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=41";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=41";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=41";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=41";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=41";
-import * as ui from "./ui.js?v=41";
+} from "./progress.js?v=42";
+import { externalSearchUrl, searchWeb } from "./web.js?v=42";
+import { openEditStudio } from "./edit-studio.js?v=42";
+import { openReader } from "./reader.js?v=42";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=42";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=42";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=42";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=42";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=42";
+import * as ui from "./ui.js?v=42";
 import {
   clearReferral,
   getLeaderboard,
@@ -143,8 +143,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=41";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=41";
+} from "./auth.js?v=42";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=42";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -152,12 +152,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=41";
-import { initMotion, revealVisible } from "./motion.js?v=41";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=41";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=41";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=41";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=41";
+} from "./premium-ui.js?v=42";
+import { initMotion, revealVisible } from "./motion.js?v=42";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=42";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=42";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=42";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=42";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -498,12 +498,24 @@ function setView(view, { skipHistory = false } = {}) {
   state.currentView = view;
   $$(".view").forEach((panel) => panel.classList.toggle("active", panel.dataset.panel === view));
   $$(".nav-item, .mobile-nav-item").forEach((button) => {
-    button.classList.toggle("active", button.dataset.view === view);
+    const active = button.dataset.view === view;
+    button.classList.toggle("active", active);
+    // Colour is not an accessible name. Screen readers get the state too.
+    if (active) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
   });
   const meta = VIEW_META[view];
   $("#view-kicker").textContent = t(meta.kicker);
   $("#view-title").textContent = t(meta.title);
   $("#view-subtitle").textContent = t(meta.subtitle);
+  // The numbered section label, kept in step with the nav order so the header
+  // and the sidebar never disagree about where you are.
+  const order = Object.keys(VIEW_META);
+  const index = order.indexOf(view) + 1;
+  const indexNode = $("#view-index");
+  if (indexNode) indexNode.textContent = String(index).padStart(2, "0");
+  // Small screens and the print sheet style themselves from this attribute.
+  document.body.dataset.view = view;
   if (!skipHistory) {
     const url = new URL(location.href);
     url.searchParams.set("view", view);
@@ -523,9 +535,46 @@ function setView(view, { skipHistory = false } = {}) {
     if (view === "chat") renderSocialChat();
     if (view === "play") renderSocialPlay();
   }
-  $("#main").scrollTop = 0;
+  restoreScroll(view);
   setPremiumView(view);
   requestAnimationFrame(() => revealVisible());
+}
+
+/**
+ * Scroll memory, per screen.
+ *
+ * The window is the scroll container, so the old `$("#main").scrollTop = 0` did
+ * nothing: switching from the bottom of a long Settings page to Ask left the
+ * student halfway down a screen they had never seen. Coming back to a screen now
+ * returns to where they were, which is what a two-way app should do.
+ */
+const scrollMemory = new Map();
+
+function mainScrollTop() {
+  const main = $("#main");
+  if (main && main.scrollHeight > main.clientHeight + 4 && getComputedStyle(main).overflowY !== "visible") {
+    return main;
+  }
+  return null;
+}
+
+function currentScroll() {
+  const scroller = mainScrollTop();
+  return scroller ? scroller.scrollTop : window.scrollY || 0;
+}
+
+function restoreScroll(view) {
+  const scroller = mainScrollTop();
+  const previous = state.currentView;
+  if (previous) scrollMemory.set(previous, currentScroll());
+  const top = scrollMemory.get(view) || 0;
+  const scrollTo = () => {
+    if (scroller) scroller.scrollTop = top;
+    else window.scrollTo({ top, left: 0, behavior: "auto" });
+  };
+  scrollTo();
+  // The view was not laid out yet on the first paint; once it is, put it back.
+  requestAnimationFrame(scrollTo);
 }
 
 function setMode(mode) {
@@ -561,7 +610,20 @@ function setTheme(theme, { save = true } = {}) {
   // so a student who chose dark saw a white flash on every load. Same reason,
   // same fix, and only for a value this app wrote itself.
   try { localStorage.setItem(THEME_MIRROR_KEY, theme === "dark" ? "dark" : "light"); } catch { /* private mode */ }
+  syncBrowserChrome();
   if (save) saveSettings();
+}
+
+/**
+ * The strip of colour a phone draws above the page is an inline <meta>, so a
+ * theme change used to leave a black band on top of a white app (or the other
+ * way round) until the next reload. Read the real background and write it back.
+ */
+function syncBrowserChrome() {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) return;
+  const background = getComputedStyle(document.body).backgroundColor;
+  if (background && background !== "rgba(0, 0, 0, 0)") meta.setAttribute("content", background);
 }
 
 /**
@@ -632,6 +694,8 @@ function applyStyle(id, { save = true, remember = true } = {}) {
   const chip = $("#style-chip");
   if (chip) chip.textContent = themeById(style).name;
   syncThemeSwitchLock();
+  // The palette changed, so the browser's own strip has to follow it.
+  requestAnimationFrame(syncBrowserChrome);
   if (save) void saveSettings();
 }
 
@@ -5047,7 +5111,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=41");
+            const { social } = await import("./social.js?v=42");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -5503,6 +5567,12 @@ function bindEvents() {
   window.addEventListener("online", updateOfflineChip);
   window.addEventListener("offline", updateOfflineChip);
   $("#pro-chip")?.addEventListener("click", () => { void disengageProMode(); });
+  // The phone tab bar carries five screens; this is the way to the other five.
+  $("#mobile-more")?.addEventListener("click", () => {
+    const button = $("#command-menu-button");
+    if (button) button.click();
+    else window.dispatchEvent(new CustomEvent("vignan:command-menu"));
+  });
   $("#update-now")?.addEventListener("click", () => { void takeUpdate(); });
   $("#update-later")?.addEventListener("click", () => {
     // Remembered, so the same release does not greet the student again on the

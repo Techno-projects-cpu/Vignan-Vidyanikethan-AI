@@ -20,7 +20,20 @@ test("minimal UI keeps one compact top navigation and a short Ask banner", () =>
   }
   const mobile = html.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/);
   assert.ok(mobile, "mobile navigation exists");
-  assert.equal((mobile[0].match(/data-view="/g) || []).length, 7, "the phone bar keeps seven thumb-sized targets");
+  // Six targets, not ten: five screens a student opens daily, plus one way to
+  // the rest. Progress and Settings used to have no phone entry at all, and the
+  // five tabs that were there included Play but not Progress.
+  assert.equal((mobile[0].match(/data-view="/g) || []).length, 5, "five screens get a tab");
+  for (const view of ["ask", "library", "quiz", "exam", "progress"]) {
+    assert.ok(mobile[0].includes(`data-view="${view}"`), `${view} is one tap away on a phone`);
+  }
+  assert.match(mobile[0], /id="mobile-more"[^>]*aria-controls="command-overlay"/, "the rest of the app is one tap away");
+  // Everything not in the bar must be in the menu the More button opens.
+  const menu = html.match(/<div class="command-panel"[\s\S]*?id="command-list"[\s\S]*?<\/section>/);
+  const menuSource = menu ? menu[0] : html;
+  for (const view of ["flashcards", "friends", "chat", "play", "settings"]) {
+    assert.ok(menuSource.includes(`data-view="${view}"`), `${view} is reachable from the phone menu`);
+  }
 
   // The connect banner used to repeat what Settings already said. It is gone from
   // Ask; its three buttons live in Settings under Study & AI.

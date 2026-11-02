@@ -1,0 +1,1477 @@
+/* ==========================================================================
+   Vignan Vidyanikethan AI — "Vignan 2.0" design layer
+   --------------------------------------------------------------------------
+   Loaded last, on purpose. Every rule here is a surface decision: type, space,
+   borders, rhythm, motion. It never changes what the app does, and it reads the
+   theme tokens that js/themes.js writes, so all six styles keep working.
+
+   The rules this layer follows, in the order they matter:
+
+   1. Sharp. Corners are 0. The app is a document, not a bubble.
+   2. One pixel. Separation is a hairline, never a shadow, never a gradient.
+   3. One accent. Ink on paper; grey for everything that is not the thing you
+      came to do.
+   4. Numbers carry structure. Sections and steps are indexed in the mono face,
+      like a printed syllabus.
+   5. Type does the shouting. Size and space, not colour, decide what is loud.
+   6. Every tap is at least 44px on a phone, and every control is reachable by
+      keyboard with a visible ring.
+
+   Scoped to body.premium-ui so a browser without the shell still renders the
+   base stylesheets cleanly.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Scale
+   -------------------------------------------------------------------------- */
+
+body.premium-ui {
+  /* Space: a 4px grid, named by role rather than by number. */
+  --vn-space-1: 4px;
+  --vn-space-2: 8px;
+  --vn-space-3: 12px;
+  --vn-space-4: 16px;
+  --vn-space-5: 24px;
+  --vn-space-6: 32px;
+  --vn-space-7: 48px;
+  --vn-space-8: 64px;
+
+  /* Type: fluid, so a 360px phone and a 1600px desk both look deliberate. */
+  --vn-label: 11px;
+  --vn-meta: 12px;
+  --vn-small: 13px;
+  --vn-body: 15px;
+  --vn-lead: 17px;
+  --vn-h3: clamp(17px, 1.4vw, 19px);
+  --vn-h2: clamp(21px, 2vw, 26px);
+  --vn-display: clamp(30px, 4.4vw, 54px);
+  --vn-measure: 68ch;
+
+  /* Shape. Zero radius everywhere: the one rule that makes it ours. */
+  --vn-radius: 0;
+  --vn-hairline: 1px;
+  --vn-control: 40px;
+  --vn-control-lg: 48px;
+
+  /* Motion. One curve, two durations, nothing clever. */
+  --vn-ease: cubic-bezier(0.2, 0, 0, 1);
+  --vn-fast: 120ms;
+  --vn-slow: 240ms;
+
+  /* Surfaces are derived from the theme, never hard-coded here. */
+  --vn-canvas: var(--bg);
+  --vn-panel: var(--surface);
+  --vn-raise: var(--surface-2);
+  --vn-ink: var(--ink);
+  --vn-ink-2: var(--ink-2);
+  --vn-quiet: var(--muted);
+  --vn-rule: var(--line);
+  --vn-rule-strong: var(--line-strong);
+
+  --vn-font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --vn-font-ui: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --vn-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Older layers round things off; this layer is the last word. Minimal and
+     Terminal therefore end up perfectly square. The other four styles may still
+     force a corner with `!important` where their whole idea is softness — that is
+     a theme doing its job, and the only file allowed to overrule this one. */
+  --radius: 0;
+  --radius-sm: 0;
+  --p-radius: 0;
+  --vn-corner: 0;
+
+  background: var(--vn-canvas);
+  color: var(--vn-ink);
+  font-family: var(--vn-font-ui);
+  font-size: var(--vn-body);
+  line-height: 1.6;
+  font-feature-settings: "kern" 1, "liga" 1, "tnum" 0;
+  text-rendering: optimizeLegibility;
+}
+
+body.premium-ui ::selection {
+  background: var(--vn-ink);
+  color: var(--vn-canvas);
+}
+
+/* Focus is never invisible, and never a browser default that clashes. */
+body.premium-ui :focus-visible {
+  outline: 2px solid var(--vn-ink);
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+body.premium-ui :focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Thin, quiet scrollbars; the content is what you should notice. */
+body.premium-ui * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--vn-rule-strong) transparent;
+}
+
+body.premium-ui ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body.premium-ui ::-webkit-scrollbar-thumb {
+  background: var(--vn-rule-strong);
+  border: 3px solid var(--vn-canvas);
+}
+
+/* --------------------------------------------------------------------------
+   2. Type
+   -------------------------------------------------------------------------- */
+
+body.premium-ui h1,
+body.premium-ui h2,
+body.premium-ui h3,
+body.premium-ui h4,
+body.premium-ui .premium-hero h2,
+body.premium-ui .brand-text strong {
+  font-family: var(--vn-font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  color: var(--vn-ink);
+  text-wrap: balance;
+}
+
+body.premium-ui h2 { font-size: var(--vn-h2); }
+body.premium-ui h3 { font-size: var(--vn-h3); letter-spacing: -0.01em; }
+
+body.premium-ui p {
+  color: var(--vn-ink-2);
+  max-width: var(--vn-measure);
+}
+
+body.premium-ui p.hint,
+body.premium-ui .hint,
+body.premium-ui small {
+  color: var(--vn-quiet);
+  font-size: var(--vn-small);
+  line-height: 1.55;
+}
+
+/* The mono micro-label. Used for section names, counts and indexes. */
+body.premium-ui .eyebrow,
+body.premium-ui .sidebar-label,
+body.premium-ui .premium-hero-eyebrow,
+body.premium-ui .page-head-index {
+  font-family: var(--vn-font-mono);
+  font-size: var(--vn-label);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vn-quiet);
+}
+
+/* Long-form reading (answer bodies, legal pages, notes). */
+body.premium-ui .message-content,
+body.premium-ui .message p,
+body.premium-ui .prose {
+  font-size: var(--vn-body);
+  line-height: 1.7;
+  max-width: var(--vn-measure);
+  color: var(--vn-ink);
+}
+
+body.premium-ui a {
+  color: var(--vn-ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--vn-rule-strong);
+  transition: border-color var(--vn-fast) var(--vn-ease);
+}
+
+body.premium-ui a:hover {
+  border-bottom-color: var(--vn-ink);
+}
+
+body.premium-ui hr {
+  border: 0;
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+  margin: var(--vn-space-5) 0;
+}
+
+/* --------------------------------------------------------------------------
+   3. Shell: sidebar, top bar, page header
+   -------------------------------------------------------------------------- */
+
+body.premium-ui .app-shell {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--vn-canvas);
+}
+
+body.premium-ui .sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vn-space-5);
+  padding: var(--vn-space-5) var(--vn-space-4) var(--vn-space-4);
+  background: var(--vn-canvas);
+  border-right: var(--vn-hairline) solid var(--vn-rule);
+  border-radius: 0;
+  overflow-y: auto;
+}
+
+body.premium-ui .brand {
+  display: flex;
+  align-items: center;
+  gap: var(--vn-space-3);
+  padding-bottom: var(--vn-space-4);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .brand-mark img {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+body.premium-ui .brand-text strong {
+  display: block;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+body.premium-ui .brand-text small {
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vn-quiet);
+}
+
+body.premium-ui .sidebar-label {
+  margin: 0;
+  padding-left: var(--vn-space-2);
+}
+
+/* The nav is a numbered index, not a pile of pills. */
+body.premium-ui .side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  counter-reset: nav-item;
+}
+
+body.premium-ui .side-nav .nav-item {
+  counter-increment: nav-item;
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px 20px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--vn-space-2);
+  min-height: 40px;
+  padding: 0 var(--vn-space-2);
+  border: 0;
+  border-left: 2px solid transparent;
+  background: transparent;
+  color: var(--vn-ink-2);
+  font-family: var(--vn-font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--vn-fast) var(--vn-ease), background var(--vn-fast) var(--vn-ease);
+}
+
+body.premium-ui .side-nav .nav-item::before {
+  content: counter(nav-item, decimal-leading-zero);
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--vn-quiet);
+  transition: color var(--vn-fast) var(--vn-ease);
+}
+
+body.premium-ui .side-nav .nav-item svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.5;
+  fill: none;
+  stroke: currentColor;
+  opacity: 0.75;
+}
+
+body.premium-ui .side-nav .nav-item:hover {
+  background: var(--vn-raise);
+  color: var(--vn-ink);
+}
+
+body.premium-ui .side-nav .nav-item.active {
+  border-left-color: var(--vn-ink);
+  background: transparent;
+  color: var(--vn-ink);
+  font-weight: 700;
+}
+
+body.premium-ui .side-nav .nav-item.active::before {
+  color: var(--vn-ink);
+}
+
+body.premium-ui .engine-card {
+  margin-top: auto;
+  padding: var(--vn-space-4);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  background: transparent;
+  border-radius: 0;
+}
+
+body.premium-ui .engine-card strong {
+  display: block;
+  font-family: var(--vn-font-display);
+  font-size: 15px;
+  margin: var(--vn-space-1) 0 var(--vn-space-1);
+}
+
+body.premium-ui .engine-card .text-button {
+  margin-top: var(--vn-space-2);
+  color: var(--vn-ink);
+}
+
+body.premium-ui .sidebar-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vn-space-1);
+  padding-top: var(--vn-space-4);
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+  font-size: var(--vn-meta);
+  color: var(--vn-quiet);
+}
+
+body.premium-ui .sidebar-foot a {
+  border: 0;
+  color: var(--vn-quiet);
+}
+
+body.premium-ui .sidebar-foot a:hover { color: var(--vn-ink); }
+
+body.premium-ui .workspace {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+  background: var(--vn-canvas);
+}
+
+/* Top bar: one hairline, brand left, actions right, nothing floating. */
+body.premium-ui .premium-topbar,
+body.premium-ui .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vn-space-4);
+  min-height: 64px;
+  padding: 0 var(--vn-space-6);
+  background: var(--vn-canvas);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+  backdrop-filter: none;
+}
+
+body.premium-ui .premium-wordmark {
+  font-family: var(--vn-font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--vn-ink);
+}
+
+body.premium-ui .premium-wordmark span {
+  color: var(--vn-quiet);
+}
+
+body.premium-ui .premium-view-chip {
+  display: none;
+}
+
+body.premium-ui .premium-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--vn-space-2);
+}
+
+body.premium-ui .ai-chooser-trigger,
+body.premium-ui .premium-menu-button,
+body.premium-ui .chip,
+body.premium-ui .icon-button {
+  border: var(--vn-hairline) solid var(--vn-rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--vn-ink);
+  min-height: 32px;
+  transition: border-color var(--vn-fast) var(--vn-ease), background var(--vn-fast) var(--vn-ease);
+}
+
+body.premium-ui .ai-chooser-trigger:hover,
+body.premium-ui .premium-menu-button:hover,
+body.premium-ui .chip:hover,
+body.premium-ui .icon-button:hover {
+  border-color: var(--vn-ink);
+}
+
+body.premium-ui .ai-chooser-copy strong {
+  font-family: var(--vn-font-display);
+  font-size: 13px;
+}
+
+body.premium-ui .ai-chooser-copy small {
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body.premium-ui .premium-menu-button kbd,
+body.premium-ui kbd {
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  padding: 2px 5px;
+  border: var(--vn-hairline) solid var(--vn-rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--vn-quiet);
+}
+
+body.premium-ui .premium-icon-button,
+body.premium-ui .icon-button {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.premium-ui .profile-chip {
+  width: 32px;
+  height: 32px;
+  border-radius: 0;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  background: var(--vn-raise);
+  font-family: var(--vn-font-mono);
+  font-size: 11px;
+}
+
+/* --------------------------------------------------------------------------
+   4. Page header — the screen's own name, in the flow of the document
+   -------------------------------------------------------------------------- */
+
+body.premium-ui .page-head {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: var(--vn-space-6) var(--vn-space-6) var(--vn-space-5) !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  border: 0 !important;
+  border-bottom: var(--vn-hairline) solid var(--vn-rule) !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "index kicker"
+    "index title"
+    "index subtitle";
+  column-gap: var(--vn-space-5);
+  align-items: start;
+  background: var(--vn-canvas);
+}
+
+body.premium-ui .page-head-index {
+  grid-area: index;
+  display: block;
+  padding-top: 6px;
+  color: var(--vn-ink);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+body.premium-ui .page-head #view-kicker {
+  grid-area: kicker;
+  display: block;
+  margin-bottom: var(--vn-space-2);
+  color: var(--vn-quiet);
+}
+
+body.premium-ui .page-head #view-title {
+  grid-area: title;
+  margin: 0;
+  font-size: var(--vn-display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+
+body.premium-ui .page-head #view-subtitle {
+  grid-area: subtitle;
+  margin: var(--vn-space-3) 0 0;
+  font-size: var(--vn-lead);
+  line-height: 1.5;
+  color: var(--vn-ink-2);
+  max-width: 60ch;
+}
+
+/* On the Ask screen the hero already says the same thing; keep the header
+   visually light rather than repeating a 54px headline above another one. */
+body.premium-ui[data-view="ask"] .page-head #view-title {
+  font-size: var(--vn-h2);
+}
+
+/* --------------------------------------------------------------------------
+   5. Main area and views
+   -------------------------------------------------------------------------- */
+
+body.premium-ui .main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--vn-space-6);
+  scroll-behavior: smooth;
+}
+
+body.premium-ui .view {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+body.premium-ui .view:not(.active) {
+  /* Never laid out or painted until it is shown: the ten screens no longer
+     cost anything while a student is on one of them. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+body.premium-ui .view.active {
+  animation: vn-view-in var(--vn-slow) var(--vn-ease) both;
+}
+
+@keyframes vn-view-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+body.premium-ui .section-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--vn-space-4);
+  margin-bottom: var(--vn-space-5);
+  padding-bottom: var(--vn-space-4);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .section-copy h2 {
+  margin: 0;
+  font-size: var(--vn-h2);
+}
+
+body.premium-ui .section-copy p {
+  margin: var(--vn-space-2) 0 0;
+  font-size: var(--vn-small);
+}
+
+/* --------------------------------------------------------------------------
+   6. Cards — one object, hairline seams, no shadow
+   -------------------------------------------------------------------------- */
+
+body.premium-ui .card {
+  padding: var(--vn-space-5);
+  background: var(--vn-panel);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.premium-ui .card > h2:first-child,
+body.premium-ui .card > h3:first-child {
+  margin-top: 0;
+}
+
+body.premium-ui .card > h2,
+body.premium-ui .card > h3 {
+  margin-bottom: var(--vn-space-3);
+}
+
+/* Groups that should read as a single block share their borders. */
+body.premium-ui .settings-grid,
+body.premium-ui .stat-grid,
+body.premium-ui .goal-stack,
+body.premium-ui .library-list,
+body.premium-ui .language-grid,
+body.premium-ui .update-rows {
+  gap: 0;
+}
+
+body.premium-ui .settings-grid > .card + .card,
+body.premium-ui .stat-grid > * + *,
+body.premium-ui .library-list > * + *,
+body.premium-ui .update-rows > * + * {
+  border-top: 0;
+}
+
+body.premium-ui .settings-grid > .card,
+body.premium-ui .stat-grid > * {
+  border-radius: 0;
+}
+
+/* --------------------------------------------------------------------------
+   7. Controls
+   -------------------------------------------------------------------------- */
+
+body.premium-ui .button,
+body.premium-ui .premium-button,
+body.premium-ui button.button,
+body.premium-ui .text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vn-space-2);
+  min-height: var(--vn-control);
+  padding: 0 var(--vn-space-4);
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--vn-ink);
+  font-family: var(--vn-font-ui);
+  font-size: var(--vn-meta);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--vn-fast) var(--vn-ease), color var(--vn-fast) var(--vn-ease),
+    border-color var(--vn-fast) var(--vn-ease), transform var(--vn-fast) var(--vn-ease);
+}
+
+body.premium-ui .button:hover,
+body.premium-ui .premium-button:hover {
+  border-color: var(--vn-ink);
+  background: var(--vn-raise);
+}
+
+body.premium-ui .button:active,
+body.premium-ui .premium-button:active {
+  transform: translateY(1px);
+}
+
+body.premium-ui .button.primary,
+body.premium-ui .premium-button.primary,
+body.premium-ui .button[type="submit"] {
+  background: var(--vn-ink);
+  color: var(--vn-canvas);
+  border-color: var(--vn-ink);
+}
+
+body.premium-ui .button.primary:hover,
+body.premium-ui .premium-button.primary:hover,
+body.premium-ui .button[type="submit"]:hover {
+  background: var(--vn-ink-2);
+  border-color: var(--vn-ink);
+  color: var(--vn-canvas);
+}
+
+body.premium-ui .button.ghost,
+body.premium-ui .text-button {
+  border-color: transparent;
+  background: transparent;
+  padding: 0 var(--vn-space-2);
+  color: var(--vn-ink-2);
+}
+
+body.premium-ui .button.ghost:hover,
+body.premium-ui .text-button:hover {
+  color: var(--vn-ink);
+  border-color: var(--vn-rule);
+  background: transparent;
+}
+
+body.premium-ui .button.danger,
+body.premium-ui .button.ghost.danger {
+  color: var(--danger, #ff817b);
+  border-color: var(--danger, #ff817b);
+}
+
+body.premium-ui .button.small,
+body.premium-ui .premium-button.small {
+  min-height: 32px;
+  padding: 0 var(--vn-space-3);
+  font-size: 10px;
+}
+
+body.premium-ui .button.full { width: 100%; }
+
+body.premium-ui .button[disabled],
+body.premium-ui button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Fields: flat, 1px, generous; the label above is the design. */
+body.premium-ui input[type="text"],
+body.premium-ui input[type="password"],
+body.premium-ui input[type="number"],
+body.premium-ui input[type="url"],
+body.premium-ui input[type="search"],
+body.premium-ui select,
+body.premium-ui textarea {
+  width: 100%;
+  min-height: var(--vn-control-lg);
+  padding: var(--vn-space-2) var(--vn-space-3);
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--vn-ink);
+  font-family: var(--vn-font-ui);
+  font-size: var(--vn-body);
+  line-height: 1.5;
+  transition: border-color var(--vn-fast) var(--vn-ease);
+}
+
+body.premium-ui textarea {
+  padding: var(--vn-space-3);
+  resize: vertical;
+}
+
+body.premium-ui input:focus,
+body.premium-ui select:focus,
+body.premium-ui textarea:focus {
+  border-color: var(--vn-ink);
+  outline: none;
+}
+
+body.premium-ui input::placeholder,
+body.premium-ui textarea::placeholder {
+  color: var(--vn-quiet);
+}
+
+body.premium-ui label {
+  display: block;
+  font-size: var(--vn-small);
+  font-weight: 600;
+  color: var(--vn-ink-2);
+}
+
+body.premium-ui label > span:first-child {
+  display: block;
+  margin-bottom: var(--vn-space-2);
+}
+
+body.premium-ui .switch-label,
+body.premium-ui label.switch-label.block {
+  display: flex;
+  align-items: center;
+  gap: var(--vn-space-3);
+  min-height: var(--vn-control-lg);
+  padding: var(--vn-space-2) var(--vn-space-3);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  font-size: var(--vn-small);
+}
+
+body.premium-ui .switch-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  margin: 0;
+  flex: none;
+  accent-color: var(--vn-ink);
+}
+
+/* Tabs inside Settings: underline, not pills. */
+body.premium-ui .settings-tabs,
+body.premium-ui .settings-tab-row {
+  display: flex;
+  gap: var(--vn-space-5);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+  margin-bottom: var(--vn-space-5);
+  padding: 0;
+}
+
+body.premium-ui .settings-tab,
+body.premium-ui .settings-tab-row button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--vn-quiet);
+  font-size: var(--vn-small);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: var(--vn-space-3) 0;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+body.premium-ui .settings-tab[aria-selected="true"],
+body.premium-ui .settings-tab.active,
+body.premium-ui .settings-tab-row button.active {
+  color: var(--vn-ink);
+  border-bottom-color: var(--vn-ink);
+}
+
+/* --------------------------------------------------------------------------
+   8. Ask screen
+   -------------------------------------------------------------------------- */
+
+body.premium-ui .premium-hero {
+  padding: var(--vn-space-7) 0 var(--vn-space-6);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+  background: transparent;
+  border-radius: 0;
+  margin-bottom: var(--vn-space-6);
+}
+
+body.premium-ui .premium-hero::before,
+body.premium-ui .premium-hero::after {
+  display: none;
+}
+
+body.premium-ui .premium-hero h2 {
+  font-size: var(--vn-display);
+  margin: var(--vn-space-4) 0 var(--vn-space-4);
+  max-width: 18ch;
+}
+
+body.premium-ui .premium-hero > p {
+  font-size: var(--vn-lead);
+  max-width: 56ch;
+  color: var(--vn-ink-2);
+}
+
+body.premium-ui .premium-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vn-space-2);
+  margin-top: var(--vn-space-5);
+}
+
+body.premium-ui .premium-project-line,
+body.premium-ui .premium-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vn-space-4);
+  margin-top: var(--vn-space-5);
+  padding-top: var(--vn-space-4);
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+  font-size: var(--vn-meta);
+  color: var(--vn-quiet);
+}
+
+body.premium-ui .premium-project-line span {
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--vn-ink);
+}
+
+body.premium-ui .ask-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--vn-space-5);
+  align-items: start;
+}
+
+body.premium-ui .chat-column {
+  padding: 0;
+  background: var(--vn-panel);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  overflow: hidden;
+}
+
+body.premium-ui .chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vn-space-5);
+  padding: var(--vn-space-5);
+  max-height: none;
+}
+
+/* Messages: a role label, then prose. No bubbles, no tails. */
+body.premium-ui .message {
+  display: grid;
+  gap: var(--vn-space-2);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+body.premium-ui .message + .message {
+  padding-top: var(--vn-space-5);
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .message-role,
+body.premium-ui .message-meta {
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vn-quiet);
+}
+
+body.premium-ui .message.assistant .message-role {
+  color: var(--vn-ink);
+}
+
+body.premium-ui .message.user .message-content {
+  color: var(--vn-ink);
+  font-weight: 600;
+}
+
+body.premium-ui .message-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vn-space-3);
+  margin-top: var(--vn-space-3);
+  padding-top: var(--vn-space-3);
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .message-actions button {
+  border: 0;
+  background: transparent;
+  color: var(--vn-quiet);
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  min-height: 32px;
+  padding: 0;
+  cursor: pointer;
+}
+
+body.premium-ui .message-actions button:hover { color: var(--vn-ink); }
+
+/* Citations read like footnotes. */
+body.premium-ui .citation,
+body.premium-ui .message-content a[href*="page"] {
+  font-family: var(--vn-font-mono);
+  font-size: 11px;
+  border-bottom: 1px solid var(--vn-rule-strong);
+}
+
+/* Composer: a bordered block that belongs to the conversation. */
+body.premium-ui .composer {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  gap: var(--vn-space-3);
+  padding: var(--vn-space-4);
+  background: var(--vn-canvas);
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+  border-radius: 0;
+}
+
+body.premium-ui .composer-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--vn-space-2);
+  align-items: end;
+}
+
+body.premium-ui #ask-input {
+  min-height: 52px;
+  max-height: 180px;
+  border-color: var(--vn-rule-strong);
+  font-size: var(--vn-body);
+  resize: none;
+}
+
+body.premium-ui .send-button {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--vn-ink);
+  cursor: pointer;
+  transition: background var(--vn-fast) var(--vn-ease), color var(--vn-fast) var(--vn-ease);
+}
+
+body.premium-ui .send-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+body.premium-ui .send-button:hover {
+  background: var(--vn-ink);
+  color: var(--vn-canvas);
+  border-color: var(--vn-ink);
+}
+
+body.premium-ui .composer-meta,
+body.premium-ui .composer-privacy {
+  font-size: var(--vn-meta);
+  color: var(--vn-quiet);
+}
+
+/* The web-search toggle sits in the composer as a quiet row. */
+body.premium-ui .web-choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vn-space-3);
+  padding: var(--vn-space-2) 0;
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+  border-bottom: 0;
+}
+
+body.premium-ui .web-choice strong { font-size: var(--vn-small); }
+body.premium-ui .web-choice small {
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Goal cards: the "where are you stuck" block, as one stacked object. */
+body.premium-ui .goal-cards {
+  padding: var(--vn-space-5);
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .goal-head h3 {
+  margin: 0;
+  font-size: var(--vn-h2);
+}
+
+body.premium-ui .goal-head p {
+  margin: var(--vn-space-2) 0 var(--vn-space-4);
+  font-size: var(--vn-small);
+}
+
+body.premium-ui .goal-stack {
+  display: grid;
+  gap: 0;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+}
+
+body.premium-ui .goal-card {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--vn-space-3);
+  min-height: 68px;
+  padding: var(--vn-space-3) var(--vn-space-4);
+  border: 0;
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--vn-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--vn-fast) var(--vn-ease), color var(--vn-fast) var(--vn-ease);
+}
+
+body.premium-ui .goal-card:last-child { border-bottom: 0; }
+
+body.premium-ui .goal-card:hover,
+body.premium-ui .goal-card:focus-visible {
+  background: var(--vn-ink);
+  color: var(--vn-canvas);
+}
+
+body.premium-ui .goal-card:hover *,
+body.premium-ui .goal-card:focus-visible * {
+  color: inherit;
+}
+
+body.premium-ui .goal-card .goal-index,
+body.premium-ui .goal-card .goal-number {
+  font-family: var(--vn-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--vn-quiet);
+}
+
+/* --------------------------------------------------------------------------
+   9. Sources panel
+   -------------------------------------------------------------------------- */
+
+body.premium-ui .sources-panel,
+body.premium-ui .sources-drawer {
+  background: var(--vn-panel);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  border-radius: 0;
+}
+
+body.premium-ui .source-card {
+  padding: var(--vn-space-4);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  border-radius: 0;
+  background: transparent;
+}
+
+body.premium-ui .source-card + .source-card { border-top: 0; }
+
+body.premium-ui .source-card-top {
+  display: flex;
+  align-items: baseline;
+  gap: var(--vn-space-3);
+}
+
+body.premium-ui .source-number {
+  font-family: var(--vn-font-mono);
+  font-size: 11px;
+  color: var(--vn-ink);
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  padding: 0 5px;
+  min-width: 22px;
+  text-align: center;
+}
+
+body.premium-ui .source-title {
+  font-family: var(--vn-font-display);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+body.premium-ui .source-page,
+body.premium-ui .source-match {
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--vn-quiet);
+  margin-left: auto;
+}
+
+body.premium-ui .source-snippet {
+  margin: var(--vn-space-2) 0;
+  font-size: var(--vn-small);
+  line-height: 1.6;
+  color: var(--vn-ink-2);
+}
+
+/* --------------------------------------------------------------------------
+   10. Library, quiz, flashcards, progress, social — shared shapes
+   -------------------------------------------------------------------------- */
+
+body.premium-ui .library-list,
+body.premium-ui .list-stack,
+body.premium-ui .friends-list,
+body.premium-ui .leaderboard,
+body.premium-ui .deck-list {
+  display: grid;
+  gap: 0;
+  border: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .book-card,
+body.premium-ui .list-row,
+body.premium-ui .friend-row,
+body.premium-ui .leaderboard-row,
+body.premium-ui .deck-row {
+  display: grid;
+  gap: var(--vn-space-1);
+  padding: var(--vn-space-3) var(--vn-space-4);
+  border: 0;
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+  border-radius: 0;
+  background: transparent;
+}
+
+body.premium-ui .book-card:last-child,
+body.premium-ui .list-row:last-child,
+body.premium-ui .friend-row:last-child,
+body.premium-ui .leaderboard-row:last-child {
+  border-bottom: 0;
+}
+
+body.premium-ui .stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0;
+  border: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .stat-grid > * {
+  padding: var(--vn-space-4);
+  border-right: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .stat-grid > *:last-child { border-right: 0; }
+
+body.premium-ui .stat-grid strong,
+body.premium-ui .stat-value {
+  display: block;
+  font-family: var(--vn-font-display);
+  font-size: var(--vn-h2);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Language board: keep the glyph rule from the previous round, restyle the rest. */
+body.premium-ui .language-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 0;
+  border: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .language-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vn-space-1);
+  min-height: 88px;
+  border: 0;
+  border-right: var(--vn-hairline) solid var(--vn-rule);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--vn-ink);
+  cursor: pointer;
+  transition: background var(--vn-fast) var(--vn-ease), color var(--vn-fast) var(--vn-ease);
+}
+
+body.premium-ui .language-tile:hover {
+  background: var(--vn-raise);
+}
+
+body.premium-ui .language-tile.active {
+  background: var(--vn-ink);
+  color: var(--vn-canvas);
+}
+
+body.premium-ui .language-name {
+  font-family: var(--vn-font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   11. Settings
+   -------------------------------------------------------------------------- */
+
+body.premium-ui .settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 0;
+  border: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .settings-grid > .card {
+  border: 0;
+  border-right: var(--vn-hairline) solid var(--vn-rule);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+  background: transparent;
+}
+
+body.premium-ui .settings-card h2 {
+  font-size: var(--vn-h3);
+  letter-spacing: 0;
+  padding-bottom: var(--vn-space-3);
+  margin-bottom: var(--vn-space-4);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .settings-card .button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vn-space-2);
+  margin-top: var(--vn-space-4);
+}
+
+body.premium-ui .update-rows {
+  border: var(--vn-hairline) solid var(--vn-rule);
+  margin: var(--vn-space-3) 0 var(--vn-space-4);
+}
+
+body.premium-ui .update-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--vn-space-3);
+  padding: var(--vn-space-2) var(--vn-space-3);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+  font-size: var(--vn-small);
+}
+
+body.premium-ui .update-row:last-child { border-bottom: 0; }
+
+body.premium-ui .update-row strong {
+  font-family: var(--vn-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------------------------------------------------------
+   12. Mobile: one column, a real tab bar, 44px targets
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1120px) {
+  body.premium-ui .app-shell { grid-template-columns: 216px minmax(0, 1fr); }
+  body.premium-ui .ask-layout { grid-template-columns: minmax(0, 1fr); }
+  body.premium-ui .main { padding: var(--vn-space-5); }
+}
+
+@media (max-width: 860px) {
+  body.premium-ui .app-shell { grid-template-columns: minmax(0, 1fr); }
+
+  body.premium-ui .sidebar {
+    display: none;
+  }
+
+  body.premium-ui .premium-topbar,
+  body.premium-ui .topbar {
+    min-height: 56px;
+    padding: 0 var(--vn-space-4);
+  }
+
+  body.premium-ui .main {
+    padding: var(--vn-space-4) var(--vn-space-4) calc(76px + env(safe-area-inset-bottom));
+  }
+
+  body.premium-ui .page-head {
+    padding: var(--vn-space-5) var(--vn-space-4) var(--vn-space-4) !important;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "index"
+      "title"
+      "subtitle";
+    row-gap: var(--vn-space-2);
+  }
+
+  body.premium-ui .page-head #view-kicker { display: none; }
+
+  body.premium-ui .page-head #view-title {
+    font-size: clamp(26px, 8vw, 34px);
+  }
+
+  /* The old chip told you where you were; the header does that now. */
+  body.premium-ui .premium-view-chip { display: none; }
+
+  body.premium-ui .mobile-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    padding: 0 0 env(safe-area-inset-bottom);
+    background: var(--vn-canvas);
+    border-top: var(--vn-hairline) solid var(--vn-rule);
+  }
+
+  body.premium-ui .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 60px;
+    padding: var(--vn-space-2) 0;
+    border: 0;
+    border-top: 2px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    color: var(--vn-quiet);
+    font-family: var(--vn-font-mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  body.premium-ui .mobile-nav-item svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+  }
+
+  body.premium-ui .mobile-nav-item.active {
+    color: var(--vn-ink);
+    border-top-color: var(--vn-ink);
+  }
+
+  body.premium-ui .goal-card { min-height: 78px; }
+  body.premium-ui .language-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+  body.premium-ui .settings-grid { grid-template-columns: minmax(0, 1fr); }
+  body.premium-ui .settings-grid > .card { border-right: 0; }
+  body.premium-ui .premium-hero { padding: var(--vn-space-5) 0 var(--vn-space-5); }
+  body.premium-ui .premium-hero h2 { font-size: clamp(28px, 9vw, 40px); }
+  body.premium-ui .button,
+  body.premium-ui .premium-button { min-height: 44px; }
+  body.premium-ui .composer { padding: var(--vn-space-3); }
+}
+
+@media (max-width: 400px) {
+  body.premium-ui .send-button { width: 40px; height: 40px; }
+  body.premium-ui .premium-project-line { font-size: 11px; }
+}
+
+/* --------------------------------------------------------------------------
+   13. Preferences
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  body.premium-ui *,
+  body.premium-ui *::before,
+  body.premium-ui *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  body.premium-ui .view.active { animation: none; }
+}
+
+@media (prefers-contrast: more) {
+  body.premium-ui {
+    --vn-rule: var(--ink-2);
+    --vn-rule-strong: var(--ink);
+  }
+
+  body.premium-ui .button,
+  body.premium-ui .premium-button,
+  body.premium-ui input,
+  body.premium-ui select,
+  body.premium-ui textarea {
+    border-width: 2px;
+  }
+}
+
+@media (pointer: coarse) {
+  body.premium-ui .side-nav .nav-item { min-height: 44px; }
+  body.premium-ui .message-actions button { min-height: 44px; }
+}
+
+/* Printing an answer should look like a page, not an app. */
+@media print {
+  body.premium-ui .sidebar,
+  body.premium-ui .premium-topbar,
+  body.premium-ui .topbar,
+  body.premium-ui .mobile-nav,
+  body.premium-ui .composer,
+  body.premium-ui .goal-cards,
+  body.premium-ui .page-head-index {
+    display: none !important;
+  }
+
+  body.premium-ui .app-shell { display: block; }
+  body.premium-ui .main { padding: 0; }
+  body.premium-ui .card { border: 0; padding: 0; }
+}
