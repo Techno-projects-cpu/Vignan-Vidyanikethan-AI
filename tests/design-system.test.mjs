@@ -190,3 +190,17 @@ test("the composer ceiling is the same number in the script and the stylesheet",
   assert.match(app, /maxRows: phone \? 5 : 8/);
   assert.match(css, /\.composer-input-row textarea \{[^}]*max-height: 210px/);
 });
+
+test("the hidden attribute still hides, whatever display this layer gives", () => {
+  // `.to-top { display: inline-flex }` beat the UA's `[hidden]` rule, so the
+  // back-to-top button was on screen from the first frame of every screen.
+  // Two selectors, because a plain `[hidden]` loses to `.composer-input-row
+// textarea` on specificity; `body.premium-ui [hidden]` outscores every rule in
+// this layer that gives something a display, without an !important.
+  assert.match(css, /\[hidden\],\s*\nbody\.premium-ui \[hidden\] \{\s*\n\s*display: none;/, "the guard is present");
+  // Anything the app hides with the attribute renders no box, by construction.
+  const hiddenInApp = [...app.matchAll(/([\w$]+)\.hidden = (true|false|![\w!]+)/g)].map((match) => match[1]);
+  assert.ok(hiddenInApp.length >= 2, "the app does hide things this way");
+  assert.match(html, /<button[^>]*id="to-top"[^>]*hidden/);
+  assert.match(html, /id="shortcuts-overlay"[^>]*hidden/);
+});

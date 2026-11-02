@@ -1656,6 +1656,15 @@ body.shortcuts-open {
   }
 }
 
+/* The `hidden` attribute is how the app shows and hides things, and it is only a
+   UA rule: as soon as this layer gives an element a display, the attribute stops
+   working and a "hidden" button sits on screen. The back-to-top control was
+   exactly that until this rule existed. One declaration, every element. */
+[hidden],
+body.premium-ui [hidden] {
+  display: none;
+}
+
 /* --------------------------------------------------------------------------
    15. The composer grows, answers stay readable, nothing hides the keyboard
    -------------------------------------------------------------------------- */
