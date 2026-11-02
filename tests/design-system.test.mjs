@@ -165,3 +165,28 @@ test("the browser's own colour strip follows the palette", () => {
   // Called when the theme flips and when the six styles change.
   assert.ok((app.match(/syncBrowserChrome\(\)/g) || []).length >= 2);
 });
+
+test("every colour and size the design layer uses actually exists", () => {
+  // A `var(--vn-ink-3)` that nobody defines does not fall back to something
+  // sensible: the whole declaration is dropped, and the rule silently does
+  // nothing. That is how a "capped" border and a focus ring can ship invisible.
+  const base = ["styles.css", "styles-premium.css", "styles-identity.css", "styles-legal.css"]
+    .filter((file) => { try { readFileSync(new URL(`../${file}`, import.meta.url)); return true; } catch { return false; } })
+    .map((file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8"))
+    .join("\n");
+  const defined = new Set([
+    ...([...css.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((match) => match[1])),
+    ...([...base.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((match) => match[1])),
+  ]);
+  const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((match) => match[1]));
+  const missing = [...used].filter((name) => !defined.has(name));
+  assert.deepEqual(missing, [], `undefined custom properties: ${missing.join(", ")}`);
+});
+
+test("the composer ceiling is the same number in the script and the stylesheet", () => {
+  const phoneRule = css.slice(css.indexOf("@media (max-width: 640px)", css.indexOf("15. The composer grows")));
+  assert.match(phoneRule, /max-height: 150px/, "the stylesheet clamps a phone to five 24px rows plus border");
+  assert.match(app, /matchMedia\("\(max-width: 640px\)"\)/, "the script uses the same breakpoint");
+  assert.match(app, /maxRows: phone \? 5 : 8/);
+  assert.match(css, /\.composer-input-row textarea \{[^}]*max-height: 210px/);
+});

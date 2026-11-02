@@ -633,9 +633,12 @@ function fitComposer() {
   const styles = getComputedStyle(input);
   const lineHeight = parseFloat(styles.lineHeight) || 24;
   const border = (parseFloat(styles.borderTopWidth) || 0) + (parseFloat(styles.borderBottomWidth) || 0);
+  // The same breakpoint as the stylesheet: eight rows on a desktop, five on a
+  // phone, so the ceiling the script measures is the ceiling the page clamps to.
+  const phone = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 640px)").matches;
   const { height, capped } = fitComposerHeight(
     { scrollHeight: input.scrollHeight, lineHeight, border },
-    { minRows: 2, maxRows: 8 },
+    { minRows: 2, maxRows: phone ? 5 : 8 },
   );
   input.style.height = `${height}px`;
   input.classList.toggle("composer-capped", capped);

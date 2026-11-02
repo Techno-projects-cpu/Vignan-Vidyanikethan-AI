@@ -1672,8 +1672,8 @@ body.shortcuts-open {
 
 /* At the ceiling, the bottom edge goes solid so it is obvious you can scroll. */
 .composer-input-row textarea.composer-capped {
-  border-bottom-color: var(--vn-ink-3);
-  box-shadow: inset 0 -12px 12px -12px var(--vn-ink-3);
+  border-bottom-color: var(--vn-ink-2);
+  box-shadow: inset 0 -12px 12px -12px color-mix(in srgb, var(--vn-ink) 45%, transparent);
 }
 
 /* Answers carry tables and code. On a phone they scroll sideways, but a plain
@@ -1695,7 +1695,7 @@ body.shortcuts-open {
 .to-top:focus-visible,
 .shortcuts-panel .icon-button:focus-visible,
 .shortcuts-panel button:focus-visible {
-  outline: 2px solid var(--vn-accent, var(--vn-ink));
+  outline: 2px solid var(--vn-ink);
   outline-offset: 3px;
 }
 
@@ -1708,7 +1708,7 @@ body.shortcuts-open {
 }
 
 .shortcut-row:hover {
-  background: var(--vn-surface-2, var(--vn-surface));
+  background: var(--vn-raise);
 }
 
 @media (max-width: 640px) {

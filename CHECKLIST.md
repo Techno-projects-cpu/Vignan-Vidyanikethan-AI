@@ -173,5 +173,5 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (521 checks) plus
+The quickest regression test for a UI fix is `npm test` (523 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.
