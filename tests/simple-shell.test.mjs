@@ -2,16 +2,17 @@
  * The simple shell.
  *
  * A student came here to study, not to learn a workspace. So the app opens as
- * one chat — greeting, question box, and a logo in the corner — and the ten
- * screens live behind that logo. These tests hold both halves of that promise:
- * the chat is the only thing on screen, and nothing was actually taken away.
+ * one chat — greeting, question box on the bottom edge, and a small logo in the
+ * top-left corner — and the ten screens live behind that logo, in a drawer that
+ * slides in from the left. These tests hold both halves of that promise: the
+ * conversation is the only thing on screen, and nothing was actually taken away.
  */
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { badgeText, chatStarters, hasConversation, historyItems, timestampLabel } from "../js/shell.js";
+import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, timestampLabel } from "../js/shell.js";
 
 const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const html = read("index.html");
@@ -25,11 +26,11 @@ test("the page opens on a chat, with a logo in the corner", () => {
   // bar are still in the page for the menu and for screen readers.
   assert.match(html, /<aside class="sidebar">/);
   assert.match(html, /class="mobile-nav"/);
-  assert.match(css, /body\.premium-ui \.sidebar,\s*\nbody\.premium-ui \.topbar,\s*\nbody\.premium-ui \.mobile-nav,/);
+  assert.match(css, /body\.premium-ui \.sidebar,\s*\nbody\.premium-ui \.topbar\.premium-topbar,\s*\nbody\.premium-ui \.topbar,\s*\nbody\.premium-ui \.mobile-nav,/);
   assert.match(css, /body\.premium-ui \.premium-hero,\s*\nbody\.premium-ui \.goal-cards \{/);
-  // The chat is one centred column with the composer pinned to the bottom.
-  assert.match(css, /body\.premium-ui \.chat-column \{[^}]*max-width: 760px/);
-  assert.match(css, /body\.premium-ui \.composer \{[^}]*position: sticky;[^}]*bottom: 0/);
+  // The chat is one centred column with the question box on the bottom edge.
+  assert.match(css, /body\.premium-ui\[data-view="ask"\] #view-ask \.chat-column \{[^}]*max-width: 820px/);
+  assert.match(css, /body\.premium-ui \.composer \{[^}]*flex: 0 0 auto/);
   assert.match(css, /body\.premium-ui\[data-view="ask"\] \.page-head \{\s*\n\s*display: none;/);
 });
 
@@ -121,12 +122,96 @@ test("suggestions look like every other chat, and disappear once you ask", () =>
   assert.match(css, /\.chat-starter \{[^}]*min-height: 40px/);
 });
 
-test("the phone keeps the logo reachable without covering the question box", () => {
-  const mobile = css.slice(css.indexOf("@media (max-width: 640px)", css.indexOf("16. The simple shell")));
-  assert.match(mobile, /body\.premium-ui \.composer \{\s*\n\s*bottom: calc\(56px \+ env\(safe-area-inset-bottom\)\)/, "the box sits above the logo");
-  assert.match(mobile, /body\.premium-ui \.chat-column \{\s*\n\s*padding-bottom: 150px/);
-  assert.match(mobile, /\.app-menu-panel \{[\s\S]{0,200}width: 100%/, "the menu is a bottom sheet on a phone");
-  assert.match(css, /\.home-logo \{[^}]*width: 44px;[^}]*height: 44px;/, "a thumb-sized target");
+test("the question box sits on the bottom edge, in the middle, like a messaging tool", () => {
+  // Only the messages scroll; the box is the last thing in the column and it
+  // never leaves the screen, so there is nothing to scroll down to in order to
+  // type.
+  assert.match(css, /body\.premium-ui\[data-view="ask"\] \.main \{[^}]*height: 100dvh;[^}]*overflow: hidden;/);
+  assert.match(css, /body\.premium-ui\[data-view="ask"\] #view-ask \.chat-log \{[^}]*overflow-y: auto;/);
+  // The order on screen puts the box last, whatever order the markup is in.
+  assert.match(css, /body\.premium-ui\[data-view="ask"\] #view-ask \.composer \{ order: 5; flex-shrink: 0; \}/);
+  assert.match(css, /body\.premium-ui \.composer \{[^}]*padding: var\(--vn-space-2\) 0 calc\(var\(--vn-space-4\) \+ env\(safe-area-inset-bottom\)\)/);
+  // The old phone workaround — a box lifted 56px to clear a bottom-left logo —
+  // is gone, because there is no longer a logo down there.
+  assert.doesNotMatch(css, /bottom: calc\(56px \+ env\(safe-area-inset-bottom\)\)/);
+});
+
+test("the menu is a drawer that slides in from the left edge", () => {
+  assert.match(css, /\.app-menu-panel \{[^}]*inset-block: 0;[^}]*inset-inline-start: 0;/);
+  assert.match(css, /\.app-menu-panel \{[^}]*width: min\(320px, 86vw\)/);
+  assert.match(css, /@keyframes vn-drawer-in \{\s*\n\s*from \{ transform: translateX\(-100%\); \}/);
+  // Right-to-left pages open from their own left, which is the right edge.
+  assert.match(css, /\[dir="rtl"\] \.app-menu-panel[\s\S]{0,120}vn-drawer-in-rtl/);
+  assert.match(css, /@keyframes vn-drawer-in-rtl \{\s*\n\s*from \{ transform: translateX\(100%\); \}/);
+  // Nothing is left of the drop-up.
+  assert.doesNotMatch(css, /\.app-menu-panel \{[^}]*max-height: min\(76vh, 640px\)/);
+});
+
+test("the logo is a small target in the top-left corner", () => {
+  assert.match(css, /\.home-logo \{[^}]*top: calc\(var\(--vn-space-3\) \+ env\(safe-area-inset-top\)\)/);
+  assert.match(css, /\.home-logo \{[^}]*width: 40px;[^}]*height: 40px;/);
+  assert.match(css, /\.home-logo img \{[^}]*width: 24px/);
+});
+
+test("a swipe from the left edge opens the drawer, and a swipe back closes it", () => {
+  const base = { startY: 400, y: 410, width: 400 };
+  // Rightwards from the edge: open. Vertically: that was a scroll.
+  assert.equal(edgeSwipeIntent({ ...base, startX: 10, x: 120 }), "open");
+  assert.equal(edgeSwipeIntent({ ...base, startX: 10, x: 30 }), null, "not far enough");
+  assert.equal(edgeSwipeIntent({ ...base, startX: 10, x: 30, y: 600 }), null, "a scroll, not a swipe");
+  // Starting mid-page is a scroll gesture, not a menu gesture.
+  assert.equal(edgeSwipeIntent({ ...base, startX: 200, x: 340 }), null);
+  // An open drawer closes when pulled back towards its edge.
+  assert.equal(edgeSwipeIntent({ ...base, startX: 200, x: 80, open: true }), "close");
+  assert.equal(edgeSwipeIntent({ ...base, startX: 200, x: 340, open: true }), null);
+  // Mirrored on a right-to-left page.
+  assert.equal(edgeSwipeIntent({ ...base, startX: 390, x: 280, rtl: true }), "open");
+  assert.equal(edgeSwipeIntent({ ...base, startX: 10, x: 120, rtl: true }), null);
+  assert.equal(edgeSwipeIntent({ ...base, startX: 200, x: 320, rtl: true, open: true }), "close");
+  // Nonsense numbers never open a menu.
+  assert.equal(edgeSwipeIntent({ startX: Number.NaN, x: 10, y: 10, width: 400 }), null);
+  assert.equal(edgeSwipeIntent({ ...base, startX: 5, x: 100, width: 0 }), null);
+  // The app wires that decision to the real drawer.
+  assert.match(app, /bindEdgeSwipe\(document, \{/);
+  assert.match(app, /onOpen: \(\) => openAppMenu\(\)/);
+  assert.match(app, /onClose: \(\) => closeAppMenu\(\)/);
+});
+
+test("the gesture is driven by real touch events, and can be unhooked", () => {
+  const handlers = new Map();
+  const target = {
+    addEventListener: (type, fn) => handlers.set(type, fn),
+    removeEventListener: (type) => handlers.delete(type),
+  };
+  const calls = [];
+  let open = false;
+  const unbind = bindEdgeSwipe(target, {
+    width: () => 400,
+    isOpen: () => open,
+    onOpen: () => { calls.push("open"); open = true; },
+    onClose: () => { calls.push("close"); open = false; },
+  });
+  const touch = (type, x, y) => handlers.get(type)({ touches: type === "touchend" ? [] : [{ clientX: x, clientY: y }] });
+
+  touch("touchstart", 12, 300);
+  touch("touchmove", 160, 306);
+  assert.deepEqual(calls, ["open"], "a drag in from the edge opens it");
+
+  touch("touchstart", 200, 300);
+  touch("touchmove", 60, 304);
+  assert.deepEqual(calls, ["open", "close"], "a drag back closes it");
+
+  // Two fingers are a pinch, and a vertical drag is a scroll: neither opens it.
+  handlers.get("touchstart")({ touches: [{ clientX: 10, clientY: 10 }, { clientX: 20, clientY: 10 }] });
+  touch("touchmove", 200, 20);
+  touch("touchstart", 10, 300);
+  touch("touchmove", 20, 600);
+  assert.deepEqual(calls, ["open", "close"]);
+
+  unbind();
+  assert.equal(handlers.size, 0, "the listeners come off again");
+  // Something without listeners is not an error.
+  assert.equal(typeof bindEdgeSwipe(null), "function");
 });
 
 test("the sheets are honest about what the app is", () => {

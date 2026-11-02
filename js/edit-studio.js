@@ -1,9 +1,9 @@
 /** Responsive result-edit studio. Everything is rendered and recorded locally. */
 
-import * as ui from "./ui.js?v=48";
-import { downloadBlob, truncate } from "./util.js?v=48";
-import { canCreateEditBeat, startEditBeat } from "./edit-audio.js?v=48";
-import { EDIT_DURATION, EDIT_STYLES, PROJECT_LINK, createPerformanceVideo, createPoster, drawPerformanceCard, scorePercent } from "./card.js?v=48";
+import * as ui from "./ui.js?v=49";
+import { downloadBlob, truncate } from "./util.js?v=49";
+import { canCreateEditBeat, startEditBeat } from "./edit-audio.js?v=49";
+import { EDIT_DURATION, EDIT_STYLES, PROJECT_LINK, createPerformanceVideo, createPoster, drawPerformanceCard, scorePercent } from "./card.js?v=49";
 
 /** Text is only copied/shared after a student explicitly chooses that action. */
 export function resultCaption(result = {}, share = {}, { includeLink = true, includeInvite = false } = {}) {

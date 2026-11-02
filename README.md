@@ -169,9 +169,14 @@ error. A funded team covers far more ground; this one goes deeper on less.
 ## The simple shell
 
 A student who came here to study should not have to learn a workspace first. The
-app now opens as one chat: a greeting, a question box, and a small logo in the
-corner. Everything else is behind that logo, in a menu that reads like the
-account menu of any other AI tool.
+app opens as a conversation, the way a messaging tool does: messages fill the
+window, the question box sits on the bottom edge in the middle, and there is
+nothing across the top of the screen at all.
+
+Everything else is in a drawer. Swipe in from the left edge of the screen — or
+tap the small logo in the top-left corner — and it slides in with the account,
+the history, all ten screens, the install instructions and the theme switch.
+Swipe back, tap the darkened conversation, or press Escape to close it.
 
 That is a deliberate reversal of the 2.0 redesign. The design layer is not gone
 — it still styles every one of the ten screens, the numbered headers still
@@ -181,15 +186,18 @@ everything. What changed is what is *in front* of a new visitor:
 | Before | Now |
 | --- | --- |
 | Sidebar with ten numbered screens | One chat, four suggestion chips, a question box |
+| A top bar with brand, view chip, AI chooser and menu | Nothing above the conversation |
 | Hero, project line, five stacked goal blocks | The same prompts as four ordinary chips, gone after the first question |
 | Library upload found in Settings-adjacent screens | "+" beside the question box |
 | Pasting a link and hoping | **Fetch a website** in the same sheet, labelled as outside your textbooks |
-| Account, theme and offline chip in a top bar | The same things in the menu the logo opens |
+| Account, theme and offline chip in a top bar | The same things in the drawer the logo opens |
 
-On a phone the logo keeps its bottom-left corner and the question box sits just
-above it, so a thumb can reach either without covering the other. Two tests hold
-the arrangement: `tests/simple-shell.test.mjs` fails if the chat stops being the
-first thing on screen, or if any screen loses its way back in the menu.
+On a phone the box has the whole bottom edge to itself and the logo is a 40px
+square in the top-left corner; the drawer takes 84% of the width. Three tests
+hold the arrangement: `tests/simple-shell.test.mjs` fails if the chat stops being
+the first thing on screen, if the box stops sitting on the bottom edge, if a
+left-edge swipe stops opening the drawer, or if any screen loses its way back
+into it.
 
 ## Premium minimal shell
 

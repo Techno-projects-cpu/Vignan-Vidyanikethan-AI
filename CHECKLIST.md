@@ -139,10 +139,11 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 
 | # | Check | P | T | L |
 | --- | --- | --- | --- | --- |
-| 5.6 | The app opens on a chat: greeting, four chips, a question box. No sidebar, no top bar, no numbered header | ☐ | ☐ | ☐ |
-| 5.7 | The logo sits in the bottom-left corner, is 44px, and opens the menu with account, chat, history, library, quiz, exams, flashcards, progress, friends, Study Hall, play, settings, install and theme | ☐ | ☐ | ☐ |
+| 5.6 | The app opens on a chat: greeting, four chips, a question box on the bottom edge. No sidebar, no top bar, no numbered header | ☐ | ☐ | ☐ |
+| 5.7 | The logo is a 40px square in the **top-left** corner and opens the drawer with account, chat, history, library, quiz, exams, flashcards, progress, friends, Study Hall, play, settings, install and theme | ☐ | ☐ | ☐ |
 | 5.7b | In Library, **Chat** returns to the conversation with every message intact; **New chat** asks before clearing it | ☐ | ☐ | ☐ |
-| 5.8 | On a phone the question box sits **above** the logo, so neither covers the other, and the menu opens as a bottom sheet | ☐ | ☐ | ☐ |
+| 5.8 | The question box sits in the middle of the **bottom edge** on every screen size, only the messages scroll, and nothing sits above the conversation | ☐ | ☐ | ☐ |
+| 5.8b | Swiping in from the left edge opens the drawer; swiping back, tapping the darkened chat, or pressing Escape closes it | ☐ | ☐ | ☐ |
 | 5.9 | The **+** beside the question box opens the sheet; **Upload a textbook** opens the file picker without visiting Settings, and the book answers questions afterwards | ☐ | ☐ | ☐ |
 | 5.10 | **Fetch a website** reads a public page, the question box is pre-filled about it, and the answer is labelled outside your textbooks | ☐ | ☐ | ☐ |
 | 5.11 | **History** lists the questions asked on this device, newest first; tapping one puts it back in the box | ☐ | ☐ | ☐ |

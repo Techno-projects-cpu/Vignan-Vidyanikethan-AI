@@ -2,8 +2,10 @@
  * The small amount of arithmetic behind the simple shell.
  *
  * The menu, the sheets and the "+" beside the question box are DOM wiring, but
- * two decisions in them are worth testing on their own: what the history list
- * shows, and when a badge is worth printing. Both are pure, so they live here.
+ * a few decisions in them are worth testing on their own: what the history list
+ * shows, when a badge is worth printing, and when a finger dragged in from the
+ * edge of the screen was asking for the menu rather than scrolling. They are
+ * all pure, so they live here.
  */
 
 /**
@@ -52,4 +54,110 @@ export function chatStarters(cards = [], { hasConversation = false, limit = 4 } 
 /** True when the conversation has anything the student asked. */
 export function hasConversation(messages = []) {
   return (Array.isArray(messages) ? messages : []).some((message) => message?.role === "user");
+}
+
+/**
+ * Was that drag a swipe, and which way?
+ *
+ * A left-to-right drag that starts within a finger's width of the left edge
+ * opens the drawer; a drag back towards that edge closes it. Anything more
+ * vertical than horizontal is a scroll and must be left alone, or the app
+ * would steal the gesture a student uses to read a long answer.
+ *
+ * Returns "open", "close" or null. Right-to-left pages mirror every direction.
+ *
+ * @param {{startX?: number, startY?: number, x?: number, y?: number, width?: number,
+ *          rtl?: boolean, open?: boolean, edgeZone?: number, threshold?: number}} input
+ * @returns {"open"|"close"|null}
+ */
+export function edgeSwipeIntent({
+  startX,
+  startY,
+  x,
+  y,
+  width,
+  rtl = false,
+  open = false,
+  edgeZone = 28,
+  threshold = 48,
+} = {}) {
+  if (![startX, startY, x, y, width].every((value) => Number.isFinite(value))) return null;
+  if (width <= 0) return null;
+  const fromEdge = rtl ? startX >= width - edgeZone : startX <= edgeZone;
+  // An open drawer can be swiped shut from anywhere on it; a closed one can
+  // only be pulled open from the edge, so a horizontal flick mid-page keeps
+  // doing whatever it was doing.
+  if (!open && !fromEdge) return null;
+  const dx = x - startX;
+  const dy = y - startY;
+  if (Math.abs(dy) >= Math.abs(dx)) return null;
+  if (open) return (rtl ? dx >= threshold : dx <= -threshold) ? "close" : null;
+  return (rtl ? dx <= -threshold : dx >= threshold) ? "open" : null;
+}
+
+/**
+ * Wire that decision to real touch events.
+ *
+ * Kept here rather than inline in the app so it can be driven by ordinary
+ * objects in a test: anything with `addEventListener` works, and the four
+ * listeners are the whole surface. Returns a function that unbinds them.
+ *
+ * @param {{addEventListener: Function, removeEventListener?: Function}} target
+ * @param {{onOpen?: Function, onClose?: Function, isOpen?: Function, rtl?: Function,
+ *          zone?: number, threshold?: number, width?: Function}} options
+ * @returns {() => void}
+ */
+export function bindEdgeSwipe(target, {
+  onOpen,
+  onClose,
+  isOpen = () => false,
+  rtl = () => false,
+  zone = 28,
+  threshold = 48,
+  width = () => 1024,
+} = {}) {
+  if (!target || typeof target.addEventListener !== "function") return () => {};
+  let start = null;
+  const end = () => { start = null; };
+  const onStart = (event) => {
+    const touches = event?.touches;
+    if (!touches || touches.length !== 1) { end(); return; }
+    const touch = touches[0];
+    if (!Number.isFinite(touch?.clientX) || !Number.isFinite(touch?.clientY)) { end(); return; }
+    start = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      open: Boolean(isOpen()),
+      rtl: Boolean(rtl()),
+    };
+  };
+  const onMove = (event) => {
+    if (!start) return;
+    const touch = event?.touches?.[0];
+    if (!touch) return;
+    const intent = edgeSwipeIntent({
+      ...start,
+      x: touch.clientX,
+      y: touch.clientY,
+      width: width(),
+      edgeZone: zone,
+      threshold,
+    });
+    if (!intent) return;
+    end();
+    if (intent === "open") { if (typeof onOpen === "function") onOpen(); }
+    else if (typeof onClose === "function") onClose();
+  };
+  const options = { passive: true };
+  target.addEventListener("touchstart", onStart, options);
+  target.addEventListener("touchmove", onMove, options);
+  target.addEventListener("touchend", end, options);
+  target.addEventListener("touchcancel", end, options);
+  return () => {
+    if (typeof target.removeEventListener !== "function") return;
+    target.removeEventListener("touchstart", onStart);
+    target.removeEventListener("touchmove", onMove);
+    target.removeEventListener("touchend", end);
+    target.removeEventListener("touchcancel", end);
+  };
 }
