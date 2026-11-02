@@ -119,7 +119,7 @@ error. A funded team covers far more ground; this one goes deeper on less.
 | Keyboard shortcuts | `Ctrl/⌘ + K` opens the menu, `/` jumps to the question box, `?` opens a shortcuts sheet, `Esc` closes the sheet then the menu, `Enter` sends and `Shift + Enter` starts a new line. None of them fire while you are typing in a field — that check is one tested function, not a hope — and `Esc` is the only one that still works inside one. The sheet is generated from the same list the code reads, so it can never advertise a key that does nothing. |
 | A composer that grows | The question box was two fixed rows, so a long question scrolled inside a box the size of a business card. It now measures what is in it, grows to a ceiling of eight rows (five on a phone), and then scrolls with a solid bottom edge so Send never leaves the screen. Sending resets it, and a prefilled question — a starting block, a shared link, a page from the reader — arrives at the right height. |
 | Offline mode, that actually means it | A switch in Settings → App & offline. When it is on there is no web fallback, and no account, friends, chat or leaderboard calls — the answer comes only from the pages on the device, which is what a demo with bad Wi-Fi needs. The switch does not erase the student's web preference: turning it off restores exactly what they had chosen. The chip in the top bar says "Offline mode" while it is on. |
-| A release that arrives by itself | The permission banner is gone, by the student's own decision: publishing is the whole gesture. The worker takes over immediately and the page reloads once, except while an answer is being written — that one case waits for the answer, then reloads. There is no button, no "Later", and no setting that can pin a device to an old release. |
+| A release that arrives by itself | The permission banner is gone, by the student's own decision: publishing is the whole gesture. The worker takes over immediately and the page reloads once — except over work in progress. An answer being written, or a question typed but not yet sent, is never thrown away; the reload waits for the box to be empty and then happens without asking. There is no button, no "Later", and no setting that can pin a device to an old release. |
 | Enter that does not send too early | The composer sent on any unguarded Enter, which in Hindi, Telugu, Japanese, Korean — or with any phone keyboard showing word suggestions — is the key that confirms the word being composed. Pressing it asked a half-finished word as a question. It now checks `isComposing` and the older 229 code, so only a real Enter sends; `Shift + Enter` still starts a new line. |
 | A shortcuts sheet you can leave | `?` opened the sheet and moved focus into it, but closing it dropped focus on the page body, so the next Tab started from the top of the document. Focus now returns to whatever had it, and Tab/Shift+Tab stay inside the sheet instead of walking into the page behind it. |
 | A crash between the answer and its sources | Since 2.11.0 the source card was assembled one line above the row it was assembling, so every cited answer drew a card that threw `cannot access 'actions' before initialization`. The throw was caught by the ask handler, so a student saw a correct answer followed by "I could not complete that answer". One line, fixed; and because no test had ever asked the app a question end to end, `tests/render-order.test.mjs` now fails the build if any element is appended before it is declared, and a headless run asks three real questions and checks the answer, its citations and the absence of the false failure.
@@ -424,9 +424,10 @@ which is how a website is supposed to behave, and the reason the old permission
 dance was removed: it only ever existed for offline users, and it slowed *them*
 down rather than helping.
 
-One courtesy is kept, and it is a two-second delay rather than a question: a
-reload never lands while an answer is being written. The watcher waits for the
-answer to finish, then reloads. A hidden tab reloads at once.
+One courtesy is kept, and it is a delay rather than a question: a reload never
+lands on top of the student's own work. The watcher waits while an answer is
+being written **and** while a question sits in the box unsent, then reloads by
+itself once the box is empty. A hidden tab reloads at once.
 
 `Settings → App & offline` shows the current release, whether the offline copy is
 complete, and a **Check offline readiness** button. That is all that card does

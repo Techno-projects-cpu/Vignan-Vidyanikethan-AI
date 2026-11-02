@@ -131,7 +131,8 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 5.1 | Settings → *App & offline* shows the current release number | ☐ | ☐ | ☐ |
 | 5.2 | There is no update button and no banner: publishing is the whole gesture | ☐ | ☐ | ☐ |
 | 5.3 | Publish a release, open the app on a phone that already has it: within a minute the page reloads **by itself** into the new release | ☐ | ☐ | ☐ |
-| 5.4 | Ask a question and publish a release while the answer is being written: the answer finishes first, then the page reloads — it is never cut off | ☐ | ☐ | ☐ |
+| 5.4 | Type half a question (do not send) and publish a release: the page does **not** reload on top of the draft; send or clear it and the reload happens by itself | ☐ | ☐ | ☐ |
+| 5.4b | Publish a release while an answer is being written: the answer finishes first, then the page reloads — it is never cut off | ☐ | ☐ | ☐ |
 | 5.5 | Saved books, chats and streaks are still there after that reload | ☐ | ☐ | ☐ |
 
 ## 6. Offline — the part that matters at a science fair

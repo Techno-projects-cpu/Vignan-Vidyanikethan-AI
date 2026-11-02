@@ -6,16 +6,17 @@
  * press: publishing a release is the whole gesture, and every open tab picks it
  * up within a minute.
  *
- * One thing is still respected — a student is never reloaded in the middle of a
- * question. The watcher waits for the answer to finish (a couple of seconds),
- * then reloads. That is a delay, not a permission prompt.
+ * One thing is still respected — a student is never reloaded on top of their own
+ * work. The watcher waits while an answer is being written, and while a question
+ * sits in the box unsent, then reloads by itself. That is a delay, not a
+ * permission prompt.
  *
  * Everything here degrades quietly when the browser has no service worker
  * (Safari private mode, file://, older browsers): the page still loads the new
  * release on its next visit, because the app is served network-first.
  */
 
-/** Release the page itself was loaded from: "./js/app.js?v=45" → "45". */
+/** Release the page itself was loaded from: "./js/app.js?v=46" → "45". */
 export const RELEASE = new URL(import.meta.url).searchParams.get("v") || "dev";
 
 /** "const CACHE_NAME = \"vignan-vidyanikethan-ai-v45\"" → "45". */

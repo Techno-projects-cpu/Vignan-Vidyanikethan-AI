@@ -7,10 +7,10 @@
   <meta name="description" content="Judge mode: what Vignan Vidyanikethan AI is, how to test its citations and its offline proof in sixty seconds, and what it honestly cannot do.">
   <title>Judge mode — Vignan AI</title>
   <link rel="canonical" href="https://vignanvidyanikethanai.onrender.com/judge.html">
-  <link rel="icon" href="./icons/icon.svg?v=45" type="image/svg+xml">
-  <link rel="icon" href="./icons/icon-48.png?v=45" type="image/png" sizes="48x48">
-  <link rel="stylesheet" href="./styles-legal.css?v=45">
-  <link rel="stylesheet" href="./styles-judge.css?v=45">
+  <link rel="icon" href="./icons/icon.svg?v=46" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-48.png?v=46" type="image/png" sizes="48x48">
+  <link rel="stylesheet" href="./styles-legal.css?v=46">
+  <link rel="stylesheet" href="./styles-judge.css?v=46">
 </head>
 <body>
   <a class="skip" href="#content">Skip to judge mode</a>
@@ -54,8 +54,8 @@
       <p>Science fairs have unreliable Wi-Fi. A tool that fails at the moment of demonstration was never really working. This app is designed to survive that, and the survival is verified by a simulator that runs the real service worker with the network switched off.</p>
       <pre class="term">$ npm run offline:check
 
-<b>Release v45</b>
-Cached after install: 380 files in vignan-vidyanikethan-ai-v45
+<b>Release v46</b>
+Cached after install: 380 files in vignan-vidyanikethan-ai-v46
 every core file ................ ok 200
 every release module ........... ok 200
 navigation fallback ............ ok
@@ -70,7 +70,7 @@ manifest files missing ......... 0
 
     <section class="judge-section">
       <h2>04 / A released version reaches every device</h2>
-      <p>There is no update button and no banner. Publishing a release is the whole gesture: the service worker takes over as soon as it has installed, and the page reloads itself once — never while an answer is being written, because a reload would throw the question away. That one case waits for the answer, then reloads.</p>
+      <p>There is no update button and no banner. Publishing a release is the whole gesture: the service worker takes over as soon as it has installed, and the page reloads itself once — but never on top of the student's own work. An answer being written, or a question typed and not yet sent, is waited for; the reload then happens by itself.</p>
       <p class="say">"The version this page is about can be checked in Settings, next to the offline readiness. Nobody has to remember to press anything, and nobody is left on an old release."</p>
     </section>
 

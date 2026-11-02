@@ -69,7 +69,8 @@ test("a reload waits for an answer to finish, and only for that", () => {
   assert.equal(shouldReloadNow({ busy: false }), true);
   assert.equal(shouldReloadNow({ busy: true }), false, "a question in flight is not thrown away");
   const source = read("/js/app.js");
-  assert.match(source, /shouldWait: \(\) => Boolean\(state\.askBusy\)/);
+  assert.match(source, /shouldWait: \(\) => Boolean\(state\.askBusy\) \|\| Boolean\(\$\("#ask-input"\)\?\.value\.trim\(\)\)/,
+    "an answer in flight and an unsent question are both waited for");
 });
 
 test("a new controller reloads the page once, and a first install does not", () => {
@@ -130,8 +131,8 @@ test("the watcher keeps trying while an answer is being written", () => {
 
 test("the offline report counts what the worker really stored", () => {
   const ready = summarize({
-    expected: ["./index.html", "./js/app.js?v=45", "./styles.css"],
-    cached: ["./index.html", "./js/app.js?v=45", "./styles.css"],
+    expected: ["./index.html", "./js/app.js?v=46", "./styles.css"],
+    cached: ["./index.html", "./js/app.js?v=46", "./styles.css"],
     critical: ["./index.html"],
   });
   assert.equal(ready.total, 3);
@@ -139,7 +140,7 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(ready.summary, /Ready offline: 3 of 3/);
 
   const broken = summarize({
-    expected: ["./index.html", "./js/app.js?v=45"],
+    expected: ["./index.html", "./js/app.js?v=46"],
     cached: [],
     critical: ["./index.html"],
   });
@@ -149,8 +150,8 @@ test("the offline report counts what the worker really stored", () => {
 
   // A release is not "ready" when a file every lesson needs is missing.
   const missingShell = summarize({
-    expected: ["./index.html", "./js/app.js?v=45"],
-    cached: ["./js/app.js?v=45"],
+    expected: ["./index.html", "./js/app.js?v=46"],
+    cached: ["./js/app.js?v=46"],
     critical: CRITICAL_FILES,
   });
   assert.equal(missingShell.ready, false);
@@ -161,8 +162,8 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(nothing.summary, /Open the app once while online/);
 
   // Query strings and absolute URLs compare equal.
-  assert.equal(normalizeUrl("./js/app.js?v=45"), "js/app.js");
-  assert.equal(normalizeUrl("https://app.local/js/app.js?v=45"), "js/app.js");
+  assert.equal(normalizeUrl("./js/app.js?v=46"), "js/app.js");
+  assert.equal(normalizeUrl("https://app.local/js/app.js?v=46"), "js/app.js");
   assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v33"], "18"), "vignan-vidyanikethan-ai-v33");
 });
 
