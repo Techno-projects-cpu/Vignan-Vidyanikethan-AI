@@ -16,16 +16,16 @@ import {
   extractJson,
   formatContext,
   formatOutsideContext,
-} from "./context.js?v=49";
-import { languageName } from "./i18n.js?v=49";
+} from "./context.js?v=50";
+import { languageName } from "./i18n.js?v=50";
 import {
   callProvider,
   callRoutedModel,
   gradeShortWithModel,
   testProvider,
   verifyAnswer,
-} from "./model-router.js?v=49";
-import { truncate, uid } from "./util.js?v=49";
+} from "./model-router.js?v=50";
+import { truncate, uid } from "./util.js?v=50";
 
 export {
   FLASHCARD_SCHEMA,

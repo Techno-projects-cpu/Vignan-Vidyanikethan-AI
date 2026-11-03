@@ -6,25 +6,25 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=49";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=49";
-import { ingestPdf, ingestText } from "./ingest.js?v=49";
-import { splitSentences } from "./text.js?v=49";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=49";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=49";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=49";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=49";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=49";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=49";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=49";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=49";
+import * as db from "./db.js?v=50";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=50";
+import { ingestPdf, ingestText } from "./ingest.js?v=50";
+import { splitSentences } from "./text.js?v=50";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=50";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=50";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=50";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=50";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=50";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=50";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=50";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=50";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=49";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=49";
-import { RELEASE, startUpdateWatch } from "./updates.js?v=49";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=49";
+} from "./pro-mode.js?v=50";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=50";
+import { RELEASE, startUpdateWatch } from "./updates.js?v=50";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=50";
 import {
   SHORTCUTS,
   fitComposerHeight,
@@ -36,18 +36,18 @@ import {
   shouldShowToTop,
   shortcutForKey,
   windowScrollState,
-} from "./viewport.js?v=49";
+} from "./viewport.js?v=50";
 import {
   OFFLINE_MODE_LABEL,
   OFFLINE_MODE_NOTE,
   isOfflineMode,
   networkAllowed,
   setOfflineMode,
-} from "./offline-mode.js?v=49";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=49";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=49";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=49";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=49";
+} from "./offline-mode.js?v=50";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=50";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=50";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=50";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=50";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -55,8 +55,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=49";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=49";
+} from "./llm.js?v=50";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=50";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -68,7 +68,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=49";
+} from "./local-ai.js?v=50";
 import {
   EXAMS,
   MODES,
@@ -83,12 +83,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=49";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=49";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=49";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=49";
-import { TASKS } from "./model-router.js?v=49";
-import { PROVIDERS, providerList } from "./providers.js?v=49";
+} from "./exam-packs.js?v=50";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=50";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=50";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=50";
+import { TASKS } from "./model-router.js?v=50";
+import { PROVIDERS, providerList } from "./providers.js?v=50";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -97,30 +97,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=49";
-import { parseApiKeys } from "./key-pool.js?v=49";
+} from "./settings.js?v=50";
+import { parseApiKeys } from "./key-pool.js?v=50";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=49";
+} from "./student-keys.js?v=50";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=49";
+} from "./quiz.js?v=50";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=49";
+} from "./flashcards.js?v=50";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=49";
+} from "./study-decks.js?v=50";
 import {
   accuracy,
   currentStreak,
@@ -131,17 +131,17 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=49";
-import { externalSearchUrl, searchWeb } from "./web.js?v=49";
-import { openEditStudio } from "./edit-studio.js?v=49";
-import { openReader } from "./reader.js?v=49";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=49";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=49";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=49";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=49";
-import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems } from "./shell.js?v=49";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=49";
-import * as ui from "./ui.js?v=49";
+} from "./progress.js?v=50";
+import { externalSearchUrl, searchWeb } from "./web.js?v=50";
+import { openEditStudio } from "./edit-studio.js?v=50";
+import { openReader } from "./reader.js?v=50";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=50";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=50";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=50";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=50";
+import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=50";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=50";
+import * as ui from "./ui.js?v=50";
 import {
   clearReferral,
   getLeaderboard,
@@ -151,8 +151,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=49";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=49";
+} from "./auth.js?v=50";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=50";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -160,12 +160,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=49";
-import { initMotion, revealVisible } from "./motion.js?v=49";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=49";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=49";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=49";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=49";
+} from "./premium-ui.js?v=50";
+import { initMotion, revealVisible } from "./motion.js?v=50";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=50";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=50";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=50";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=50";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -1008,9 +1008,39 @@ function initMenuSwipe() {
   });
 }
 
+/**
+ * Keep the chat layer the height of the visible window.
+ *
+ * Without this, opening the keyboard on a phone slides the keyboard over the
+ * question box instead of under it. The numbers come from `viewportBox` and
+ * are written to two CSS variables the layout already reads.
+ */
+function initViewportBox() {
+  const viewport = window.visualViewport;
+  if (!viewport) return;
+  const apply = () => {
+    const box = viewportBox({
+      viewportHeight: viewport.height,
+      viewportOffset: viewport.offsetTop,
+      innerHeight: window.innerHeight,
+    });
+    const root = document.documentElement.style;
+    root.setProperty("--vn-viewport-height", box.height);
+    root.setProperty("--vn-viewport-offset", box.top);
+  };
+  apply();
+  viewport.addEventListener("resize", apply);
+  viewport.addEventListener("scroll", apply);
+}
+
 async function initSimpleShell() {
-  $("home-logo")?.addEventListener("click", () => toggleAppMenu());
+  // A bare element name rather than an id matched nothing here once, so the
+  // logo looked alive and did nothing. The drawer is the only navigation the
+  // app has; a click that silently disappears is the worst bug this screen can
+  // have, and tests/simple-shell.test.mjs now checks the selector itself.
+  $("#home-logo")?.addEventListener("click", () => toggleAppMenu());
   initMenuSwipe();
+  initViewportBox();
   $("#app-menu")?.addEventListener("click", (event) => {
     if (event.target?.id === "app-menu") closeAppMenu();
   });
@@ -5696,7 +5726,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=49");
+            const { social } = await import("./social.js?v=50");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));

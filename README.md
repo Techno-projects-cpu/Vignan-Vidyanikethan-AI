@@ -192,6 +192,12 @@ everything. What changed is what is *in front* of a new visitor:
 | Pasting a link and hoping | **Fetch a website** in the same sheet, labelled as outside your textbooks |
 | Account, theme and offline chip in a top bar | The same things in the drawer the logo opens |
 
+An empty chat keeps its greeting above the chips; as soon as there is a
+conversation the greeting goes and the messages have the whole screen. The chat
+is a fixed layer the height of the *visible* window (js/shell.js reads
+`visualViewport`), so opening the phone keyboard pushes the box up instead of
+covering it.
+
 On a phone the box has the whole bottom edge to itself and the logo is a 40px
 square in the top-left corner; the drawer takes 84% of the width. Three tests
 hold the arrangement: `tests/simple-shell.test.mjs` fails if the chat stops being

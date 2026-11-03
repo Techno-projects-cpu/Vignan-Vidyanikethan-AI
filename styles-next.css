@@ -53,6 +53,12 @@ body.premium-ui {
   --vn-control: 40px;
   --vn-control-lg: 48px;
 
+  /* The visible slice of the window. Rewritten at runtime by js/app.js from
+     `visualViewport`, so the chat layer is the size of the part a student can
+     actually see — with the phone keyboard open, that is not the window. */
+  --vn-viewport-height: 100dvh;
+  --vn-viewport-offset: 0px;
+
   /* Motion. One curve, two durations, nothing clever. */
   --vn-ease: cubic-bezier(0.2, 0, 0, 1);
   --vn-fast: 120ms;
@@ -473,7 +479,6 @@ body.premium-ui .page-head {
   height: auto !important;
   margin: 0 !important;
   padding: var(--vn-space-6) var(--vn-space-6) var(--vn-space-5) !important;
-  overflow: visible !important;
   clip: auto !important;
   white-space: normal !important;
   border: 0 !important;
@@ -1749,7 +1754,6 @@ body.premium-ui .sidebar,
 body.premium-ui .topbar.premium-topbar,
 body.premium-ui .topbar,
 body.premium-ui .mobile-nav,
-body.premium-ui .premium-hero,
 body.premium-ui .goal-cards {
   display: none;
 }
@@ -1761,8 +1765,10 @@ body.premium-ui .page-head-index {
   display: none;
 }
 
+/* The base layer sets `display: grid !important` here, so hiding it needs the
+   same weight. Without it the numbered header stayed above the chat. */
 body.premium-ui[data-view="ask"] .page-head {
-  display: none;
+  display: none !important;
 }
 
 body.premium-ui .app-shell {
@@ -1792,34 +1798,65 @@ body.premium-ui .view:not(#view-ask) {
 
 /* --- the chat: fills the window, scrolls inside, box on the bottom edge --- */
 
-/* The older layers set heights and max-heights on the same elements with ids
-   in their selectors, so this block matches them selector for selector rather
-   than hoping to out-rank them. */
+/* The ask screen is its own layer, pinned to the window from top to bottom.
+   This is the part that matters: while the height of the conversation came
+   from the app shell above it, any ancestor with a height or a scroll could
+   push the question box off the bottom edge — and on an empty chat there was
+   nothing to stretch, so the box floated up under the chips instead. A fixed
+   layer has no ancestors to depend on. */
 
-body.premium-ui[data-view="ask"] .main {
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-}
-
-body.premium-ui[data-view="ask"] #view-ask.active {
-  height: 100%;
+body.premium-ui #view-ask.active {
+  position: fixed;
+  top: var(--vn-viewport-offset, 0px);
+  left: 0;
+  right: 0;
+  /* The height of the *visible* window, not the window. On a phone with the
+     keyboard open those are different, and the difference is exactly the part
+     where the question box would otherwise be hiding. js/shell.js keeps this
+     variable up to date from visualViewport; the fallback is the window. */
+  height: var(--vn-viewport-height, 100dvh);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
   max-width: none;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+  background: var(--vn-canvas);
 }
 
-/* The hero and the goal grid repeat what the greeting and the suggestion chips
-   already say, and they pushed the conversation down the page. */
-body.premium-ui[data-view="ask"] #view-ask .premium-hero,
-body.premium-ui[data-view="ask"] #view-ask .goal-cards {
+/* The empty chat keeps its greeting — a blank screen with a box at the bottom
+   is what a broken app looks like. The five huge goal blocks go; the four
+   chips under the greeting do the same job without the wall of boxes. Once
+   there is a conversation, the greeting goes too, and the messages have the
+   whole screen. */
+body.premium-ui #view-ask .goal-cards {
   display: none;
 }
 
-body.premium-ui[data-view="ask"] #view-ask .ask-layout {
-  display: flex;
-  height: 100%;
+body.premium-ui #view-ask.has-conversation .premium-hero {
+  display: none;
+}
+
+/* The greeting sits at the top of the layer; the layout below it takes the
+   rest of the height and packs the chips and the box to the bottom edge. */
+body.premium-ui #view-ask .premium-hero {
+  /* On a short screen the greeting gives way, not the question box. */
+  flex: 0 1 auto;
   min-height: 0;
+  overflow: hidden;
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 64px var(--vn-space-5) var(--vn-space-4);
+  border-bottom: 0;
+}
+
+body.premium-ui #view-ask .ask-layout {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+  height: auto;
   max-width: none;
   margin: 0;
   border: 0;
@@ -1827,12 +1864,15 @@ body.premium-ui[data-view="ask"] #view-ask .ask-layout {
   overflow: visible;
 }
 
-body.premium-ui[data-view="ask"] #view-ask .chat-column {
+/* `justify-content: flex-end` is what puts the box on the bottom edge even when
+   the conversation is empty and there is nothing above it to take up the room. */
+body.premium-ui #view-ask .chat-column {
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   width: 100%;
   max-width: 820px;
-  height: 100%;
+  height: auto;
   min-height: 0;
   margin: 0 auto;
   padding: 0 var(--vn-space-5);
@@ -1843,7 +1883,7 @@ body.premium-ui[data-view="ask"] #view-ask .chat-column {
 }
 
 /* Only the messages scroll. The room at the top is where the logo sits. */
-body.premium-ui[data-view="ask"] #view-ask .chat-log {
+body.premium-ui #view-ask .chat-log {
   flex: 1 1 0;
   min-height: 0;
   max-height: none;
@@ -1853,7 +1893,7 @@ body.premium-ui[data-view="ask"] #view-ask .chat-log {
   scrollbar-gutter: stable;
 }
 
-body.premium-ui[data-view="ask"] #view-ask .chat-log:empty {
+body.premium-ui #view-ask .chat-log:empty {
   display: none;
 }
 
@@ -1891,17 +1931,17 @@ body.premium-ui .composer-input-row textarea:focus {
    they would take the space the conversation needs; the same switches live in
    Settings, and the answer itself still says when it went to the web. */
 @media (max-width: 640px) {
-  body.premium-ui[data-view="ask"] .composer-privacy {
+  body.premium-ui #view-ask .composer-privacy {
     display: none;
   }
 
-  body.premium-ui[data-view="ask"] .composer-meta {
+  body.premium-ui #view-ask .composer-meta {
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
   }
 
-  body.premium-ui[data-view="ask"] .composer-meta::-webkit-scrollbar {
+  body.premium-ui #view-ask .composer-meta::-webkit-scrollbar {
     display: none;
   }
 }
@@ -1909,20 +1949,23 @@ body.premium-ui .composer-input-row textarea:focus {
 /* The order on screen, top to bottom: conversation, typing hint, suggestions,
    then the box. The markup has the suggestions after the form, so the order is
    stated here rather than by moving nodes around at runtime. */
-body.premium-ui[data-view="ask"] #view-ask .chat-log { order: 0; }
-body.premium-ui[data-view="ask"] #view-ask #typing { order: 1; }
-body.premium-ui[data-view="ask"] #view-ask .chat-starters { order: 2; }
-body.premium-ui[data-view="ask"] #view-ask .goal-cards { order: 3; }
+body.premium-ui #view-ask .chat-log { order: 0; }
+body.premium-ui #view-ask #typing { order: 1; }
+body.premium-ui #view-ask .chat-starters { order: 2; }
+body.premium-ui #view-ask .goal-cards { order: 3; }
 /* The suggestion row gives way before the box does: an input that has been
    pushed off the bottom of a small phone is a broken app, three missing
    suggestions are not. */
-body.premium-ui[data-view="ask"] #view-ask .chat-suggestions {
+body.premium-ui #view-ask .chat-suggestions,
+body.premium-ui #view-ask .chat-starters {
   order: 4;
   flex: 0 1 auto;
   min-height: 0;
   overflow: hidden;
 }
-body.premium-ui[data-view="ask"] #view-ask .composer { order: 5; flex-shrink: 0; }
+
+body.premium-ui #view-ask .chat-starters { order: 2; }
+body.premium-ui #view-ask .composer { order: 5; flex-shrink: 0; }
 
 /* The suggestions sit above the box, under the conversation. */
 .chat-starters {

@@ -143,6 +143,7 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 5.7 | The logo is a 40px square in the **top-left** corner and opens the drawer with account, chat, history, library, quiz, exams, flashcards, progress, friends, Study Hall, play, settings, install and theme | ☐ | ☐ | ☐ |
 | 5.7b | In Library, **Chat** returns to the conversation with every message intact; **New chat** asks before clearing it | ☐ | ☐ | ☐ |
 | 5.8 | The question box sits in the middle of the **bottom edge** on every screen size, only the messages scroll, and nothing sits above the conversation | ☐ | ☐ | ☐ |
+| 5.8c | Opening the phone keyboard lifts the box above it instead of hiding it behind | ☐ | ☐ | ☐ |
 | 5.8b | Swiping in from the left edge opens the drawer; swiping back, tapping the darkened chat, or pressing Escape closes it | ☐ | ☐ | ☐ |
 | 5.9 | The **+** beside the question box opens the sheet; **Upload a textbook** opens the file picker without visiting Settings, and the book answers questions afterwards | ☐ | ☐ | ☐ |
 | 5.10 | **Fetch a website** reads a public page, the question box is pre-filled about it, and the answer is labelled outside your textbooks | ☐ | ☐ | ☐ |

@@ -161,3 +161,27 @@ export function bindEdgeSwipe(target, {
     target.removeEventListener("touchcancel", end);
   };
 }
+
+/**
+ * How tall is the part of the window a student can actually see?
+ *
+ * On a phone with the keyboard open, `visualViewport` reports the slice above
+ * the keyboard, and `offsetTop` says where that slice starts. A conversation
+ * pinned with `position: fixed; inset: 0` uses the *window*, so the question
+ * box ends up behind the keyboard exactly while someone is typing. This turns
+ * the two numbers into the box the chat layer should occupy.
+ *
+ * Anything that is not a usable measurement — a missing API, a zero, a value
+ * from the middle of a pinch — falls back to the window.
+ *
+ * @param {{viewportHeight?: number, viewportOffset?: number, innerHeight?: number}} input
+ * @returns {{height: string, top: string, keyboard: number}}
+ */
+export function viewportBox({ viewportHeight, viewportOffset, innerHeight } = {}) {
+  const window_ = Number.isFinite(innerHeight) && innerHeight > 0 ? Math.round(innerHeight) : 0;
+  const visible = Number.isFinite(viewportHeight) && viewportHeight > 120 ? Math.round(viewportHeight) : 0;
+  if (!visible) return { height: window_ ? `${window_}px` : "100dvh", top: "0px", keyboard: 0 };
+  const offset = Number.isFinite(viewportOffset) && viewportOffset > 0 ? Math.round(viewportOffset) : 0;
+  const height = window_ ? Math.min(visible, window_) : visible;
+  return { height: `${height}px`, top: `${offset}px`, keyboard: Math.max(0, window_ - height) };
+}

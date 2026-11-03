@@ -12,12 +12,30 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, timestampLabel } from "../js/shell.js";
+import {
+  badgeText,
+  bindEdgeSwipe,
+  chatStarters,
+  edgeSwipeIntent,
+  hasConversation,
+  historyItems,
+  timestampLabel,
+  viewportBox,
+} from "../js/shell.js";
 
 const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const html = read("index.html");
 const css = read("styles-next.css");
 const app = read("js/app.js");
+
+/** The element names a bare selector may legitimately start with. */
+const TAGS = new Set(("a abbr address area article aside audio b base bdi bdo blockquote body br button canvas " +
+  "caption cite code col colgroup data datalist dd del details dfn dialog div dl dt em embed fieldset " +
+  "figcaption figure footer form h1 h2 h3 h4 h5 h6 head header hgroup hr html i iframe img input ins kbd " +
+  "label legend li link main map mark menu meta meter nav noscript object ol optgroup option output p " +
+  "param picture pre progress q rp rt ruby s samp script section select slot small source span strong " +
+  "style sub summary sup table tbody td template textarea tfoot th thead time title tr track u ul var " +
+  "video wbr svg path use circle g text tspan").split(" "));
 
 test("the page opens on a chat, with a logo in the corner", () => {
   assert.match(html, /<button[^>]*class="home-logo"[^>]*id="home-logo"[^>]*aria-haspopup="dialog"[^>]*aria-controls="app-menu"/);
@@ -27,11 +45,17 @@ test("the page opens on a chat, with a logo in the corner", () => {
   assert.match(html, /<aside class="sidebar">/);
   assert.match(html, /class="mobile-nav"/);
   assert.match(css, /body\.premium-ui \.sidebar,\s*\nbody\.premium-ui \.topbar\.premium-topbar,\s*\nbody\.premium-ui \.topbar,\s*\nbody\.premium-ui \.mobile-nav,/);
-  assert.match(css, /body\.premium-ui \.premium-hero,\s*\nbody\.premium-ui \.goal-cards \{/);
+  assert.match(css, /body\.premium-ui \.mobile-nav,\s*\nbody\.premium-ui \.goal-cards \{\s*\n\s*display: none;/);
   // The chat is one centred column with the question box on the bottom edge.
-  assert.match(css, /body\.premium-ui\[data-view="ask"\] #view-ask \.chat-column \{[^}]*max-width: 820px/);
+  assert.match(css, /body\.premium-ui #view-ask \.chat-column \{[^}]*max-width: 820px/);
   assert.match(css, /body\.premium-ui \.composer \{[^}]*flex: 0 0 auto/);
-  assert.match(css, /body\.premium-ui\[data-view="ask"\] \.page-head \{\s*\n\s*display: none;/);
+  // The base layer sets `display: grid !important` on this header, so the hide
+  // has to carry the same weight or the numbered header stays above the chat.
+  assert.match(css, /body\.premium-ui\[data-view="ask"\] \.page-head \{\s*\n\s*display: none !important;/);
+  // An empty chat keeps a greeting: a blank screen with a box on the bottom
+  // edge is what a broken app looks like.
+  assert.match(css, /body\.premium-ui #view-ask\.has-conversation \.premium-hero \{\s*\n\s*display: none;/);
+  assert.match(css, /body\.premium-ui #view-ask \.premium-hero \{[^}]*padding: 64px var\(--vn-space-5\) var\(--vn-space-4\)/);
 });
 
 test("the logo opens a menu with every screen in it", () => {
@@ -123,17 +147,65 @@ test("suggestions look like every other chat, and disappear once you ask", () =>
 });
 
 test("the question box sits on the bottom edge, in the middle, like a messaging tool", () => {
-  // Only the messages scroll; the box is the last thing in the column and it
-  // never leaves the screen, so there is nothing to scroll down to in order to
-  // type.
-  assert.match(css, /body\.premium-ui\[data-view="ask"\] \.main \{[^}]*height: 100dvh;[^}]*overflow: hidden;/);
-  assert.match(css, /body\.premium-ui\[data-view="ask"\] #view-ask \.chat-log \{[^}]*overflow-y: auto;/);
+  // The ask screen owns the window. Its height does not come from the app
+  // shell above it, so no ancestor can push the box down the page — this is
+  // what was broken when the box floated up over the suggestion chips on an
+  // empty chat.
+  assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*position: fixed;/);
+  assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*height: var\(--vn-viewport-height, 100dvh\);/);
+  assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*display: flex;[^}]*flex-direction: column;/);
+  // With no messages there is nothing to stretch, so the column itself has to
+  // pack its children to the bottom.
+  assert.match(css, /body\.premium-ui #view-ask \.chat-column \{[^}]*justify-content: flex-end;/);
+  // Only the messages scroll.
+  assert.match(css, /body\.premium-ui #view-ask \.chat-log \{[^}]*flex: 1 1 0;[^}]*overflow-y: auto;/);
   // The order on screen puts the box last, whatever order the markup is in.
-  assert.match(css, /body\.premium-ui\[data-view="ask"\] #view-ask \.composer \{ order: 5; flex-shrink: 0; \}/);
+  assert.match(css, /body\.premium-ui #view-ask \.composer \{ order: 5; flex-shrink: 0; \}/);
   assert.match(css, /body\.premium-ui \.composer \{[^}]*padding: var\(--vn-space-2\) 0 calc\(var\(--vn-space-4\) \+ env\(safe-area-inset-bottom\)\)/);
   // The old phone workaround — a box lifted 56px to clear a bottom-left logo —
   // is gone, because there is no longer a logo down there.
   assert.doesNotMatch(css, /bottom: calc\(56px \+ env\(safe-area-inset-bottom\)\)/);
+});
+
+test("the layer matches the visible window, so the keyboard cannot cover the box", () => {
+  // A phone with the keyboard open: 640 of 844 pixels are visible.
+  assert.deepEqual(
+    viewportBox({ viewportHeight: 640, viewportOffset: 0, innerHeight: 844 }),
+    { height: "640px", top: "0px", keyboard: 204 },
+  );
+  // Zoomed in a little, the visible slice starts part-way down the page.
+  assert.deepEqual(
+    viewportBox({ viewportHeight: 700, viewportOffset: 44, innerHeight: 844 }),
+    { height: "700px", top: "44px", keyboard: 144 },
+  );
+  // Nonsense and absent numbers fall back to the whole window.
+  assert.deepEqual(viewportBox({}), { height: "100dvh", top: "0px", keyboard: 0 });
+  assert.equal(viewportBox({ viewportHeight: 0, innerHeight: 800 }).height, "800px");
+  assert.equal(viewportBox({ viewportHeight: 40, innerHeight: 800 }).height, "800px", "a pinch-zoom sliver is ignored");
+  assert.equal(viewportBox({ viewportHeight: 900, innerHeight: 800 }).height, "800px", "never taller than the window");
+  assert.equal(viewportBox({ viewportHeight: 640, viewportOffset: -20, innerHeight: 844 }).top, "0px");
+  // It is wired to the real viewport, not just exported.
+  assert.match(app, /window\.visualViewport/);
+  assert.match(app, /root\.setProperty\("--vn-viewport-height", box\.height\)/);
+  assert.match(app, /root\.setProperty\("--vn-viewport-offset", box\.top\)/);
+  assert.match(app, /viewport\.addEventListener\("resize", apply\)/);
+});
+
+test("clicking the logo actually opens the drawer", () => {
+  // The bug that made the whole app feel broken: `$("home-logo")` — a bare
+  // element name — matched nothing, so the only navigation in the app did
+  // nothing at all when tapped. Assert the binding itself, not just the idea.
+  assert.match(app, /\$\("#home-logo"\)\?\.addEventListener\("click", \(\) => toggleAppMenu\(\)\)/);
+  assert.doesNotMatch(app, /\$\("home-logo"\)/);
+  // And every selector in the app has to be a selector. A bare word is only
+  // valid when it is a real element name.
+  for (const [, selector] of app.matchAll(/\$\$?\("([^"]+)"\)/g)) {
+    const first = selector.trim().split(/[\s>+~]/)[0];
+    assert.ok(
+      /^[#.[*:]/.test(first) || TAGS.has(first),
+      `"${selector}" in js/app.js is not a selector and would silently match nothing`,
+    );
+  }
 });
 
 test("the menu is a drawer that slides in from the left edge", () => {
