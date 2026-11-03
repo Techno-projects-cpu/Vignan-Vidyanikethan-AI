@@ -10,8 +10,8 @@
  * point at the original passage.
  */
 
-import { CORE_STRINGS } from "./translations-core.js?v=50";
-import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=50";
+import { CORE_STRINGS } from "./translations-core.js?v=51";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=51";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 
@@ -21,6 +21,7 @@ const EN = {
   "nav.quiz": "Quiz",
   "nav.exam": "Exams",
   "nav.flashcards": "Flashcards",
+  "nav.code": "Code",
   "nav.progress": "Progress",
   "nav.settings": "Settings",
   "nav.friends": "Friends",
@@ -77,6 +78,9 @@ const EN = {
   "view.flashcards.kicker": "RECALL",
   "view.flashcards.title": "Flashcards",
   "view.flashcards.subtitle": "Review with spaced repetition, one card at a time.",
+  "view.code.kicker": "LEARN TO CODE",
+  "view.code.title": "Code practice",
+  "view.code.subtitle": "Three languages, twelve lessons, and a plain-words reading of any code you paste. Works with no internet.",
   "view.progress.kicker": "MOMENTUM",
   "view.progress.title": "Your progress",
   "view.progress.subtitle": "Streaks, topic mastery, squad invites and a live class leaderboard.",

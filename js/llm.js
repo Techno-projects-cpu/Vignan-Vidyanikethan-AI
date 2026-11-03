@@ -16,16 +16,16 @@ import {
   extractJson,
   formatContext,
   formatOutsideContext,
-} from "./context.js?v=50";
-import { languageName } from "./i18n.js?v=50";
+} from "./context.js?v=51";
+import { languageName } from "./i18n.js?v=51";
 import {
   callProvider,
   callRoutedModel,
   gradeShortWithModel,
   testProvider,
   verifyAnswer,
-} from "./model-router.js?v=50";
-import { truncate, uid } from "./util.js?v=50";
+} from "./model-router.js?v=51";
+import { truncate, uid } from "./util.js?v=51";
 
 export {
   FLASHCARD_SCHEMA,
@@ -52,29 +52,34 @@ function languageInstruction(language = "en") {
 
 
 
-export function buildMessages({ query, hits, mode = "answer", history = [], language = "en", depth = "balanced" }) {
+export function buildMessages({ query, hits, mode = "answer", history = [], language = "en", depth = "balanced", memory = "" }) {
   const context = formatContext(hits);
   const recent = history.slice(-6).map(({ role, content }) => ({ role, content: truncate(content, 700) }));
+  // The brief repeats the conversation in one block, because a provider may
+  // drop the earlier turns or a follow-up may arrive without them ("why?").
+  const brief = memory ? `${truncate(memory, 1400)}\n\n` : "";
   return [
     { role: "system", content: SYSTEM_PROMPT },
     ...recent,
     {
       role: "user",
-      content: `${MODE_INSTRUCTION[mode] || MODE_INSTRUCTION.answer}\n${DEPTH_INSTRUCTION[depth] || DEPTH_INSTRUCTION.balanced}\n${languageInstruction(language)}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}\n\nQUESTION: ${query}\n\nRemember: cite [n] after each claim. If the passages are insufficient, say you could not find it in the library.`,
+      content: `${brief}${MODE_INSTRUCTION[mode] || MODE_INSTRUCTION.answer}\n${DEPTH_INSTRUCTION[depth] || DEPTH_INSTRUCTION.balanced}\n${languageInstruction(language)}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}\n\nQUESTION: ${query}\n\nIf the question leans on the conversation (it, that, the second one), answer about the same topic as the earlier turns rather than starting fresh. Remember: cite [n] after each claim. If the passages are insufficient, say you could not find it in the library.`,
     },
   ];
 }
 
 /** Prompt for a labelled outside-source answer built from web results. */
-export function buildOutsideMessages({ query, results = [], history = [], language = "en" }) {
+export function buildOutsideMessages({ query, results = [], history = [], language = "en", memory = "" }) {
   const context = formatOutsideContext(results);
   const recent = history.slice(-4).map(({ role, content }) => ({ role, content: truncate(content, 500) }));
+  // Same reason as above: a follow-up question needs the topic it is following.
+  const brief = memory ? `${truncate(memory, 1200)}\n\n` : "";
   return [
     { role: "system", content: OUTSIDE_SYSTEM_PROMPT },
     ...recent,
     {
       role: "user",
-      content: `${languageInstruction(language)}\n\nOUTSIDE SOURCES (web search results, not textbooks):\n${context}\n\nQUESTION: ${query}\n\nAnswer only from these sources, cite [W1] and so on, and say clearly what is missing if they do not answer everything.`,
+      content: `${brief}${languageInstruction(language)}\n\nOUTSIDE SOURCES (web search results, not textbooks):\n${context}\n\nQUESTION: ${query}\n\nAnswer only from these sources, cite [W1] and so on, and say clearly what is missing if they do not answer everything.`,
     },
   ];
 }
@@ -99,8 +104,8 @@ export async function callModel({ settings, messages, temperature = 0.2, maxToke
  * sources. Returns `offline: true` when no model is available so the caller can
  * fall back to the extractive outside answer.
  */
-export async function answerOutsideWithModel({ query, results = [], history = [], settings, signal } = {}) {
-  const messages = buildOutsideMessages({ query, results, history, language: settings?.language });
+export async function answerOutsideWithModel({ query, results = [], history = [], memory = "", settings, signal } = {}) {
+  const messages = buildOutsideMessages({ query, results, history, language: settings?.language, memory });
   const result = await callModel({ settings, messages, task: "answer", signal, temperature: 0.2, maxTokens: 700 });
   if (result.offline) return { ...result, verification: { enabled: false } };
   let content = String(result.content || "").trim();
@@ -123,9 +128,9 @@ export async function answerOutsideWithModel({ query, results = [], history = []
   };
 }
 
-export async function answerWithModel({ query, hits, mode, history, settings, signal, verify = true } = {}) {
+export async function answerWithModel({ query, hits, mode, history, memory = "", settings, signal, verify = true } = {}) {
   const messages = buildMessages({
-    query, hits, mode, history,
+    query, hits, mode, history, memory,
     language: settings?.language,
     depth: settings?.answerDepth,
   });

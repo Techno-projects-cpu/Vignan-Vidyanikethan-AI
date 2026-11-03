@@ -6,25 +6,42 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=50";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=50";
-import { ingestPdf, ingestText } from "./ingest.js?v=50";
-import { splitSentences } from "./text.js?v=50";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=50";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=50";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, contextualQuery, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=50";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=50";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=50";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=50";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=50";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=50";
+import * as db from "./db.js?v=51";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=51";
+import { ingestPdf, ingestText } from "./ingest.js?v=51";
+import { splitSentences } from "./text.js?v=51";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=51";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=51";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=51";
+import { carryOverHits, contextChipLabel, conversationBrief, resolveQuery } from "./memory.js?v=51";
+import {
+  LANGUAGES as CODE_LANGUAGES,
+  checkPrediction,
+  codeExplanationMarkdown,
+  explainCode,
+  extractCode,
+  guessLanguage,
+  lessonById,
+  lessonCount,
+  lessonMarkdown,
+  lessonsFor,
+  looksLikeCode,
+  predictOutput,
+  requestedCodeLesson,
+  unpredictableReason,
+} from "./code-mode.js?v=51";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=51";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=51";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=51";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=51";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=51";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=50";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=50";
-import { RELEASE, startUpdateWatch } from "./updates.js?v=50";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=50";
+} from "./pro-mode.js?v=51";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=51";
+import { RELEASE, startUpdateWatch } from "./updates.js?v=51";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=51";
 import {
   SHORTCUTS,
   fitComposerHeight,
@@ -36,18 +53,18 @@ import {
   shouldShowToTop,
   shortcutForKey,
   windowScrollState,
-} from "./viewport.js?v=50";
+} from "./viewport.js?v=51";
 import {
   OFFLINE_MODE_LABEL,
   OFFLINE_MODE_NOTE,
   isOfflineMode,
   networkAllowed,
   setOfflineMode,
-} from "./offline-mode.js?v=50";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=50";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=50";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=50";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=50";
+} from "./offline-mode.js?v=51";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=51";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=51";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=51";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=51";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -55,8 +72,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=50";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=50";
+} from "./llm.js?v=51";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=51";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -68,7 +85,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=50";
+} from "./local-ai.js?v=51";
 import {
   EXAMS,
   MODES,
@@ -83,12 +100,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=50";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=50";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=50";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=50";
-import { TASKS } from "./model-router.js?v=50";
-import { PROVIDERS, providerList } from "./providers.js?v=50";
+} from "./exam-packs.js?v=51";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=51";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=51";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=51";
+import { TASKS } from "./model-router.js?v=51";
+import { PROVIDERS, providerList } from "./providers.js?v=51";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -97,30 +114,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=50";
-import { parseApiKeys } from "./key-pool.js?v=50";
+} from "./settings.js?v=51";
+import { parseApiKeys } from "./key-pool.js?v=51";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=50";
+} from "./student-keys.js?v=51";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=50";
+} from "./quiz.js?v=51";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=50";
+} from "./flashcards.js?v=51";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=50";
+} from "./study-decks.js?v=51";
 import {
   accuracy,
   currentStreak,
@@ -131,17 +148,17 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=50";
-import { externalSearchUrl, searchWeb } from "./web.js?v=50";
-import { openEditStudio } from "./edit-studio.js?v=50";
-import { openReader } from "./reader.js?v=50";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=50";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=50";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=50";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=50";
-import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=50";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=50";
-import * as ui from "./ui.js?v=50";
+} from "./progress.js?v=51";
+import { externalSearchUrl, searchWeb } from "./web.js?v=51";
+import { openEditStudio } from "./edit-studio.js?v=51";
+import { openReader } from "./reader.js?v=51";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=51";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=51";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=51";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=51";
+import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=51";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=51";
+import * as ui from "./ui.js?v=51";
 import {
   clearReferral,
   getLeaderboard,
@@ -151,8 +168,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=50";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=50";
+} from "./auth.js?v=51";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=51";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -160,12 +177,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=50";
-import { initMotion, revealVisible } from "./motion.js?v=50";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=50";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=50";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=50";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=50";
+} from "./premium-ui.js?v=51";
+import { initMotion, revealVisible } from "./motion.js?v=51";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=51";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=51";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=51";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=51";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -176,6 +193,7 @@ const VIEW_META = {
   quiz: { kicker: "view.quiz.kicker", title: "view.quiz.title", subtitle: "view.quiz.subtitle" },
   exam: { kicker: "view.exam.kicker", title: "view.exam.title", subtitle: "view.exam.subtitle" },
   flashcards: { kicker: "view.flashcards.kicker", title: "view.flashcards.title", subtitle: "view.flashcards.subtitle" },
+  code: { kicker: "view.code.kicker", title: "view.code.title", subtitle: "view.code.subtitle" },
   progress: { kicker: "view.progress.kicker", title: "view.progress.title", subtitle: "view.progress.subtitle" },
   friends: { kicker: "view.friends.kicker", title: "view.friends.title", subtitle: "view.friends.subtitle" },
   chat: { kicker: "view.chat.kicker", title: "view.chat.title", subtitle: "view.chat.subtitle" },
@@ -461,6 +479,7 @@ function setView(view, { skipHistory = false } = {}) {
   if (view === "quiz") renderQuizState();
   if (view === "exam") renderExamView();
   if (view === "flashcards") renderFlashcards();
+  if (view === "code") renderCode();
   if (view === "friends" || view === "chat" || view === "play") {
     if (state.account) syncSocial().catch(() => {});
     if (view === "friends") renderSocialFriends();
@@ -691,6 +710,277 @@ function initShortcuts() {
   window.addEventListener("resize", queueScrollPaint, { passive: true });
   $("#to-top")?.addEventListener("click", backToTop);
   paintScrollTools();
+}
+
+/**
+ * The "Continuing: …" line above the question box.
+ *
+ * Context that is invisible is indistinguishable from context that is wrong, so
+ * when a follow-up is typed the app names the topic it will read it against.
+ * It is written with textContent, so a question full of angle brackets cannot
+ * become markup.
+ */
+function syncContextChip() {
+  const chip = $("#composer-context");
+  const input = $("#ask-input");
+  if (!chip || !input) return;
+  const label = contextChipLabel(input.value, state.messages.slice(-8));
+  chip.textContent = label;
+  chip.hidden = !label;
+}
+
+/* ------------------------------------------------------------ code practice */
+
+/**
+ * Code practice: twelve lessons, an explainer and a prediction check.
+ *
+ * The arithmetic is in js/code-mode.js and is unit-tested. This section is the
+ * screen: which language, which lesson, and what to do with the answer. It is
+ * the only part of the app that shows code, so it is also the only place where
+ * a monospaced block is the right answer to a design question.
+ */
+
+const CODE_READ_KEY = "vignan.code.read";
+
+/** The lessons this device has opened, so progress is visible on the list. */
+function codeReadSet() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(CODE_READ_KEY) || "[]");
+    return new Set(Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string") : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function markCodeLessonRead(id) {
+  if (!id) return;
+  const read = codeReadSet();
+  read.add(id);
+  try { localStorage.setItem(CODE_READ_KEY, JSON.stringify([...read].slice(-40))); } catch { /* private mode */ }
+}
+
+let codeLanguage = "python";
+let codeLessonId = null;
+
+function renderCodeLanguages() {
+  const host = $("#code-languages");
+  if (!host) return;
+  host.replaceChildren();
+  for (const language of CODE_LANGUAGES) {
+    const button = ui.element("button", "code-language");
+    button.type = "button";
+    button.role = "tab";
+    button.dataset.language = language.id;
+    button.setAttribute("aria-selected", String(language.id === codeLanguage));
+    button.classList.toggle("active", language.id === codeLanguage);
+    button.appendChild(ui.element("span", "code-glyph", language.glyph));
+    button.appendChild(ui.element("span", "", language.label));
+    button.title = language.note;
+    host.appendChild(button);
+  }
+}
+
+function renderCodeLessonList() {
+  const host = $("#code-lesson-list");
+  if (!host) return;
+  const lessons = lessonsFor(codeLanguage);
+  const read = codeReadSet();
+  host.replaceChildren();
+  if (!codeLessonId && lessons.length) codeLessonId = lessons[0].id;
+  lessons.forEach((lesson, index) => {
+    const button = ui.element("button", "code-lesson-item");
+    button.type = "button";
+    button.role = "listitem";
+    button.dataset.lesson = lesson.id;
+    button.classList.toggle("active", lesson.id === codeLessonId);
+    button.setAttribute("aria-current", String(lesson.id === codeLessonId));
+    button.appendChild(ui.element("span", "code-lesson-index", String(index + 1).padStart(2, "0")));
+    const copy = ui.element("span", "code-lesson-copy");
+    copy.appendChild(ui.element("strong", "", lesson.title));
+    copy.appendChild(ui.element("small", "", lesson.goal));
+    button.appendChild(copy);
+    button.appendChild(ui.element("span", "code-lesson-done", read.has(lesson.id) ? "read" : ""));
+    host.appendChild(button);
+  });
+}
+
+/** One code block, as text a student can select and copy. */
+function codeBlock(code) {
+  const pre = ui.element("pre", "code-block");
+  pre.appendChild(ui.element("code", "", code));
+  return pre;
+}
+
+function renderCodeLesson() {
+  const body = $("#code-lesson-body");
+  const empty = $("#code-lesson-empty");
+  if (!body) return;
+  const lesson = lessonById(codeLessonId);
+  body.replaceChildren();
+  if (empty) empty.hidden = Boolean(lesson);
+  if (!lesson) return;
+  markCodeLessonRead(lesson.id);
+  body.appendChild(ui.element("h3", "", lesson.title));
+  body.appendChild(ui.element("p", "code-goal", lesson.goal));
+  for (const paragraph of lesson.idea) body.appendChild(ui.element("p", "", paragraph));
+  body.appendChild(codeBlock(lesson.code));
+  const tryIt = ui.element("div", "code-try");
+  tryIt.appendChild(ui.element("strong", "", "Try it"));
+  tryIt.appendChild(ui.element("span", "", lesson.tryIt));
+  body.appendChild(tryIt);
+  const expected = ui.element("div", "code-try");
+  expected.appendChild(ui.element("strong", "", "Expected"));
+  expected.appendChild(ui.element("span", "", lesson.check));
+  body.appendChild(expected);
+  const mistake = ui.element("div", "code-mistake");
+  mistake.appendChild(ui.element("strong", "", "The mistake almost everyone makes"));
+  mistake.appendChild(ui.element("span", "", lesson.mistake));
+  body.appendChild(mistake);
+
+  const actions = ui.element("div", "code-actions");
+  const explainThis = ui.element("button", "button primary", "Explain this example");
+  explainThis.type = "button";
+  explainThis.dataset.codeAction = "explain-example";
+  explainThis.addEventListener("click", () => {
+    const input = $("#code-input");
+    if (input) input.value = lesson.code;
+    explainFromInput();
+    $("#code-explanation")?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+  });
+  const copy = ui.element("button", "button ghost", "Copy the code");
+  copy.type = "button";
+  copy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(lesson.code);
+      ui.showToast("Code copied. Paste it wherever you like.", "success");
+    } catch {
+      ui.showToast("Your browser would not let me copy. Select the code and copy it by hand.", "info", 4000);
+    }
+  });
+  const ask = ui.element("button", "button ghost", "Ask Bolt about this");
+  ask.type = "button";
+  ask.addEventListener("click", () => {
+    const input = $("#ask-input");
+    if (input) input.value = `Explain ${lesson.title.toLowerCase()} in ${lesson.language === "html" ? "HTML" : lesson.language} with an example`;
+    setView("ask");
+    requestAnimationFrame(() => input?.focus({ preventScroll: true }));
+  });
+  actions.append(explainThis, copy, ask);
+  body.appendChild(actions);
+}
+
+function renderCode() {
+  renderCodeLanguages();
+  renderCodeLessonList();
+  renderCodeLesson();
+}
+
+/** Read the box, explain it, and show every line. */
+function explainFromInput() {
+  const input = $("#code-input");
+  const output = $("#code-explanation");
+  if (!input || !output) return;
+  const code = input.value.trim();
+  output.replaceChildren();
+  if (!code) {
+    output.appendChild(ui.element("p", "code-note", "Paste a program above and I will read it line by line."));
+    return;
+  }
+  const language = guessLanguage(code);
+  const result = explainCode(code, language);
+  output.appendChild(ui.element("p", "code-summary", result.summary));
+  for (const line of result.lines) {
+    if (line.kind === "blank") continue;
+    const row = ui.element("div", "code-line");
+    row.classList.toggle("unknown", line.kind === "unknown");
+    row.appendChild(ui.element("span", "code-line-number", String(line.number)));
+    const copy = ui.element("div", "code-line-copy");
+    copy.appendChild(ui.element("p", "code-line-source", line.text.trim()));
+    copy.appendChild(ui.element("p", "code-line-say", line.explain));
+    row.appendChild(copy);
+    output.appendChild(row);
+  }
+  if (result.notes.length) {
+    const list = ui.element("ul", "code-warnings");
+    for (const note of result.notes) list.appendChild(ui.element("li", "", note));
+    output.appendChild(list);
+  }
+  // The language the rules actually used, so a student is never surprised by an
+  // explanation that assumed the wrong one.
+  const named = CODE_LANGUAGES.find((entry) => entry.id === language);
+  output.appendChild(ui.element("p", "code-foot", `Read with the ${named ? named.label : "Python"} rules, on this device. Nothing was sent anywhere.`));
+}
+
+/** A tiny program whose output is certain, for the prediction check. */
+const PREDICT_SAMPLE = `a = 5
+b = 3
+print(a * b + 2)
+print("Done")`;
+
+function checkCodePrediction() {
+  const input = $("#code-input");
+  const guess = $("#code-prediction");
+  const verdict = $("#code-verdict");
+  if (!guess || !verdict) return;
+  const code = input?.value.trim() || PREDICT_SAMPLE;
+  const language = guessLanguage(code);
+  const result = checkPrediction(code, guess.value, language);
+  verdict.classList.remove("correct", "wrong");
+  if (!result.checkable) {
+    verdict.classList.add("wrong");
+    verdict.textContent = result.reason;
+    return;
+  }
+  if (result.correct) {
+    verdict.classList.add("correct");
+    verdict.textContent = "Correct. That is exactly what the program prints.";
+    return;
+  }
+  verdict.classList.add("wrong");
+  const expected = result.expected.split("\n").join(" / ");
+  verdict.textContent = `${result.hint || "Not quite."} The program prints: ${expected}`;
+}
+
+function initCodeMode() {
+  $("#code-languages")?.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-language]");
+    if (!button) return;
+    codeLanguage = button.dataset.language;
+    codeLessonId = null;
+    renderCode();
+  });
+  $("#code-lesson-list")?.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-lesson]");
+    if (!button) return;
+    codeLessonId = button.dataset.lesson;
+    renderCodeLessonList();
+    renderCodeLesson();
+  });
+  $("#code-explain")?.addEventListener("click", () => explainFromInput());
+  $("#code-clear")?.addEventListener("click", () => {
+    const input = $("#code-input");
+    if (input) input.value = "";
+    $("#code-explanation")?.replaceChildren();
+    const verdict = $("#code-verdict");
+    if (verdict) verdict.textContent = "";
+    $("#code-prediction") && ($("#code-prediction").value = "");
+  });
+  $("#code-predict-sample")?.addEventListener("click", () => {
+    const input = $("#code-input");
+    if (input) input.value = PREDICT_SAMPLE;
+    const verdict = $("#code-verdict");
+    if (verdict) verdict.textContent = "";
+    $("#code-explanation")?.replaceChildren();
+    explainFromInput();
+  });
+  $("#code-check")?.addEventListener("click", () => checkCodePrediction());
+  // Enter writes a new line here, because a program's output has lines. The
+  // shortcut is Ctrl/Cmd + Enter, and the button is the obvious path.
+  $("#code-prediction")?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || !(event.ctrlKey || event.metaKey)) return;
+    event.preventDefault();
+    checkCodePrediction();
+  });
 }
 
 /* ------------------------------------------------------------ simple shell */
@@ -2277,6 +2567,7 @@ async function handleAsk(event) {
   addMessage({ role: "user", content: query });
   input.value = "";
   queueComposerFit();
+  syncContextChip();
   state.askBusy = true;
   showTyping(true);
 
@@ -2321,6 +2612,9 @@ async function handleAsk(event) {
       renderSources(report);
       return;
     }
+    // A pasted program is not a question about a chapter: it goes to the code
+    // reader, which explains it line by line on this device.
+    const pastedCode = !requestedLink && looksLikeCode(query) ? extractCode(query) : "";
     const safety = safetyReply(query, language);
     const intent = !safety && !asksAboutCreator(query) ? parseChatIntent(query) : null;
     const greeting = conversationReply(query, language);
@@ -2346,6 +2640,16 @@ async function handleAsk(event) {
         if (action.focus) requestAnimationFrame(() => $(action.focus)?.focus({ preventScroll: false }));
       }
       return;
+    } else if (pastedCode) {
+      const codeLanguageGuess = guessLanguage(pastedCode);
+      const reading = explainCode(pastedCode, codeLanguageGuess);
+      const named = CODE_LANGUAGES.find((entry) => entry.id === codeLanguageGuess);
+      answer = {
+        text: codeExplanationMarkdown(reading, { title: `Code, line by line · ${named ? named.label : "Python"}` }),
+        sources: [], webSources: [], flashcards: [], grounded: false, confidence: 0,
+        meta: "Bolt · code reader (offline rules)",
+        verification: { enabled: false },
+      };
     } else if (greeting || casual) {
       // In Pro Mode a greeting gets an in-character readout rather than a
       // generic hello; the wording still comes from the same local replies.
@@ -2363,7 +2667,38 @@ async function handleAsk(event) {
       answer = composeLinkAnswer({ query, ...state.linkContext });
     } else {
       state.linkContext = null;
-      const effectiveQuery = contextualQuery(query, history);
+      // Carry the topic forward when the question leans on the last one, and
+      // keep a short brief of the conversation for the model below.
+      const resolved = resolveQuery(query, history);
+      const effectiveQuery = resolved.query;
+
+      // A programming request is answered by the lesson we wrote, before
+      // retrieval. A student who types "teach me loops in python" should not be
+      // handed a chapter on current electricity because the word "teach"
+      // matched a passage — the lesson is the better answer, and it is honest
+      // about being written for this project.
+      const requestedLesson = requestedCodeLesson(effectiveQuery) || requestedCodeLesson(query);
+      if (requestedLesson) {
+        // Asking again about the lesson we are already on ("why?", "and then?")
+        // gets that lesson's example read line by line, not the same page again.
+        const repeating = resolved.usedContext && state.lastLesson === requestedLesson.id;
+        if (repeating) {
+          const reading = explainCode(requestedLesson.code, requestedLesson.language);
+          answer = {
+            text: `_Continuing the lesson "${requestedLesson.title}"._\n\n${codeExplanationMarkdown(reading, { title: "That lesson's example, line by line" })}`,
+            sources: [], webSources: [], flashcards: [], grounded: false, confidence: 0,
+            meta: "Bolt · code lesson · written for this project",
+            verification: { enabled: false },
+          };
+        } else {
+          answer = {
+            text: lessonMarkdown(requestedLesson),
+            sources: [], webSources: [], flashcards: [], grounded: false,
+            confidence: 0, meta: "Bolt · code lesson · written for this project",
+            verification: { enabled: false },
+          };
+        }
+      }
       const bookIds = scopeIds("#ask-book-scope");
       const retrieval = retrievePreferBooks(effectiveQuery, state.indexes, { topK: 5, bookIds });
       hits = retrieval.hits;
@@ -2406,6 +2741,37 @@ async function handleAsk(event) {
         online,
       });
       const webSkippedOffline = Boolean(state.settings.webEnabled) && (!online || state.settings.offlineMode);
+      // A follow-up that finds no new page still has the pages the last answer
+      // stood on. A teacher answers "why?" from the same paragraph.
+      if (!answer && !hits.length && resolved.usedContext && state.lastHits?.length) {
+        hits = carryOverHits(state.lastHits);
+        if (hits.length) {
+          answer = composeGroundedAnswer({
+            query, evidenceQuery: effectiveQuery, hits, mode: requestMode,
+            reason: "follow-up", confidence: 0.4, webResults: [], webEnabled: false,
+            language: state.settings.language, depth: state.settings.answerDepth,
+            partial: true, contextHits: hits,
+          });
+          answer.meta = "Bolt · continuing from the last answer";
+          answer.verification = { enabled: false };
+          answer.text = `_Continuing from the pages cited a moment ago — the question did not name a new topic._\n\n${answer.text}`;
+        }
+      }
+
+      // A follow-up to a lesson continues that lesson, line by line, instead of
+      // drifting into a search for the words in the question.
+      if (!answer && resolved.usedContext && state.lastLesson) {
+        const lesson = lessonById(state.lastLesson);
+        if (lesson) {
+          const reading = explainCode(lesson.code, lesson.language);
+          answer = {
+            text: `_Continuing the lesson "${lesson.title}"._\n\n${codeExplanationMarkdown(reading, { title: "That lesson's example, line by line" })}`,
+            sources: [], webSources: [], flashcards: [], grounded: false, confidence: 0,
+            meta: "Bolt · code reader (offline rules)", verification: { enabled: false },
+          };
+        }
+      }
+
       let webResults = [];
       let searchProvider = "Web search";
       let searchProviders = [];
@@ -2433,6 +2799,7 @@ async function handleAsk(event) {
             hits,
             mode: requestMode,
             history: history.slice(-6).map(({ role, content }) => ({ role, content })),
+            memory: conversationBrief(history).brief,
             settings: state.settings,
           });
           if (!model.offline && model.content) {
@@ -2473,6 +2840,7 @@ async function handleAsk(event) {
               query: effectiveQuery,
               results: webResults,
               history: history.slice(-4).map(({ role, content }) => ({ role, content })),
+              memory: conversationBrief(history).brief,
               settings: state.settings,
             });
             if (!model.offline && model.content) {
@@ -2557,6 +2925,12 @@ async function handleAsk(event) {
     // question, so the question travels with the answer.
     answer.query = query;
     state.lastAnswer = answer;
+    // Kept only in memory, only for the next follow-up: if "why?" finds no new
+    // page, the pages behind this answer are the honest place to continue.
+    state.lastHits = answer.sources?.length ? answer.sources.map((source) => ({ ...source })) : [];
+    // Which lesson we were on, so "why?" after a lesson continues the lesson
+    // rather than searching for the words in the question.
+    state.lastLesson = /code lesson/.test(answer.meta || "") ? (requestedCodeLesson(query) || lessonById(state.lastLesson))?.id || "" : "";
     addMessage({
       role: "assistant", content: answer.text, sources: answer.sources,
       webSources: answer.webSources, meta: answer.meta, confidence: answer.confidence,
@@ -5726,7 +6100,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=50");
+            const { social } = await import("./social.js?v=51");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -6185,6 +6559,7 @@ function bindEvents() {
   $("#pro-chip")?.addEventListener("click", () => { void disengageProMode(); });
   // The phone tab bar carries five screens; this is the way to the other five.
   initShortcuts();
+  initCodeMode();
   void initSimpleShell();
   $("#mobile-more")?.addEventListener("click", () => {
     const button = $("#command-menu-button");
@@ -6199,7 +6574,9 @@ function bindEvents() {
   $("#ask-web-fallback").addEventListener("change", (event) => void setWebChoice(event.target.checked));
   $("#settings-web-enabled").addEventListener("change", (event) => void setWebChoice(event.target.checked));
   $("#ask-input").addEventListener("input", queueComposerFit);
+  $("#ask-input").addEventListener("input", syncContextChip);
   $("#ask-input").addEventListener("paste", queueComposerFit);
+  $("#ask-input").addEventListener("paste", () => setTimeout(syncContextChip, 0));
   $("#ask-input").addEventListener("keydown", (event) => {
     // Enter sends — unless it belongs to a keyboard that is still composing a
     // word, which is every Hindi, Telugu, Japanese and suggestion-bar keyboard.

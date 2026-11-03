@@ -6,10 +6,10 @@
  * a purely static export) the app continues as a guest with local progress.
  */
 
-import * as ui from "./ui.js?v=50";
-import { blockInOfflineMode } from "./offline-mode.js?v=50";
-import { truncate } from "./util.js?v=50";
-import { newPasswordProblem } from "./password-policy.js?v=50";
+import * as ui from "./ui.js?v=51";
+import { blockInOfflineMode } from "./offline-mode.js?v=51";
+import { truncate } from "./util.js?v=51";
+import { newPasswordProblem } from "./password-policy.js?v=51";
 
 const API_BASE = new URL("../api/", import.meta.url);
 const REQUEST_TIMEOUT = 12000;

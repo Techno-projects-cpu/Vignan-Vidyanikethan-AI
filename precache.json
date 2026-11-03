@@ -1,6 +1,6 @@
 {
-  "version": 50,
-  "generatedAt": "2026-11-03T00:48:12.871Z",
+  "version": 51,
+  "generatedAt": "2026-11-03T01:07:21.295Z",
   "urls": [
     "./",
     "./index.html",
@@ -31,6 +31,7 @@
     "./js/chat-intents.js",
     "./js/chat-ui.js",
     "./js/chess.js",
+    "./js/code-mode.js",
     "./js/context.js",
     "./js/conversation.js",
     "./js/db.js",
@@ -52,6 +53,7 @@
     "./js/llm.js",
     "./js/local-ai-worker.js",
     "./js/local-ai.js",
+    "./js/memory.js",
     "./js/model-paper.js",
     "./js/model-router.js",
     "./js/motion.js",

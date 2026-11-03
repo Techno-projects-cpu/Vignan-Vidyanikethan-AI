@@ -161,7 +161,7 @@ test("no visible text is a fragment of markup", () => {
 test("index.html has one screen per navigation item, and balanced tags", () => {
   // The default screen carries "view active", so the class is matched loosely.
   const views = [...html.matchAll(/<section class="view(?: active)?"[^>]*id="([^"]+)"/g)].map((match) => match[1]);
-  assert.equal(views.length, 10, "ten screens: ask, library, quiz, exam, flashcards, friends, chat, play, progress, settings");
+  assert.equal(views.length, 11, "eleven screens: ask, library, quiz, exam, flashcards, code, friends, chat, play, progress, settings");
   const navViews = [...html.matchAll(/data-view="([^"]+)"/g)].map((match) => match[1]);
   const uniqueNav = [...new Set(navViews)];
   for (const view of uniqueNav) {

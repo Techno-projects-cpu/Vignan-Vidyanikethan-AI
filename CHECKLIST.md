@@ -151,6 +151,19 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 5.12 | **Install the app** installs the website (full screen, offline) and states plainly that an `.apk`/`.exe` needs a build machine | ☐ | ☐ | ☐ |
 | 5.13 | Escape closes the menu, then a sheet; focus returns to the logo; Tab stays inside the menu | ☐ | ☐ | ☐ |
 
+## 5c. Code practice and conversation memory
+
+| # | Check | P | T | L |
+| --- | --- | --- | --- | --- |
+| 5.14 | **Code practice** opens from the drawer and shows three languages and four lessons each; every lesson has one idea, one example and one thing to try | ☐ | ☐ | ☐ |
+| 5.15 | **Explain this example** reads the lesson's code line by line in plain words; the same works for any code pasted into the box | ☐ | ☐ | ☐ |
+| 5.16 | A line the rules do not recognise is marked as unrecognised, not guessed at; missing colons, `=` where `==` belongs, unclosed braces and unclosed tags are named | ☐ | ☐ | ☐ |
+| 5.17 | **What will this print?** marks "17 / Done" as correct and says which line differs when the answer is wrong; a program with a loop or an `input()` says it cannot be predicted instead of inventing an output | ☐ | ☐ | ☐ |
+| 5.18 | Pasting a program into the chat gets the same line-by-line reading; "teach me loops in python" opens the lesson; "explain the functions of the heart" still searches the library | ☐ | ☐ | ☐ |
+| 5.19 | Typing "why is it important?" after a question shows **Continuing: <that question>** above the box, and the answer stays on the same topic | ☐ | ☐ | ☐ |
+| 5.20 | A new question with its own subject ("List the parts of a flower") carries nothing over, and greetings never do | ☐ | ☐ | ☐ |
+| 5.21 | With the Wi-Fi off, the code reader and the lessons still work, and a follow-up to a library answer continues from the same cited pages | ☐ | ☐ | ☐ |
+
 ## 6. Offline — the part that matters at a science fair
 
 Turn on aeroplane mode (or DevTools → Network → Offline) and reload the app.

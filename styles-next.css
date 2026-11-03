@@ -1907,6 +1907,23 @@ body.premium-ui .composer {
   border: 0;
 }
 
+/* While a follow-up is being typed, say which topic it will be read against.
+   Without this, carrying context over looks like answering a different
+   question. It disappears the moment the question names its own subject. */
+.composer-context {
+  margin: 0 0 var(--vn-space-2);
+  padding: 0 var(--vn-space-1);
+  font-family: var(--vn-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--vn-quiet);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.composer-context[hidden] { display: none; }
+
 body.premium-ui .composer-input-row {
   display: flex;
   align-items: flex-end;
@@ -2493,6 +2510,271 @@ body.premium-ui .ask-layout.show-sources .source-column {
 
 .install-step strong { font-size: var(--vn-small); }
 .install-step span { color: var(--vn-ink-2); font-size: var(--vn-meta); line-height: 1.55; }
+
+/* --------------------------------------------------------------------------
+   17. Code practice — a lesson on the left, a code reader on the right
+   --------------------------------------------------------------------------
+
+   A student with a phone and no laptop needs three things from a coding lesson:
+   the idea in short sentences, the code itself in a face that lines up, and a
+   way to check they understood it. Nothing here needs a network, and nothing
+   here is a screenshot — the code is real text they can select and copy. */
+
+.code-toolbar {
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+.code-languages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vn-space-2);
+  margin: var(--vn-space-4) 0 var(--vn-space-4);
+}
+
+.code-language {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vn-space-2);
+  min-height: 44px;
+  padding: 0 var(--vn-space-4);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  background: transparent;
+  color: var(--vn-ink-2);
+  font-size: var(--vn-small);
+  cursor: pointer;
+  transition: border-color var(--vn-fast) var(--vn-ease), color var(--vn-fast) var(--vn-ease);
+}
+
+.code-language:hover { border-color: var(--vn-ink); color: var(--vn-ink); }
+
+.code-language.active {
+  border-color: var(--vn-ink);
+  background: var(--vn-raise);
+  color: var(--vn-ink);
+}
+
+.code-language .code-glyph {
+  font-family: var(--vn-font-mono);
+  font-size: 12px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.code-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--vn-space-4);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .code-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+.code-lesson-column,
+.code-reader-column {
+  display: grid;
+  gap: var(--vn-space-4);
+  min-width: 0;
+}
+
+/* The lesson list is a stack of hairline rows, not a row of cards: the same
+   choice reads as one object at a glance and costs no extra borders. */
+.code-lesson-list {
+  display: grid;
+  border: var(--vn-hairline) solid var(--vn-rule);
+}
+
+.code-lesson-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--vn-space-3);
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: var(--vn-space-3) var(--vn-space-4);
+  border: 0;
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+  background: transparent;
+  color: var(--vn-ink-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.code-lesson-item:last-child { border-bottom: 0; }
+
+.code-lesson-item:hover,
+.code-lesson-item.active {
+  background: var(--vn-raise);
+  color: var(--vn-ink);
+}
+
+.code-lesson-item.active { box-shadow: inset 2px 0 0 var(--vn-ink); }
+
+.code-lesson-item strong {
+  display: block;
+  font-size: var(--vn-small);
+  font-weight: 600;
+}
+
+.code-lesson-item small {
+  display: block;
+  color: var(--vn-quiet);
+  font-size: var(--vn-meta);
+  margin-top: 2px;
+}
+
+.code-lesson-index {
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--vn-quiet);
+}
+
+.code-lesson-done {
+  font-family: var(--vn-font-mono);
+  font-size: 11px;
+  color: var(--vn-ink);
+}
+
+.code-note {
+  margin: 0 0 var(--vn-space-3);
+  color: var(--vn-ink-2);
+  font-size: var(--vn-small);
+  line-height: 1.6;
+}
+
+.code-lesson h3 { margin: 0 0 var(--vn-space-2); }
+.code-lesson p { margin: 0 0 var(--vn-space-3); color: var(--vn-ink-2); line-height: 1.6; }
+
+/* The example, in a real monospaced face, scrollable on a phone. */
+.code-block {
+  margin: 0 0 var(--vn-space-3);
+  padding: var(--vn-space-3) var(--vn-space-4);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  background: var(--vn-raise);
+  overflow-x: auto;
+  font-family: var(--vn-font-mono);
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre;
+  tab-size: 2;
+  color: var(--vn-ink);
+}
+
+.code-block code { border: 0; background: transparent; padding: 0; font-size: inherit; color: inherit; }
+
+.code-try,
+.code-mistake {
+  display: grid;
+  gap: 2px;
+  padding: var(--vn-space-3);
+  margin-bottom: var(--vn-space-2);
+  border-left: 2px solid var(--vn-ink);
+  background: var(--vn-raise);
+}
+
+.code-try strong,
+.code-mistake strong {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vn-quiet);
+  font-family: var(--vn-font-mono);
+}
+
+.code-try span,
+.code-mistake span { font-size: var(--vn-small); line-height: 1.55; }
+
+.code-actions { display: flex; flex-wrap: wrap; gap: var(--vn-space-2); margin-top: var(--vn-space-3); }
+
+.code-field { display: grid; gap: var(--vn-space-2); margin-bottom: var(--vn-space-3); }
+
+.code-field > span {
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vn-quiet);
+}
+
+.code-field textarea,
+.code-field input {
+  font-family: var(--vn-font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+.code-reader-actions { display: flex; flex-wrap: wrap; gap: var(--vn-space-2); margin-bottom: var(--vn-space-3); }
+
+/* The explanation, one row per line of code. */
+.code-output { display: grid; gap: var(--vn-space-2); }
+
+.code-line {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: var(--vn-space-3);
+  padding: var(--vn-space-2) 0;
+  border-top: var(--vn-hairline) solid var(--vn-rule);
+}
+
+.code-line:first-child { border-top: 0; }
+
+.code-line-number {
+  font-family: var(--vn-font-mono);
+  font-size: 11px;
+  color: var(--vn-quiet);
+  padding-top: 2px;
+  text-align: right;
+}
+
+.code-line-source {
+  margin: 0 0 4px;
+  font-family: var(--vn-font-mono);
+  font-size: 12.5px;
+  color: var(--vn-ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.code-line-say {
+  margin: 0;
+  font-size: var(--vn-small);
+  line-height: 1.55;
+  color: var(--vn-ink-2);
+}
+
+.code-line.unknown .code-line-say { color: var(--vn-quiet); font-style: italic; }
+
+.code-summary {
+  margin: 0 0 var(--vn-space-3);
+  padding: var(--vn-space-3);
+  border: var(--vn-hairline) solid var(--vn-rule);
+  font-size: var(--vn-small);
+  line-height: 1.6;
+}
+
+.code-warnings {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: var(--vn-small);
+  line-height: 1.55;
+  color: var(--vn-ink-2);
+}
+
+.code-verdict { margin: var(--vn-space-3) 0 0; font-size: var(--vn-small); line-height: 1.6; min-height: 1em; }
+.code-verdict.correct { color: var(--vn-ink); font-weight: 600; }
+.code-verdict.wrong { color: var(--vn-ink-2); }
+
+.code-foot {
+  margin-top: var(--vn-space-5);
+  color: var(--vn-quiet);
+  font-size: var(--vn-meta);
+  line-height: 1.6;
+}
 
 /* Scroll is locked while a menu or a sheet is over the page. */
 body.menu-open,

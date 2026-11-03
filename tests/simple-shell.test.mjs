@@ -3,7 +3,7 @@
  *
  * A student came here to study, not to learn a workspace. So the app opens as
  * one chat — greeting, question box on the bottom edge, and a small logo in the
- * top-left corner — and the ten screens live behind that logo, in a drawer that
+ * top-left corner — and the eleven screens live behind that logo, in a drawer that
  * slides in from the left. These tests hold both halves of that promise: the
  * conversation is the only thing on screen, and nothing was actually taken away.
  */
@@ -60,7 +60,7 @@ test("the page opens on a chat, with a logo in the corner", () => {
 
 test("the logo opens a menu with every screen in it", () => {
   const menu = html.slice(html.indexOf('id="app-menu"'), html.indexOf('id="history-overlay"'));
-  for (const view of ["ask", "library", "quiz", "exam", "flashcards", "progress", "friends", "chat", "play", "settings"]) {
+  for (const view of ["ask", "library", "quiz", "exam", "flashcards", "code", "progress", "friends", "chat", "play", "settings"]) {
     assert.match(menu, new RegExp(`data-menu-view="${view}"`), `${view} is reachable from the menu`);
   }
   for (const action of ["new-chat", "history", "upload", "install", "theme"]) {
