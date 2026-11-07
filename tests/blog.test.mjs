@@ -139,8 +139,13 @@ test("every link in the section goes somewhere real", () => {
       if (/^(?:https?:)?\/\//.test(link)) continue;
       if (link.startsWith("#")) continue;
       const path = link.split("?")[0].split("#")[0];
-      const resolved = `blog/${path}`.replace(/\/\.\//g, "/").replace(/^blog\/blog\//, "blog/");
-      const target = path.startsWith("../") ? path.replace(/^\.\.\//, "") : resolved;
+      // Three shapes are allowed: a path from the site root (/blog/x.html), a
+      // path inside the section (./x.html) and a path up one level (../judge.html).
+      const target = path.startsWith("/")
+        ? path.replace(/^\//, "")
+        : path.startsWith("../")
+          ? path.replace(/^\.\.\//, "")
+          : `blog/${path}`;
       if (!existsSync(`${root}/${target}`)) missing.push(`${file} → ${link}`);
     }
     assert.deepEqual(missing, [], `dead links: ${missing.join(", ")}`);
@@ -178,10 +183,15 @@ test("every piece is a complete page a search engine can index", () => {
 
 test("the section has a way in, from the app and from the landing page", () => {
   assert.equal((index.match(/class="bl-card"/g) || []).length, posts.length);
+  // Absolute links in the index, because /blog, /blog/, /writing and
+  // /blog/index.html all serve it and a relative card link only works for one.
+  for (const file of posts) {
+    assert.ok(index.includes(`href="/blog/${file}"`), `the index links ${file} absolutely`);
+  }
   assert.match(app, /<a class="app-menu-item" href="\.\/blog\/index\.html">/, "the drawer links the writing");
   assert.match(landing, /<a href="\.\/blog\/index\.html">Writing<\/a>/, "the landing page links it in the top bar");
   assert.equal((landing.match(/class="wl-cell wl-cell-article"/g) || []).length, 6, "and lists all six pieces");
-  assert.match(index, /href="\.\.\/">Open the app/, "every page leads back into the app");
+  assert.match(index, /href="\/">Open the app/, "every page leads back into the app");
   for (const file of posts) assert.match(source(file), /<a class="bl-bar-open" href="\.\.\/">/, `${file} leads back into the app`);
 });
 
