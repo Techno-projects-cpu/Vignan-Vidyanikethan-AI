@@ -38,7 +38,10 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+/* `overflow-x: hidden` on the body would make the body a scroll container and
+   break the sticky top bar in some browsers. It is set on the root instead, and
+   the only element wide enough to overflow (the language strip) clips itself. */
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body.wl {
   margin: 0;
@@ -47,7 +50,6 @@ body.wl {
   color: var(--wl-ink);
   font-size: 16px;
   line-height: 1.6;
-  overflow-x: hidden;
 }
 
 body.wl ::selection { background: #f6f6f6; color: #080808; }
