@@ -2256,6 +2256,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
   color: var(--vn-ink-2);
   font-size: var(--vn-small);
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
   transition: background var(--vn-fast) var(--vn-ease), color var(--vn-fast) var(--vn-ease);
 }

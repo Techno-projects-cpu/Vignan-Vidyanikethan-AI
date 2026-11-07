@@ -121,6 +121,7 @@ error. A funded team covers far more ground; this one goes deeper on less.
 | Offline mode, that actually means it | A switch in Settings → App & offline. When it is on there is no web fallback, and no account, friends, chat or leaderboard calls — the answer comes only from the pages on the device, which is what a demo with bad Wi-Fi needs. The switch does not erase the student's web preference: turning it off restores exactly what they had chosen. The chip in the top bar says "Offline mode" while it is on. |
 | A release that arrives by itself | The permission banner is gone, by the student's own decision: publishing is the whole gesture. The worker takes over immediately and the page reloads once — except over work in progress. An answer being written, or a question typed but not yet sent, is never thrown away; the reload waits for the box to be empty and then happens without asking. There is no button, no "Later", and no setting that can pin a device to an old release. |
 | One chat, and a logo | The app opens as a single conversation — a greeting, four ordinary suggestion chips, a question box — and nothing else. The sidebar, the numbered page header, the hero and the five stacked blocks are folded away behind the logo in the bottom-left corner, which opens a menu with account, chat, history, library, quiz, exams, flashcards, progress, friends, Study Hall, play, settings, install and the theme switch. **Chat** returns to the conversation; **New chat** clears it, and asks first, because only one of those loses anything. Nothing was deleted: the screens are the same screens — and there are now eleven, with code practice among them — one tap from where the student is already looking. |
+| A landing page that argues | `/welcome` is a page of its own, not a fifth version of the app: a hero that states the constraint ("It will not answer from nothing"), a four-move illustration of a cited answer, a strip of all thirty-three languages drifting past in their own scripts, the eleven screens as square cards that share their borders, and five numbers a judge can re-run. It carries no JavaScript at all, loads no host but this one, and every corner is square. `tests/landing.test.mjs` keeps it honest: each number on it must equal the number on the judge page (which is itself checked against a real run of the offline simulator), each card must name a screen the app really has, every link must resolve, and the palette must stay grey. |
 | A textbook, without Settings | The "+" beside the question box opens one sheet: upload a PDF or text file, paste notes, fetch a website, or start a quiz, flashcards or exam practice. Uploading from chat opens the phone's own file picker directly — the same guarded ingest path as the Library, with the same limits and the same labels. |
 | Fetch a website, then ask about it | A public page can be read from the composer and asked about like any other source. The browser never fetches the page itself: the address goes through the Library's server-side importer, which refuses private addresses, scripts and archives, and the result is labelled **outside your textbooks**. The next question is pre-filled as *"Explain this page in simple words, then tell me how it works: …"*, and the page stays in the library as a web source for follow-ups. |
 | Install, honestly | **Install the app** in the menu installs the website as an app — full screen, offline, own icon — and says so. It also says plainly that a real `.apk` or `.exe` needs a build machine with Android Studio or Tauri, and links the exact commands in [PACKAGING.md](./PACKAGING.md) instead of offering a download that does not exist. |
@@ -255,6 +256,27 @@ app invented. A follow-up that finds no new page continues from the pages the
 last answer cited, and says that it is doing so. A connected model receives a
 short **CONVERSATION SO FAR** block as well as the last turns, so a provider
 that drops history still knows what the conversation was about.
+
+## The landing page
+
+The app opens as a conversation, on purpose. A page that has to explain the
+project in thirty seconds is a different job, so it lives at `/welcome` as its
+own document with its own stylesheet — no script tag, no host but this one.
+
+| Part | What it does |
+| --- | --- |
+| The hero | `ASK YOUR / TEXTBOOK.` with the second line stroked rather than filled, over a hairline grid. Four figures underneath (cost, languages, screens, offline) and two ways in: the app, or the judge page. |
+| The specimen | One question, one cited answer, one follow-up with the **Continuing:** chip, one answer that stays on the same page — animated in four moves. It is labelled **ILLUSTRATION** and the caption says it is not a recorded session, because a landing page is where projects start lying. |
+| The language strip | All thirty-three languages in their own scripts, drifting sideways. It pauses when you point at it, and it becomes a plain scrollable row for a reader who has asked for less motion. |
+| `01`–`11` | The eleven screens as full-width square cards that stick together and share their borders, whole card clickable, inverting to white on hover — the zero-vast stack. |
+| The numbers | Five figures and a link to re-run them. They are copied from `judge.html`, which `tests/judge-numbers.test.mjs` checks against the real offline simulator, so the chain ends in a command rather than in a slide. |
+| Four steps | How an answer is actually produced: index on the device, retrieve, cite or decline, check by hand. |
+
+It is reachable from the drawer (**The project → About this project**), from the
+fine print on the login screen, from the judge page and from each legal page's
+footer, and it links back into the app in fifteen places. Pure CSS motion, with
+`prefers-reduced-motion` restoring every hidden element rather than leaving a
+reader with an empty hero.
 
 ## Study loop
 

@@ -164,6 +164,18 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 5.20 | A new question with its own subject ("List the parts of a flower") carries nothing over, and greetings never do | ☐ | ☐ | ☐ |
 | 5.21 | With the Wi-Fi off, the code reader and the lessons still work, and a follow-up to a library answer continues from the same cited pages | ☐ | ☐ | ☐ |
 
+## 5d. The landing page
+
+| # | Check | P | T | L |
+| --- | --- | --- | --- | --- |
+| 5.22 | `/welcome` opens on a phone and on a laptop, and the hero fits without sideways scrolling | ☐ | ☐ | ☐ |
+| 5.23 | The four moves in the specimen panel finish visibly: question, cited answer, follow-up with the **Continuing:** chip, second answer | ☐ | ☐ | ☐ |
+| 5.24 | The language strip moves on its own, pauses when you point at it, and shows a real script for all thirty-three languages | ☐ | ☐ | ☐ |
+| 5.25 | All eleven cards open the app, and each one names a screen that exists in the drawer | ☐ | ☐ | ☐ |
+| 5.26 | The five numbers match `/judge.html`, and **Re-run all of it** opens the judge page | ☐ | ☐ | ☐ |
+| 5.27 | Turn on the phone's "Remove animations" / "Reduce motion" setting and reload: every part of the page is still visible, nothing is stuck at zero opacity | ☐ | ☐ | ☐ |
+| 5.28 | With the Wi-Fi off, `/welcome` still opens (it is in the offline cache) and shows every section | ☐ | ☐ | ☐ |
+
 ## 6. Offline — the part that matters at a science fair
 
 Turn on aeroplane mode (or DevTools → Network → Offline) and reload the app.

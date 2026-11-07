@@ -7,7 +7,7 @@
  * reasonably well, and is deterministic (important for verifiable answers).
  */
 
-import { bigrams, tokenize } from "./text.js?v=51";
+import { bigrams, tokenize } from "./text.js?v=52";
 
 export const VECTOR_DIM = 512;
 

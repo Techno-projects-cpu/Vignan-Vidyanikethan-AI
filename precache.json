@@ -1,6 +1,6 @@
 {
-  "version": 51,
-  "generatedAt": "2026-11-03T01:12:23.290Z",
+  "version": 52,
+  "generatedAt": "2026-11-07T14:49:25.666Z",
   "urls": [
     "./",
     "./index.html",
@@ -106,6 +106,7 @@
     "./styles-premium.css",
     "./styles-pro.css",
     "./styles-social.css",
+    "./styles-welcome.css",
     "./styles.css",
     "./sw.js",
     "./terms.html",
@@ -297,6 +298,7 @@
     "./vendor/pdfjs/standard_fonts/LiberationSans-Regular.ttf",
     "./vendor/qr/LICENSE.txt",
     "./vendor/qr/qrcode.js",
-    "./vendor/webllm/web-llm.js"
+    "./vendor/webllm/web-llm.js",
+    "./welcome.html"
   ]
 }
