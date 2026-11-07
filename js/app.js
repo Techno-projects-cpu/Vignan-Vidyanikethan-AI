@@ -6,14 +6,14 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=53";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=53";
-import { ingestPdf, ingestText } from "./ingest.js?v=53";
-import { splitSentences } from "./text.js?v=53";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=53";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=53";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=53";
-import { carryOverHits, contextChipLabel, conversationBrief, resolveQuery } from "./memory.js?v=53";
+import * as db from "./db.js?v=54";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=54";
+import { ingestPdf, ingestText } from "./ingest.js?v=54";
+import { splitSentences } from "./text.js?v=54";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=54";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=54";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=54";
+import { carryOverHits, contextChipLabel, conversationBrief, resolveQuery } from "./memory.js?v=54";
 import {
   LANGUAGES as CODE_LANGUAGES,
   checkPrediction,
@@ -29,19 +29,20 @@ import {
   predictOutput,
   requestedCodeLesson,
   unpredictableReason,
-} from "./code-mode.js?v=53";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=53";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=53";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=53";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=53";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=53";
+} from "./code-mode.js?v=54";
+import { answerOutOfView, isFollowing, readChatBox, scrollForAnswer, scrollForLatest } from "./chat-scroll.js?v=54";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=54";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=54";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=54";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=54";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=54";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=53";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=53";
-import { RELEASE, startUpdateWatch } from "./updates.js?v=53";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=53";
+} from "./pro-mode.js?v=54";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=54";
+import { RELEASE, startUpdateWatch } from "./updates.js?v=54";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=54";
 import {
   SHORTCUTS,
   fitComposerHeight,
@@ -53,18 +54,18 @@ import {
   shouldShowToTop,
   shortcutForKey,
   windowScrollState,
-} from "./viewport.js?v=53";
+} from "./viewport.js?v=54";
 import {
   OFFLINE_MODE_LABEL,
   OFFLINE_MODE_NOTE,
   isOfflineMode,
   networkAllowed,
   setOfflineMode,
-} from "./offline-mode.js?v=53";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=53";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=53";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=53";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=53";
+} from "./offline-mode.js?v=54";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=54";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=54";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=54";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=54";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -72,8 +73,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=53";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=53";
+} from "./llm.js?v=54";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=54";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -85,7 +86,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=53";
+} from "./local-ai.js?v=54";
 import {
   EXAMS,
   MODES,
@@ -100,12 +101,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=53";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=53";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=53";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=53";
-import { TASKS } from "./model-router.js?v=53";
-import { PROVIDERS, providerList } from "./providers.js?v=53";
+} from "./exam-packs.js?v=54";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=54";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=54";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=54";
+import { TASKS } from "./model-router.js?v=54";
+import { PROVIDERS, providerList } from "./providers.js?v=54";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -114,30 +115,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=53";
-import { parseApiKeys } from "./key-pool.js?v=53";
+} from "./settings.js?v=54";
+import { parseApiKeys } from "./key-pool.js?v=54";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=53";
+} from "./student-keys.js?v=54";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=53";
+} from "./quiz.js?v=54";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=53";
+} from "./flashcards.js?v=54";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=53";
+} from "./study-decks.js?v=54";
 import {
   accuracy,
   currentStreak,
@@ -148,17 +149,17 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=53";
-import { externalSearchUrl, searchWeb } from "./web.js?v=53";
-import { openEditStudio } from "./edit-studio.js?v=53";
-import { openReader } from "./reader.js?v=53";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=53";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=53";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=53";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=53";
-import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=53";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=53";
-import * as ui from "./ui.js?v=53";
+} from "./progress.js?v=54";
+import { externalSearchUrl, searchWeb } from "./web.js?v=54";
+import { openEditStudio } from "./edit-studio.js?v=54";
+import { openReader } from "./reader.js?v=54";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=54";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=54";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=54";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=54";
+import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=54";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=54";
+import * as ui from "./ui.js?v=54";
 import {
   clearReferral,
   getLeaderboard,
@@ -168,8 +169,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=53";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=53";
+} from "./auth.js?v=54";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=54";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -177,12 +178,12 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=53";
-import { initMotion, revealVisible } from "./motion.js?v=53";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=53";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=53";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=53";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=53";
+} from "./premium-ui.js?v=54";
+import { initMotion, revealVisible } from "./motion.js?v=54";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=54";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=54";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=54";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=54";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -1329,6 +1330,7 @@ async function initSimpleShell() {
   // app has; a click that silently disappears is the worst bug this screen can
   // have, and tests/simple-shell.test.mjs now checks the selector itself.
   $("#home-logo")?.addEventListener("click", () => toggleAppMenu());
+  initChatScroll();
   initMenuSwipe();
   initViewportBox();
   $("#app-menu")?.addEventListener("click", (event) => {
@@ -2319,6 +2321,7 @@ function renderChat() {
   let lastQuestion = "";
   for (const message of state.messages) {
     const wrapper = ui.element("div", `message ${message.role}`);
+    wrapper.dataset.role = message.role;
     const avatar = ui.element("div", "message-avatar", message.role === "user" ? "S" : "V");
     const body = ui.element("div", "message-body");
     if (message.role === "user") {
@@ -2394,9 +2397,13 @@ function renderChat() {
     wrapper.append(avatar, body);
     log.appendChild(wrapper);
   }
-  log.scrollTop = log.scrollHeight;
   renderSuggestions();
   renderGoalCards();
+  // Put the newest answer where the student is already looking. `mode` says
+  // what "latest" means: while the typing hint is up the interesting line is
+  // the bottom of the conversation, and once an answer lands the interesting
+  // thing is the first line of that answer.
+  pinChat({ mode: $("#typing")?.classList.contains("hidden") ? "answer" : "latest" });
 }
 
 function showTyping(visible) {
@@ -2404,6 +2411,123 @@ function showTyping(visible) {
   const label = $("#typing-label");
   if (label) label.textContent = state.settings.pro ? PRO_TYPING : "Reading your textbooks…";
   $("#ask-send").disabled = visible;
+  // A new question is a deliberate act, so following resumes: the student is
+  // shown the last line of the conversation while the answer is written.
+  if (visible) {
+    chatPinned = true;
+    pinChat({ mode: "latest", force: true });
+  } else {
+    // The answer has been written. Pin it: its first line goes to the top of
+    // the reading area, so the student reads the answer, not its conclusion.
+    pinChat({ mode: "answer" });
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Keeping the answer on screen                                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Is the reader following the conversation?
+ *
+ * True until they scroll up to re-read something. After that the app stops
+ * moving the page under them — being yanked to the bottom while reading is as
+ * bad as having to hunt for the answer — and offers the jump control instead.
+ */
+let chatPinned = true;
+let pinFrame = 0;
+
+/** The newest answer, which is what the reading area is pinned to. */
+function newestAnswer() {
+  const log = $("#chat-log");
+  if (!log) return null;
+  const answers = log.querySelectorAll('.message[data-role="assistant"]');
+  return answers.length ? answers[answers.length - 1] : log.lastElementChild;
+}
+
+/**
+ * Scroll the conversation so the newest answer starts at the top of the reading
+ * area, and keep it there while the browser settles the layout.
+ *
+ * The repeat pass matters: the first call runs before the answer's paragraphs,
+ * code blocks and source chips have been measured, so on a long answer it lands
+ * short by a few hundred pixels — which is exactly the "scroll down to see the
+ * answer" the student complained about. Two frames later the height is final,
+ * and a ResizeObserver catches anything later than that (a font arriving, an
+ * image, the typing hint collapsing).
+ */
+function pinChat({ mode = "answer", force = false } = {}) {
+  const log = $("#chat-log");
+  if (!log) return;
+  const settle = () => {
+    const answer = newestAnswer();
+    const box = readChatBox(log, answer);
+    if (!box) return;                      // no layout yet: never guess
+    if (mode === "answer" && !force && !chatPinned) {
+      syncChatJump();
+      return;
+    }
+    log.scrollTop =
+      mode === "latest"
+        ? scrollForLatest(box)
+        : scrollForAnswer(box);
+    syncChatJump();
+  };
+  settle();
+  cancelAnimationFrame(pinFrame);
+  pinFrame = requestAnimationFrame(() => {
+    settle();
+    pinFrame = requestAnimationFrame(settle);
+  });
+}
+
+/** Show the "latest answer" control only when the answer has drifted away. */
+function syncChatJump() {
+  const jump = $("#chat-jump");
+  const log = $("#chat-log");
+  if (!jump || !log) return;
+  const box = readChatBox(log, newestAnswer());
+  const stray = box ? answerOutOfView(box) : false;
+  jump.hidden = !stray;
+  log.classList.toggle("is-scrolled-back", stray);
+}
+
+/** Wire the scroll region: follow, or stop following, and keep the pill honest. */
+function initChatScroll() {
+  const log = $("#chat-log");
+  if (!log) return;
+  // Throttled to a frame: reading a bounding box on every scroll event is how a
+  // conversation starts to feel sticky on a cheap phone.
+  let scrollFrame = 0;
+  log.addEventListener("scroll", () => {
+    if (scrollFrame) return;
+    scrollFrame = requestAnimationFrame(() => {
+      scrollFrame = 0;
+      const box = readChatBox(log, newestAnswer());
+      chatPinned = box ? isFollowing(box) : true;
+      syncChatJump();
+    });
+  }, { passive: true });
+  $("#chat-jump")?.addEventListener("click", () => {
+    chatPinned = true;
+    pinChat({ mode: "answer", force: true });
+    $("#ask-input")?.focus({ preventScroll: true });
+  });
+  // Late layout — a font, an image, the typing hint going away — is re-pinned
+  // rather than left to move the answer out of view.
+  if (typeof ResizeObserver === "function") {
+    let guard = false;
+    const observer = new ResizeObserver(() => {
+      if (guard || !chatPinned) { syncChatJump(); return; }
+      guard = true;
+      pinChat({ mode: "answer" });
+      setTimeout(() => { guard = false; }, 120);
+    });
+    observer.observe(log);
+    const stream = log.parentElement;
+    if (stream) observer.observe(stream);
+  }
+  syncChatJump();
 }
 
 function chatActionText(key, language = state.settings.language, values = {}) {
@@ -6100,7 +6224,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=53");
+            const { social } = await import("./social.js?v=54");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));

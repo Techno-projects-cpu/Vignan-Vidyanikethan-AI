@@ -1889,9 +1889,49 @@ body.premium-ui #view-ask .chat-log {
   max-height: none;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 72px 0 var(--vn-space-3);
+  /* Just enough room for the logo to sit above the first line, and not a pixel
+     more: every 20px taken here is a line of the answer pushed off screen. */
+  padding: 58px 0 var(--vn-space-3);
   scrollbar-gutter: stable;
+  /* A pinned answer must land instantly. A smooth scroll animated while the
+     answer is still being laid out is a scroll that can be cancelled short —
+     which is how the answer ended up below the fold in the first place. */
+  scroll-behavior: auto;
 }
+
+/* The newest answer, when the reader has scrolled away from it. It sits above
+   the question box rather than floating in the middle of the text. */
+.chat-jump {
+  position: absolute;
+  top: -46px;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 13px;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  background: var(--vn-panel);
+  color: var(--vn-ink);
+  font-family: var(--vn-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  z-index: 3;
+  transition: background var(--vn-fast) var(--vn-ease), color var(--vn-fast) var(--vn-ease);
+}
+
+.chat-jump:hover,
+.chat-jump:focus-visible {
+  background: var(--vn-ink);
+  color: var(--vn-canvas);
+}
+
+.chat-jump[hidden] { display: none; }
+
+.chat-jump span { font-size: 13px; line-height: 1; }
 
 body.premium-ui #view-ask .chat-log:empty {
   display: none;
@@ -1961,6 +2001,35 @@ body.premium-ui .composer-input-row textarea:focus {
   body.premium-ui #view-ask .composer-meta::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Once a conversation exists the student is reading, so the furniture around
+   the answer gives way: starter chips, the answer-style row and the web search
+   explanation are the first things to go on a phone. The same switches live in
+   Settings, and the answer itself still says when it went to the web. */
+@media (max-width: 720px) {
+  body.premium-ui #view-ask.has-conversation .chat-starters,
+  body.premium-ui #view-ask.has-conversation .chat-suggestions {
+    display: none;
+  }
+
+  body.premium-ui #view-ask.has-conversation .composer-meta details,
+  body.premium-ui #view-ask.has-conversation .web-choice,
+  body.premium-ui #view-ask.has-conversation .composer-privacy {
+    display: none;
+  }
+
+  body.premium-ui #view-ask.has-conversation .composer-meta {
+    gap: var(--vn-space-3);
+  }
+
+  /* The greeting on an empty screen is a greeting, not a page: shorter type,
+     no project line, so a first question and its answer get the screen. */
+  body.premium-ui #view-ask .premium-hero { padding: 52px var(--vn-space-5) var(--vn-space-3); }
+  body.premium-ui #view-ask .premium-hero h2 { font-size: clamp(30px, 8.4vw, 40px); }
+  body.premium-ui #view-ask .premium-hero > p { font-size: 14px; }
+  body.premium-ui #view-ask .premium-project-line,
+  body.premium-ui #view-ask .premium-hero-meta { display: none; }
 }
 
 /* The order on screen, top to bottom: conversation, typing hint, suggestions,

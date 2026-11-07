@@ -61,11 +61,13 @@ const jsonLd = (html) => {
   return JSON.parse(found[1]);
 };
 
-test("there are six pieces, and six is the number the pages say", () => {
-  assert.equal(posts.length, 6, `posts on disk: ${posts.join(", ")}`);
-  assert.equal((index.match(/class="bl-card"/g) || []).length, 6, "the index links every one");
-  assert.match(index, /<p class="bl-bar-note">WRITING &nbsp;\/&nbsp; <span>06 PIECES<\/span><\/p>/);
-  assert.equal((feed.match(/<item>/g) || []).length, 6, "and the feed carries every one");
+test("there are ten pieces, and ten is the number the pages say", () => {
+  assert.equal(posts.length, 10, `posts on disk: ${posts.join(", ")}`);
+  assert.equal((index.match(/class="bl-card"/g) || []).length, 10, "the index links every one");
+  assert.match(index, /<p class="bl-bar-note">WRITING &nbsp;\/&nbsp; <span>10 PIECES<\/span><\/p>/);
+  assert.match(index, /<h1 class="bl-title" id="bl-title">TEN PIECES/, "the archive counts itself");
+  assert.equal((feed.match(/<item>/g) || []).length, 10, "and the feed carries every one");
+  assert.equal((feed.match(/<link>/g) || []).length, 11, "one channel link and one per item");
 });
 
 test("every piece is long enough to be worth a click", () => {
@@ -190,7 +192,7 @@ test("the section has a way in, from the app and from the landing page", () => {
   }
   assert.match(app, /<a class="app-menu-item" href="\.\/blog\/index\.html">/, "the drawer links the writing");
   assert.match(landing, /<a href="\.\/blog\/index\.html">Writing<\/a>/, "the landing page links it in the top bar");
-  assert.equal((landing.match(/class="wl-cell wl-cell-article"/g) || []).length, 6, "and lists all six pieces");
+  assert.equal((landing.match(/class="wl-cell wl-cell-article"/g) || []).length, posts.length, "and lists all ten pieces");
   assert.match(index, /href="\/">Open the app/, "every page leads back into the app");
   for (const file of posts) assert.match(source(file), /<a class="bl-bar-open" href="\.\.\/">/, `${file} leads back into the app`);
 });
@@ -226,7 +228,6 @@ test("the sitemap and the feed agree with the files", () => {
   assert.match(feed, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
   assert.equal((feed.match(/<channel>/g) || []).length, 1);
   assert.equal((feed.match(/<\/item>/g) || []).length, posts.length);
-  assert.equal((feed.match(/<link>/g) || []).length, posts.length + 1, "one channel link and one per item");
 });
 
 test("the reading page is designed, not default", () => {

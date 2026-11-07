@@ -3,7 +3,7 @@
   <channel>
     <title>Vignan AI writing</title>
     <link>https://vignanvidyanikethanai.onrender.com/blog/</link>
-    <description>Six pieces about studying, written by the student who built Vignan Vidyanikethan AI.</description>
+    <description>TEN pieces about studying, written by the student who built Vignan Vidyanikethan AI.</description>
     <language>en</language>
     <lastBuildDate>Sat, 07 Nov 2026 12:00:00 +0530</lastBuildDate>
     <atom:link href="https://vignanvidyanikethanai.onrender.com/blog/feed.xml" rel="self" type="application/rss+xml"/>
@@ -48,6 +48,34 @@
       <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/explain-your-project-in-60-seconds.html</guid>
       <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
       <description>A judge decides whether to keep listening in about a minute. Five sentences, in a fixed order, survive that minute.</description>
+    </item>
+    <item>
+      <title>Why your marks dropped in one chapter and not another</title>
+      <link>https://vignanvidyanikethanai.onrender.com/blog/why-marks-dropped-in-one-chapter.html</link>
+      <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/why-marks-dropped-in-one-chapter.html</guid>
+      <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
+      <description>It is almost never the chapter being harder. Find the exact line where you stopped understanding, and the rest of the chapter gets easier.</description>
+    </item>
+    <item>
+      <title>How to answer a five-mark question</title>
+      <link>https://vignanvidyanikethanai.onrender.com/blog/how-to-answer-a-five-mark-question.html</link>
+      <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/how-to-answer-a-five-mark-question.html</guid>
+      <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
+      <description>Five marks is not five sentences. It is five things the examiner is looking for, and they are almost always the same five.</description>
+    </item>
+    <item>
+      <title>How to prepare for a viva you were not expecting</title>
+      <link>https://vignanvidyanikethanai.onrender.com/blog/how-to-prepare-for-a-viva.html</link>
+      <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/how-to-prepare-for-a-viva.html</guid>
+      <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
+      <description>You cannot rehearse the questions. You can rehearse the three sentences every answer is built from.</description>
+    </item>
+    <item>
+      <title>A demo that survives a power cut</title>
+      <link>https://vignanvidyanikethanai.onrender.com/blog/a-demo-that-survives-a-power-cut.html</link>
+      <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/a-demo-that-survives-a-power-cut.html</guid>
+      <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
+      <description>Science fairs have bad Wi-Fi, flat batteries and a queue. The demo that wins is the one that still works when all three happen.</description>
     </item>
   </channel>
 </rss>

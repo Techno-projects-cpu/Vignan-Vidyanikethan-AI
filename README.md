@@ -122,7 +122,7 @@ error. A funded team covers far more ground; this one goes deeper on less.
 | A release that arrives by itself | The permission banner is gone, by the student's own decision: publishing is the whole gesture. The worker takes over immediately and the page reloads once — except over work in progress. An answer being written, or a question typed but not yet sent, is never thrown away; the reload waits for the box to be empty and then happens without asking. There is no button, no "Later", and no setting that can pin a device to an old release. |
 | One chat, and a logo | The app opens as a single conversation — a greeting, four ordinary suggestion chips, a question box — and nothing else. The sidebar, the numbered page header, the hero and the five stacked blocks are folded away behind the logo in the bottom-left corner, which opens a menu with account, chat, history, library, quiz, exams, flashcards, progress, friends, Study Hall, play, settings, install and the theme switch. **Chat** returns to the conversation; **New chat** clears it, and asks first, because only one of those loses anything. Nothing was deleted: the screens are the same screens — and there are now eleven, with code practice among them — one tap from where the student is already looking. |
 | A landing page that argues | `/welcome` is a page of its own, not a fifth version of the app: a hero that states the constraint ("It will not answer from nothing"), a four-move illustration of a cited answer, a strip of all thirty-three languages drifting past in their own scripts, the eleven screens as square cards that share their borders, and five numbers a judge can re-run. It carries no JavaScript at all, loads no host but this one, and every corner is square. `tests/landing.test.mjs` keeps it honest: each number on it must equal the number on the judge page (which is itself checked against a real run of the offline simulator), each card must name a screen the app really has, every link must resolve, and the palette must stay grey. |
-| Writing, for people who have not installed anything | `/blog` is six pieces a student can act on tonight: checking an AI answer before you trust it, revising a forgotten chapter, studying with only a phone, writing your own questions, a fixed routine for physics numericals, and explaining a project to a judge in sixty seconds. Original writing, no email box, no cookie, no analytics, no JavaScript beyond the structured data. Every piece carries a canonical URL, a description search engines can read, `BlogPosting` structured data that has to agree with the page, an RSS feed, and an entry in `sitemap.xml`. `tests/blog.test.mjs` keeps them from becoming what most project blogs become: a stub with a keyword in the title (a word floor and a minimum per section), a claim nothing backs (no percentages, no "guaranteed", no invented statistics), a dead link, a reading time that drifts from the real count, or a page that needs the network. |
+| Writing, for people who have not installed anything | `/blog` is ten pieces a student can act on tonight: checking an AI answer before you trust it, revising a forgotten chapter, studying with only a phone, writing your own questions, a fixed routine for physics numericals, and explaining a project to a judge in sixty seconds, why marks dropped in one chapter, answering a five-mark question, a viva, and a demo that survives a power cut. Original writing, no email box, no cookie, no analytics, no JavaScript beyond the structured data. Every piece carries a canonical URL, a description search engines can read, `BlogPosting` structured data that has to agree with the page, an RSS feed, and an entry in `sitemap.xml`. `tests/blog.test.mjs` keeps them from becoming what most project blogs become: a stub with a keyword in the title (a word floor, a minimum per section, and a reading time recomputed from the finished page), a claim nothing backs (no percentages, no "guaranteed", no invented statistics), a dead link, a reading time that drifts from the real count, or a page that needs the network. |
 | A textbook, without Settings | The "+" beside the question box opens one sheet: upload a PDF or text file, paste notes, fetch a website, or start a quiz, flashcards or exam practice. Uploading from chat opens the phone's own file picker directly — the same guarded ingest path as the Library, with the same limits and the same labels. |
 | Fetch a website, then ask about it | A public page can be read from the composer and asked about like any other source. The browser never fetches the page itself: the address goes through the Library's server-side importer, which refuses private addresses, scripts and archives, and the result is labelled **outside your textbooks**. The next question is pre-filled as *"Explain this page in simple words, then tell me how it works: …"*, and the page stays in the library as a web source for follow-ups. |
 | Install, honestly | **Install the app** in the menu installs the website as an app — full screen, offline, own icon — and says so. It also says plainly that a real `.apk` or `.exe` needs a build machine with Android Studio or Tauri, and links the exact commands in [PACKAGING.md](./PACKAGING.md) instead of offering a download that does not exist. |
@@ -281,7 +281,7 @@ reader with an empty hero.
 
 ## Writing
 
-Six pieces live at `/blog`, because a study tool that only appears when someone
+Ten pieces live at `/blog`, because a study tool that only appears when someone
 types a brand name is not much use to the student who has never heard of it.
 Each one is a method, not a product tour:
 
@@ -293,6 +293,10 @@ Each one is a method, not a product tour:
 | 04 | Why writing your own questions beats re-reading | Five questions from one paragraph, the stems that do the work, put a number in it, ask the question that would fail you. |
 | 05 | A fixed routine for physics numericals | Given with units, asked with units, a bad diagram, the relation before the numbers, symbol rearrangement, a size check, the unit on the answer. |
 | 06 | How to explain a school project in sixty seconds | Five sentences in a fixed order, a test the judge can run, the limit said out loud, and what to say when you do not know. |
+| 07 | Why your marks dropped in one chapter and not another | Find the exact sentence where understanding stopped; the three reasons a line stops making sense; the forty-minute repair. |
+| 08 | How to answer a five-mark question | Five marks is five tickable things, not five sentences. The shape that earns all five, and the one line almost nobody writes. |
+| 09 | How to prepare for a viva you were not expecting | Three sentences per topic, rehearsing the fourth "why", and the sentence to say when you do not know. |
+| 10 | A demo that survives a power cut | Assume the connection fails; the four-minute test the morning of the fair; a paper version; making the judge drive. |
 
 **What is deliberately not done.** No keyword stuffing, no pages written for a
 crawler, no hidden text, no "AI tutor" articles that repeat the product name
@@ -306,6 +310,39 @@ and description must match the page (a test fails if they drift), an RSS feed, a
 sitemap entry, and links in from the landing page, the app's drawer and the
 judge page — so the pages are reachable by a person, which is the part a
 crawler follows.
+
+## Why the answer is on screen
+
+The Ask screen is a conversation, so the newest answer appears where the student
+is already looking. That sounds obvious; it was wrong for several releases. The
+old code did one thing:
+
+```js
+log.scrollTop = log.scrollHeight;
+```
+
+Two defects in one line. It ran **once**, immediately after the messages were
+appended, before a long answer had been laid out — so it landed short and the
+answer sat below the fold. And when it did work, it landed on the **end** of the
+answer, so the first thing a student read was the last paragraph.
+
+Now (`js/chat-scroll.js`, tested in `tests/ask-scroll.test.mjs`):
+
+| Behaviour | How |
+| --- | --- |
+| The answer's first line lands at the top of the reading area | `scrollForAnswer` puts the newest answer's top where the reading starts, with a 14px gutter, clamped to the real scroll range |
+| It still lands right after the browser has finished laying out | the pin runs again after two animation frames, and a `ResizeObserver` re-pins when a font, an image or the typing hint changes the height |
+| A reader who scrolled up to re-read is never yanked back | `isFollowing` measures whether they are within 140px of the bottom; if not, the pin is skipped |
+| There is always a way back | a **↓ Newest answer** pill appears whenever the newest answer has drifted out of view, and resumes following when tapped |
+| Sending a question resumes following | asking is a deliberate act, so the typing hint is pinned to the bottom |
+| No layout, no movement | `readChatBox` returns null when the log is not on screen, and the pin does nothing rather than guessing |
+
+The furniture gives way as well: on a phone, once there is a conversation, the
+starter chips and the answer-style rows stand down, the log's top padding drops
+from 72px to 58px (it exists for the logo, not for air), the greeting shrinks to
+a greeting, and the log's own scroll is instant — a smooth animation started
+while the answer is still being laid out is a scroll that can be cancelled
+short, which is how it went wrong in the first place.
 
 ## Study loop
 

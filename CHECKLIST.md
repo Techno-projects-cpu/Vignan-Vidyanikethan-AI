@@ -176,12 +176,23 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 5.27 | Turn on the phone's "Remove animations" / "Reduce motion" setting and reload: every part of the page is still visible, nothing is stuck at zero opacity | ☐ | ☐ | ☐ |
 | 5.28 | With the Wi-Fi off, `/welcome` still opens (it is in the offline cache) and shows every section | ☐ | ☐ | ☐ |
 
-## 5e. Writing
+## 5d2. The answer has to be on screen
 
 | # | Check | P | T | L |
 | --- | --- | --- | --- | --- |
-| 5.29 | **Writing** opens from the drawer, from the landing page's top bar and from its six-piece band, and from every legal page footer | ☐ | ☐ | ☐ |
-| 5.30 | `/blog` lists six pieces with a date and a reading time; each title opens the piece | ☐ | ☐ | ☐ |
+| 5.36 | Ask anything on a phone. The answer's **first line** is at the top of the reading area — not its last paragraph, and not below the fold | ☐ | ☐ | ☐ |
+| 5.37 | Ask for a long answer (an exam-style one). The beginning is what you see; the end is a short scroll away | ☐ | ☐ | ☐ |
+| 5.38 | Scroll up mid-answer. When the answer lands, the page does **not** jump; a **↓ Newest answer** pill appears above the box | ☐ | ☐ | ☐ |
+| 5.39 | Tap the pill: it lands on the first line of the answer, and the next answer pins normally again | ☐ | ☐ | ☐ |
+| 5.40 | Ask a follow-up with a long answer while the keyboard is open: the box stays visible and the answer still starts on screen | ☐ | ☐ | ☐ |
+| 5.41 | On a phone with a conversation open, the starter chips and the answer-style row are gone, leaving the conversation the screen | ☐ | ☐ | ☐ |
+
+## 5e. Writing (ten pieces)
+
+| # | Check | P | T | L |
+| --- | --- | --- | --- | --- |
+| 5.29 | **Writing** opens from the drawer, from the landing page's top bar and from its ten-piece band, and from every legal page footer | ☐ | ☐ | ☐ |
+| 5.30 | `/blog` lists all ten pieces with a date and a reading time; each title opens the piece | ☐ | ☐ | ☐ |
 | 5.31 | A piece is comfortable to read on a phone: one column, no sideways scrolling, numbered section headings, quotes indented | ☐ | ☐ | ☐ |
 | 5.32 | Every piece ends with **How you know it worked**, and offers the next piece, the full list and the app | ☐ | ☐ | ☐ |
 | 5.33 | The RSS link in the footer opens a feed a reader app can subscribe to | ☐ | ☐ | ☐ |
