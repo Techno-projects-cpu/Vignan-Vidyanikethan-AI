@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Vignan AI writing</title>
+    <link>https://vignanvidyanikethanai.onrender.com/blog/</link>
+    <description>Six pieces about studying, written by the student who built Vignan Vidyanikethan AI.</description>
+    <language>en</language>
+    <lastBuildDate>Sat, 07 Nov 2026 12:00:00 +0530</lastBuildDate>
+    <atom:link href="https://vignanvidyanikethanai.onrender.com/blog/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>How to check an AI answer before you trust it</title>
+      <link>https://vignanvidyanikethanai.onrender.com/blog/check-an-ai-answer.html</link>
+      <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/check-an-ai-answer.html</guid>
+      <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
+      <description>Five minutes and one book page. If an answer survives that, it is worth more than a paragraph nobody can check.</description>
+    </item>
+    <item>
+      <title>How to revise a chapter you have already forgotten</title>
+      <link>https://vignanvidyanikethanai.onrender.com/blog/revise-a-forgotten-chapter.html</link>
+      <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/revise-a-forgotten-chapter.html</guid>
+      <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
+      <description>Reading it again feels like revision and usually is not. Here is the version that hurts a little and stays.</description>
+    </item>
+    <item>
+      <title>How to study with only a phone</title>
+      <link>https://vignanvidyanikethanai.onrender.com/blog/study-with-only-a-phone.html</link>
+      <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/study-with-only-a-phone.html</guid>
+      <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
+      <description>No laptop, one small screen and a connection that comes and goes is the normal case, not a disadvantage to apologise for.</description>
+    </item>
+    <item>
+      <title>Why writing your own questions beats re-reading</title>
+      <link>https://vignanvidyanikethanai.onrender.com/blog/write-your-own-questions.html</link>
+      <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/write-your-own-questions.html</guid>
+      <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
+      <description>The person who writes the question has to know what the answer depends on. That is the part you are missing.</description>
+    </item>
+    <item>
+      <title>A fixed routine for physics numericals</title>
+      <link>https://vignanvidyanikethanai.onrender.com/blog/physics-numerical-routine.html</link>
+      <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/physics-numerical-routine.html</guid>
+      <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
+      <description>Most marks are lost in the first line, not the last. Seven lines, every problem, no exceptions.</description>
+    </item>
+    <item>
+      <title>How to explain a school project in sixty seconds</title>
+      <link>https://vignanvidyanikethanai.onrender.com/blog/explain-your-project-in-60-seconds.html</link>
+      <guid isPermaLink="true">https://vignanvidyanikethanai.onrender.com/blog/explain-your-project-in-60-seconds.html</guid>
+      <pubDate>Sat, 07 Nov 2026 06:00:00 +0530</pubDate>
+      <description>A judge decides whether to keep listening in about a minute. Five sentences, in a fixed order, survive that minute.</description>
+    </item>
+  </channel>
+</rss>

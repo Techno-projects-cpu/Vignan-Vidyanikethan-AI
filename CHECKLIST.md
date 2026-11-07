@@ -176,6 +176,18 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | 5.27 | Turn on the phone's "Remove animations" / "Reduce motion" setting and reload: every part of the page is still visible, nothing is stuck at zero opacity | ☐ | ☐ | ☐ |
 | 5.28 | With the Wi-Fi off, `/welcome` still opens (it is in the offline cache) and shows every section | ☐ | ☐ | ☐ |
 
+## 5e. Writing
+
+| # | Check | P | T | L |
+| --- | --- | --- | --- | --- |
+| 5.29 | **Writing** opens from the drawer, from the landing page's top bar and from its six-piece band, and from every legal page footer | ☐ | ☐ | ☐ |
+| 5.30 | `/blog` lists six pieces with a date and a reading time; each title opens the piece | ☐ | ☐ | ☐ |
+| 5.31 | A piece is comfortable to read on a phone: one column, no sideways scrolling, numbered section headings, quotes indented | ☐ | ☐ | ☐ |
+| 5.32 | Every piece ends with **How you know it worked**, and offers the next piece, the full list and the app | ☐ | ☐ | ☐ |
+| 5.33 | The RSS link in the footer opens a feed a reader app can subscribe to | ☐ | ☐ | ☐ |
+| 5.34 | View source on a piece: one canonical URL, a description, and structured data whose headline matches the heading on the page | ☐ | ☐ | ☐ |
+| 5.35 | With the Wi-Fi off, `/blog` and a piece open from the offline cache | ☐ | ☐ | ☐ |
+
 ## 6. Offline — the part that matters at a science fair
 
 Turn on aeroplane mode (or DevTools → Network → Offline) and reload the app.

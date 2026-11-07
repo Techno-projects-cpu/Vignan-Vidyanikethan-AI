@@ -942,7 +942,7 @@ async function socialDiagnostics({ fresh = false } = {}) {
 function health() {
   return {
     ok: true,
-    version: "2.20.0",
+    version: "2.21.0",
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,
@@ -1170,7 +1170,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.20.0</strong></div>
+      <div><span>release</span><strong>2.21.0</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1284,7 +1284,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.20.0",
+    release: "2.21.0",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);
@@ -1386,11 +1386,20 @@ async function serveStatic(request, response, pathname) {
     response.writeHead(400).end("Bad path");
     return;
   }
-  // One clean address for the landing page: /welcome shows welcome.html
-  // without a redirect, so a link in a message stays short and the file is
-  // still cached by the worker under its real name.
+  // Clean addresses that map onto a real file, without a redirect: a link in a
+  // message stays short, and the worker still caches the file under its real
+  // name. /blog/ already resolves as a directory; the rest are spelled out so
+  // that /blog and /writing work without the trailing slash.
   const requested = decoded.replace(/^\/+/, "");
-  const relative = ["welcome", "welcome/"].includes(requested) ? "welcome.html" : requested;
+  const ALIASES = {
+    welcome: "welcome.html",
+    "welcome/": "welcome.html",
+    blog: "blog/index.html",
+    "blog/": "blog/index.html",
+    writing: "blog/index.html",
+    "writing/": "blog/index.html",
+  };
+  const relative = ALIASES[requested] || requested;
   // Never serve account data, backend source, tooling or dotfiles.
   if (
     /^(\.git|server|supabase|node_modules|tools|tests)(\/|$)/.test(relative) ||

@@ -54,7 +54,7 @@ test("the landing page loads nothing from another host", () => {
 
 test("the landing page is served, and cached for offline use", () => {
   assert.ok(existsSync(`${root}/welcome.html`), "the file exists");
-  assert.match(server, /\["welcome", "welcome\/"\]\.includes\(requested\)/, "serve.mjs maps the clean /welcome address");
+  assert.match(server, /welcome: "welcome\.html"/, "serve.mjs maps the clean /welcome address");
   assert.ok(worker.includes("./welcome.html"), "the worker caches the page");
   assert.ok(worker.includes("./styles-welcome.css?v="), "and its stylesheet");
   assert.match(page, /<link rel="stylesheet" href="\.\/styles-welcome\.css\?v=\d+">/);
@@ -86,7 +86,9 @@ test("every number on the landing page is the number on the judge page", () => {
 
 test("the page names only screens the app actually has", () => {
   const views = [...index.matchAll(/<section class="view(?: active)?"[^>]*id="view-([a-z]+)"/g)].map((match) => match[1]);
-  const cells = [...page.matchAll(/<span class="wl-cell-title">([^<]+)<\/span>/g)].map((match) => match[1]);
+  // Only the screens band: the writing band below it uses the same stacked card.
+  const screensBand = page.slice(page.indexOf('id="wl-screens"'), page.indexOf('id="wl-proof"'));
+  const cells = [...screensBand.matchAll(/<span class="wl-cell-title">([^<]+)<\/span>/g)].map((match) => match[1]);
   assert.equal(cells.length, views.length, `one card per screen: ${cells.length} cards, ${views.length} screens`);
   const navLabels = [...index.matchAll(/data-menu-view="([a-z]+)"><svg[^>]*>[\s\S]*?<span>([^<]+)<\/span>/g)].map((match) => match[2]);
   for (const cell of cells) {
