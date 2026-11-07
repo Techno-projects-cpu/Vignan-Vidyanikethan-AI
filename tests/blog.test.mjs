@@ -186,8 +186,12 @@ test("the section has a way in, from the app and from the landing page", () => {
 });
 
 test("the clean addresses are served, and the pages work offline", () => {
-  assert.match(server, /blog: "blog\/index\.html"/);
-  assert.match(server, /writing: "blog\/index\.html"/);
+  // /blog without a trailing slash must redirect, not serve the index: served in
+  // place, every relative link in it resolves one level too high and the cards
+  // point at pages that do not exist. This was a real defect on the live site.
+  assert.match(server, /const DIRECTORY_ALIASES = \{ blog: "\/blog\/", writing: "\/blog\/" \};/);
+  assert.match(server, /response\.writeHead\(308, \{ Location: DIRECTORY_ALIASES\[requested\] \}\)/);
+  assert.match(server, /"blog\/": "blog\/index\.html"/);
   assert.ok(worker.includes("./blog/index.html"), "the worker caches the index");
   assert.ok(worker.includes("./blog/feed.xml"), "and the feed");
   assert.ok(worker.includes("./styles-blog.css?v="), "and the stylesheet");

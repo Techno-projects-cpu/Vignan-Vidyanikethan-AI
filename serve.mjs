@@ -1394,11 +1394,18 @@ async function serveStatic(request, response, pathname) {
   const ALIASES = {
     welcome: "welcome.html",
     "welcome/": "welcome.html",
-    blog: "blog/index.html",
     "blog/": "blog/index.html",
-    writing: "blog/index.html",
     "writing/": "blog/index.html",
   };
+  // A directory index must be reached *with* its trailing slash, or every
+  // relative link inside it resolves one level too high: /blog served the index
+  // and its cards pointed at /check-an-ai-answer.html, which is a 404. The clean
+  // address redirects to the canonical one instead.
+  const DIRECTORY_ALIASES = { blog: "/blog/", writing: "/blog/" };
+  if (DIRECTORY_ALIASES[requested]) {
+    response.writeHead(308, { Location: DIRECTORY_ALIASES[requested] }).end();
+    return;
+  }
   const relative = ALIASES[requested] || requested;
   // Never serve account data, backend source, tooling or dotfiles.
   if (
