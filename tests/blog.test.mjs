@@ -66,6 +66,17 @@ test("there are ten pieces, and ten is the number the pages say", () => {
   assert.equal((index.match(/class="bl-card"/g) || []).length, 10, "the index links every one");
   assert.match(index, /<p class="bl-bar-note">WRITING &nbsp;\/&nbsp; <span>10 PIECES<\/span><\/p>/);
   assert.match(index, /<h1 class="bl-title" id="bl-title">TEN PIECES/, "the archive counts itself");
+  // Every place the archive names a number has to name the same one. The label
+  // above the list said "THE SIX" for a release after the seventh piece landed.
+  assert.match(index, /id="bl-list-title">THE TEN/, "the label above the list counts too");
+  for (const stale of ["SIX", "SEVEN", "EIGHT", "NINE"]) {
+    assert.ok(!new RegExp(`\\b${stale}\\b`).test(index), `no stale count on the page: ${stale}`);
+  }
+  // And the lede names every piece, not the first six.
+  const lede = /<p class="bl-lede">([\s\S]*?)<\/p>/.exec(index)[1];
+  for (const phrase of ["five-mark", "viva", "Wi", "where a chapter broke"]) {
+    assert.ok(lede.includes(phrase), `the lede mentions ${phrase}`);
+  }
   assert.equal((feed.match(/<item>/g) || []).length, 10, "and the feed carries every one");
   assert.equal((feed.match(/<link>/g) || []).length, 11, "one channel link and one per item");
 });
