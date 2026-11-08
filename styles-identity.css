@@ -44,13 +44,16 @@ body.premium-ui .premium-project-line {
   font-size: 11px;
   line-height: 1.5;
 }
+/* The caps tag in front of the school name said "STUDENT BUILT" in the same
+   costume every generated page uses for a badge. The sentence says it instead. */
 body.premium-ui .premium-project-line span {
-  margin-right: 8px;
+  margin-right: 6px;
   color: var(--p-ink-2);
-  font-family: var(--mono);
+  font-family: var(--font);
   font-size: 11px;
-  font-weight: 750;
-  letter-spacing: .08em;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
 }
 body.premium-ui .project-attribution { margin-top: 20px !important; color: var(--p-muted) !important; font-size: 11px !important; }
 body.premium-ui .auth-gate-foot a, body.premium-ui .legal-links a { text-underline-offset: 3px; }

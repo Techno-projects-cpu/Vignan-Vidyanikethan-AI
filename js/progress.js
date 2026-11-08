@@ -3,7 +3,7 @@
  * No accounts and no server: profiles are just names typed on this device.
  */
 
-import { localDay, truncate } from "./util.js?v=56";
+import { localDay, truncate } from "./util.js?v=57";
 
 const PROGRESS_KEY = "vignan-study-ai.progress.v1";
 

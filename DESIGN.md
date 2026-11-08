@@ -9,7 +9,9 @@ places it deliberately breaks a generic rule. Written so that the next person
 - **Black, grey and white.** Every hex in `styles-welcome.css` and
   `styles-premium.css` is greyscale, and a test fails if a colour appears. The
   only exceptions are the bundled score-studio styles, which are an artist's
-  choice inside a document, not part of the shell.
+  choice inside a document, not part of the shell. Black is `#000000`, not a
+  tinted near-black: `#080808` reads as a dark grey the moment it sits next to a
+  true black, which is the tell that gives it away.
 - **Square corners, hairline rules.** No `border-radius` in the landing page or
   the premium shell; cards share a single 1px border instead of casting a
   shadow. Depth is a line, not a blur.
@@ -34,6 +36,17 @@ places it deliberately breaks a generic rule. Written so that the next person
   borders.
 - **Pro Mode is drawn in ink.** The easter-egg boot keeps its scan, reticle and
   letter beats in white on black; it is not a neon HUD.
+- **A link says where it goes.** No `↗` glued to the end of a link or a button,
+  and no arrow standing in for a label. The words carry the meaning; the arrow
+  was decoration that meant "external" on some links and "go" on others, which
+  means it meant nothing. A test fails on the glyph.
+- **Labels are not shouted.** All-caps is a property of the display voice — the
+  landing title, the three section headings, the closing line — and nothing
+  else. Eyebrows above content (`LOCAL ENGINE`, `VERIFY`, `YOUR STUDY SPACE`)
+  were sentence case or gone, and a test reads the stylesheet and fails if
+  `text-transform: uppercase` appears on any other selector.
+- **Monospace is for numerals.** Folios, list indexes, the page number on the
+  specimen plate. Not for small data labels, not for tags, not for emphasis.
 
 Those five, the size floor, the grey floor and the "nothing loops" rule are
 asserted in `tests/design-rules.test.mjs`, so they survive the audit tool being
@@ -61,6 +74,36 @@ carrying sentences at 11px is 12.5–13px, the tracked-caps breadcrumb above eac
 piece is a breadcrumb, Pro Mode is monochrome, the hero grid and the stripe fields
 are gone, and the em-dash staccato in the landing copy was rewritten as sentences.
 
+## Where the look comes from (2.25.0)
+
+The landing page stopped being a product page and became a **set book**. The
+subject is a school textbook and a machine that quotes it, so the page borrows the
+textbook's own grammar instead of a SaaS template's: a 76px margin column with a
+folio number and a hairline rule running the height of the row, text set in one
+column of a readable measure, hanging quotes, and the specimen answer presented as
+a plate with its page number in the gutter. That single idea is the page's one
+bold move; everything else on it is quiet so the idea can be seen.
+
+This direction came from Anthropic's `frontend-design` brief (Apache-2.0, 9.4 kB
+of Markdown, no code and nothing executed) — applied as a design brief, not as a
+generator. What it indicted here was mostly the furniture a generated page
+carries: eight all-caps eyebrow labels, thirty-five `↗` glyphs, three `·` meta
+strings, a grey `<span>` inside a display headline to accent a phrase, fifteen
+monospace uses, and a four-cell `₹0 / 33 / 11 / Tested` stat strip under the hero.
+None of that was wrong exactly; it was the shape of a page that had been dressed
+rather than written. All of it is gone, and `tests/landing.test.mjs` now fails if
+an arrow, a middle-dot meta string, a caps label or a tinted phrase inside a
+headline comes back.
+
+The same pass reached the app. The two primary buttons in the ask hero lost their
+trailing arrows; `STUDENT BUILT` and `YOUR STUDY SPACE` are sentence case in the
+body face rather than a tracked caps tag; the arrow prefixes on three feature
+lines (which were not links) are gone; and the blog's palette tokens were moved
+onto the landing page's, which is what the palette-parity test in
+`tests/blog.test.mjs` had been asserting and politely failing to get. A merge
+accident that had given the header badge a two-column layout grid and 54px of
+padding was split into its two intended rules.
+
 ## How this was audited
 
 The pages are scanned with [impeccable](https://github.com/pbakaus/impeccable)
@@ -72,8 +115,8 @@ npx impeccable@4.8.0 detect index.html welcome.html judge.html privacy.html \
   terms.html blog styles*.css
 ```
 
-**2.24.0 result: 4 failures and 3 advisories, down from 89 failures and 23
-advisories.** The four are the frames in the table above, left visible on purpose.
+**2.25.0 result: 4 failures and 3 advisories** — unchanged from 2.24.0, which was
+itself down from 89 failures and 23 advisories. The rewrite added no new finding. The four are the frames in the table above, left visible on purpose.
 The three advisories are em-dash saturation in three of the ten pieces, where the
 dashes are load-bearing dialogue rather than filler.
 

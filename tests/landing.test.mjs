@@ -131,7 +131,7 @@ test("the language board keeps every language in a copyable, translated element"
 });
 
 test("an illustration is labelled as an illustration", () => {
-  assert.match(page, /class="wl-badge">ILLUSTRATION</);
+  assert.match(page, /class="wl-badge">Illustration</, "the badge says what it is, in the page's voice");
   assert.match(page, /An illustration of the real screen, not a recorded session/);
   // The correction the user made once, in writing: do not claim a feature works
   // from something that was never actually run.
@@ -195,10 +195,61 @@ test("motion can be switched off, and nothing is stuck invisible when it is", ()
   }
   assert.match(reduced, /animation: none !important;/);
   assert.match(reduced, /opacity: 1 !important;/);
-  // Every element that starts hidden through `both` must be listed in the block,
-  // or a reader who dislikes motion sees an empty hero.
-  for (const selector of [".wl-line-a", ".wl-specimen", ".wl-turn", ".wl-hero .wl-facts"]) {
-    assert.ok(reduced.includes(selector), `${selector} is restored`);
+  // Every element that starts hidden through `animation-fill-mode: both` has to be
+  // restored in the reduced-motion block, or a reader who dislikes motion is left
+  // with a blank hero. Read the list out of the stylesheet rather than keeping a
+  // second copy of it here: a selector added above cannot be forgotten below.
+  const animated = [];
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const rule of withoutComments.matchAll(/([^{}]+)\{([^{}]*animation:[^{}]*\bboth\b[^{}]*)\}/g)) {
+    if (rule[1].includes("prefers-reduced-motion")) continue;
+    for (const selector of rule[1].split(",")) {
+      const name = selector.trim();
+      if (name && !animated.includes(name)) animated.push(name);
+    }
+  }
+  assert.ok(animated.length >= 3, `the entrances are found (${animated.length})`);
+  for (const selector of animated) {
+    assert.ok(reduced.includes(selector), `${selector} starts hidden, so it must be restored`);
+  }
+});
+
+test("the page speaks like a person, not like a template", () => {
+  // Four tells that survive every palette change, because they are habits rather
+  // than styles: an arrow glued to the end of every link, a tracked-out all-caps
+  // label over every heading, a headline with one phrase tinted grey for effect,
+  // and meta text joined with middle dots. Each is legitimate somewhere; none of
+  // them means anything here, and a page that uses all four reads as generated.
+  assert.doesNotMatch(page, /↗|→/, "no arrow is glued to the end of a link or a button");
+  assert.doesNotMatch(visible, /·/, "no meta string is joined with a middle dot");
+  // The display voice is shouted on purpose — the title, the section headings and
+  // the closing line. Anything else in caps is a label wearing a uniform.
+  const notHeadlines = body
+    .replace(/<h1[\s\S]*?<\/h1>/g, " ")
+    .replace(/<h2[\s\S]*?<\/h2>/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/VIGNAN \/ AI/g, " ")
+    .replace(/\s+/g, " ");
+  assert.doesNotMatch(notHeadlines, /[A-Z]{3,}(?: [A-Z]{2,})+/, "no line outside a headline is shouted in caps");
+  // The display headlines are set in caps on purpose — that is the identity voice,
+  // declared once on `.wl-title` and the three section headings, not sprinkled on
+  // labels. Nothing else may transform its case.
+  const upper = [...css.matchAll(/([^{}]+)\{[^{}]*text-transform:\s*uppercase/g)].map((m) => m[1].trim());
+  assert.ok(upper.length > 0, "the display voice is still set in caps");
+  for (const selector of upper) {
+    assert.ok(
+      /\.wl-(title|section-head h2|close-title)$/.test(selector),
+      `${selector} is not a display headline, so it should not be set in caps`,
+    );
+  }
+  // A headline may not tint one phrase to make its point; the words have to do it.
+  // Spans that wrap a whole animated line are structure, not emphasis, so the
+  // check looks for the emphasis itself: a changed colour, a swapped face, or a
+  // highlight behind part of the sentence.
+  assert.doesNotMatch(css, /(?:\.wl-title|\.wl-section-head h2|\.wl-close-title)[^{}]*\b(?:span|em|i|b|strong)\b[^{}]*\{[^}]*(?:color|background)/,
+    "no phrase inside a display headline is given its own colour");
+  for (const heading of page.matchAll(/<h[12][^>]*>([\s\S]*?)<\/h[12]>/g)) {
+    assert.doesNotMatch(heading[1], /<(?:em|i|b|strong|mark)\b/, "a headline is set in one voice");
   }
 });
 
@@ -246,7 +297,7 @@ test("the stylesheet is well formed, and every rule earns its place", () => {
 test("the app links to the page, and the page links back", () => {
   assert.match(index, /<a class="app-menu-item" href="\.\/welcome\.html">/, "the drawer has a way in");
   assert.match(index, /<a href="\.\/welcome\.html">About the project<\/a>/, "and the first screen's fine print does too");
-  const judgeLink = /<a href="\.\/judge\.html">Judge mode ↗<\/a>/.test(page);
+  const judgeLink = /<a href="\.\/judge\.html">Judge mode<\/a>/.test(page);
   assert.ok(judgeLink, "the page can be checked, not just admired");
   assert.match(judge, /welcome\.html/, "and the judge page can reach the landing page");
 });

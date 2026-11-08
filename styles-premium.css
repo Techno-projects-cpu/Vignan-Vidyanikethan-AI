@@ -1008,8 +1008,18 @@ body.premium-ui .auth-gate-mark {
   letter-spacing: -0.05em;
 }
 
-body.premium-ui .auth-gate-badge,
-body.premium-ui body.premium-ui .auth-gate-layout {
+/* These were one merged rule, so the header badge was inheriting the two-column
+   layout grid and fifty-four pixels of top padding. Two separate rules now. */
+body.premium-ui .auth-gate-badge {
+  color: var(--p-muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+body.premium-ui .auth-gate-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 435px);
   gap: clamp(36px, 8vw, 120px);
@@ -1042,7 +1052,6 @@ body.premium-ui .auth-gate-features {
   font-size: 12.5px;
 }
 body.premium-ui .auth-gate-features > span { white-space: nowrap; }
-body.premium-ui .auth-gate-features span span { color: var(--p-ink-2); margin-right: 5px; }
 
 body.premium-ui .auth-gate-panel {
   padding: 8px 24px 24px;
