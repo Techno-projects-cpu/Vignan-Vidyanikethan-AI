@@ -12,7 +12,7 @@
 .judge-facts div { padding: 20px 18px; border-right: 1px solid #383838; border-bottom: 1px solid #383838; }
 .judge-facts div:last-child { border-right: 0; }
 .judge-facts strong { display: block; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 30px; letter-spacing: -.05em; line-height: 1; }
-.judge-facts span { display: block; margin-top: 8px; color: #a5a5a5; font-size: 10px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
+.judge-facts span { display: block; margin-top: 8px; color: #a5a5a5; font-size: 11px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
 
 .judge-section { padding: 40px 0; border-bottom: 1px solid #303030; }
 .judge-section h2 { margin: 0 0 8px; font-size: 24px; }
@@ -26,7 +26,7 @@
 .steps span { display: block; margin-top: 4px; color: #b6b6b6; font-size: 13px; line-height: 1.7; }
 
 .say { margin: 10px 0 0; padding: 14px 16px; border-left: 2px solid #fff; color: #ededed; font-size: 14px; line-height: 1.75; }
-.say::before { content: "SAY THIS"; display: block; margin-bottom: 6px; color: #8d8d8d; font-family: ui-monospace, monospace; font-size: 9.5px; font-weight: 700; letter-spacing: .14em; }
+.say::before { content: "SAY THIS"; display: block; margin-bottom: 6px; color: #8d8d8d; font-family: ui-monospace, monospace; font-size: 11px; font-weight: 700; letter-spacing: .14em; }
 
 pre.term { margin: 18px 0 0; padding: 16px 18px; border: 1px solid #383838; background: #0d0d0d; color: #d8d8d8; font-family: ui-monospace, monospace; font-size: 11.5px; line-height: 1.85; overflow-x: auto; }
 pre.term b { color: #fff; font-weight: 700; }

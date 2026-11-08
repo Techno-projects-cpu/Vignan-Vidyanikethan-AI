@@ -14,7 +14,7 @@ a:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 .wordmark span { color: #aaa; }
 .legal-main { display: grid; grid-template-columns: minmax(260px, .85fr) minmax(0, 1.15fr); gap: clamp(50px, 9vw, 150px); max-width: 1200px; margin: 0 auto; padding: 90px 0 110px; }
 .legal-intro { align-self: start; position: sticky; top: 36px; }
-.eyebrow, .updated { color: #aaa; font-family: ui-monospace, monospace; font-size: 10px; font-weight: 700; letter-spacing: .11em; }
+.eyebrow, .updated { color: #aaa; font-family: ui-monospace, monospace; font-size: 11px; font-weight: 700; letter-spacing: .11em; }
 h1, h2 { font-family: 'Space Grotesk', system-ui, sans-serif; letter-spacing: -.055em; }
 h1 { margin: 22px 0; font-size: clamp(58px, 6vw, 90px); line-height: .93; }
 h1 span { color: #999; }
@@ -27,7 +27,7 @@ h1 span { color: #999; }
 .legal-copy p:last-child { margin-bottom: 0; }
 .legal-copy strong { color: #fff; }
 .legal-footer { display: flex; justify-content: space-between; gap: 30px; max-width: 1400px; margin: auto; padding: 28px 0 50px; border-top: 1px solid #383838; }
-.legal-footer strong { font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: .12em; }
+.legal-footer strong { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: .12em; }
 .legal-footer p { color: #aaa; font-size: 11px; line-height: 1.6; }
 .legal-footer nav { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 18px; }
 .legal-footer a { font-size: 11px; font-weight: 700; }

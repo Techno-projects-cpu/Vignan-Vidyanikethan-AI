@@ -99,21 +99,35 @@ test("the page names only screens the app actually has", () => {
   }
 });
 
-test("the language strip shows the thirty-three languages, and says nothing it cannot back", () => {
+test("the language board lists the thirty-three languages, all of them visible at once", () => {
+  // This used to be a marquee: the list was duplicated and slid sideways forever,
+  // so half the languages were off-screen and moving when nobody asked. It is a
+  // static board now — one list, complete, readable without waiting.
   const lists = [...page.matchAll(/<ul class="wl-langs"(?: aria-hidden="true")?>([\s\S]*?)<\/ul>/g)].map((match) => match[1]);
-  assert.equal(lists.length, 2, "the strip is doubled so the loop has no seam");
+  assert.equal(lists.length, 1, "one list, shown once — nothing is duplicated to fake a loop");
   const names = [...lists[0].matchAll(/<li[^>]*>([^<]+)<\/li>/g)].map((match) => match[1]);
-  assert.equal(names.length, 33, `thirty-three languages in the strip, got ${names.length}`);
+  assert.equal(names.length, 33, `thirty-three languages on the board, got ${names.length}`);
   assert.deepEqual(
     names.slice(0, 4),
     ["English", "हिन्दी", "বাংলা", "मराठी"],
-    "the strip is ordered the way the picker is",
+    "the board is ordered the way the picker is",
   );
   for (const name of ["اردو", "తెలుగు", "日本語", "Kiswahili"]) {
-    assert.ok(names.includes(name), `${name} is in the strip`);
+    assert.ok(names.includes(name), `${name} is in the board`);
   }
-  const hidden = [...page.matchAll(/<ul class="wl-langs" aria-hidden="true">/g)];
-  assert.equal(hidden.length, 1, "only the copy is hidden; the first list is read aloud");
+  assert.doesNotMatch(page, /wl-marquee|wl-scroll/, "no scrolling strip is left in the page");
+  assert.doesNotMatch(css, /wl-marquee|@keyframes wl-drift/, "and none of its motion is left in the CSS");
+});
+
+test("the language board keeps every language in a copyable, translated element", () => {
+  // The board is the one place a visitor can see their own script before signing
+  // up, so the names stay real text (not an image) and right-to-left scripts keep
+  // their direction.
+  const items = [...page.matchAll(/<li[^>]*>([^<]+)<\/li>/g)].filter((match) =>
+    /हिन्दी|বাংলা|اردو|తెలుగు|日本語/.test(match[1]),
+  );
+  assert.ok(items.length >= 5, "scripts other than Latin are real text on the page");
+  assert.match(page, /lang="ur" dir="rtl"|dir="rtl"[^>]*lang="ur"/, "Urdu keeps its right-to-left direction");
 });
 
 test("an illustration is labelled as an illustration", () => {
@@ -171,12 +185,16 @@ test("the page is accessible before it is pretty", () => {
 test("motion can be switched off, and nothing is stuck invisible when it is", () => {
   const reduced = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
   assert.ok(reduced, "there is a reduced-motion block");
-  for (const animation of ["wl-rise", "wl-turn-in", "wl-drift", "wl-bob"]) {
+  // Only the two entrances are left. The marquee drift and the bobbing arrow were
+  // removed with the marquee itself; the list below is what this page still animates.
+  for (const animation of ["wl-rise", "wl-turn-in"]) {
     assert.ok(css.includes(`@keyframes ${animation}`), `${animation} is defined`);
+  }
+  for (const gone of ["wl-drift", "wl-bob", "wl-marquee-track"]) {
+    assert.ok(!css.includes(gone), `${gone} is gone, not merely switched off`);
   }
   assert.match(reduced, /animation: none !important;/);
   assert.match(reduced, /opacity: 1 !important;/);
-  assert.match(reduced, /\.wl-marquee-track \{ animation: none !important; transform: none !important; \}/);
   // Every element that starts hidden through `both` must be listed in the block,
   // or a reader who dislikes motion sees an empty hero.
   for (const selector of [".wl-line-a", ".wl-specimen", ".wl-turn", ".wl-hero .wl-facts"]) {

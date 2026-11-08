@@ -170,7 +170,7 @@ Legend: `P` phone · `T` tablet · `L` laptop. Fill each column.
 | --- | --- | --- | --- | --- |
 | 5.22 | `/welcome` opens on a phone and on a laptop, and the hero fits without sideways scrolling | ☐ | ☐ | ☐ |
 | 5.23 | The four moves in the specimen panel finish visibly: question, cited answer, follow-up with the **Continuing:** chip, second answer | ☐ | ☐ | ☐ |
-| 5.24 | The language strip moves on its own, pauses when you point at it, and shows a real script for all thirty-three languages | ☐ | ☐ | ☐ |
+| 5.24 | The language board shows all thirty-three languages at once, each in its real script, and none of it moves on its own | ☐ | ☐ | ☐ |
 | 5.25 | All eleven cards open the app, and each one names a screen that exists in the drawer | ☐ | ☐ | ☐ |
 | 5.26 | The five numbers match `/judge.html`, and **Re-run all of it** opens the judge page | ☐ | ☐ | ☐ |
 | 5.27 | Turn on the phone's "Remove animations" / "Reduce motion" setting and reload: every part of the page is still visible, nothing is stuck at zero opacity | ☐ | ☐ | ☐ |

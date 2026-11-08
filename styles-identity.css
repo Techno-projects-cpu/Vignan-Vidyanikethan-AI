@@ -41,14 +41,14 @@ body.premium-ui .premium-button, body.premium-ui .gate-submit, body.premium-ui .
 body.premium-ui .premium-project-line {
   margin: 26px auto 0;
   color: var(--p-muted);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.5;
 }
 body.premium-ui .premium-project-line span {
   margin-right: 8px;
   color: var(--p-ink-2);
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 750;
   letter-spacing: .08em;
 }
@@ -99,14 +99,12 @@ body.premium-ui .startup-wordmark span { color: #aaa; }
 body.premium-ui :is(.auth-gate-mark, .brand-mark, .compact-brand, .command-mark) img { display: block; width: 100%; height: 100%; }
 body.premium-ui .compact-brand { border-radius: 0; }
 body.premium-ui .startup-top-right { display: flex; align-items: center; gap: 26px; }
-body.premium-ui .startup-edition { color: #aaa; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; }
+body.premium-ui .startup-edition { color: #aaa; font-family: var(--mono); font-size: 11px; letter-spacing: .1em; }
 body.premium-ui #startup-skip { min-height: 44px; padding: 0 2px; border: 0; background: transparent; color: #eee; font: 700 11px var(--font); cursor: pointer; }
 body.premium-ui #startup-skip:hover { color: #aaa; }
 body.premium-ui .startup-body { display: grid; grid-template-columns: 120px minmax(0, 1fr); flex: 1; align-items: center; padding: 58px 0 76px; }
-body.premium-ui .startup-side { align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; color: #999; font: 700 9px var(--mono); letter-spacing: .1em; writing-mode: vertical-rl; transform: rotate(180deg); }
+body.premium-ui .startup-side { align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; color: #999; font: 700 11px var(--mono); letter-spacing: .1em; writing-mode: vertical-rl; transform: rotate(180deg); }
 body.premium-ui .startup-copy { max-width: 1000px; animation: identity-enter .75s var(--p-ease) both; }
-body.premium-ui .startup-kicker { display: inline-flex; align-items: center; gap: 10px; color: #c9c9c9; font: 700 10px var(--mono); letter-spacing: .13em; }
-body.premium-ui .startup-kicker span { color: #fff; font-size: 16px; }
 body.premium-ui .startup-copy h1 { margin: 27px 0 23px; color: #fff; font-family: var(--display); font-size: clamp(58px, 8.4vw, 120px); font-weight: 700; line-height: .92; letter-spacing: -.075em; }
 body.premium-ui .startup-copy h1 em { color: #8d8d8d; font-style: normal; }
 body.premium-ui .startup-copy > p { max-width: 480px; margin: 0; color: #c5c5c5; font-size: clamp(14px, 1.3vw, 17px); line-height: 1.65; }
@@ -119,9 +117,9 @@ body.premium-ui .startup-actions a span { margin-left: 8px; }
 body.premium-ui .startup-screen :is(button, a):focus-visible { outline-color: #fff !important; }
 body.premium-ui .startup-footer { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; padding-top: 20px; border-top: 1px solid #383838; }
 body.premium-ui .startup-footer div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-body.premium-ui .startup-footer span { color: #aaa; font: 700 9px var(--mono); letter-spacing: .12em; }
+body.premium-ui .startup-footer span { color: #aaa; font: 700 11px var(--mono); letter-spacing: .12em; }
 body.premium-ui .startup-footer strong { font-size: 11px; line-height: 1.4; }
-body.premium-ui .startup-footer small { color: #aaa; font-size: 10px; }
+body.premium-ui .startup-footer small { color: #aaa; font-size: 11px; }
 body.premium-ui .startup-footer .nezaad-logo { display: block; width: clamp(105px, 12vw, 155px); height: auto; filter: invert(1); }
 @keyframes identity-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
@@ -134,9 +132,9 @@ body.premium-ui .startup-footer .nezaad-logo { display: block; width: clamp(105p
   body.premium-ui .startup-copy h1 { margin: 22px 0; font-size: clamp(48px, 11.4vw, 80px); }
   body.premium-ui .startup-actions { margin-top: 28px; }
   body.premium-ui .startup-footer { align-items: flex-end; }
-  body.premium-ui .startup-footer strong { font-size: 10px; }
+  body.premium-ui .startup-footer strong { font-size: 11px; }
   body.premium-ui .startup-footer .nezaad-logo { width: 105px; }
-  body.premium-ui .premium-project-line { margin-top: 18px; font-size: 9px; }
+  body.premium-ui .premium-project-line { margin-top: 18px; font-size: 11px; }
   body.premium-ui .project-attribution { margin-top: 10px !important; }
   body.premium-ui .studio-style-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

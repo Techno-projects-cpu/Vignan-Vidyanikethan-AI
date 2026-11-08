@@ -249,7 +249,7 @@ body.premium-ui .brand-text strong {
 
 body.premium-ui .brand-text small {
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--vn-quiet);
@@ -292,7 +292,7 @@ body.premium-ui .side-nav .nav-item {
 body.premium-ui .side-nav .nav-item::before {
   content: counter(nav-item, decimal-leading-zero);
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.06em;
   color: var(--vn-quiet);
   transition: color var(--vn-fast) var(--vn-ease);
@@ -434,7 +434,7 @@ body.premium-ui .ai-chooser-copy strong {
 
 body.premium-ui .ai-chooser-copy small {
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -442,7 +442,7 @@ body.premium-ui .ai-chooser-copy small {
 body.premium-ui .premium-menu-button kbd,
 body.premium-ui kbd {
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   padding: 2px 5px;
   border: var(--vn-hairline) solid var(--vn-rule);
   border-radius: 0;
@@ -710,7 +710,7 @@ body.premium-ui .button.small,
 body.premium-ui .premium-button.small {
   min-height: 32px;
   padding: 0 var(--vn-space-3);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 body.premium-ui .button.full { width: 100%; }
@@ -873,7 +873,7 @@ body.premium-ui .premium-hero-meta {
 
 body.premium-ui .premium-project-line span {
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   color: var(--vn-ink);
 }
@@ -918,7 +918,7 @@ body.premium-ui .message + .message {
 body.premium-ui .message-role,
 body.premium-ui .message-meta {
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--vn-quiet);
@@ -947,7 +947,7 @@ body.premium-ui .message-actions button {
   background: transparent;
   color: var(--vn-quiet);
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   min-height: 32px;
@@ -1041,7 +1041,7 @@ body.premium-ui .web-choice {
 body.premium-ui .web-choice strong { font-size: var(--vn-small); }
 body.premium-ui .web-choice small {
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -1151,7 +1151,7 @@ body.premium-ui .source-title {
 body.premium-ui .source-page,
 body.premium-ui .source-match {
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.06em;
   color: var(--vn-quiet);
   margin-left: auto;
@@ -1393,7 +1393,7 @@ body.premium-ui .update-row strong {
     background: transparent;
     color: var(--vn-quiet);
     font-family: var(--vn-font-mono);
-    font-size: 9px;
+    font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
@@ -1529,7 +1529,7 @@ body.premium-ui .update-row strong {
   background: var(--vn-canvas);
   color: var(--vn-ink);
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
@@ -1914,7 +1914,7 @@ body.premium-ui #view-ask .chat-log {
   background: var(--vn-panel);
   color: var(--vn-ink);
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2308,7 +2308,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
   display: block;
   padding: var(--vn-space-2) var(--vn-space-4);
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   color: var(--vn-quiet);
 }
@@ -2347,7 +2347,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 .app-menu-item small {
   color: var(--vn-quiet);
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .app-menu-item:hover,
@@ -2488,7 +2488,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 
 .attach-link-form label {
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--vn-quiet);
@@ -2517,7 +2517,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
   margin: var(--vn-space-3) 0;
   color: var(--vn-quiet);
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
 }
 
@@ -2553,7 +2553,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 .history-item small {
   color: var(--vn-quiet);
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.06em;
 }
 
@@ -2696,7 +2696,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 
 .code-lesson-index {
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.08em;
   color: var(--vn-quiet);
 }
@@ -2746,7 +2746,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 
 .code-try strong,
 .code-mistake strong {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--vn-quiet);
@@ -2762,7 +2762,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 
 .code-field > span {
   font-family: var(--vn-font-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--vn-quiet);

@@ -22,7 +22,11 @@ test("premium shell hides navigation in a command menu and foregrounds PDF + Bol
   assert.doesNotMatch(html, /id="ai-chooser-menu"|id="command-ai-list"/);
   assert.match(html, /data-premium-action="upload-pdf"/);
   assert.match(html, /data-premium-action="instant-ai"/);
-  assert.match(html, /Built-in instant AI|BUILT-IN INSTANT AI/i);
+  // The hero eyebrow that used to carry this line was a label floating above the
+  // headline; it is gone. The claim itself has to survive somewhere a visitor
+  // reads it, so it is asserted on the control that actually invokes Bolt.
+  assert.match(html, /data-premium-action="instant-ai">Use Bolt</);
+  assert.match(html, /Built-in super-fast cited answers/);
   assert.match(html, /Upload a textbook PDF/);
   assert.match(html, /Advanced settings/);
   assert.match(html, /premium-settings-launcher/);

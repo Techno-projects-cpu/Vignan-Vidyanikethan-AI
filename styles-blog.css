@@ -95,7 +95,7 @@ img { display: block; }
 .bl-bar-note {
   margin: 0;
   font-family: var(--bl-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .12em;
   color: var(--bl-quiet);
   white-space: nowrap;
@@ -123,7 +123,7 @@ img { display: block; }
 .bl-eyebrow {
   margin: 0 0 24px;
   font-family: var(--bl-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 400;
   line-height: 1.6;
   letter-spacing: .14em;
@@ -166,8 +166,8 @@ img { display: block; }
 .bl-card:last-child { border-bottom: 0; }
 .bl-card:hover, .bl-card:focus-visible { background: #f4f4f4; color: #080808; }
 
-.bl-card-index { font-family: var(--bl-mono); font-size: 10px; letter-spacing: .16em; color: var(--bl-quiet); }
-.bl-card:hover .bl-card-index { color: #5f5f5f; }
+.bl-card-index { font-family: var(--bl-mono); font-size: 11px; letter-spacing: .16em; color: var(--bl-quiet); }
+.bl-card:hover .bl-card-index { color: #8a8a8a; }
 
 .bl-card-title {
   display: block;
@@ -183,14 +183,14 @@ img { display: block; }
 
 .bl-card-meta {
   font-family: var(--bl-mono);
-  font-size: 9.5px;
+  font-size: 11px;
   letter-spacing: .1em;
   line-height: 1.9;
   color: var(--bl-quiet);
   text-align: right;
   text-transform: uppercase;
 }
-.bl-card:hover .bl-card-meta { color: #4b4b4b; }
+.bl-card:hover .bl-card-meta { color: #8a8a8a; }
 
 .bl-note {
   max-width: 70ch;
@@ -212,7 +212,7 @@ img { display: block; }
   gap: 10px;
   margin: 0 0 30px;
   font-family: var(--bl-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .12em;
   color: var(--bl-quiet);
 }
@@ -246,7 +246,7 @@ img { display: block; }
   border-top: 1px solid var(--bl-line);
   border-bottom: 1px solid var(--bl-line);
   font-family: var(--bl-mono);
-  font-size: 9.5px;
+  font-size: 11px;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--bl-quiet);
@@ -270,7 +270,7 @@ img { display: block; }
 }
 .bl-body h2 span {
   font-family: var(--bl-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .16em;
   color: var(--bl-quiet);
   padding-top: 9px;
@@ -312,7 +312,7 @@ img { display: block; }
   left: 0;
   top: 3px;
   font-family: var(--bl-mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .1em;
   color: #7d7d7d;
 }
@@ -353,7 +353,7 @@ img { display: block; }
 }
 .bl-body th {
   font-family: var(--bl-mono);
-  font-size: 9.5px;
+  font-size: 11px;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--bl-quiet);
@@ -373,7 +373,7 @@ img { display: block; }
   display: block;
   margin-bottom: 8px;
   font-family: var(--bl-mono);
-  font-size: 9.5px;
+  font-size: 11px;
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--bl-quiet);
@@ -403,12 +403,12 @@ img { display: block; }
   display: block;
   margin-bottom: 6px;
   font-family: var(--bl-mono);
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--bl-quiet);
 }
-.bl-next a:hover small { color: #5a5a5a; }
+.bl-next a:hover small { color: #8a8a8a; }
 
 /* ------------------------------------------------------------------ */
 /* Foot                                                                */
@@ -422,7 +422,7 @@ img { display: block; }
   border-top: 1px solid var(--bl-line);
   align-items: start;
 }
-.bl-foot strong { font-family: var(--bl-mono); font-size: 10px; letter-spacing: .14em; color: #fff; }
+.bl-foot strong { font-family: var(--bl-mono); font-size: 11px; letter-spacing: .14em; color: #fff; }
 .bl-foot p { margin: 10px 0 0; font-size: 12px; line-height: 1.66; color: var(--bl-quiet); }
 .bl-foot-fine { max-width: 46ch; margin-top: 16px !important; color: #7c7c7c !important; }
 .bl-foot nav { display: flex; flex-wrap: wrap; gap: 12px 20px; }
@@ -436,7 +436,7 @@ img { display: block; }
   color: var(--bl-quiet);
   white-space: nowrap;
 }
-.bl-foot-stamp em { font-style: normal; color: #5f5f5f; }
+.bl-foot-stamp em { font-style: normal; color: #8a8a8a; }
 
 /* ------------------------------------------------------------------ */
 /* Narrow screens                                                      */

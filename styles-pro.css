@@ -170,7 +170,6 @@
   width: 1px;
   height: 22%;
   background: linear-gradient(180deg, transparent, var(--pro));
-  box-shadow: 0 0 10px var(--pro);
   transform-origin: 50% 218%;
   animation: pro-spin 3.6s linear infinite;
   opacity: 0.85;
@@ -272,7 +271,7 @@
 
 .pro-kicker {
   margin: 0 0 10px;
-  font: 700 9.5px var(--mono, ui-monospace, monospace);
+  font: 700 11px var(--mono, ui-monospace, monospace);
   letter-spacing: 0.34em;
   text-transform: uppercase;
   color: rgba(232, 251, 255, 0.5);
@@ -296,7 +295,6 @@
   inset: 0 auto 0 0;
   width: var(--pro-progress, 0%);
   background: var(--pro);
-  box-shadow: 0 0 10px var(--pro);
   transition: width 180ms cubic-bezier(0.3, 0.8, 0.3, 1);
 }
 
@@ -309,7 +307,6 @@
   font: 500 11px/1.65 var(--mono, ui-monospace, monospace);
   letter-spacing: 0.04em;
   color: var(--pro);
-  text-shadow: 0 0 12px rgba(110, 231, 255, 0.45);
 }
 
 .pro-line {
@@ -393,7 +390,7 @@
 
 .pro-subtitle {
   margin: 10px 0 0;
-  font: 600 10px var(--mono, ui-monospace, monospace);
+  font: 600 11px var(--mono, ui-monospace, monospace);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: rgba(232, 251, 255, 0.55);
@@ -416,7 +413,7 @@
   border: 1px solid var(--pro-dim);
   background: transparent;
   color: rgba(232, 251, 255, 0.7);
-  font: 700 10px var(--mono, ui-monospace, monospace);
+  font: 700 11px var(--mono, ui-monospace, monospace);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
@@ -444,19 +441,13 @@
   border: 1px solid var(--pro-dim);
   background: rgba(110, 231, 255, 0.1);
   color: var(--pro);
-  font: 750 10px var(--mono, ui-monospace, monospace);
+  font: 750 11px var(--mono, ui-monospace, monospace);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   cursor: pointer;
-  animation: pro-chip-glow 3.2s ease-in-out infinite;
 }
 
 .pro-chip[hidden] { display: none; }
-
-@keyframes pro-chip-glow {
-  0%, 100% { box-shadow: 0 0 0 rgba(110, 231, 255, 0); }
-  50% { box-shadow: 0 0 14px rgba(110, 231, 255, 0.35); }
-}
 
 body.pro-mode .premium-hero {
   border-color: var(--pro-dim);
@@ -483,7 +474,6 @@ body.pro-mode .premium-hero-dot,
 body.pro-mode .ai-chooser-dot,
 body.pro-mode .premium-view-dot {
   background: var(--pro);
-  box-shadow: 0 0 10px var(--pro);
 }
 
 body.pro-mode .message.assistant .message-avatar {
@@ -500,7 +490,7 @@ body.pro-mode.pro-booting {
 }
 
 @media (max-width: 640px) {
-  .pro-console { font-size: 10px; min-height: 118px; }
+  .pro-console { font-size: 11px; min-height: 118px; }
   .pro-boot { width: 92vw; }
   .pro-kicker { letter-spacing: 0.26em; }
   .pro-reticle { width: 78vmin; height: 78vmin; }
