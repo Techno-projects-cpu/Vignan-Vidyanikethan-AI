@@ -115,7 +115,7 @@ npx impeccable@4.8.0 detect index.html welcome.html judge.html privacy.html \
   terms.html blog styles*.css
 ```
 
-**2.25.0 result: 4 failures and 3 advisories** — unchanged from 2.24.0, which was
+**2.25.1 result: 4 failures and 3 advisories** — unchanged from 2.24.0, which was
 itself down from 89 failures and 23 advisories. The rewrite added no new finding. The four are the frames in the table above, left visible on purpose.
 The three advisories are em-dash saturation in three of the ten pieces, where the
 dashes are load-bearing dialogue rather than filler.
