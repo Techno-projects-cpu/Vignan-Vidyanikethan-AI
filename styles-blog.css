@@ -115,19 +115,28 @@ img { display: block; }
 .bl-hero {
   padding: clamp(56px, 9vh, 110px) var(--bl-pad) clamp(36px, 5vh, 60px);
   border-bottom: 1px solid var(--bl-line);
-  background-image:
-    radial-gradient(70% 60% at 10% 0%, #141414 0%, transparent 70%),
-    repeating-linear-gradient(90deg, #131313 0 1px, transparent 1px 96px);
+  background: var(--bl-bg);
 }
 
+/* The same byline treatment as the landing page: a rule, then a sentence. */
 .bl-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin: 0 0 24px;
   font-family: var(--bl-mono);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 400;
   line-height: 1.6;
-  letter-spacing: .14em;
-  color: var(--bl-quiet);
+  letter-spacing: .01em;
+  color: var(--bl-soft);
+}
+.bl-eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  flex: 0 0 auto;
+  background: #7a7a7a;
 }
 
 .bl-title {
@@ -190,7 +199,7 @@ img { display: block; }
   text-align: right;
   text-transform: uppercase;
 }
-.bl-card:hover .bl-card-meta { color: #8a8a8a; }
+.bl-card:hover .bl-card-meta { color: #4b4b4b; }
 
 .bl-note {
   max-width: 70ch;
@@ -212,8 +221,8 @@ img { display: block; }
   gap: 10px;
   margin: 0 0 30px;
   font-family: var(--bl-mono);
-  font-size: 11px;
-  letter-spacing: .12em;
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--bl-quiet);
 }
 .bl-crumbs a { color: var(--bl-soft); border-bottom: 1px solid #4a4a4a; }
@@ -314,7 +323,7 @@ img { display: block; }
   font-family: var(--bl-mono);
   font-size: 11px;
   letter-spacing: .1em;
-  color: #7d7d7d;
+  color: #8a8a8a;
 }
 .bl-body ul > li::before {
   content: "/";
@@ -328,8 +337,8 @@ img { display: block; }
 
 .bl-body blockquote {
   margin: 0 0 20px;
-  padding: 4px 0 4px 22px;
-  border-left: 2px solid #6a6a6a;
+  padding: 16px 0 0;
+  border-top: 1px solid #6a6a6a;
   font-family: var(--bl-display);
   font-size: clamp(18px, 2vw, 23px);
   line-height: 1.4;
@@ -408,7 +417,7 @@ img { display: block; }
   text-transform: uppercase;
   color: var(--bl-quiet);
 }
-.bl-next a:hover small { color: #8a8a8a; }
+.bl-next a:hover small { color: #a4a4a4; }
 
 /* ------------------------------------------------------------------ */
 /* Foot                                                                */

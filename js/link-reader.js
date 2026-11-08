@@ -1,7 +1,7 @@
 /** Read public links through the bounded, same-origin server fetcher. */
-import { inspectFileBytes, MAX_REMOTE_BYTES } from "./files.js?v=55";
-import { extractPdfPages } from "./ingest.js?v=55";
-import { safeUrl } from "./util.js?v=55";
+import { inspectFileBytes, MAX_REMOTE_BYTES } from "./files.js?v=56";
+import { extractPdfPages } from "./ingest.js?v=56";
+import { safeUrl } from "./util.js?v=56";
 
 export function firstLink(text = "") {
   const match = String(text).match(/https?:\/\/[^\s<>"'`]+/i);

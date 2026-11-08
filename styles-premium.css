@@ -638,7 +638,7 @@ body.premium-ui .ai-option-index { font-family: var(--mono); font-size: 11px; co
 body.premium-ui .ai-option-copy { display: flex; flex-direction: column; min-width: 0; }
 body.premium-ui .ai-option-copy strong { font-size: 12.5px; font-weight: 700; }
 body.premium-ui .ai-option-copy small { margin-top: 2px; color: var(--p-muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-body.premium-ui .ai-option-tag { font-family: var(--mono); font-size: 8px; letter-spacing: 0.08em; color: var(--p-muted); border: 1px solid var(--p-line); border-radius: 999px; padding: 3px 6px; }
+body.premium-ui .ai-option-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--p-muted); border: 1px solid var(--p-line); border-radius: 999px; padding: 3px 6px; }
 
 body.premium-ui .premium-pulse .ai-chooser-dot { animation: premiumPulse 0.7s var(--p-ease); }
 
@@ -1039,7 +1039,7 @@ body.premium-ui .auth-gate-features {
   gap: 12px 20px;
   margin-top: 38px;
   color: var(--p-muted);
-  font-size: 11px;
+  font-size: 12.5px;
 }
 body.premium-ui .auth-gate-features > span { white-space: nowrap; }
 body.premium-ui .auth-gate-features span span { color: var(--p-ink-2); margin-right: 5px; }
@@ -1149,7 +1149,7 @@ body.premium-ui .gate-strength-label,
 body.premium-ui .gate-form-note {
   margin: -5px 0 0;
   color: var(--p-muted);
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.5;
 }
 body.premium-ui .gate-check {
@@ -1213,7 +1213,7 @@ body.premium-ui .gate-or::before,
 body.premium-ui .gate-or::after { content: ""; flex: 1; height: 1px; background: var(--p-line); }
 body.premium-ui .gate-guest-button { border: 1px solid var(--p-line-strong); background: transparent; color: var(--p-ink); }
 body.premium-ui .gate-guest-button:hover:not(:disabled) { background: var(--p-surface-2); }
-body.premium-ui .auth-gate-guest p { margin: 9px 0 0; color: var(--p-muted); font-size: 11px; line-height: 1.5; }
+body.premium-ui .auth-gate-guest p { margin: 9px 0 0; color: var(--p-muted); font-size: 12.5px; line-height: 1.5; }
 body.premium-ui .auth-gate-foot {
   display: flex;
   flex-wrap: wrap;
@@ -1561,7 +1561,7 @@ body.premium-ui .deck-create > summary > span:last-child { color: var(--p-muted)
 body.premium-ui .deck-create > summary > span:last-child span { margin-left: 8px; color: var(--p-ink); font-size: 18px; }
 body.premium-ui .deck-create[open] > summary { border-radius: 18px 18px 0 0; }
 body.premium-ui .deck-create[open] .deck-setup { border-top: 0 !important; border-radius: 0 0 18px 18px; }
-body.premium-ui .deck-create-hint, body.premium-ui .quiz-run-note { margin: 11px 0 0; color: var(--p-muted); font-size: 11px; line-height: 1.5; }
+body.premium-ui .deck-create-hint, body.premium-ui .quiz-run-note { margin: 11px 0 0; color: var(--p-muted); font-size: 12.5px; line-height: 1.5; }
 body.premium-ui .flashcard { display: block; padding: 0; border: 0; border-radius: 22px; background: transparent; color: inherit; font: inherit; }
 body.premium-ui .flashcard:focus-visible { outline: 2px solid var(--p-ink); outline-offset: 4px; }
 body.premium-ui .flashcard-face { padding: 24px 24px 46px; overflow: hidden; }

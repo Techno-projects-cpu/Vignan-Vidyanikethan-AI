@@ -1,9 +1,10 @@
 {
-  "version": 55,
-  "generatedAt": "2026-11-08T02:37:59.279Z",
+  "version": 56,
+  "generatedAt": "2026-11-08T03:17:16.332Z",
   "urls": [
     "./",
     "./index.html",
+    "./.impeccable/config.json",
     "./.well-known/security.txt",
     "./assets/brand/nezaad-mark.png",
     "./assets/brand/nezaad-original.jpg",

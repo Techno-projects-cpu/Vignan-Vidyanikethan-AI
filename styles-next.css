@@ -873,7 +873,7 @@ body.premium-ui .premium-hero-meta {
 
 body.premium-ui .premium-project-line span {
   font-family: var(--vn-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   color: var(--vn-ink);
 }
@@ -1041,7 +1041,7 @@ body.premium-ui .web-choice {
 body.premium-ui .web-choice strong { font-size: var(--vn-small); }
 body.premium-ui .web-choice small {
   font-family: var(--vn-font-mono);
-  font-size: 11px;
+  font-size: 12.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -2347,7 +2347,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 .app-menu-item small {
   color: var(--vn-quiet);
   font-family: var(--vn-font-mono);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .app-menu-item:hover,
@@ -2517,7 +2517,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
   margin: var(--vn-space-3) 0;
   color: var(--vn-quiet);
   font-family: var(--vn-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.14em;
 }
 
@@ -2553,7 +2553,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 .history-item small {
   color: var(--vn-quiet);
   font-family: var(--vn-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.06em;
 }
 
@@ -2679,7 +2679,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
   color: var(--vn-ink);
 }
 
-.code-lesson-item.active { box-shadow: inset 2px 0 0 var(--vn-ink); }
+.code-lesson-item.active { border: 1px solid var(--vn-ink); }
 
 .code-lesson-item strong {
   display: block;
@@ -2740,7 +2740,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
   gap: 2px;
   padding: var(--vn-space-3);
   margin-bottom: var(--vn-space-2);
-  border-left: 2px solid var(--vn-ink);
+  border: 1px solid var(--vn-ink);
   background: var(--vn-raise);
 }
 

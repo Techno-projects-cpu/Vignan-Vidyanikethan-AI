@@ -6,10 +6,10 @@
  * the sender is a friend or the room is the shared Study Hall.
  */
 
-import { decorateAvatar } from "./avatars.js?v=55";
-import * as ui from "./ui.js?v=55";
-import { onSocialChange, setActiveThread, social, socialState, syncSocial } from "./social.js?v=55";
-import { relativeTime } from "./friends-ui.js?v=55";
+import { decorateAvatar } from "./avatars.js?v=56";
+import * as ui from "./ui.js?v=56";
+import { onSocialChange, setActiveThread, social, socialState, syncSocial } from "./social.js?v=56";
+import { relativeTime } from "./friends-ui.js?v=56";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const POLL_MS = 4000;

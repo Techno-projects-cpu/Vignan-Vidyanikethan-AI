@@ -1,12 +1,20 @@
 /* ------------------------------------------------------------------------- */
-/* Pro Mode — the easter egg. A HUD boot, then a restrained cyan accent.     */
+/* Pro Mode — the easter egg: a boot sequence, then a quiet marker.          */
 /* Everything here is decoration; hiding this file leaves the app usable.    */
+/*                                                                          */
+/* It used to be a cyan HUD: a perspective grid, three coloured radial       */
+/* washes, glow shadows on the reticle, the meter and the title, and a       */
+/* pulsing chip that never stopped. Every one of those is the house style of */
+/* a generated page, and none of them matched a product that is black, grey  */
+/* and white everywhere else. The mechanics are the same — the scan, the     */
+/* reticle, the lock-on flash, the letters landing one at a time — drawn in  */
+/* ink instead of neon.                                                      */
 /* ------------------------------------------------------------------------- */
 
 :root {
-  --pro: #6ee7ff;
-  --pro-dim: rgba(110, 231, 255, 0.32);
-  --pro-line: rgba(110, 231, 255, 0.16);
+  --pro: #f2f2f2;
+  --pro-dim: rgba(255, 255, 255, 0.32);
+  --pro-line: rgba(255, 255, 255, 0.14);
 }
 
 /* The overlay ------------------------------------------------------------- */
@@ -18,8 +26,8 @@
   z-index: 1700;
   display: grid;
   place-items: center;
-  background: radial-gradient(120% 90% at 50% 40%, #071019 0%, #04060a 55%, #010203 100%);
-  color: #e8fbff;
+  background: #080808;
+  color: #f4f4f4;
   overflow: hidden;
   cursor: pointer;
   --pro-progress: 0%;
@@ -46,7 +54,7 @@
 /* The iris: a small bright ring opens outward, like a lens uncapping. */
 @keyframes pro-out {
   0% { opacity: 1; transform: scale(1); filter: brightness(1); }
-  55% { opacity: 1; transform: scale(1.015); filter: brightness(1.5); }
+  55% { opacity: 1; transform: scale(1.015); filter: brightness(1.25); }
   100% { opacity: 0; transform: scale(1.08); filter: brightness(0.4) blur(3px); }
 }
 
@@ -58,40 +66,17 @@
   pointer-events: none;
 }
 
-/* A slow aurora so the black is never flat. */
+/* A slow neutral wash so the black is never flat — one hue, no colour. */
 .pro-aurora {
   position: absolute;
   inset: -20%;
-  background:
-    radial-gradient(38% 32% at 30% 32%, rgba(110, 231, 255, 0.16), transparent 70%),
-    radial-gradient(32% 28% at 72% 68%, rgba(90, 140, 255, 0.14), transparent 72%),
-    radial-gradient(26% 22% at 55% 20%, rgba(150, 240, 255, 0.08), transparent 70%);
-  filter: blur(8px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 58%);
   animation: pro-aurora 7s ease-in-out infinite alternate;
 }
 
 @keyframes pro-aurora {
-  from { transform: translate3d(-1.5%, -1%, 0) scale(1); opacity: 0.75; }
+  from { transform: translate3d(-1.5%, -1%, 0) scale(1); opacity: 0.6; }
   to { transform: translate3d(1.5%, 1.5%, 0) scale(1.08); opacity: 1; }
-}
-
-.pro-grid {
-  position: absolute;
-  inset: -40%;
-  background-image:
-    linear-gradient(var(--pro-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--pro-line) 1px, transparent 1px);
-  background-size: 56px 56px;
-  opacity: 0.45;
-  transform: perspective(620px) rotateX(62deg);
-  animation: pro-grid-run 2.8s linear infinite;
-  mask-image: radial-gradient(60% 55% at 50% 50%, #000 35%, transparent 78%);
-  -webkit-mask-image: radial-gradient(60% 55% at 50% 50%, #000 35%, transparent 78%);
-}
-
-@keyframes pro-grid-run {
-  from { background-position: 0 0, 0 0; }
-  to { background-position: 0 56px, 56px 0; }
 }
 
 /* The reticle ------------------------------------------------------------- */
@@ -114,14 +99,13 @@
   position: absolute;
   border-radius: 50%;
   border: 1px solid var(--pro-dim);
-  box-shadow: 0 0 40px rgba(110, 231, 255, 0.18), inset 0 0 40px rgba(110, 231, 255, 0.08);
 }
 
 .pro-ring-a {
   width: 100%;
   height: 100%;
   border-style: dashed;
-  border-color: rgba(110, 231, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.22);
   animation: pro-spin 9s linear infinite;
 }
 
@@ -157,7 +141,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, rgba(110, 231, 255, 0.26), rgba(110, 231, 255, 0.02) 22%, transparent 34%, transparent 100%);
+  background: conic-gradient(from 0deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.02) 22%, transparent 34%, transparent 100%);
   mask-image: radial-gradient(circle, transparent 42%, #000 43%, #000 100%);
   -webkit-mask-image: radial-gradient(circle, transparent 42%, #000 43%, #000 100%);
   animation: pro-spin 3.6s linear infinite;
@@ -208,7 +192,7 @@
   left: 0;
   right: 0;
   height: 22vh;
-  background: linear-gradient(180deg, transparent, rgba(110, 231, 255, 0.07) 45%, rgba(110, 231, 255, 0.14) 50%, rgba(110, 231, 255, 0.07) 55%, transparent);
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.05) 45%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 55%, transparent);
   animation: pro-scan 3.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -219,11 +203,11 @@
   100% { transform: translateY(115vh); opacity: 0; }
 }
 
-/* The single flash at the moment of lock-on. */
+/* The single flash at the moment of lock-on: one white frame, not a halo. */
 .pro-flash {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(214, 252, 255, 0.9), rgba(110, 231, 255, 0.25) 26%, transparent 58%);
+  background: #fff;
   opacity: 0;
 }
 
@@ -233,13 +217,13 @@
 
 @keyframes pro-flash {
   0% { opacity: 0; transform: scale(0.72); }
-  12% { opacity: 0.95; }
+  12% { opacity: 0.5; }
   100% { opacity: 0; transform: scale(1.35); }
 }
 
 /* On lock-on the whole reticle snaps inward, like a lens focusing. */
 .pro-overlay.pro-locked .pro-reticle {
-  animation: pro-reticle-lock 560ms cubic-bezier(0.2, 1.3, 0.35, 1) both;
+  animation: pro-reticle-lock 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes pro-reticle-lock {
@@ -250,11 +234,11 @@
 
 .pro-overlay.pro-locked .pro-ring-b {
   animation-duration: 0.9s;
-  border-top-color: #f4feff;
+  border-top-color: #fff;
 }
 
 .pro-overlay.pro-locked .pro-ring-c {
-  border-color: rgba(232, 251, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.5);
   animation: none;
   transform: scale(1.08);
 }
@@ -271,10 +255,10 @@
 
 .pro-kicker {
   margin: 0 0 10px;
-  font: 700 11px var(--mono, ui-monospace, monospace);
-  letter-spacing: 0.34em;
+  font: 600 11px var(--mono, ui-monospace, monospace);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(232, 251, 255, 0.5);
+  color: rgba(244, 244, 244, 0.55);
   transition: color 200ms ease;
 }
 
@@ -286,7 +270,7 @@
   position: relative;
   height: 1px;
   margin: 0 0 20px;
-  background: rgba(110, 231, 255, 0.14);
+  background: rgba(255, 255, 255, 0.16);
   overflow: hidden;
 }
 
@@ -304,9 +288,9 @@
   min-height: 132px;
   margin-bottom: 18px;
   text-align: left;
-  font: 500 11px/1.65 var(--mono, ui-monospace, monospace);
-  letter-spacing: 0.04em;
-  color: var(--pro);
+  font: 500 12px/1.65 var(--mono, ui-monospace, monospace);
+  letter-spacing: 0.03em;
+  color: #d8d8d8;
 }
 
 .pro-line {
@@ -320,7 +304,7 @@
 
 .pro-line::before {
   content: ">";
-  color: rgba(110, 231, 255, 0.5);
+  color: rgba(255, 255, 255, 0.45);
   flex: 0 0 auto;
 }
 
@@ -359,7 +343,7 @@
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #f4feff;
+  color: #f4f4f4;
   white-space: pre;
   opacity: 0.18;
   transition: opacity 200ms ease;
@@ -373,12 +357,11 @@
 
 .pro-title.pro-title-live {
   opacity: 1;
-  text-shadow: 0 0 26px rgba(110, 231, 255, 0.55);
 }
 
-/* The letters land in sequence, with a small overshoot, then settle. */
+/* The letters land in sequence, with a small settle, then hold. */
 .pro-title.pro-title-live .pro-letter {
-  animation: pro-letter-in 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  animation: pro-letter-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 46ms);
 }
 
@@ -391,9 +374,9 @@
 .pro-subtitle {
   margin: 10px 0 0;
   font: 600 11px var(--mono, ui-monospace, monospace);
-  letter-spacing: 0.22em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(232, 251, 255, 0.55);
+  color: rgba(244, 244, 244, 0.6);
   opacity: 0;
   transform: translateY(4px);
   transition: opacity 400ms ease 220ms, transform 400ms ease 220ms;
@@ -412,9 +395,9 @@
   padding: 8px 14px;
   border: 1px solid var(--pro-dim);
   background: transparent;
-  color: rgba(232, 251, 255, 0.7);
+  color: rgba(244, 244, 244, 0.75);
   font: 700 11px var(--mono, ui-monospace, monospace);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
 }
@@ -422,13 +405,14 @@
 .pro-skip:hover { border-color: var(--pro); color: #fff; }
 
 @media (prefers-reduced-motion: reduce) {
-  .pro-ring, .pro-wedge, .pro-needle, .pro-grid, .pro-aurora, .pro-scanline,
+  .pro-ring, .pro-wedge, .pro-needle, .pro-aurora, .pro-scanline,
   .pro-reticle, .pro-bracket, .pro-flash, .pro-overlay.pro-locked .pro-reticle,
   .pro-title.pro-title-live .pro-letter { animation: none; }
   .pro-overlay.pro-active { animation: none; }
   .pro-title .pro-letter { opacity: 1; transform: none; }
   .pro-line:not(.pro-line-done) .pro-line-body::after { animation: none; }
   .pro-meter span { transition: none; }
+  .pro-overlay.pro-closing { animation-duration: 1ms; }
 }
 
 /* The in-app chrome ------------------------------------------------------- */
@@ -437,12 +421,12 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 7px 11px;
   border: 1px solid var(--pro-dim);
-  background: rgba(110, 231, 255, 0.1);
-  color: var(--pro);
-  font: 750 11px var(--mono, ui-monospace, monospace);
-  letter-spacing: 0.16em;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f4f4;
+  font: 700 11px var(--mono, ui-monospace, monospace);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
 }
@@ -451,7 +435,6 @@
 
 body.pro-mode .premium-hero {
   border-color: var(--pro-dim);
-  box-shadow: inset 0 0 0 1px rgba(110, 231, 255, 0.08), 0 0 40px rgba(110, 231, 255, 0.06);
   position: relative;
   overflow: hidden;
 }
@@ -461,7 +444,7 @@ body.pro-mode .premium-hero::after {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent 0%, rgba(110, 231, 255, 0.07) 50%, transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.06) 50%, transparent 100%);
   transform: translateY(-100%);
   animation: pro-hero-scan 6s linear infinite;
 }
@@ -490,9 +473,9 @@ body.pro-mode.pro-booting {
 }
 
 @media (max-width: 640px) {
-  .pro-console { font-size: 11px; min-height: 118px; }
+  .pro-console { font-size: 12px; min-height: 118px; }
   .pro-boot { width: 92vw; }
-  .pro-kicker { letter-spacing: 0.26em; }
+  .pro-kicker { letter-spacing: 0.12em; }
   .pro-reticle { width: 78vmin; height: 78vmin; }
   .pro-bracket { width: 18px; height: 18px; }
   .pro-bracket-a, .pro-bracket-b { top: 5vh; }

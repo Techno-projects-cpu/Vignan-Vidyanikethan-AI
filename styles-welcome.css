@@ -140,13 +140,12 @@ img { display: block; }
   min-height: 100vh;
   padding: clamp(48px, 7vh, 96px) var(--wl-pad) clamp(72px, 9vh, 120px);
   border-bottom: 1px solid var(--wl-line);
-  /* One measured hairline grid, in greys, on the hero only. It is the one
-     place the page argues that this is a document with a structure; repeating
-     it on every section turned it into decoration. */
-  background-image:
-    repeating-linear-gradient(0deg, #141414 0 1px, transparent 1px 96px),
-    repeating-linear-gradient(90deg, #141414 0 1px, transparent 1px 96px);
-  background-color: var(--wl-bg);
+  /* No grid wash. A repeating hairline field tiled on a fixed pixel cell is the
+     most common generated-page background there is, and this page already shows
+     its structure with real borders: the hairline under the section, the cell
+     borders in the language grid, the boxed specimen. The grid was a picture of
+     structure drawn behind structure. */
+  background: var(--wl-bg);
 }
 
 @supports (min-height: 100svh) {
@@ -352,7 +351,7 @@ img { display: block; }
   padding: 4px 8px;
   border: 1px solid #3a3a3a;
   font-family: var(--wl-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: .04em;
   color: #dcdcdc;
 }

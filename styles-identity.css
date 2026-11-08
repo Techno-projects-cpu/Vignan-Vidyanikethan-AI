@@ -62,7 +62,7 @@ body.premium-ui .command-project {
 }
 body.premium-ui .command-project .nezaad-logo { display: block; width: 130px; height: auto; filter: invert(1); }
 :root[data-theme="light"] body.premium-ui .command-project .nezaad-logo { filter: none; }
-body.premium-ui .command-project p { max-width: 520px; margin: 12px 0; color: var(--p-muted); font-size: 11px; line-height: 1.55; }
+body.premium-ui .command-project p { max-width: 520px; margin: 12px 0; color: var(--p-muted); font-size: 13px; line-height: 1.55; }
 body.premium-ui .command-project div { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11px; font-weight: 700; }
 body.premium-ui .command-project a { text-underline-offset: 3px; }
 body.premium-ui .studio-style-buttons { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -82,15 +82,9 @@ body.premium-ui .startup-screen {
   font-family: var(--font);
   color-scheme: dark;
 }
-body.premium-ui .startup-screen::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image: linear-gradient(rgba(255,255,255,.032) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.032) 1px, transparent 1px);
-  background-size: 72px 72px;
-  mask-image: linear-gradient(90deg, transparent, #000 45%, transparent);
-}
+/* The two-axis grid wash is gone. It was the page saying "interface" rather
+   than being one, and at 3% it was invisible on a phone anyway. The startup
+   screen is a black page with the mark, three lines and a button. */
 body.premium-ui .startup-frame { position: relative; display: flex; flex-direction: column; width: min(1400px, 100%); min-height: calc(100dvh - 48px); margin: auto; }
 body.premium-ui .startup-top { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 60px; border-bottom: 1px solid #383838; }
 body.premium-ui .startup-wordmark { display: inline-flex; align-items: center; gap: 4px; font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: -.025em; }
@@ -103,8 +97,11 @@ body.premium-ui .startup-edition { color: #aaa; font-family: var(--mono); font-s
 body.premium-ui #startup-skip { min-height: 44px; padding: 0 2px; border: 0; background: transparent; color: #eee; font: 700 11px var(--font); cursor: pointer; }
 body.premium-ui #startup-skip:hover { color: #aaa; }
 body.premium-ui .startup-body { display: grid; grid-template-columns: 120px minmax(0, 1fr); flex: 1; align-items: center; padding: 58px 0 76px; }
-body.premium-ui .startup-side { align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; color: #999; font: 700 11px var(--mono); letter-spacing: .1em; writing-mode: vertical-rl; transform: rotate(180deg); }
+body.premium-ui .startup-side { align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; color: #999; font: 600 11px var(--mono); letter-spacing: .08em; writing-mode: vertical-rl; transform: rotate(180deg); }
 body.premium-ui .startup-copy { max-width: 1000px; animation: identity-enter .75s var(--p-ease) both; }
+/* An editorial byline, not a tracked-caps chip with a glyph in front of an
+   h1. Same information, none of the costume. */
+body.premium-ui .startup-kicker { margin: 0; color: #c9c9c9; font: 500 13px var(--mono); letter-spacing: .01em; }
 body.premium-ui .startup-copy h1 { margin: 27px 0 23px; color: #fff; font-family: var(--display); font-size: clamp(58px, 8.4vw, 120px); font-weight: 700; line-height: .92; letter-spacing: -.075em; }
 body.premium-ui .startup-copy h1 em { color: #8d8d8d; font-style: normal; }
 body.premium-ui .startup-copy > p { max-width: 480px; margin: 0; color: #c5c5c5; font-size: clamp(14px, 1.3vw, 17px); line-height: 1.65; }
@@ -117,9 +114,9 @@ body.premium-ui .startup-actions a span { margin-left: 8px; }
 body.premium-ui .startup-screen :is(button, a):focus-visible { outline-color: #fff !important; }
 body.premium-ui .startup-footer { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; padding-top: 20px; border-top: 1px solid #383838; }
 body.premium-ui .startup-footer div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-body.premium-ui .startup-footer span { color: #aaa; font: 700 11px var(--mono); letter-spacing: .12em; }
-body.premium-ui .startup-footer strong { font-size: 11px; line-height: 1.4; }
-body.premium-ui .startup-footer small { color: #aaa; font-size: 11px; }
+body.premium-ui .startup-footer span { color: #aaa; font: 500 11px var(--mono); letter-spacing: .02em; }
+body.premium-ui .startup-footer strong { font-size: 12px; line-height: 1.4; }
+body.premium-ui .startup-footer small { color: #aaa; font-size: 12px; }
 body.premium-ui .startup-footer .nezaad-logo { display: block; width: clamp(105px, 12vw, 155px); height: auto; filter: invert(1); }
 @keyframes identity-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
@@ -159,8 +156,8 @@ body.premium-ui .ai-status { cursor: default; pointer-events: none; }
 body.premium-ui .composer-privacy,
 body.premium-ui .link-import-privacy {
   color: var(--p-muted, #999);
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: 12.5px;
+  line-height: 1.5;
   margin: 8px 0 0;
 }
 body.premium-ui .link-import-card { margin-top: 16px; }

@@ -248,7 +248,7 @@ body.premium-ui .account-dot.has-alerts {
 
 .social-row-copy small {
   color: var(--p-muted);
-  font-size: 11.5px;
+  font-size: 12.5px;
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -478,7 +478,7 @@ body.premium-ui .account-dot.has-alerts {
 
 .chat-thread-copy small {
   color: var(--p-muted);
-  font-size: 11.5px;
+  font-size: 12.5px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -531,7 +531,7 @@ body.premium-ui .account-dot.has-alerts {
 
 .chat-room-title span {
   color: var(--p-muted);
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .chat-messages {
@@ -1018,7 +1018,7 @@ body.premium-ui .account-dot.has-alerts {
 
 .trivia-head small {
   color: var(--p-muted);
-  font-size: 11.5px;
+  font-size: 12.5px;
 }
 
 .trivia-head .chip {
@@ -1097,9 +1097,9 @@ body.premium-ui .account-dot.has-alerts {
 .trivia-feedback {
   display: grid;
   gap: 2px;
-  border-left: 3px solid var(--p-ink);
+  border: 1px solid var(--p-line);
   background: var(--p-surface-2);
-  padding: 8px 12px;
+  padding: 10px 13px;
 }
 
 .trivia-feedback strong {
@@ -1345,11 +1345,11 @@ body.premium-ui .account-dot.has-alerts {
   background-position: 2px 2px;
 }
 
+/* A two-axis hairline grid on a 34px avatar is the generated-UI texture; a
+   dot lattice reads the same at that size and stays inside the palette. */
 :is(.social-avatar, .profile-chip)[data-avatar="grid"] {
-  background-image:
-    linear-gradient(var(--p-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--p-line) 1px, transparent 1px);
-  background-size: 9px 9px;
+  background-image: radial-gradient(var(--p-line-strong) 0.75px, transparent 1px);
+  background-size: 5px 5px;
 }
 
 :is(.social-avatar, .profile-chip)[data-avatar="ring"] {
@@ -1357,7 +1357,7 @@ body.premium-ui .account-dot.has-alerts {
 }
 
 :is(.social-avatar, .profile-chip)[data-avatar="stripes"] {
-  background-image: repeating-linear-gradient(90deg, var(--p-line-strong) 0 2px, transparent 2px 7px);
+  background-image: linear-gradient(90deg, transparent 0 50%, var(--p-line-strong) 50% 100%);
 }
 
 :is(.social-avatar, .profile-chip)[data-avatar="corner"] {
@@ -1401,7 +1401,7 @@ body.premium-ui .account-dot.has-alerts {
 
 .social-me-copy small {
   color: var(--p-muted);
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.45;
 }
 

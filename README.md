@@ -848,7 +848,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-536 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, response compression (encoding negotiation, cache keys, and a spawned server proving a page arrives smaller and decodes back to the same bytes), the reading-position and shortcut arithmetic, the growing composer, and the server's security posture.
+615 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, response compression (encoding negotiation, cache keys, and a spawned server proving a page arrives smaller and decodes back to the same bytes), the reading-position and shortcut arithmetic, the growing composer, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 
@@ -863,6 +863,29 @@ GitHub, Slack, Cloudflare and AWS credentials, prints only a truncated hint
 (`sb_secre…Bv3e`) so a report can be shared safely, and exits non-zero if
 anything looks live. A key that reaches a public repository must be revoked, not
 deleted, because the history keeps it.
+
+### The design rules, checked rather than remembered
+
+The interface is audited with [`impeccable`](https://github.com/pbakaus/impeccable)
+(`npx impeccable@4.8.0 detect`), a deterministic detector for UI anti-patterns —
+not a model, and not connected to the answer pipeline. On its first full pass this
+site reported 409 findings; what it found has been fixed, and the rules a tool
+cannot enforce once it is uninstalled are ordinary tests in
+`tests/design-rules.test.mjs`:
+
+- nothing below the 11px text floor (`font-size` and the `font` shorthand),
+- no thick accent bar down one side of a card, and no inset side stripe,
+- no repeating-gradient stripes and no tiled two-axis grid background,
+- no chromatic glow shadow (zero offset, blurred, on a coloured value),
+- Pro Mode drawn in ink rather than neon, with its scan, reticle and letter beats kept,
+- the language band a wrapped grid of all thirty-three, with nothing moving on its own,
+- no tracked-caps chip above a headline and no halo behind one.
+
+Suppressions live in `.impeccable/config.json`, one entry per decision, each with a
+written reason, so nothing is silenced anonymously. Four findings stay visible
+instead of suppressed: the app's own full-bleed frames (`gate-tabs`,
+`gate-optional`, `chat-shell`, `settings-tabs`), where children meeting the shared
+hairline is the layout, not an accident.
 
 A separate DOM smoke run (jsdom + fake IndexedDB) was used during development to verify first launch, adding notes, asking a question, generating a quiz, viewing results and opening the performance-card modal. Those harness dependencies are intentionally not added to this zero-dependency repository.
 
