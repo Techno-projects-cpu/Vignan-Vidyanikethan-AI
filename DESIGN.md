@@ -24,44 +24,70 @@ places it deliberately breaks a generic rule. Written so that the next person
 - **No JavaScript on the landing page.** `/welcome` is a document: no script
   tag, no host but this one, and it must still read correctly with CSS motion
   switched off.
+- **No accent bar down one side of a card.** A thick `border-left` in a colour
+  is the most recognisable generated-UI tell there is. Meaning is carried by a
+  tinted surface, a full hairline box, or the colour of the text.
+- **No glow.** No zero-offset shadow with a blur on a coloured value, no
+  chromatic radial wash behind type. Elevation is a line, not a light.
+- **No decorative field.** No repeating-gradient stripes and no tiled
+  two-axis grid background: if a surface needs structure, draw it with real
+  borders.
+- **Pro Mode is drawn in ink.** The easter-egg boot keeps its scan, reticle and
+  letter beats in white on black; it is not a neon HUD.
+
+Those five, the size floor, the grey floor and the "nothing loops" rule are
+asserted in `tests/design-rules.test.mjs`, so they survive the audit tool being
+uninstalled.
 
 ## Deliberate breaks, with the reason
 
-These are reported by `impeccable detect` and are **not** defects. Each one is a
-decision that has a cost, and the cost is accepted:
+These are reported by `impeccable detect` **and are not defects**. Each one is a
+decision that has a cost, and the cost is accepted. Every entry is machine-readable
+in [`.impeccable/config.json`](./.impeccable/config.json) with the same reason, so
+a reviewer can see what was suppressed and why.
 
 | Reported as | Where | Why it stays |
 | --- | --- | --- |
 | `overused-font` | every page | Space Grotesk is the brand face and the only display font bundled locally (`assets/fonts/space-grotesk-latin.woff2`). Swapping it to satisfy a popularity heuristic would change the identity to no one's benefit. |
 | `numbered-section-labels`, mono `01 — 03` | hero, screens, writing | The numbered index above each title is the layout authority borrowed from [zero-vast.vercel.app](https://zero-vast.vercel.app): a document with sections you can count. It is information about position, not decoration. |
-| `hero-eyebrow-chip` | `blog/index.html` and every post | The `WRITING / 03 / 10` line above a post title is the series position. It is the one eyebrow that carries a number a reader can use, which is why the slogan eyebrows on `index.html`, `welcome.html` and the legal pages were deleted and this one was not. |
 | `tight-leading` | `.wl-cell-title`, `.bl-card-title`, article `h2` | 1.10–1.16 is normal for display type at 19–30px. The rule's 1.3 floor is a body-text floor; applying it to the headlines would make the page look loose, not more readable. |
-| `cramped-padding` | every `.wl-*` section, `gate-tabs`, `chat-shell` | The hairline grid *is* the layout: cells sit flush against the shared 1px border on purpose, with the text inset inside the cell. Padding every child would double every rule and break the stack. |
-| `tiny-text` at 11–11.5px | labels, metadata, legal fine print | The detector's own floor is 11px and this is its body-text heuristic reading a label. Sizes were raised to that floor from 9–10.5px; they are not going lower and do not need to be bigger. |
-| `dark-glow`, `radial-halo` | Pro Mode overlay | The PRO easter-egg intro is a piece of cinema — one screen, entered on purpose, left by pressing Escape. Its bloom is removed from anything legible (screen text, the PRO chip, status dots), and what is left is atmosphere behind display-size type. |
-| `repeating-stripes-gradient` | `blog` rules, `welcome` hero grid, social stripes | Measured single-pixel rules at 96px intervals are the document grid, drawn once per section. They are not a decorative fill; the second field that used to sit on top of the first was removed in 2.23.0. |
-| `codex-grid-background` | `welcome` hero | Same grid, seen through the hero. One field, greys only, on the one screen that argues the page has a structure. |
+| `cramped-padding` wall sections | every `.wl-*` section, `bl-list-cards` | The hairline grid **is** the layout: cells sit flush against the shared 1px border on purpose, with the text inset inside the cell. It is also what the static reader gets wrong here: it cannot resolve `clamp()` padding, so 18–28px of real inset reads as zero. Verified by hand, then recorded. |
+| `cramped-padding` frames | `gate-tabs`, `gate-optional`, `chat-shell`, `settings-tabs` | Left **visible** rather than suppressed. These are edge-to-edge frames: tabs share one underline, the two chat panes share one hairline, and the text is inset inside the pane. Padding the children would double every rule and break the frame. |
+
+Nothing else is left. The `tiny-text`, `hero-eyebrow-chip`, `dark-glow`,
+`radial-halo`, `repeating-stripes-gradient` and `codex-grid-background` rows this
+file used to carry were **fixed** in 2.24.0 rather than argued: the copy that was
+carrying sentences at 11px is 12.5–13px, the tracked-caps breadcrumb above each
+piece is a breadcrumb, Pro Mode is monochrome, the hero grid and the stripe fields
+are gone, and the em-dash staccato in the landing copy was rewritten as sentences.
 
 ## How this was audited
 
-In 2.23.0 the pages were scanned with [impeccable](https://github.com/pbakaus/impeccable)
-`0.1.18` (Apache-2.0), the deterministic 62-rule detector — no model, no key, no
-network:
+The pages are scanned with [impeccable](https://github.com/pbakaus/impeccable)
+(Apache-2.0), the deterministic 62-rule detector — no model, no key, and no
+network after the first download:
 
 ```sh
-# engine verified by sha256 against the publisher's manifest before first run
-impeccable detect --json index.html welcome.html judge.html blog/
+npx impeccable@4.8.0 detect index.html welcome.html judge.html privacy.html \
+  terms.html blog styles*.css
 ```
 
-Findings fell from 70 to 27 on `index.html` and 72 to 24 on `welcome.html`. What
-it caught that was genuinely wrong: an auto-scrolling language marquee that hid
-half the languages and moved unbidden, a 6px pulsing dot, seven eyebrows that floated
-above a headline without saying anything a reader could use, more than a hundred
-declarations of 9–10.5px text, seven body greys under 4:1,
-a doubling of the decorative stripe field, and glow used where a hairline
-belongs. What is left is the table above.
+**2.24.0 result: 4 failures and 3 advisories, down from 89 failures and 23
+advisories.** The four are the frames in the table above, left visible on purpose.
+The three advisories are em-dash saturation in three of the ten pieces, where the
+dashes are load-bearing dialogue rather than filler.
 
-The tool is a development aid only: it is not a dependency, nothing it produces
-is served, and the site still builds and runs offline without it. Do not run
-`impeccable install` here — it writes agent hooks that execute outside approval.
-`detect` alone is read-only and local.
+What the audit caught that was genuinely wrong this round: a Pro Mode overlay
+built from a perspective grid, three coloured radial washes and glow shadows; four
+coloured `border-left` accents on cards; a coloured brand shadow and an ellipse
+halo; a pulsing 6px dot above the ask hero; stripe fields on the writing and
+landing heroes and in the avatar patterns; a dozen rules carrying sentences at
+11–11.5px; and fifteen em-dashes in one page of landing copy. All of it is fixed,
+and `tests/design-rules.test.mjs` holds the rules so they cannot come back.
+
+Earlier rounds used `impeccable 0.1.18` and took the same tree from 202 findings to
+94 (marquee, pulsing dot, seven slogan eyebrows, a hundred declarations of 9–10.5px
+text, seven body greys under 4:1). The tool is a development aid only: it is not a
+dependency, nothing it produces is served, and the site still builds and runs
+offline without it. Do not run `impeccable install` here — it writes agent hooks
+that execute outside approval. `detect` alone is read-only and local.
