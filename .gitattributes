@@ -1,0 +1,10 @@
+# Vendored third-party bundles and generated binary assets keep upstream
+# formatting. Do not flag their CRLF/trailing whitespace in diff checks.
+vendor/** -whitespace
+vendor/pdfjs/** -whitespace
+*.min.js -whitespace
+*.wasm binary
+*.bcmap binary
+*.png binary
+*.jpg binary
+*.webp binary

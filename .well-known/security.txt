@@ -1,0 +1,8 @@
+# Security contact for Vignan Vidyanikethan AI — a student project for INSPIRE-MANAK.
+# Report privately first; please do not probe accounts that are not yours.
+
+Contact: https://github.com/Techno-projects-cpu/Vignan-Vidyanikethan-AI/issues
+Policy: https://vignanvidyanikethanai.onrender.com/security.html
+Preferred-Languages: en, te, hi
+Canonical: https://vignanvidyanikethanai.onrender.com/.well-known/security.txt
+Expires: 2027-10-29T00:00:00.000Z

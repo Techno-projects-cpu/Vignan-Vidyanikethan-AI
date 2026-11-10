@@ -1,0 +1,755 @@
+/*
+ * The landing page.
+ *
+ * A separate document from the app on purpose: the app opens as a conversation,
+ * and a page that has to explain the project in thirty seconds is a different job.
+ *
+ * The design is a set book. The subject is a school textbook and a machine that
+ * quotes it, so the page borrows the textbook's own grammar instead of a SaaS
+ * page's: folio numbers in the margin, a hairline margin rule, text set in one
+ * column of a readable measure, and a specimen answer presented as a plate with
+ * its page number in the gutter. The monospaced face is kept for exactly one job,
+ * numerals — folios, list indexes, page numbers — and for nothing else.
+ *
+ * Rules kept from the rest of the site: true black, grey and white only; square
+ * corners; blocks that share a single hairline instead of floating in shadows;
+ * no gradients as decoration; no all-caps labels above content; no arrows stuck
+ * on the end of links. Motion is CSS only — the page has no JavaScript at all,
+ * so it cannot throw a console error and cannot fail on a school Wi-Fi.
+ */
+
+@font-face { font-family: Manrope; src: url('./assets/fonts/manrope-latin.woff2') format('woff2'); font-style: normal; font-weight: 200 800; font-display: swap; }
+@font-face { font-family: 'Space Grotesk'; src: url('./assets/fonts/space-grotesk-latin.woff2') format('woff2'); font-style: normal; font-weight: 300 700; font-display: swap; }
+
+:root {
+  color-scheme: dark;
+  /* One black, four greys, and one raised surface used only by the specimen. */
+  --wl-bg: #000000;
+  --wl-panel: #0c0c0c;
+  --wl-ink: #f7f7f7;
+  --wl-soft: #c9c9c9;
+  --wl-quiet: #9a9a9a;
+  --wl-line: #262626;
+  --wl-line-soft: #141414;
+  --wl-font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --wl-display: 'Space Grotesk', Manrope, system-ui, sans-serif;
+  --wl-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --wl-pad: clamp(20px, 5vw, 72px);
+  --wl-rail: 76px;
+  --wl-ease: cubic-bezier(.2, .7, .2, 1);
+  font-family: var(--wl-font);
+  background: var(--wl-bg);
+  color: var(--wl-ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+* { box-sizing: border-box; }
+
+/* `overflow-x: hidden` on the body would make the body a scroll container and
+   break the sticky top bar in some browsers. It is set on the root instead. */
+html { scroll-behavior: smooth; overflow-x: hidden; }
+
+body.wl {
+  margin: 0;
+  padding: 0;
+  background: var(--wl-bg);
+  color: var(--wl-ink);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+body.wl ::selection { background: #f7f7f7; color: #000000; }
+
+a { color: inherit; text-decoration: none; }
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 4px;
+}
+
+img { display: block; }
+
+.wl-skip {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  z-index: 40;
+  padding: 12px 16px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 600;
+}
+.wl-skip:focus { top: 14px; }
+
+/* ------------------------------------------------------------------ */
+/* Top bar                                                             */
+/* ------------------------------------------------------------------ */
+
+.wl-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 74px;
+  padding: 0 var(--wl-pad);
+  border-bottom: 1px solid var(--wl-line);
+  background: rgba(0, 0, 0, .88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.wl-brand { display: flex; align-items: center; gap: 12px; }
+.wl-brand img { width: 30px; height: 30px; }
+.wl-brand-text {
+  font-family: var(--wl-display);
+  font-size: 16px;
+  letter-spacing: -.02em;
+}
+.wl-brand-text em { font-style: normal; color: var(--wl-quiet); }
+
+.wl-bar-note {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--wl-quiet);
+  white-space: nowrap;
+}
+
+.wl-bar-nav { display: flex; align-items: center; gap: 24px; font-size: 13.5px; font-weight: 600; }
+.wl-bar-nav a { color: var(--wl-soft); }
+.wl-bar-nav a:hover { color: #ffffff; }
+.wl-bar-open {
+  padding: 11px 16px;
+  border: 1px solid #3d3d3d;
+  color: #ffffff !important;
+  white-space: nowrap;
+  transition: background .16s ease, color .16s ease, border-color .16s ease;
+}
+.wl-bar-open:hover { background: #ffffff; color: #000000 !important; border-color: #ffffff; }
+
+/* ------------------------------------------------------------------ */
+/* Hero                                                                */
+/* ------------------------------------------------------------------ */
+
+.wl-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, .98fr);
+  align-items: center;
+  gap: clamp(36px, 5vw, 88px);
+  min-height: 100vh;
+  padding: clamp(48px, 7vh, 92px) var(--wl-pad) clamp(64px, 8vh, 112px);
+  border-bottom: 1px solid var(--wl-line);
+  background: var(--wl-bg);
+}
+
+@supports (min-height: 100svh) {
+  .wl-hero { min-height: 100svh; }
+}
+
+.wl-hero-copy { position: relative; z-index: 2; min-width: 0; }
+
+.wl-title {
+  margin: 0 0 28px;
+  font-family: var(--wl-display);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: -.055em;
+  line-height: .86;
+  font-size: clamp(46px, 8.2vw, 118px);
+}
+.wl-title-line { display: block; }
+
+/* The one bold move on the page: the object of the whole project — the title of
+   the book — set as an outline, the way a textbook plate labels its figure. */
+.wl-title-outline { color: var(--wl-ink); }
+
+@supports ((-webkit-text-stroke: 1px #fff)) {
+  .wl-title-outline {
+    color: transparent;
+    -webkit-text-stroke: 1.4px #efefef;
+    text-shadow: none;
+  }
+}
+
+.wl-title-small {
+  margin-top: 20px;
+  font-family: var(--wl-font);
+  font-size: clamp(15px, 1.5vw, 19px);
+  font-weight: 500;
+  letter-spacing: -.01em;
+  line-height: 1.3;
+  color: var(--wl-soft);
+  text-transform: none;
+}
+
+.wl-lede {
+  max-width: 52ch;
+  margin: 0 0 30px;
+  font-size: clamp(15px, 1.3vw, 17px);
+  line-height: 1.7;
+  color: var(--wl-soft);
+}
+
+.wl-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
+
+.wl-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 24px;
+  border: 1px solid transparent;
+  font-family: var(--wl-font);
+  font-size: 14.5px;
+  font-weight: 650;
+  letter-spacing: -.005em;
+  transition: background .16s ease, color .16s ease, border-color .16s ease;
+}
+.wl-button-solid { background: #f7f7f7; color: #000000; }
+.wl-button-solid:hover { background: #ffffff; }
+.wl-button-ghost { border-color: #3d3d3d; color: #f7f7f7; }
+.wl-button-ghost:hover { background: #f7f7f7; color: #000000; border-color: #f7f7f7; }
+
+/* The cost of the thing, said once, in a sentence rather than four stat cells. */
+.wl-cost {
+  max-width: 46ch;
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--wl-quiet);
+}
+
+/* The hero's opening move: three lines and the plate, once. */
+
+.wl-line-a, .wl-line-b, .wl-line-c, .wl-specimen {
+  animation: wl-rise .9s var(--wl-ease) both;
+}
+.wl-line-a { animation-delay: .04s; }
+.wl-line-b { animation-delay: .14s; }
+.wl-line-c { animation-delay: .26s; }
+.wl-specimen { animation-delay: .34s; }
+
+@keyframes wl-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------------------------------------------------ */
+/* The specimen: one cited answer, presented as a plate                */
+/* ------------------------------------------------------------------ */
+
+.wl-specimen {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  border: 1px solid var(--wl-line);
+  background: var(--wl-panel);
+}
+
+.wl-specimen-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--wl-line);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--wl-soft);
+}
+.wl-badge {
+  font-family: var(--wl-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .04em;
+  color: var(--wl-quiet);
+}
+
+.wl-turns {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--wl-line-soft);
+}
+
+.wl-turn {
+  padding: 17px 16px 19px;
+  background: var(--wl-panel);
+  animation: wl-turn-in .6s var(--wl-ease) both;
+}
+.wl-turn-1 { animation-delay: .7s; }
+.wl-turn-2 { animation-delay: 1.2s; }
+.wl-turn-3 { animation-delay: 2s; }
+.wl-turn-4 { animation-delay: 2.5s; }
+
+@keyframes wl-turn-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wl-turn p {
+  margin: 5px 0 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #e8e8e8;
+  overflow-wrap: anywhere;
+}
+
+/* Speaker names are set like the speakers in a play: small, plain, and quiet
+   unless the machine is talking. */
+.wl-who {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .01em;
+  color: var(--wl-quiet);
+}
+.wl-turn-2 .wl-who, .wl-turn-4 .wl-who { color: #ffffff; }
+
+.wl-cite {
+  display: inline-block;
+  margin-top: 11px;
+  padding: 5px 9px;
+  border: 1px solid #333333;
+  font-size: 12.5px;
+  color: #dedede;
+}
+
+.wl-chip {
+  display: inline-block;
+  margin-top: 9px;
+  padding: 5px 9px;
+  background: #ededed;
+  color: #000000;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.wl-specimen-foot {
+  margin: 0;
+  padding: 14px 16px 15px;
+  border-top: 1px solid var(--wl-line);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--wl-quiet);
+}
+
+/* ------------------------------------------------------------------ */
+/* The languages, all of them, at rest                                  */
+/* ------------------------------------------------------------------ */
+
+/* This was a marquee: an infinite loop of thirty-three names, half of them
+   off-screen and all of them moving on their own. A complete board is shorter,
+   still, searchable, and honest about the one thing it claims. */
+
+.wl-langs-board {
+  border-bottom: 1px solid var(--wl-line);
+  background: var(--wl-bg);
+}
+
+.wl-langs-title {
+  margin: 0;
+  padding: 22px var(--wl-pad) 18px;
+  border-bottom: 1px solid var(--wl-line);
+  font-family: var(--wl-font);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--wl-quiet);
+}
+
+.wl-langs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--wl-line);
+  /* The grid's own background is the hairline between cells. */
+}
+
+.wl-langs li {
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  padding: 0 18px;
+  background: var(--wl-bg);
+  font-size: 15px;
+  color: var(--wl-soft);
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 560px) {
+  .wl-langs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wl-langs li { min-height: 46px; padding: 0 12px; font-size: 14px; }
+}
+
+/* ------------------------------------------------------------------ */
+/* The margin: a folio, and the rule that separates it from the text   */
+/* ------------------------------------------------------------------ */
+
+.wl-folio {
+  margin: 0;
+  padding-top: 6px;
+  font-family: var(--wl-mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  color: var(--wl-quiet);
+  text-align: right;
+}
+
+/* ------------------------------------------------------------------ */
+/* The claim                                                           */
+/* ------------------------------------------------------------------ */
+
+.wl-claim {
+  display: grid;
+  grid-template-columns: var(--wl-rail) minmax(0, 1.2fr) minmax(0, .8fr);
+  gap: clamp(20px, 3vw, 44px) clamp(28px, 4vw, 64px);
+  align-items: start;
+  padding: clamp(64px, 10vh, 128px) var(--wl-pad);
+  border-bottom: 1px solid var(--wl-line);
+}
+.wl-claim .wl-folio,
+.wl-section-head .wl-folio {
+  /* `align-self: stretch` is what makes the hairline run the height of the row:
+     a percentage height would collapse against the auto-sized grid row. */
+  align-self: stretch;
+  padding-right: clamp(16px, 2vw, 28px);
+  border-right: 1px solid var(--wl-line);
+}
+
+.wl-quote {
+  margin: 0;
+  max-width: 24ch;
+  font-family: var(--wl-display);
+  font-weight: 400;
+  font-size: clamp(26px, 3.4vw, 46px);
+  line-height: 1.14;
+  letter-spacing: -.035em;
+  /* Hanging punctuation: the opening quote sits in the margin instead of denting
+     the left edge of the column. */
+  text-indent: -.42em;
+  text-wrap: balance;
+}
+
+.wl-claim-aside { display: grid; gap: 16px; }
+.wl-claim-aside p {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--wl-soft);
+}
+
+/* ------------------------------------------------------------------ */
+/* Section headings                                                    */
+/* ------------------------------------------------------------------ */
+
+.wl-screens, .wl-proof, .wl-how, .wl-writing {
+  padding: clamp(60px, 9vh, 112px) var(--wl-pad);
+  border-bottom: 1px solid var(--wl-line);
+}
+
+.wl-section-head {
+  display: grid;
+  grid-template-columns: var(--wl-rail) minmax(0, 1.15fr) minmax(0, .85fr);
+  gap: clamp(16px, 3vw, 44px) clamp(24px, 4vw, 56px);
+  align-items: start;
+  margin-bottom: clamp(34px, 5vh, 56px);
+}
+
+.wl-section-head h2 {
+  margin: 0;
+  font-family: var(--wl-display);
+  font-weight: 500;
+  font-size: clamp(32px, 4.6vw, 62px);
+  line-height: .94;
+  letter-spacing: -.045em;
+  text-transform: uppercase;
+}
+.wl-section-note {
+  margin: 0;
+  max-width: 44ch;
+  padding-top: 6px;
+  font-size: 14px;
+  line-height: 1.72;
+  color: var(--wl-quiet);
+}
+
+/* ------------------------------------------------------------------ */
+/* The stack of screens — square boxes, sharing one hairline           */
+/* ------------------------------------------------------------------ */
+
+.wl-stack { border: 1px solid var(--wl-line); }
+
+.wl-cell {
+  display: grid;
+  grid-template-columns: 66px minmax(0, .9fr) minmax(0, 1.6fr);
+  align-items: baseline;
+  gap: clamp(12px, 2vw, 30px);
+  padding: clamp(20px, 2.4vw, 30px) clamp(16px, 2.2vw, 30px);
+  border-bottom: 1px solid var(--wl-line);
+  background: var(--wl-bg);
+  transition: background .16s ease, color .16s ease;
+}
+/* The writing band: the titles are sentences, so the two text columns trade a
+   little width. */
+.wl-cell-article { grid-template-columns: 66px minmax(0, 1.25fr) minmax(0, 1.2fr); }
+
+.wl-cell:last-child { border-bottom: 0; }
+.wl-cell:hover, .wl-cell:focus-visible { background: #f2f2f2; color: #000000; }
+
+.wl-index {
+  font-family: var(--wl-mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--wl-quiet);
+}
+.wl-cell:hover .wl-index { color: #6d6d6d; }
+
+.wl-cell-title {
+  font-family: var(--wl-display);
+  font-size: clamp(19px, 2vw, 26px);
+  letter-spacing: -.03em;
+  line-height: 1.12;
+}
+.wl-cell:hover .wl-cell-title {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+.wl-cell-body { max-width: 62ch; font-size: 14px; line-height: 1.65; color: var(--wl-soft); }
+.wl-cell:hover .wl-cell-body { color: #2b2b2b; }
+
+/* ------------------------------------------------------------------ */
+/* Numbers                                                             */
+/* ------------------------------------------------------------------ */
+
+.wl-numbers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--wl-line);
+}
+
+.wl-number {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: clamp(150px, 17vw, 210px);
+  padding: clamp(20px, 2.2vw, 30px);
+  border-right: 1px solid var(--wl-line);
+  border-bottom: 1px solid var(--wl-line);
+}
+.wl-number:nth-child(3n) { border-right: 0; }
+.wl-number:nth-last-child(-n+3) { border-bottom: 0; }
+
+.wl-number strong {
+  font-family: var(--wl-display);
+  font-weight: 400;
+  font-size: clamp(40px, 5.4vw, 82px);
+  line-height: .86;
+  letter-spacing: -.055em;
+  font-variant-numeric: tabular-nums;
+}
+.wl-number span {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--wl-quiet);
+}
+
+.wl-number-link { justify-content: flex-end; }
+.wl-number-link a {
+  font-family: var(--wl-display);
+  font-size: clamp(19px, 2vw, 25px);
+  letter-spacing: -.03em;
+  border-bottom: 1px solid #4a4a4a;
+  padding-bottom: 6px;
+  transition: border-color .16s ease, color .16s ease;
+}
+.wl-number-link a:hover { border-color: #ffffff; color: #ffffff; }
+
+.wl-proof-note {
+  max-width: 68ch;
+  margin: 20px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--wl-quiet);
+}
+
+/* ------------------------------------------------------------------ */
+/* Steps                                                               */
+/* ------------------------------------------------------------------ */
+
+.wl-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--wl-line);
+}
+.wl-steps li {
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1fr);
+  gap: clamp(12px, 2vw, 30px);
+  padding: clamp(22px, 2.6vw, 34px) clamp(16px, 2.2vw, 30px);
+  border-bottom: 1px solid var(--wl-line);
+}
+.wl-steps li:last-child { border-bottom: 0; }
+.wl-steps .wl-index { grid-row: 1 / span 2; padding-top: 6px; }
+.wl-steps h3 {
+  margin: 0 0 8px;
+  font-family: var(--wl-display);
+  font-weight: 500;
+  font-size: clamp(19px, 2vw, 25px);
+  letter-spacing: -.03em;
+}
+.wl-steps p {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 14px;
+  line-height: 1.72;
+  color: var(--wl-soft);
+}
+
+/* ------------------------------------------------------------------ */
+/* Closing block                                                       */
+/* ------------------------------------------------------------------ */
+
+.wl-close {
+  padding: clamp(72px, 12vh, 144px) var(--wl-pad);
+  border-bottom: 1px solid var(--wl-line);
+  background: var(--wl-bg);
+}
+.wl-close-title {
+  margin: 0 0 34px;
+  max-width: 20ch;
+  font-family: var(--wl-display);
+  font-weight: 500;
+  font-size: clamp(32px, 6.2vw, 92px);
+  line-height: .92;
+  letter-spacing: -.05em;
+  text-transform: uppercase;
+}
+.wl-close .wl-actions { margin-bottom: 20px; }
+.wl-close-note {
+  max-width: 52ch;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--wl-quiet);
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer                                                              */
+/* ------------------------------------------------------------------ */
+
+.wl-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) auto;
+  gap: clamp(24px, 4vw, 60px);
+  padding: clamp(40px, 6vh, 68px) var(--wl-pad) clamp(36px, 5vh, 54px);
+  align-items: start;
+}
+
+.wl-foot-credit strong {
+  font-size: 15px;
+  font-weight: 650;
+  color: #ffffff;
+}
+.wl-foot-credit p {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.66;
+  color: var(--wl-quiet);
+}
+.wl-foot-fine { max-width: 44ch; margin-top: 16px !important; color: #8a8a8a !important; }
+
+.wl-foot-nav { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+.wl-foot-nav a {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d6d6d6;
+  border-bottom: 1px solid transparent;
+}
+.wl-foot-nav a:hover { color: #ffffff; border-bottom-color: #ffffff; }
+
+.wl-foot-stamp {
+  margin: 0;
+  justify-self: end;
+  font-family: var(--wl-display);
+  font-size: 13px;
+  letter-spacing: -.01em;
+  color: var(--wl-quiet);
+  white-space: nowrap;
+}
+.wl-foot-stamp em { font-style: normal; color: #8a8a8a; }
+
+/* ------------------------------------------------------------------ */
+/* Narrow screens                                                      */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 1080px) {
+  .wl-hero { grid-template-columns: 1fr; min-height: 0; }
+  .wl-hero-copy { max-width: 700px; }
+  .wl-specimen { max-width: 620px; }
+  .wl-claim { grid-template-columns: 1fr; }
+  .wl-claim .wl-folio,
+  .wl-section-head .wl-folio {
+    align-self: start;
+    border-right: 0;
+    padding: 0;
+    text-align: left;
+  }
+  .wl-section-head { grid-template-columns: 1fr; align-items: start; }
+  .wl-cell { grid-template-columns: 44px minmax(0, 1fr); row-gap: 8px; }
+  .wl-cell-body { grid-column: 2 / -1; }
+  .wl-number { min-height: 0; }
+  .wl-numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wl-number:nth-child(3n) { border-right: 1px solid var(--wl-line); }
+  .wl-number:nth-child(2n) { border-right: 0; }
+  .wl-number:nth-last-child(-n+3) { border-bottom: 1px solid var(--wl-line); }
+  .wl-number:nth-last-child(-n+2) { border-bottom: 0; }
+  .wl-foot { grid-template-columns: 1fr; }
+  .wl-foot-stamp { justify-self: start; }
+}
+
+@media (max-width: 720px) {
+  :root { --wl-rail: 0px; }
+  .wl-bar { min-height: 62px; }
+  .wl-bar-note, .wl-bar-nav a:not(.wl-bar-open) { display: none; }
+  .wl-hero { padding-top: 40px; }
+  .wl-actions { flex-direction: column; align-items: stretch; }
+  .wl-button { width: 100%; min-height: 54px; }
+  .wl-numbers { grid-template-columns: 1fr; }
+  .wl-number, .wl-number:nth-child(2n), .wl-number:nth-child(3n) {
+    border-right: 0;
+    border-bottom: 1px solid var(--wl-line);
+    min-height: 132px;
+  }
+  .wl-number:nth-last-child(-n+2) { border-bottom: 1px solid var(--wl-line); }
+  .wl-number:last-child { border-bottom: 0; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Respect the reader's motion setting                                 */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .wl-line-a, .wl-line-b, .wl-line-c,
+  .wl-specimen, .wl-turn {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .wl-button, .wl-cell, .wl-bar-open, .wl-number-link a { transition: none !important; }
+}
