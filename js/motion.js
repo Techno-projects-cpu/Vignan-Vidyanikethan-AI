@@ -2,7 +2,7 @@
  * Tiny dependency-free motion layer for the premium shell.
  *
  * Inspired by open-source animation work in AOS, Motion One, Motion
- * Primitives and css-motion (see OPEN_SOURCE_CREDITS.md). No third-party code
+ * Primitives and css-motion (see docs/OPEN_SOURCE_CREDITS.md). No third-party code
  * is copied: this module only uses IntersectionObserver, CSS classes and a
  * reduced-motion check. It degrades to fully visible content.
  */

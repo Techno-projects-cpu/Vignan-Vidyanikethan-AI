@@ -182,14 +182,32 @@ test("the page is accessible before it is pretty", () => {
   assert.match(css, /@media \(max-width: 720px\) \{[\s\S]*?min-height: 54px/);
 });
 
+test("the hero moves as an object, not as four things fading up", () => {
+  // The tell of a generated page is one entrance — opacity 0 plus translateY —
+  // copied onto every element with a delay. Here the page is *made*: ink arrives,
+  // the outline word is printed across the line, the sub-line is set, and the
+  // specimen plate is turned over in perspective. Three different movements for
+  // three different things, which is the point.
+  const entrance = (selector) => {
+    const rule = new RegExp(`\\${selector}\\s*\\{[^}]*animation:\\s*([a-z-]+)`).exec(css);
+    return rule?.[1] || "";
+  };
+  const movements = [".wl-line-a", ".wl-line-b", ".wl-line-c", ".wl-specimen"].map(entrance);
+  assert.ok(movements.every(Boolean), `every hero element has its own entrance (${movements.join(", ")})`);
+  assert.equal(new Set(movements).size, movements.length, "no two hero elements share an entrance");
+  assert.match(css, /@keyframes wl-turn \{[\s\S]*?rotateY/, "the plate turns in perspective");
+  assert.match(css, /perspective: \d+px/, "there is a camera for it to turn in");
+});
+
 test("motion can be switched off, and nothing is stuck invisible when it is", () => {
   const reduced = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
   assert.ok(reduced, "there is a reduced-motion block");
-  // Only the two entrances are left. The marquee drift and the bobbing arrow were
-  // removed with the marquee itself; the list below is what this page still animates.
-  for (const animation of ["wl-rise", "wl-turn-in"]) {
+  // The marquee drift and the bobbing arrow went with the marquee. What is left
+  // is one movement per element and nothing that loops.
+  for (const animation of ["wl-ink-in", "wl-print", "wl-settle", "wl-turn", "wl-bind", "wl-draw", "wl-turn-in"]) {
     assert.ok(css.includes(`@keyframes ${animation}`), `${animation} is defined`);
   }
+  assert.doesNotMatch(css, /animation-iteration-count:\s*infinite|animation:\s*[^;]*\binfinite\b/, "nothing loops on its own");
   for (const gone of ["wl-drift", "wl-bob", "wl-marquee-track"]) {
     assert.ok(!css.includes(gone), `${gone} is gone, not merely switched off`);
   }

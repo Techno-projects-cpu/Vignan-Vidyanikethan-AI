@@ -6,14 +6,14 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=58";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=58";
-import { ingestPdf, ingestText } from "./ingest.js?v=58";
-import { splitSentences } from "./text.js?v=58";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=58";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=58";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=58";
-import { carryOverHits, contextChipLabel, conversationBrief, resolveQuery } from "./memory.js?v=58";
+import * as db from "./db.js?v=59";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=59";
+import { ingestPdf, ingestText } from "./ingest.js?v=59";
+import { splitSentences } from "./text.js?v=59";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=59";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=59";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=59";
+import { carryOverHits, contextChipLabel, conversationBrief, resolveQuery } from "./memory.js?v=59";
 import {
   LANGUAGES as CODE_LANGUAGES,
   checkPrediction,
@@ -29,20 +29,20 @@ import {
   predictOutput,
   requestedCodeLesson,
   unpredictableReason,
-} from "./code-mode.js?v=58";
-import { answerOutOfView, isFollowing, readChatBox, scrollForAnswer, scrollForLatest } from "./chat-scroll.js?v=58";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=58";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=58";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=58";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=58";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=58";
+} from "./code-mode.js?v=59";
+import { answerOutOfView, isFollowing, readChatBox, scrollForAnswer, scrollForLatest } from "./chat-scroll.js?v=59";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=59";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=59";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=59";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=59";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=59";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=58";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=58";
-import { RELEASE, startUpdateWatch } from "./updates.js?v=58";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=58";
+} from "./pro-mode.js?v=59";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=59";
+import { RELEASE, startUpdateWatch } from "./updates.js?v=59";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=59";
 import {
   SHORTCUTS,
   fitComposerHeight,
@@ -54,18 +54,18 @@ import {
   shouldShowToTop,
   shortcutForKey,
   windowScrollState,
-} from "./viewport.js?v=58";
+} from "./viewport.js?v=59";
 import {
   OFFLINE_MODE_LABEL,
   OFFLINE_MODE_NOTE,
   isOfflineMode,
   networkAllowed,
   setOfflineMode,
-} from "./offline-mode.js?v=58";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=58";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=58";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=58";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=58";
+} from "./offline-mode.js?v=59";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=59";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=59";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=59";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=59";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -73,8 +73,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=58";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=58";
+} from "./llm.js?v=59";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=59";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -86,7 +86,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=58";
+} from "./local-ai.js?v=59";
 import {
   EXAMS,
   MODES,
@@ -101,12 +101,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=58";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=58";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=58";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=58";
-import { TASKS } from "./model-router.js?v=58";
-import { PROVIDERS, providerList } from "./providers.js?v=58";
+} from "./exam-packs.js?v=59";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=59";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=59";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=59";
+import { TASKS } from "./model-router.js?v=59";
+import { PROVIDERS, providerList } from "./providers.js?v=59";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -115,30 +115,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=58";
-import { parseApiKeys } from "./key-pool.js?v=58";
+} from "./settings.js?v=59";
+import { parseApiKeys } from "./key-pool.js?v=59";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=58";
+} from "./student-keys.js?v=59";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=58";
+} from "./quiz.js?v=59";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=58";
+} from "./flashcards.js?v=59";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=58";
+} from "./study-decks.js?v=59";
 import {
   accuracy,
   currentStreak,
@@ -149,17 +149,17 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=58";
-import { externalSearchUrl, searchWeb } from "./web.js?v=58";
-import { openEditStudio } from "./edit-studio.js?v=58";
-import { openReader } from "./reader.js?v=58";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=58";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=58";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=58";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=58";
-import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=58";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=58";
-import * as ui from "./ui.js?v=58";
+} from "./progress.js?v=59";
+import { externalSearchUrl, searchWeb } from "./web.js?v=59";
+import { openEditStudio } from "./edit-studio.js?v=59";
+import { openReader } from "./reader.js?v=59";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=59";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=59";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=59";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=59";
+import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=59";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=59";
+import * as ui from "./ui.js?v=59";
 import {
   clearReferral,
   getLeaderboard,
@@ -169,8 +169,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=58";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=58";
+} from "./auth.js?v=59";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=59";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -178,12 +178,13 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=58";
-import { initMotion, revealVisible } from "./motion.js?v=58";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=58";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=58";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=58";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=58";
+} from "./premium-ui.js?v=59";
+import { initMotion, revealVisible } from "./motion.js?v=59";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=59";
+import { buildStudyCard, cardTitle } from "./study-card.js?v=59";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=59";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=59";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=59";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -1257,7 +1258,7 @@ function renderInstallSheet() {
   const rows = [
     ["On Android", "Open this site in Chrome, tap the ⋮ menu, then Add to Home screen. It opens full screen and works offline."],
     ["On a laptop", "In Chrome or Edge, click the install icon in the address bar. It gets its own window and Start-menu entry."],
-    ["A real .apk or .exe", "That needs a build machine with Android Studio or Tauri. PACKAGING.md in the repository has the exact commands; nothing here pretends to hand out a file that has not been built."],
+    ["A real .apk or .exe", "That needs a build machine with Android Studio or Tauri. docs/PACKAGING.md in the repository has the exact commands; nothing here pretends to hand out a file that has not been built."],
   ];
   for (const [title, body] of rows) {
     const row = ui.element("div", "install-step");
@@ -2363,6 +2364,14 @@ function renderChat() {
         copy.type = "button";
         copy.addEventListener("click", () => copyText(formatAnswerForCopy(message), "Answer and citations copied."));
         actions.appendChild(copy);
+        // A cited answer is worth more to the classmate who has the book open
+        // than to the student reading it alone. The card is the answer, the
+        // citation and a link that reopens the question.
+        const handOn = ui.element("button", "message-action", "Hand this on");
+        handOn.type = "button";
+        handOn.setAttribute("aria-label", "Copy this answer, its citation and a link to the question as a study card");
+        handOn.addEventListener("click", () => handOnAnswer(message, lastQuestion));
+        actions.appendChild(handOn);
         if (voiceEnv().speak) {
           const speak = ui.element("button", "message-action", "Read aloud");
           speak.type = "button";
@@ -3245,6 +3254,28 @@ function formatAnswerForCopy(message) {
   const references = (message.sources || []).map((source, index) => `[${source.n || index + 1}] ${source.sourceUrl ? "Web import: " : ""}${source.title || "Library source"} · ${source.sourceUrl && source.sourceKind !== "pdf" ? "section" : "page"} ${source.page || "?"}${source.sourceUrl ? ` — ${source.sourceUrl}` : ""}`);
   const outside = (message.webSources || []).map((source, index) => `[W${index + 1}] ${source.title || "Outside source"} — ${source.url || ""}`);
   return [message.content || "", ...(references.length ? ["", "Textbook sources:", ...references] : []), ...(outside.length ? ["", "Outside sources:", ...outside] : [])].join("\n");
+}
+
+/**
+ * Hand a cited answer to somebody else.
+ *
+ * Two routes, decided by what the student can actually do right now: a signed-in
+ * student gets the card copied *and* the Study Hall opened with it as a draft;
+ * a guest gets the card on the clipboard and a sentence saying why that is all
+ * the app can offer. Neither route sends anything on its own.
+ */
+async function handOnAnswer(message, question) {
+  const base = globalThis.location ? `${globalThis.location.origin}${globalThis.location.pathname}` : "";
+  const card = buildStudyCard({ question, answer: message.content, sources: message.sources, base });
+  const social_ = socialState();
+  const hallId = social_.data?.threads?.find?.((row) => row.kind === "hall")?.id || social_.data?.studyHallId || "";
+  await copyText(card, "");
+  if (!social_.signedIn || !hallId) {
+    ui.showToast(`Study card copied: “${cardTitle(question)}”. A student account adds the Study Hall.`, "success", 6000);
+    return;
+  }
+  window.dispatchEvent(new CustomEvent("vignan:open-chat", { detail: { threadId: hallId, draft: card } }));
+  ui.showToast("Study card copied, and open in Study Hall as a draft. Send it when you are ready.", "success", 6000);
 }
 
 async function copyText(text, successMessage = "Quote copied.") {
@@ -6224,7 +6255,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=58");
+            const { social } = await import("./social.js?v=59");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));

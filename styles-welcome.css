@@ -225,19 +225,45 @@ img { display: block; }
   color: var(--wl-quiet);
 }
 
-/* The hero's opening move: three lines and the plate, once. */
+/* The hero's opening move.
+ *
+ * One subject, three movements, and none of them is "fade up" on everything —
+ * that is the tell that makes a page read as a slide deck. The page is being
+ * made: the first line is set (ink arriving), the second is printed across the
+ * line (a wipe, like a press), the third is justified (type settling), and the
+ * specimen plate is turned over and laid flat. The plate turns on the Y axis
+ * out of perspective, so the motion reads as an object in the room rather than
+ * a picture fading in. */
 
-.wl-line-a, .wl-line-b, .wl-line-c, .wl-specimen {
-  animation: wl-rise .9s var(--wl-ease) both;
-}
-.wl-line-a { animation-delay: .04s; }
-.wl-line-b { animation-delay: .14s; }
-.wl-line-c { animation-delay: .26s; }
-.wl-specimen { animation-delay: .34s; }
+.wl-hero { perspective: 1400px; }
 
-@keyframes wl-rise {
-  from { opacity: 0; transform: translateY(22px); }
+.wl-line-a { animation: wl-ink-in .7s var(--wl-ease) both; }
+.wl-line-b { animation: wl-print .92s cubic-bezier(.55, .05, .25, 1) .12s both; }
+.wl-line-c { animation: wl-settle .8s var(--wl-ease) .5s both; }
+.wl-specimen { animation: wl-turn 1.05s cubic-bezier(.2, .75, .25, 1) .3s both; }
+
+@keyframes wl-ink-in {
+  from { opacity: 0; transform: translateY(.22em); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* A wipe from the left edge: the outline word is laid down the way a plate is
+   printed, not faded in. `clip-path` keeps the glyphs crisp. */
+@keyframes wl-print {
+  from { clip-path: inset(-10% 100% -10% 0); }
+  to { clip-path: inset(-10% -2% -10% 0); }
+}
+
+/* The sentence under the title is set, not drifted: the tracking closes up as
+   it arrives, which is what type does when it is justified. */
+@keyframes wl-settle {
+  from { opacity: 0; letter-spacing: .06em; }
+  to { opacity: 1; letter-spacing: -.01em; }
+}
+
+@keyframes wl-turn {
+  from { opacity: 0; transform: translateX(46px) rotateY(-9deg); }
+  to { opacity: 1; transform: translateX(0) rotateY(0deg); }
 }
 
 /* ------------------------------------------------------------------ */
@@ -250,6 +276,26 @@ img { display: block; }
   margin: 0;
   border: 1px solid var(--wl-line);
   background: var(--wl-panel);
+  transform-style: preserve-3d;
+}
+
+/* The binding: one hairline down the left edge of the plate that draws itself
+   after the plate lands. It is the only ornament on the figure. */
+.wl-specimen::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1px;
+  width: 1px;
+  background: #4a4a4a;
+  transform-origin: top;
+  animation: wl-bind .8s var(--wl-ease) 1.15s both;
+}
+
+@keyframes wl-bind {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
 }
 
 .wl-specimen-head {
@@ -422,9 +468,41 @@ img { display: block; }
 .wl-section-head .wl-folio {
   /* `align-self: stretch` is what makes the hairline run the height of the row:
      a percentage height would collapse against the auto-sized grid row. */
+  position: relative;
   align-self: stretch;
   padding-right: clamp(16px, 2vw, 28px);
-  border-right: 1px solid var(--wl-line);
+  border-right: 1px solid var(--wl-line-soft);
+}
+
+/* The margin rule is drawn, not switched on: a solid hairline grows down the
+   faint one as the section comes into view, the way a ruled margin is inked in
+   before the writing starts. Scroll-driven, so it cannot run ahead of the
+   reader, and it stops when the row is in — nothing here loops. */
+.wl-claim .wl-folio::after,
+.wl-section-head .wl-folio::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -1px;
+  width: 1px;
+  height: 100%;
+  background: var(--wl-line);
+  transform-origin: top;
+}
+
+@supports (animation-timeline: view()) {
+  .wl-claim .wl-folio::after,
+  .wl-section-head .wl-folio::after {
+    transform: scaleY(0);
+    animation: wl-rule linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+}
+
+@keyframes wl-rule {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
 }
 
 .wl-quote {
@@ -449,6 +527,107 @@ img { display: block; }
   line-height: 1.75;
   color: var(--wl-soft);
 }
+
+
+/* ------------------------------------------------------------------ */
+/* The plate: a page drawn in ink, not photographed                     */
+/* ------------------------------------------------------------------ */
+
+/* Drawn the way a person draws with a pen: construction lines first, then the
+   outline, then the writing on the page, then the sentence that is cited, then
+   the hatching on the shadow side. All of it is one SVG, no image file, no
+   network — the page still loads with the Wi-Fi off. The motion is driven by
+   the reader's scroll (`view()`), so it draws exactly as fast as the reader
+   arrives at it, and nothing moves once the drawing is finished. */
+
+.wl-plate {
+  margin: 0;
+  padding: 18px 18px 16px;
+  border: 1px solid var(--wl-line);
+  background: var(--wl-panel);
+}
+
+.wl-plate-folio {
+  margin: 0 0 10px;
+  font-family: var(--wl-mono);
+  font-size: 11.5px;
+  letter-spacing: .06em;
+  color: var(--wl-quiet);
+}
+
+.wl-ink {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: #c9c9c9;
+}
+
+.wl-ink path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.wl-ink-guide { stroke-width: .75; opacity: .45; stroke-dasharray: 2 6; }
+.wl-ink-page { stroke-width: 1.5; }
+.wl-ink-line-1 { stroke-width: 1; opacity: .8; }
+.wl-ink-line-2 { stroke-width: 1; opacity: .66; }
+.wl-ink-line-3 { stroke-width: 1; opacity: .5; }
+.wl-ink-cited { stroke-width: 2.5; stroke: #f7f7f7; }
+.wl-ink-bracket { stroke-width: 1.5; stroke: #f7f7f7; }
+.wl-ink-hatch { stroke-width: .9; opacity: .55; }
+
+/* `pathLength="1"` on every path in the markup normalises them to a length of
+   one, so one dash rule draws all of them without measuring anything. */
+@supports (animation-timeline: view()) {
+  .wl-ink-page,
+  .wl-ink-line-1,
+  .wl-ink-line-2,
+  .wl-ink-line-3,
+  .wl-ink-cited,
+  .wl-ink-bracket,
+  .wl-ink-hatch {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+    animation: wl-draw linear both;
+    animation-timeline: view();
+  }
+  .wl-ink-page { animation-range: entry 6% entry 34%; }
+  .wl-ink-line-1 { animation-range: entry 20% entry 42%; }
+  .wl-ink-line-2 { animation-range: entry 26% entry 48%; }
+  .wl-ink-line-3 { animation-range: entry 32% entry 52%; }
+  .wl-ink-cited { animation-range: entry 42% entry 62%; }
+  .wl-ink-bracket { animation-range: entry 50% entry 70%; }
+  .wl-ink-hatch { animation-range: entry 58% entry 84%; }
+  .wl-ink-guide {
+    animation: wl-guide-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 25%;
+  }
+}
+
+@keyframes wl-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes wl-guide-in {
+  from { opacity: 0; }
+  to { opacity: .45; }
+}
+
+.wl-plate-note {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--wl-quiet);
+}
+
+/* ------------------------------------------------------------------ */
+/* The margin rule draws as its section arrives                         */
+/* ------------------------------------------------------------------ */
 
 /* ------------------------------------------------------------------ */
 /* Section headings                                                    */
@@ -746,10 +925,30 @@ img { display: block; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .wl-line-a, .wl-line-b, .wl-line-c,
-  .wl-specimen, .wl-turn {
+  .wl-specimen, .wl-specimen::before, .wl-turn {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+    clip-path: none !important;
   }
+  /* The drawing is not switched off, it is finished: without the dash rule the
+     ink paths are simply lines on the page, which is what a reader who dislikes
+     motion should see. */
+  .wl-ink-page, .wl-ink-line-1, .wl-ink-line-2, .wl-ink-line-3,
+  .wl-ink-cited, .wl-ink-bracket, .wl-ink-hatch, .wl-ink-guide {
+    animation: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+  }
+  .wl-ink-guide { opacity: .45 !important; }
+  .wl-claim .wl-folio::after,
+  .wl-section-head .wl-folio::after {
+    animation: none !important;
+    transform: none !important;
+  }
+  .wl-ink-line-2 { opacity: .66 !important; }
+  .wl-ink-line-3 { opacity: .5 !important; }
+  .wl-ink-hatch { opacity: .55 !important; }
   .wl-button, .wl-cell, .wl-bar-open, .wl-number-link a { transition: none !important; }
 }
