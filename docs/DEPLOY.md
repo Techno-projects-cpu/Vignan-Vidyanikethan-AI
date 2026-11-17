@@ -42,16 +42,31 @@ healthy.
 then *Manual Deploy → Deploy latest commit*. `render.yaml` now pins
 `branch: main` so a blueprint-driven service cannot drift again.
 
-**Checking it from a terminal, without the dashboard** — the live version must
-equal `main`'s:
+**Checking it in one command, without the dashboard:**
 
 ```sh
-git show origin/main:package.json | grep '"version"'   # 2.26.0
-curl -s https://<your-service>.onrender.com/api/health | grep -o '"version":"[^"]*"'
+npm run deployed                       # checks the live Render host
+npm run deployed -- https://other.example
 ```
 
-If those disagree, the service is building something other than `main`; nothing
-about the code is wrong.
+It reads the version this checkout would deploy, asks the host what it is
+running, and prints both. On a mismatch it says how far behind the host is and
+which dropdown to change. Exit code 0 means they agree, 1 means they do not, 2
+means the host could not be reached.
+
+The same answer by hand — `/api/health` now reports the commit and branch the
+host actually built, which is the fact that makes a wrong-branch deploy visible:
+
+```sh
+curl -s https://<your-service>.onrender.com/api/health \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['version'], d['build'])"
+
+# {'commit': 'fe4aed6…', 'branch': 'arena/f2a1402d-…', 'service': '…', 'hosted': True}
+#   the code is fine; that branch is simply not main.
+```
+
+If the branch named there is not `main`, the service is building something other
+than the repository's default branch, and nothing about the code is wrong.
 
 **Delete a stale branch once its pull request is merged.** A merged `arena/…`
 branch left on the remote is a future deployment pointed at a dead end. (This

@@ -6,10 +6,10 @@
  * the client for anything the server also checks.
  */
 
-import * as ui from "./ui.js?v=59";
-import { legalMoves } from "./chess.js?v=59";
-import { onSocialChange, setActiveGame, social, socialState, syncSocial } from "./social.js?v=59";
-import { relativeTime } from "./friends-ui.js?v=59";
+import * as ui from "./ui.js?v=60";
+import { legalMoves } from "./chess.js?v=60";
+import { onSocialChange, setActiveGame, social, socialState, syncSocial } from "./social.js?v=60";
+import { relativeTime } from "./friends-ui.js?v=60";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 
