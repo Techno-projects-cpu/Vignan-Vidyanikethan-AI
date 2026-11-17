@@ -1,6 +1,6 @@
 {
-  "version": 61,
-  "generatedAt": "2026-11-17T03:08:41.446Z",
+  "version": 62,
+  "generatedAt": "2026-11-17T14:46:23.042Z",
   "urls": [
     "./",
     "./index.html",
@@ -37,6 +37,7 @@
     "./js/answer-quality.js",
     "./js/answer.js",
     "./js/app.js",
+    "./js/ask-recent.js",
     "./js/auth.js",
     "./js/avatars.js",
     "./js/boot.js",

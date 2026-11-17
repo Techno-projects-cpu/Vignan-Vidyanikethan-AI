@@ -180,6 +180,24 @@ one dropdown to change. A deploy target is part of the product's honesty: the
 judge page promises every number can be re-run, and a number re-run against a
 three-release-old host is a lie nobody intended to tell.
 
+## What a returning student sees (2.29.0)
+
+The ask screen used to be the same for a first visit and a tenth: greeting, five
+starting sentences, a box. That is right for a stranger and wrong for somebody
+who was in the middle of chapter four last night.
+
+So the screen now opens with what the student already has — the last three
+questions they asked, newest first, with a plain-language time under each, one
+tap to ask again — and a single quiet line under it: `6 day streak · 2 questions
+today`. Both are counted from this device's own log, never from the network, so
+they work in a room with no Wi-Fi. And both **hide themselves** when there is
+nothing to say: an empty "recent" row and a `0 questions today` are the kind of
+furniture that makes an app feel assembled rather than written.
+
+On the landing page the same idea appears as a hairline: a 1px rule at the top
+of the viewport that fills as you scroll, scroll-driven CSS with no script, and
+switched off entirely for a reader who has asked for reduced motion.
+
 ## How this was audited
 
 The pages are scanned with [impeccable](https://github.com/pbakaus/impeccable)

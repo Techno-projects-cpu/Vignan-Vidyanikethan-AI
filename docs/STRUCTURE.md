@@ -12,7 +12,7 @@ is somebody else's.
 ├── judge.html  privacy.html  terms.html  security.html  copyright.html
 ├── blog/                   ten pieces + an index, hand-written HTML
 │
-├── js/                     74 modules, native ES modules, no bundler
+├── js/                     75 modules, native ES modules, no bundler
 ├── styles*.css             11 stylesheets, one per surface (see below)
 ├── assets/                 the two bundled fonts, brand marks
 ├── icons/                  app icons, 48 → 512, plus the maskable pair
@@ -25,7 +25,7 @@ is somebody else's.
 ├── precache.json           generated: every file the worker installs
 ├── manifest.webmanifest    the installable-app manifest
 │
-├── tests/                  73 files, `node --test`, no dependencies
+├── tests/                  74 files, `node --test`, no dependencies
 ├── tools/                  precache generator, offline simulator, secret scan,
 │                           and the live-deploy check
 ├── docs/                   this folder: design, deploy, credits, checklist

@@ -70,6 +70,40 @@ button:focus-visible {
 
 img { display: block; }
 
+/* How far down the document you are.
+ *
+ * One hairline at the very top of the viewport, filled from the left as you
+ * scroll. It is the same idea as the reading position in the app, drawn with the
+ * same 1px rule as everything else on this page. Scroll-driven CSS, no script,
+ * and it only appears where the browser can animate on scroll — a browser that
+ * cannot simply never shows it. */
+.wl-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: 1px;
+  background: #f7f7f7;
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .wl-progress {
+    display: block;
+    animation: wl-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@keyframes wl-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 .wl-skip {
   position: absolute;
   top: -100px;
@@ -969,5 +1003,8 @@ img { display: block; }
   .wl-ink-line-2 { opacity: .66 !important; }
   .wl-ink-line-3 { opacity: .5 !important; }
   .wl-ink-hatch { opacity: .55 !important; }
+  /* The scroll indicator is decoration, so a reader who dislikes motion loses
+     nothing by it going away entirely rather than sliding under their thumb. */
+  .wl-progress { animation: none !important; transform: none !important; display: none !important; }
   .wl-button, .wl-cell, .wl-bar-open, .wl-number-link a { transition: none !important; }
 }
