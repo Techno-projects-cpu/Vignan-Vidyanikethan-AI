@@ -23,6 +23,15 @@ test("the class is a tab, not a hidden screen", () => {
   assert.match(friends, /class: "Class",/, "the tab has a label");
 });
 
+test("the server sends the student's own streak, so the board cannot show a zero", () => {
+  // `state().self` used to be id, username and avatar only. A leaderboard that
+  // shows the reader as 0 XP while their friends have hundreds is a lie about
+  // their own week, so the row carries the same two numbers as everyone else's.
+  const server = read("server/social.mjs");
+  assert.match(server, /self: \{[\s\S]*?\.\.\.score\(me\)/, "self is scored like a classmate");
+  assert.match(server, /const score = \(profile\) => \(\{ xp: Number\(profile\?\.xp\) \|\| 0, streak: Number\(profile\?\.streak\) \|\| 0 \}\)/);
+});
+
 test("the student is in their own class, and marked as themselves", () => {
   assert.match(friends, /\{ username: me\.username \|\| "You", streak: Number\(me\.streak\) \|\| 0/, "the signed-in student is a row");
   assert.match(friends, /class-row\$\{row\.self \? " is-me" : ""\}/, "their row is marked");

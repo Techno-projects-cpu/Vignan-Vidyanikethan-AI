@@ -266,7 +266,15 @@ export function createSocialService({ store, now = () => Date.now(), lookupByNam
       myGames(user),
     ]);
     return {
-      self: { id: user.id, username: user.username, avatarSeed: me?.avatar_seed || "" },
+      // The student's own streak and points come back with the rest of the
+      // class: a board that leaves the person reading it out of their own class,
+      // or shows them as a zero, is worse than no board.
+      self: {
+        id: user.id,
+        username: user.username,
+        avatarSeed: me?.avatar_seed || "",
+        ...score(me),
+      },
       friends,
       requests,
       notifications: notifications.map((row) => ({
