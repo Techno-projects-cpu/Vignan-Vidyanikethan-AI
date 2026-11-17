@@ -5,14 +5,14 @@
  * and tabs that scroll sideways instead of wrapping.
  */
 
-import * as ui from "./ui.js?v=58";
-import { onSocialChange, social, socialState, syncSocial } from "./social.js?v=58";
-import { AVATAR_PATTERNS, avatarSeed, decorateAvatar } from "./avatars.js?v=58";
+import * as ui from "./ui.js?v=59";
+import { onSocialChange, social, socialState, syncSocial } from "./social.js?v=59";
+import { AVATAR_PATTERNS, avatarSeed, decorateAvatar } from "./avatars.js?v=59";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
-const TABS = ["friends", "requests", "find", "alerts"];
+const TABS = ["friends", "class", "requests", "find", "alerts"];
 let activeTab = "friends";
 let searchResults = [];
 let searchTerm = "";
@@ -153,6 +153,7 @@ function renderTabs(root) {
   wrap.setAttribute("aria-label", "Friends sections");
   const labels = {
     friends: `Friends${data?.friends?.length ? ` ${data.friends.length}` : ""}`,
+    class: "Class",
     requests: "Requests",
     find: "Find people",
     alerts: "Alerts",
@@ -260,6 +261,67 @@ function renderFriendsTab(body, data) {
   }
   body.appendChild(list);
   body.appendChild(ui.element("p", "social-hint", "Tap Message to open a private chat. Only friends can message you."));
+}
+
+/**
+ * The class, in one column.
+ *
+ * Friends already showed a streak and an XP count on each row, which is data a
+ * student has to read four times to compare. This tab is the same numbers in
+ * the one order that matters at the end of a week — longest streak first — with
+ * the signed-in student placed in it rather than left out of their own class.
+ *
+ * Everything here is what the classmates' devices already reported to the
+ * server; nothing is estimated, and a classmate who has never opened the app
+ * simply has a zero. The Challenge button starts the quiz duel that already
+ * exists, so this adds a view, not a second game.
+ */
+function renderClassTab(body, data) {
+  const me = data.self || {};
+  const rows = [
+    { username: me.username || "You", streak: Number(me.streak) || 0, xp: Number(me.xp) || 0, online: true, self: true },
+    ...(data.friends || []).map((friend) => ({
+      username: friend.username,
+      streak: Number(friend.streak) || 0,
+      xp: Number(friend.xp) || 0,
+      online: Boolean(friend.online),
+      id: friend.id,
+      avatarSeed: friend.avatarSeed || "",
+    })),
+  ].sort((a, b) => b.streak - a.streak || b.xp - a.xp || String(a.username).localeCompare(String(b.username)));
+
+  const longest = rows.reduce((best, row) => Math.max(best, row.streak), 0);
+  const head = ui.element("div", "social-alerts-head");
+  head.appendChild(ui.element("h3", "social-subhead", longest ? `Longest streak: ${longest} days` : "Nobody has a streak yet"));
+  body.appendChild(head);
+
+  const board = ui.element("ol", "class-board");
+  board.setAttribute("aria-label", "Your class, by streak");
+  rows.forEach((row, index) => {
+    const item = ui.element("li", `class-row${row.self ? " is-me" : ""}`);
+    item.appendChild(ui.element("span", "class-rank", String(index + 1)));
+    item.appendChild(avatar(row.username, row.online, "", row.avatarSeed || ""));
+    const copy = ui.element("div", "class-row-copy");
+    copy.appendChild(ui.element("strong", "", row.self ? `${row.username} (you)` : row.username));
+    const bits = [`${row.streak} day${row.streak === 1 ? "" : "s"}`, `${row.xp} XP`];
+    if (!row.self) bits.push(row.online ? "Online" : "Offline");
+    copy.appendChild(ui.element("small", "", bits.join(", ")));
+    item.appendChild(copy);
+    if (!row.self && row.id) {
+      item.appendChild(button("Challenge", "button ghost small", () => openChat({ friendId: row.id, play: true }), {
+        action: "challenge",
+        ariaLabel: `Challenge ${row.username} to a quiz duel`,
+      }));
+    }
+    board.appendChild(item);
+  });
+  body.appendChild(board);
+
+  if (rows.length === 1) {
+    const add = button("Add a classmate to compare streaks", "button primary", () => openAddFriend(), { action: "add-friend" });
+    body.appendChild(add);
+  }
+  body.appendChild(ui.element("p", "social-hint", "Streaks are reported by each student's own device when they study. Nothing about their marks is shared."));
 }
 
 function renderRequestsTab(body, data) {
@@ -541,6 +603,7 @@ export function renderFriends() {
   body.setAttribute("aria-labelledby", `friends-tab-${activeTab}`);
   root.appendChild(body);
   if (activeTab === "friends") renderFriendsTab(body, data);
+  else if (activeTab === "class") renderClassTab(body, data);
   else if (activeTab === "requests") renderRequestsTab(body, data);
   else if (activeTab === "find") {
     renderFindTab(body);

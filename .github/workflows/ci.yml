@@ -1,0 +1,35 @@
+# The same four checks a person runs by hand, on every push.
+#
+# `npm run check` is the whole contract: the secret scanner, the precache
+# generator, the full test suite, and the offline simulator that installs the
+# real service worker, takes the network away and asks for every file of the
+# release. It needs Node and nothing else — no dependencies to install, which is
+# why there is no `npm ci` step and no lockfile to keep in sync.
+name: checks
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Secret scan
+        run: npm run secrets
+      - name: Tests and the offline simulation
+        run: npm run check

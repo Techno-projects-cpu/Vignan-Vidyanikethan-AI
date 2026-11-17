@@ -2,7 +2,7 @@
  * The sentences a student can start from, instead of an empty box.
  *
  * Why this file exists: an empty composer is a dead end. The free tutors we read
- * before building this (credited in OPEN_SOURCE_CREDITS.md) open with a question —
+ * before building this (credited in docs/OPEN_SOURCE_CREDITS.md) open with a question —
  * "where are you stuck?" — and a short list of sentences. No code, text or prompt
  * was copied; the idea is theirs and the rules below are ours.
  *

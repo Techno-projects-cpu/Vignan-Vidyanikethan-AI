@@ -50,11 +50,11 @@ Instead, Vignan Vidyanikethan AI offers a **keyless local model** plus a **provi
 | **Local WebLLM** | **Real open-weight AI on the device, $0, no key** ([WebLLM](https://github.com/mlc-ai/web-llm)) | First model download needs internet and a WebGPU-capable browser. |
 | Offline engine | Truly unlimited, $0, private | Extractive answers rather than fluent generative prose. |
 
-The server supports **multiple keys per provider**: paste several values into one Render secret separated by commas/newlines, or use a plural `*_KEYS` alias. Vignan builds one upstream per key, tries them in order, cools down a quota-limited key for 60 seconds, and only then tries student-owned keys. It skips 429/5xx/empty responses and falls back to the offline extractive engine if everything fails. Add school keys on the server only — never in the browser. See `.env.example`, `render.yaml` and `DEPLOY.md`. The **Settings → Advanced settings → Official free-tier API keys** panel links to each provider's own key-creation page; **no key value is ever committed to this repository**.
+The server supports **multiple keys per provider**: paste several values into one Render secret separated by commas/newlines, or use a plural `*_KEYS` alias. Vignan builds one upstream per key, tries them in order, cools down a quota-limited key for 60 seconds, and only then tries student-owned keys. It skips 429/5xx/empty responses and falls back to the offline extractive engine if everything fails. Add school keys on the server only — never in the browser. See `.env.example`, `render.yaml` and [DEPLOY.md](./docs/DEPLOY.md). The **Settings → Advanced settings → Official free-tier API keys** panel links to each provider's own key-creation page; **no key value is ever committed to this repository**.
 
 When all Render keys are exhausted, students can add their own keys in **Settings → Advanced settings → Your own API keys** (also linked from the account area). Those keys stay in that browser, are sent per request only to this site's `/api/ai` proxy, are never stored in Supabase accounts or the public leaderboard, and are excluded from JSON exports. They can be tested, paused or cleared per provider.
 
-For full offline capability, see [LOCAL_AI.md](./LOCAL_AI.md). The bundled WebLLM runtime runs Meta Llama 3.2 1B / SmolLM2 / Qwen2.5 in a Web Worker with WebGPU, applies Vignan's own grounding rules, and caches the chosen model after one download. It powers answers, explanations, summaries, practice, quizzes, flashcards, short-answer grading and citation verification without a server key.
+For full offline capability, see [LOCAL_AI.md](./docs/LOCAL_AI.md). The bundled WebLLM runtime runs Meta Llama 3.2 1B / SmolLM2 / Qwen2.5 in a Web Worker with WebGPU, applies Vignan's own grounding rules, and caches the chosen model after one download. It powers answers, explanations, summaries, practice, quizzes, flashcards, short-answer grading and citation verification without a server key.
 
 ---
 
@@ -66,7 +66,7 @@ the code and the tests. That is disclosed on the judge page too, because a scien
 project should not leave a judge to guess. What makes the claims checkable is not who typed
 the code: it is `npm run check`, which runs the secret scanner, the tests, the precache
 build and an offline simulation with the network switched off, and fails the build when
-something is missing. `CHECKLIST.md` lists the checks that still need a human and a phone.
+something is missing. [`docs/CHECKLIST.md`](./docs/CHECKLIST.md) lists the checks that still need a human and a phone.
 
 ## Where the ideas came from
 
@@ -83,7 +83,7 @@ The **open-source repository** at
 [visheshpandey/Eklavya](https://github.com/visheshpandey/Eklavya) is a separate weekend
 hackathon project that happens to share the name. The idea of a viva that asks you to
 explain, then names the misconception, came from reading it; it is credited in
-`OPEN_SOURCE_CREDITS.md`, publishes no licence, and none of its code, text or prompts were
+[`docs/OPEN_SOURCE_CREDITS.md`](./docs/OPEN_SOURCE_CREDITS.md), publishes no licence, and none of its code, text or prompts were
 copied — the rules in `js/viva.js` are our own.
 
 What is different here is a deliberate constraint: every answer must name a page of the
@@ -121,11 +121,14 @@ error. A funded team covers far more ground; this one goes deeper on less.
 | Offline mode, that actually means it | A switch in Settings → App & offline. When it is on there is no web fallback, and no account, friends, chat or leaderboard calls — the answer comes only from the pages on the device, which is what a demo with bad Wi-Fi needs. The switch does not erase the student's web preference: turning it off restores exactly what they had chosen. The chip in the top bar says "Offline mode" while it is on. |
 | A release that arrives by itself | The permission banner is gone, by the student's own decision: publishing is the whole gesture. The worker takes over immediately and the page reloads once — except over work in progress. An answer being written, or a question typed but not yet sent, is never thrown away; the reload waits for the box to be empty and then happens without asking. There is no button, no "Later", and no setting that can pin a device to an old release. |
 | One chat, and a logo | The app opens as a single conversation — a greeting, four ordinary suggestion chips, a question box — and nothing else. The sidebar, the numbered page header, the hero and the five stacked blocks are folded away behind the logo in the bottom-left corner, which opens a menu with account, chat, history, library, quiz, exams, flashcards, progress, friends, Study Hall, play, settings, install and the theme switch. **Chat** returns to the conversation; **New chat** clears it, and asks first, because only one of those loses anything. Nothing was deleted: the screens are the same screens — and there are now eleven, with code practice among them — one tap from where the student is already looking. |
+| Hand an answer on | A cited answer is worth more to the classmate who has the book open, so every answer now has a **Hand this on** action beside Copy. It builds a plain-text study card — question, answer, the page it cited, and a link that reopens the same question in the app — copies it, and, for a signed-in student, opens the Study Hall with the card already in the box as an unsent draft. A guest still gets the card; only the Study Hall route needs an account. The card is trimmed to the chat's 500-character limit *before* it is offered, so it cannot silently fail, and a card built from an answer with no citation says exactly that instead of inventing a page number. `tests/study-card.test.mjs` holds all of it. |
+| The class, in one column | **Friends → Class** places the signed-in student among their classmates, sorted by the streak that matters at the end of a week (then by points), with their own row marked by a surface instead of a medal. Each row carries the same numbers the friends list already showed, in the one order that makes them comparable, and a Challenge button opens the quiz duel that already existed. No marks, answers or book titles are on it, and a line under the board says so. `tests/class-board.test.mjs` checks that it stays a view rather than a second game. |
+| Motion that is drawn, not faded | The page and the app share one movement language: ink arriving, a line being drawn, a sheet turning. On `/welcome` the hero sets its three lines three different ways and the specimen plate turns in perspective; the margin rules ink themselves down as their section arrives; and a hand-drawn page — construction lines, outline, writing, the cited sentence, then the hatching — draws itself while you scroll to it, from one inline SVG, in CSS, with no image file and no JavaScript. In the app a screen no longer slides in: the rule under its title is drawn across in a third of a second. Nothing loops, everything is switched off by the reduced-motion rule, and `tests/landing.test.mjs` fails if two hero elements ever share an entrance again. |
 | A landing page that argues | `/welcome` is a page of its own, not a fifth version of the app: a hero that states the constraint ("It will not answer from nothing"), a four-move illustration of a cited answer, a board of all thirty-three languages in their own scripts, every one of them on screen at once, the eleven screens as square cards that share their borders, and five numbers a judge can re-run. It carries no JavaScript at all, loads no host but this one, and every corner is square. `tests/landing.test.mjs` keeps it honest: each number on it must equal the number on the judge page (which is itself checked against a real run of the offline simulator), each card must name a screen the app really has, every link must resolve, and the palette must stay grey. |
 | Writing, for people who have not installed anything | `/blog` is ten pieces a student can act on tonight: checking an AI answer before you trust it, revising a forgotten chapter, studying with only a phone, writing your own questions, a fixed routine for physics numericals, and explaining a project to a judge in sixty seconds, why marks dropped in one chapter, answering a five-mark question, a viva, and a demo that survives a power cut. Original writing, no email box, no cookie, no analytics, no JavaScript beyond the structured data. Every piece carries a canonical URL, a description search engines can read, `BlogPosting` structured data that has to agree with the page, an RSS feed, and an entry in `sitemap.xml`. `tests/blog.test.mjs` keeps them from becoming what most project blogs become: a stub with a keyword in the title (a word floor, a minimum per section, and a reading time recomputed from the finished page), a claim nothing backs (no percentages, no "guaranteed", no invented statistics), a dead link, a reading time that drifts from the real count, or a page that needs the network. |
 | A textbook, without Settings | The "+" beside the question box opens one sheet: upload a PDF or text file, paste notes, fetch a website, or start a quiz, flashcards or exam practice. Uploading from chat opens the phone's own file picker directly — the same guarded ingest path as the Library, with the same limits and the same labels. |
 | Fetch a website, then ask about it | A public page can be read from the composer and asked about like any other source. The browser never fetches the page itself: the address goes through the Library's server-side importer, which refuses private addresses, scripts and archives, and the result is labelled **outside your textbooks**. The next question is pre-filled as *"Explain this page in simple words, then tell me how it works: …"*, and the page stays in the library as a web source for follow-ups. |
-| Install, honestly | **Install the app** in the menu installs the website as an app — full screen, offline, own icon — and says so. It also says plainly that a real `.apk` or `.exe` needs a build machine with Android Studio or Tauri, and links the exact commands in [PACKAGING.md](./PACKAGING.md) instead of offering a download that does not exist. |
+| Install, honestly | **Install the app** in the menu installs the website as an app — full screen, offline, own icon — and says so. It also says plainly that a real `.apk` or `.exe` needs a build machine with Android Studio or Tauri, and links the exact commands in [PACKAGING.md](./docs/PACKAGING.md) instead of offering a download that does not exist. |
 | History you can point at | The menu's History lists the student's own questions from this device, newest first, with times; tapping one puts it back in the composer. It is deliberately not dressed up as a list of separate conversations, because the app keeps one running chat. |
 | Enter that does not send too early | The composer sent on any unguarded Enter, which in Hindi, Telugu, Japanese, Korean — or with any phone keyboard showing word suggestions — is the key that confirms the word being composed. Pressing it asked a half-finished word as a question. It now checks `isComposing` and the older 229 code, so only a real Enter sends; `Shift + Enter` still starts a new line. |
 | A shortcuts sheet you can leave | `?` opened the sheet and moved focus into it, but closing it dropped focus on the page body, so the next Tab started from the top of the document. Focus now returns to whatever had it, and Tab/Shift+Tab stay inside the sheet instead of walking into the page behind it. |
@@ -218,7 +221,7 @@ The public interface is intentionally sparse: a skippable student-project intro,
 - **Bolt** is the built-in super-fast AI: it answers from the local textbook index with citations, requires no model download and works offline. It is the default route.
 - The main AI chooser is hidden. Bolt is the default; optional local and connected model routing is available only through the advanced Settings panels. Existing deliberately configured routes are preserved.
 - Settings open with a single **Control room** card; the dense model, key, web, privacy and appearance panels stay hidden until **Advanced settings** is chosen.
-- The interface palette is black/grey/white in both themes. Fonts are bundled locally, motion respects reduced-motion preferences, and the score studio offers additional colourful styles. See [OPEN_SOURCE_CREDITS.md](./OPEN_SOURCE_CREDITS.md).
+- The interface palette is black/grey/white in both themes. Fonts are bundled locally, motion respects reduced-motion preferences, and the score studio offers additional colourful styles. See [OPEN_SOURCE_CREDITS.md](./docs/OPEN_SOURCE_CREDITS.md).
 
 ## Code practice
 
@@ -668,7 +671,7 @@ Judge mode is linked from the app footer, every legal page and the sitemap, so
 it is one tap away when someone is standing at the table: the citation test, the
 offline test, the questions judges ask and the limits are all on one page.
 
-`CHECKLIST.md` is the other half of that: a printable pass/fail sheet for a real
+[`docs/CHECKLIST.md`](./docs/CHECKLIST.md) is the other half of that: a printable pass/fail sheet for a real
 phone, tablet and laptop, covering first impression, citations, the study loop,
 social, permissioned updates, aeroplane-mode offline and polish. The automated
 suite proves the code runs; only a human can see that a screen looks right.
@@ -848,7 +851,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-616 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, response compression (encoding negotiation, cache keys, and a spawned server proving a page arrives smaller and decodes back to the same bytes), the reading-position and shortcut arithmetic, the growing composer, and the server's security posture.
+637 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, response compression (encoding negotiation, cache keys, and a spawned server proving a page arrives smaller and decodes back to the same bytes), the reading-position and shortcut arithmetic, the growing composer, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 
@@ -901,8 +904,10 @@ styles-identity.css       Sharp identity, local fonts and startup screen
 styles-legal.css          Offline-friendly legal pages
 privacy.html, terms.html  Student-facing policies (operator review required)
 assets/                   User-supplied Vignan AI/Nezaad marks and licensed local fonts
-LOCAL_AI.md               Real local WebLLM model guide
-DESIGN.md                 The visual law, and the rules it deliberately breaks
+docs/                     Documentation, not served: design, deploy, credits, skills
+  DESIGN.md               The visual law, the deliberate breaks, and the audit
+  SKILLS.md               The external design skills read, and what was taken
+  STRUCTURE.md            The map of this repository
 manifest.webmanifest      PWA manifest
 robots.txt, sitemap.xml   Search-engine crawling and canonical-page sitemap
 sw.js                     Offline service worker
@@ -961,7 +966,7 @@ render.yaml               Render free web service blueprint
 package.json              start / test / precache scripts
 LICENSE                   MIT
 README.md                 This file
-DEPLOY.md                 Exact Render + Supabase deployment steps
+docs/DEPLOY.md            Exact Render + Supabase deployment steps
 ```
 
 ---
@@ -988,7 +993,7 @@ A free Supabase project has already been created and the schema migration applie
 - **Migration:** `20261027150656_create_vignan_ai_schema`
 - **Auth:** email signup enabled, `mailer_autoconfirm` on (no real emails are sent for synthetic student accounts)
 
-Copy the **publishable** key into `SUPABASE_ANON_KEY` and the **secret** key into `SUPABASE_SERVICE_ROLE_KEY` in Render. The latter is private; never put it in a browser, chat or Git. Legacy anon/service-role JWTs are also supported for migration. See `DEPLOY.md` for setup, rotation and verification steps.
+Copy the **publishable** key into `SUPABASE_ANON_KEY` and the **secret** key into `SUPABASE_SERVICE_ROLE_KEY` in Render. The latter is private; never put it in a browser, chat or Git. Legacy anon/service-role JWTs are also supported for migration. See `docs/DEPLOY.md` for setup, rotation and verification steps.
 
 ---
 

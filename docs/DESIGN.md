@@ -47,6 +47,15 @@ places it deliberately breaks a generic rule. Written so that the next person
   `text-transform: uppercase` appears on any other selector.
 - **Monospace is for numerals.** Folios, list indexes, the page number on the
   specimen plate. Not for small data labels, not for tags, not for emphasis.
+- **No element enters the way another one does.** One fade-and-rise, copied onto
+  every block with a delay, is the signature of a page that was assembled rather
+  than designed. The hero sets its three lines three ways and turns the plate in
+  perspective; a margin rule inks itself down; a drawing draws itself. A test
+  fails if two hero elements ever share an entrance again.
+- **Movement comes from the material.** The vocabulary of this page is
+  hairlines, margin rules and type. So the motion is lines being drawn, type
+  being set, a sheet being turned — never stripes, fields, parallax or glow. If
+  a movement could belong to any other site, it does not belong here.
 
 Those five, the size floor, the grey floor and the "nothing loops" rule are
 asserted in `tests/design-rules.test.mjs`, so they survive the audit tool being
@@ -56,7 +65,7 @@ uninstalled.
 
 These are reported by `impeccable detect` **and are not defects**. Each one is a
 decision that has a cost, and the cost is accepted. Every entry is machine-readable
-in [`.impeccable/config.json`](./.impeccable/config.json) with the same reason, so
+in [`.impeccable/config.json`](../.impeccable/config.json) with the same reason, so
 a reviewer can see what was suppressed and why.
 
 | Reported as | Where | Why it stays |
@@ -104,6 +113,58 @@ onto the landing page's, which is what the palette-parity test in
 accident that had given the header badge a two-column layout grid and 54px of
 padding was split into its two intended rules.
 
+## Motion, and where the four skills went (2.26.0)
+
+Four external skills were read for this round — bang-motion, huashu-art-motion,
+claude-drawing-skill and vox-director. All four are MIT, all four were read
+through the public GitHub API, and **none of them was installed or executed**:
+no `npx skills add`, no plugin, no hooks. `docs/SKILLS.md` records what each one
+is and exactly what was taken from it, including the one that was read and
+deliberately not run (vox-director needs a paid API key and ffmpeg to render
+video, and neither belongs in a dependency list for a school project).
+
+What changed, in the language the skills use:
+
+- **The anti-slide-deck test.** Four hero elements all faded up with a delay.
+  They now have four different movements: ink arriving, the outline word printed
+  across the line by a `clip-path` wipe, the sub-line *set* (tracking closing),
+  and the specimen plate turned on the Y axis out of a 1400px perspective. A
+  test asserts that no two of them share an entrance, because a rule that lives
+  only in a document is a rule the next edit breaks.
+- **Background never static, movement from the material.** The margin rule of
+  every section is now *drawn* downward as the section arrives, scroll-driven
+  (`animation-timeline: view()`), and the plate in the claim section draws
+  itself in the order a person draws with a pen: construction lines, outline,
+  writing, the cited sentence, then the hatching on the shadow side of the
+  folded corner. One inline SVG, `pathLength="1"` on every path so a single dash
+  rule draws all of them, no image file, no JavaScript, no network.
+- **A screen is laid down, not slid in.** In the app the `vn-view-in` fade and
+  six-pixel rise is gone; the rule under the active screen's title is drawn
+  across in 420ms and nothing else moves. The five goal cards are set down in
+  order, and a meter travels to its value. Nothing loops; the global
+  reduced-motion rule still cuts every animation to a hundredth of a
+  millisecond, and the landing page's reduced-motion block restores the drawing
+  to its finished state rather than hiding it.
+
+Two rules came out of this round that now live in the law above: no element
+enters the way another one does, and movement has to come from the material.
+
+## Organised, not just tidier (2.26.0)
+
+Six documents moved to `docs/` (design, deploy, local AI, packaging, checklist,
+credits) and three stay in the root because the world looks for them there:
+`README.md`, `LICENSE`, `SECURITY.md`. `docs/README.md` is the index,
+`docs/STRUCTURE.md` is the map, and `tests/organisation.test.mjs` holds the
+shape: no Markdown in the root except the two that belong there, every relative
+link in the documentation resolves, no page the browser loads links into the
+uncached `docs/` folder, and the counts in the map match the repository.
+
+`.github/` now has CI that runs the same command a person runs (`npm run check`,
+plus the secret scan first so a leak fails fastest), a pull-request template that
+asks the four questions this project actually cares about, and two issue
+templates — one for a broken thing, one for a wrong claim, because the second
+kind is the one this project is about.
+
 ## How this was audited
 
 The pages are scanned with [impeccable](https://github.com/pbakaus/impeccable)
@@ -115,8 +176,9 @@ npx impeccable@4.8.0 detect index.html welcome.html judge.html privacy.html \
   terms.html blog styles*.css
 ```
 
-**2.25.1 result: 4 failures and 3 advisories** — unchanged from 2.24.0, which was
-itself down from 89 failures and 23 advisories. The rewrite added no new finding. The four are the frames in the table above, left visible on purpose.
+**2.26.0 result: 4 failures and 3 advisories** — unchanged from 2.24.0, which was
+itself down from 89 failures and 23 advisories. The rewrite added no new finding, and neither did the motion work: the detector
+does not object to a page that draws itself, only to one that dresses itself. The four are the frames in the table above, left visible on purpose.
 The three advisories are em-dash saturation in three of the ten pieces, where the
 dashes are load-bearing dialogue rather than filler.
 

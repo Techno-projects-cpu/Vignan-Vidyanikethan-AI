@@ -6,10 +6,10 @@
  * the sender is a friend or the room is the shared Study Hall.
  */
 
-import { decorateAvatar } from "./avatars.js?v=58";
-import * as ui from "./ui.js?v=58";
-import { onSocialChange, setActiveThread, social, socialState, syncSocial } from "./social.js?v=58";
-import { relativeTime } from "./friends-ui.js?v=58";
+import { decorateAvatar } from "./avatars.js?v=59";
+import * as ui from "./ui.js?v=59";
+import { onSocialChange, setActiveThread, social, socialState, syncSocial } from "./social.js?v=59";
+import { relativeTime } from "./friends-ui.js?v=59";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const POLL_MS = 4000;
@@ -177,7 +177,7 @@ function schedulePoll() {
   }, POLL_MS);
 }
 
-export async function openThread({ threadId = "", friendId = "" } = {}) {
+export async function openThread({ threadId = "", friendId = "", draft = "" } = {}) {
   if (!threadId && !friendId) return;
   chat.loading = true;
   chat.error = "";
@@ -194,7 +194,17 @@ export async function openThread({ threadId = "", friendId = "" } = {}) {
     schedulePoll();
     openView("chat");
     const input = $("#chat-input");
-    if (input) input.focus({ preventScroll: true });
+    if (input) {
+      // A card handed on from an answer arrives as a draft, not as a sent
+      // message: the student still gets to read it, edit it, or decide the
+      // Study Hall is not the place for it.
+      if (draft) {
+        input.value = draft;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      input.focus({ preventScroll: true });
+      if (draft) input.setSelectionRange(input.value.length, input.value.length);
+    }
   } catch (error) {
     ui.showToast(error.message, "error");
   } finally {

@@ -1,6 +1,6 @@
 {
-  "version": 58,
-  "generatedAt": "2026-11-08T14:45:18.692Z",
+  "version": 59,
+  "generatedAt": "2026-11-17T02:31:52.408Z",
   "urls": [
     "./",
     "./index.html",
@@ -93,6 +93,7 @@
     "./js/starter-shelf.js",
     "./js/startup.js",
     "./js/student-keys.js",
+    "./js/study-card.js",
     "./js/study-decks.js",
     "./js/study-sheet.js",
     "./js/text.js",
