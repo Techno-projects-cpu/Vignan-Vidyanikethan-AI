@@ -25,8 +25,9 @@ is somebody else's.
 ├── precache.json           generated: every file the worker installs
 ├── manifest.webmanifest    the installable-app manifest
 │
-├── tests/                  72 files, `node --test`, no dependencies
-├── tools/                  precache generator, offline simulator, secret scan
+├── tests/                  73 files, `node --test`, no dependencies
+├── tools/                  precache generator, offline simulator, secret scan,
+│                           and the live-deploy check
 ├── docs/                   this folder: design, deploy, credits, checklist
 └── .github/                CI and the two issue templates
 ```

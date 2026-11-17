@@ -165,6 +165,21 @@ asks the four questions this project actually cares about, and two issue
 templates — one for a broken thing, one for a wrong claim, because the second
 kind is the one this project is about.
 
+## The deploy was invisible, so now it says what it built (2.27.0)
+
+Not a design change; the reason for one small server change. The live host was
+pointed at a pull-request branch. That branch stopped moving when the pull
+request merged, so every later release reached `main`, GitHub Pages and Vercel,
+and never reached the site a judge would open. The build log was green and every
+request answered 200.
+
+`/api/health` now reports `build: { commit, branch, service, hosted }` from the
+environment the host provides, and `npm run deployed` compares the live version
+against this checkout and named the gap ("1 minor release(s) behind") with the
+one dropdown to change. A deploy target is part of the product's honesty: the
+judge page promises every number can be re-run, and a number re-run against a
+three-release-old host is a lie nobody intended to tell.
+
 ## How this was audited
 
 The pages are scanned with [impeccable](https://github.com/pbakaus/impeccable)

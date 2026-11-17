@@ -939,10 +939,33 @@ async function socialDiagnostics({ fresh = false } = {}) {
   return value;
 }
 
+/**
+ * What this process was actually built from.
+ *
+ * A hosted deploy can be pointed at a branch that stopped moving, and then the
+ * site answers every request correctly while being three releases old — which
+ * looks exactly like "the deploy is not working". Render exposes the commit and
+ * branch it built as environment variables, so the health endpoint can say them
+ * out loud. Locally they are empty, which is itself the honest answer.
+ */
+function buildInfo() {
+  const commit = (process.env.RENDER_GIT_COMMIT || process.env.GIT_COMMIT || "").trim();
+  return {
+    commit: commit ? commit.slice(0, 40) : null,
+    branch: (process.env.RENDER_GIT_BRANCH || "").trim() || null,
+    service: (process.env.RENDER_SERVICE_NAME || "").trim() || null,
+    hosted: Boolean(commit),
+  };
+}
+
 function health() {
   return {
     ok: true,
-    version: "2.26.0",
+    version: "2.27.0",
+    // `version` is what the code says; `build` is what the host says it built.
+    // When those two disagree with the repository, the deploy target is wrong,
+    // not the code.
+    build: buildInfo(),
     brand: "Vignan Vidyanikethan AI",
     ai: AI_UPSTREAMS.length > 0,
     aiProviders: AI_PROVIDER_IDS,
@@ -1170,7 +1193,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.26.0</strong></div>
+      <div><span>release</span><strong>2.27.0</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1284,7 +1307,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.26.0",
+    release: "2.27.0",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);
