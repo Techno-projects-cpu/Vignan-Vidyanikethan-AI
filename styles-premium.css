@@ -187,6 +187,17 @@ body.premium-ui label > span {
   color: var(--p-muted) !important;
 }
 
+/* The release, in the drawer: monospace numerals and nothing else, the same as
+   the folios on the landing page. It answers one question — is this device on
+   the release that was just published — without opening Settings. */
+body.premium-ui .sidebar-foot .app-release {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: var(--p-quiet, var(--p-muted)) !important;
+}
+
 /* ------------------------------------------------------------------ layout */
 
 body.premium-ui .app-shell {

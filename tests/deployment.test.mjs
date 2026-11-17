@@ -77,3 +77,22 @@ test("the check is one command, and it is documented where a deployer looks", ()
   assert.match(deploy, /npm run deployed/, "DEPLOY.md names the command");
   assert.match(deploy, /branch: main/, "and the branch the host must build");
 });
+
+test("the version can be read off the page, without opening a menu", () => {
+  // The user's question was "is this the new version or the old one?", and the
+  // honest answer is that the page should not make them guess. The landing page
+  // has no JavaScript, so its stamp is literal text tied to the worker's cache
+  // name here; the app fills its drawer stamp from the same `?v=` the release
+  // bump rewrites everywhere else.
+  const worker = read("sw.js");
+  const cache = (worker.match(/CACHE_NAME = "vignan-vidyanikethan-ai-v(\d+)"/) || [])[1];
+  assert.ok(cache, "the worker names its release");
+
+  const landing = read("welcome.html");
+  assert.match(landing, new RegExp(`class="wl-foot-release">Release v${cache}<`), "the footer states the release");
+
+  const app = read("index.html");
+  assert.match(app, /class="app-release" id="app-release"/, "the drawer has a release row");
+  const script = read("js/app.js");
+  assert.match(script, /stamp\.textContent = `Release \$\{RELEASE\}`/, "and it is filled from the release, not typed twice");
+});
