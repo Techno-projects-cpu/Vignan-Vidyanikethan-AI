@@ -10,8 +10,8 @@
  * point at the original passage.
  */
 
-import { CORE_STRINGS } from "./translations-core.js?v=60";
-import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=60";
+import { CORE_STRINGS } from "./translations-core.js?v=61";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=61";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 

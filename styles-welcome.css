@@ -869,6 +869,25 @@ img { display: block; }
   letter-spacing: -.01em;
   color: var(--wl-quiet);
   white-space: nowrap;
+}.wl-foot-stamp {
+  margin: 0;
+  justify-self: end;
+  font-family: var(--wl-display);
+  font-size: 13px;
+  letter-spacing: -.01em;
+  color: var(--wl-quiet);
+  white-space: nowrap;
+}
+
+/* The release, in the footer: the one number that says whether the page you are
+   reading is the page that was just published. It is set like a folio — mono,
+   quiet — because it is a fact about the document, not a boast. */
+.wl-foot-release {
+  margin: 0;
+  font-family: var(--wl-mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--wl-quiet);
 }
 .wl-foot-stamp em { font-style: normal; color: #8a8a8a; }
 
