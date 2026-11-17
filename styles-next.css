@@ -1052,6 +1052,80 @@ body.premium-ui .goal-cards {
   border-top: var(--vn-hairline) solid var(--vn-rule);
 }
 
+/* Today, and what you were doing last.
+ *
+ * Both sit above the starting sentences, because a student who comes back the
+ * next day does not want to start over: the last question is one tap away, and
+ * the streak says whether today counts. Hairlines and hover, no badges. */
+body.premium-ui .ask-today {
+  margin: 0 0 var(--vn-space-3);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--p-muted);
+}
+
+body.premium-ui .ask-continue {
+  margin: 0 0 var(--vn-space-4);
+  padding-bottom: var(--vn-space-4);
+  border-bottom: var(--vn-hairline) solid var(--vn-rule);
+}
+
+body.premium-ui .ask-continue-head {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--p-muted);
+}
+
+body.premium-ui .ask-continue-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+body.premium-ui .ask-continue-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: var(--vn-hairline) solid var(--vn-rule-strong);
+  background: transparent;
+  color: var(--p-ink);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+body.premium-ui .ask-continue-chip:hover,
+body.premium-ui .ask-continue-chip:focus-visible {
+  background: var(--p-ink);
+  border-color: var(--p-ink);
+  color: var(--p-bg);
+}
+
+body.premium-ui .ask-continue-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.premium-ui .ask-continue-when {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--p-muted);
+}
+
+body.premium-ui .ask-continue-chip:hover .ask-continue-when,
+body.premium-ui .ask-continue-chip:focus-visible .ask-continue-when {
+  color: var(--p-bg);
+}
+
 body.premium-ui .goal-head h3 {
   margin: 0;
   font-size: var(--vn-h2);
