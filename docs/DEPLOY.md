@@ -24,6 +24,39 @@ If a local checkout still points at the old URL, run:
 git remote set-url origin https://github.com/Techno-projects-cpu/Vignan-Vidyanikethan-AI.git
 ```
 
+## 2a. The branch Render builds must be `main`
+
+A web service is wired to **one branch**, and it is easy to point it at the
+branch a pull request was opened from. Do not. That branch stops moving the
+moment the pull request is merged, and the service then keeps deploying the same
+old commit forever, with every sign of success.
+
+This has already happened here once. Render was pointed at
+`arena/f2a1402d-…`, which ended at 2.25.1; three later releases were merged to
+`main` and never reached the live site, while GitHub Pages and Vercel — both
+wired to `main` — updated within a minute. The symptom is a site that reports a
+version older than `main`'s `package.json` while its build log looks perfectly
+healthy.
+
+**The fix, in Render:** *Service → Settings → Build & Deploy → Branch* → `main`,
+then *Manual Deploy → Deploy latest commit*. `render.yaml` now pins
+`branch: main` so a blueprint-driven service cannot drift again.
+
+**Checking it from a terminal, without the dashboard** — the live version must
+equal `main`'s:
+
+```sh
+git show origin/main:package.json | grep '"version"'   # 2.26.0
+curl -s https://<your-service>.onrender.com/api/health | grep -o '"version":"[^"]*"'
+```
+
+If those disagree, the service is building something other than `main`; nothing
+about the code is wrong.
+
+**Delete a stale branch once its pull request is merged.** A merged `arena/…`
+branch left on the remote is a future deployment pointed at a dead end. (This
+session cannot delete them; the repository owner can, from the branches page.)
+
 ## 2. Create the Render web service
 
 1. Push this branch to GitHub.

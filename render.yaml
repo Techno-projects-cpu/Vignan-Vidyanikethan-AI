@@ -5,6 +5,14 @@
 services:
   - type: web
     name: vignan-vidyanikethan-ai
+    # Build `main`, never a working branch.
+    #
+    # This line exists because a service was once pointed at an
+    # `arena/…` branch, and it dutifully deployed that branch for three
+    # releases while `main` moved ahead: the site kept reporting an old version
+    # and looked like it was not being deployed at all. A branch that is used
+    # for a pull request is not a branch that is used for hosting.
+    branch: main
     env: node
     plan: free
     region: singapore
