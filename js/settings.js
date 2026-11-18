@@ -1,12 +1,12 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=66";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=66";
-import { parseApiKeys } from "./key-pool.js?v=66";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=66";
-import { aiProfile } from "./ai-nicknames.js?v=66";
-import { LANGUAGE_CODES } from "./languages.js?v=66";
-import { DEFAULT_STYLE, THEMES } from "./themes.js?v=66";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=67";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=67";
+import { parseApiKeys } from "./key-pool.js?v=67";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=67";
+import { aiProfile } from "./ai-nicknames.js?v=67";
+import { LANGUAGE_CODES } from "./languages.js?v=67";
+import { DEFAULT_STYLE, STYLE_ERA, THEMES, migrateStyleChoice } from "./themes.js?v=67";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -40,12 +40,17 @@ export const DEFAULT_SETTINGS = {
   language: "en",
   theme: "dark",
   // The look of the app: one of the six styles in js/themes.js.
-  style: "minimal",
+  // The default style is a painted room, not the classic base look — see
+  // DEFAULT_STYLE in js/themes.js for why the default is the thing you see.
+  style: DEFAULT_STYLE,
   profile: "Student",
   // Monogram avatar (`p0`-`p7`), kept locally so guests get one too.
   avatar: "",
   // Pro Mode: the JARVIS-style easter egg. Off unless it has been activated.
   pro: false,
+  // The generation of the style default this device has seen. 0 means "written
+  // before the painted themes existed", which is what the migration keys on.
+  styleEra: STYLE_ERA,
   // How long an answer should be: brief, balanced or a model exam answer.
   answerDepth: "balanced",
   disclaimerSeen: false,
@@ -115,6 +120,12 @@ export function normalizeSettings(value = {}) {
   if (!["light", "dark"].includes(merged.theme)) merged.theme = "light";
   if (!LANGUAGE_CODES.includes(merged.language)) merged.language = "en";
   if (!THEMES.some((theme) => theme.id === merged.style)) merged.style = DEFAULT_STYLE;
+  // One question, asked in one place: a device that never picked a style is moved
+  // to the painted default, and a device that did pick one keeps it. The era is
+  // written back so this happens exactly once.
+  const style = migrateStyleChoice({ style: merged.style, era: raw.styleEra });
+  merged.style = style.style;
+  merged.styleEra = style.era;
   merged.freeRouterDismissed = Boolean(raw.freeRouterDismissed);
   merged.offlineMode = raw.offlineMode === true;
   merged.profile = String(merged.profile || "Student").slice(0, 32);
