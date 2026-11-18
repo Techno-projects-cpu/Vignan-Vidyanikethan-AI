@@ -49,6 +49,10 @@
   --wl-vermilion: #b23a29;   /* the seal, used once per plate */
   --wl-ochre: #c08a3e;
   --wl-moss: #5c6a49;
+  /* The bar under each plate is a measurement, not decoration: the two quieter
+     steps are the stone and straw that the painted grounds are made of. */
+  --wl-stone: #6f6a5e;
+  --wl-straw: #a89e88;
   /* Paper, edge to edge: the sheet, its highlight, the shade under a fold, the
      panel a card is printed on, and the three inks used on it. */
   --wl-paper-deep: #e7d9bb;
@@ -1384,7 +1388,7 @@ img { display: block; }
      carries words was ever in this list, which is the rule the whole motion
      budget is built on. */
   .wl-cell, .wl-steps li, .wl-number, .wl-close-title, .wl-close-note,
-  .wl-plate-band .wl-paint-plate {
+  .wl-room, .wl-picture, .wl-plate-band .wl-paint-plate {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -1405,6 +1409,141 @@ img { display: block; }
      nothing by it going away entirely rather than sliding under their thumb. */
   .wl-progress { animation: none !important; transform: none !important; display: none !important; }
   .wl-button, .wl-cell, .wl-bar-open, .wl-number-link a { transition: none !important; }
+}
+
+/* ------------------------------------------------------------------ */
+/* The rooms: twelve plates, one measured rule                          */
+/* ------------------------------------------------------------------ */
+
+.wl-rooms {
+  position: relative;
+  padding: clamp(64px, 9vw, 130px) 0 clamp(56px, 7vw, 96px);
+  border-top: 1px solid var(--wl-line);
+}
+.wl-rooms-title {
+  margin: 10px 0 20px;
+  font-family: var(--wl-display);
+  font-size: clamp(38px, 5.6vw, 78px);
+  font-weight: 500;
+  line-height: .96;
+  letter-spacing: -.045em;
+}
+.wl-rooms-lede {
+  max-width: 62ch;
+  margin: 0 0 clamp(28px, 4vw, 46px);
+  color: var(--wl-ink-2);
+  font-size: clamp(15px, 1.1vw, 17px);
+  line-height: 1.72;
+}
+.wl-rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--wl-line);
+}
+.wl-room {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 14px 14px 16px;
+  background: var(--wl-night);
+}
+.wl-room-plate { position: relative; margin: 0 0 4px; overflow: hidden; }
+.wl-room-plate img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center 42%;
+  filter: saturate(104%);
+}
+.wl-room-plate figcaption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 14px 10px 6px;
+  background: linear-gradient(180deg, transparent, rgba(8, 9, 12, .82));
+  font-family: var(--wl-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.wl-room-note { margin: 0; color: var(--wl-ink-2); font-size: 13px; line-height: 1.5; }
+.wl-room-roles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 0;
+  color: var(--wl-ink-3);
+  font-family: var(--wl-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+}
+/* The bar is the argument: three widths, no labels, the measurement itself. */
+.wl-bal { display: flex; flex: 1 1 auto; height: 5px; outline: 1px solid var(--wl-line); }
+.wl-bal i { display: block; height: 100%; }
+.wl-bal i:nth-child(1) { background: var(--wl-stone); }
+.wl-bal i:nth-child(2) { background: var(--wl-straw); }
+.wl-bal i:nth-child(3) { background: var(--wl-vermilion); }
+.wl-room-pigment { display: flex; gap: 4px; margin: 0; }
+.wl-room-pigment i { display: block; width: 22px; height: 10px; outline: 1px solid var(--wl-line); }
+
+.wl-pictures-title {
+  margin: clamp(46px, 6vw, 76px) 0 12px;
+  font-family: var(--wl-display);
+  font-size: clamp(21px, 2.2vw, 30px);
+  font-weight: 500;
+  letter-spacing: -.03em;
+}
+.wl-pictures-lede { max-width: 60ch; margin: 0 0 22px; color: var(--wl-ink-2); font-size: 14px; line-height: 1.7; }
+.wl-pictures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wl-picture figure { margin: 0; }
+.wl-picture img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  outline: 1px solid var(--wl-line);
+  outline-offset: -1px;
+}
+.wl-picture figcaption { margin-top: 7px; color: var(--wl-ink-3); font-size: 12px; line-height: 1.5; }
+.wl-picture-metric { font-family: var(--wl-mono); letter-spacing: .05em; color: var(--wl-ink-2); }
+.wl-rooms-foot { max-width: 62ch; margin: clamp(26px, 3vw, 40px) 0 0; color: var(--wl-ink-2); font-size: 14px; line-height: 1.7; }
+.wl-rooms-foot a { color: var(--wl-ink); text-underline-offset: 4px; }
+
+/* One gesture only: the framed plates tilt a quarter-degree off square as they
+   arrive, the way a print hung by hand does. Nothing loops. */
+@supports (animation-timeline: view()) {
+  .wl-room, .wl-picture {
+    animation: wl-hang linear both;
+    animation-timeline: view();
+    animation-range: entry 6% entry 34%;
+  }
+  .wl-room:nth-child(3n), .wl-picture:nth-child(3n) { animation-range: entry 12% entry 42%; }
+}
+@keyframes wl-hang {
+  from { opacity: .3; transform: translateY(12px) rotate(-.35deg); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 640px) {
+  .wl-rooms-grid { grid-template-columns: 1fr 1fr; gap: 1px; }
+  .wl-room { padding: 10px; }
+  .wl-room-note { font-size: 12px; }
+  .wl-pictures { grid-template-columns: 1fr 1fr; gap: 10px; }
 }
 
 /* ------------------------------------------------------------------ */

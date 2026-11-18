@@ -166,7 +166,38 @@ html[data-style="brutal"] body.premium-ui { color-scheme: light; }
 .style-tile.active { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
 .style-tile.active::after { content: "✓"; position: absolute; top: 7px; right: 9px; color: var(--brand); font-size: 11px; }
 .style-preview { display: flex; gap: 0; height: 34px; border: 1px solid rgba(0,0,0,.18); }
-.style-preview span { flex: 1 1 auto; }
+.style-preview > span { flex: 1 1 auto; }
+/* A classic theme is three colours in a row. A painted theme is its painting,
+   with the three colours laid along the bottom edge as a strip — the plate is the
+   thing being chosen, and the strip says what the interface will look like on it. */
+.style-preview.painted {
+  position: relative;
+  height: 72px;
+  background-color: var(--surface-3);
+  background-position: center 38%;
+  background-size: cover;
+  overflow: hidden;
+}
+.style-preview.painted::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .08), rgba(0, 0, 0, .34));
+}
+.style-preview.painted .style-swatches {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  height: 6px;
+}
+.style-preview.painted .style-swatches span { flex: 1 1 auto; }
+@media (prefers-reduced-motion: no-preference) {
+  .style-tile:hover .style-preview.painted,
+  .style-tile:focus-visible .style-preview.painted { background-position: center 62%; transition: background-position 1.6s var(--ease, ease); }
+}
 .style-name { font-size: 13px; font-weight: 650; color: var(--ink); }
 .style-note { font-size: 12px; line-height: 1.45; color: var(--muted); }
 .style-tags { display: flex; flex-wrap: wrap; gap: 4px; }

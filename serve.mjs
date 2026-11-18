@@ -1062,7 +1062,7 @@ function buildInfo() {
 function health() {
   return {
     ok: true,
-    version: "2.32.0",
+    version: "2.32.1",
     // `version` is what the code says; `build` is what the host says it built.
     // When those two disagree with the repository, the deploy target is wrong,
     // not the code.
@@ -1294,7 +1294,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.32.0</strong></div>
+      <div><span>release</span><strong>2.32.1</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1408,7 +1408,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.32.0",
+    release: "2.32.1",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);
