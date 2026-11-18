@@ -131,9 +131,13 @@ test("screens that are not on no longer cost anything to keep", () => {
 });
 
 test("the layer stays a surface layer", () => {
-  // No script, no image, no external request: it can only restyle.
-  assert.doesNotMatch(css, /url\((?!['"]?\.\/assets\/fonts)/, "no remote or image assets");
+  // No script and no external request: it can only restyle. Since 2.31.0 it may
+  // paint the opening with the plates in `assets/paint/` — shipped in the repository
+  // and precached by the worker — but never fetch anything from another host.
   assert.doesNotMatch(css, /@import/);
+  for (const [, , target] of css.matchAll(/url\((['"]?)([^'")]+)\1\)/g)) {
+    assert.match(target, /^\.\/assets\/(?:fonts|paint)\//, `only local fonts and painted plates, found ${target}`);
+  }
   // !important is a last resort; a handful for the legacy sr-only overrides is
   // acceptable, dozens would mean the layer is fighting itself.
   const important = (css.match(/!important/g) || []).length;

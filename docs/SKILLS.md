@@ -89,6 +89,39 @@ Its art direction was still useful and is credited: the idea that each beat is a
 composition. The ink plate follows it — the drawing is finished and correct even
 with every animation switched off.
 
+### The painted round (2.31.0) — the four skills, applied again
+
+The user asked for the look of the illustrated web: painted back images, brush
+strokes, the register of an anime background painting, on a book theme. The same
+four skills were re-read and this is what each contributed to the four plates and
+the page that carries them.
+
+- **Cloveric/claude-drawing-skill** — the medium checklists are the reason the
+  plates are painted rather than rendered. Its gouache and ink notes (a limited
+  palette, dry-brush edges that thin into bare paper, no more than a few glazes,
+  one light) went into the prompts: rough washi paper, visible bristle texture,
+  edges that dissolve, one vermilion accent and nothing else. Its rule that white
+  objects are warm off-white is why the paper is `#efe3c8` rather than `#ffffff`.
+- **Bangtutorial/bang-motion** — its anti-slide-deck tests decided the motion
+  budget. Ken Burns as the only motion is banned there, so the plate is never the
+  only thing moving: the title is being set, the stroke is being drawn, the seal
+  is stamped, the mist crosses and dust rises, and the scroll itself drives the
+  sections. Its "background may only change with a visible trigger" is why the
+  page changes world exactly twice, and both times on a real brush-band plate
+  rather than a cross-fade.
+- **Alchaincyf/huashu-art-motion** — the "轨道档" route: lock the style in three
+  lines (one style, a palette of six, a character policy of none), then a shot
+  table. That is why the palette is six named pigments and why there are no
+  people in any of the plates. Its ban on blue-purple palettes is now the same
+  law as the project's own.
+- **Alisa0808/vox-director** — storyboard discipline only, as before: each plate
+  is a finished poster that reads correctly with every animation switched off —
+  which the reduced-motion block guarantees rather than hopes for.
+
+The pictures themselves were generated as image models output, not traced from
+any work, and no third-party asset, font or script was shipped: four WebP files,
+404KB together, committed here and precached.
+
 ## The skills the site itself carries
 
 Separately from the four above, the design work is checked by

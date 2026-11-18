@@ -6,12 +6,15 @@ places it deliberately breaks a generic rule. Written so that the next person
 
 ## The law
 
-- **Black, grey and white.** Every hex in `styles-welcome.css` and
-  `styles-premium.css` is greyscale, and a test fails if a colour appears. The
-  only exceptions are the bundled score-studio styles, which are an artist's
-  choice inside a document, not part of the shell. Black is `#000000`, not a
-  tinted near-black: `#080808` reads as a dark grey the moment it sits next to a
-  true black, which is the tell that gives it away.
+- **The palette is a set of named pigments.** Since 2.31.0 the landing page is
+  painted, so colour is allowed — but only the pigments declared once in `:root`:
+  warm sumi black, washi cream, paper, ochre, moss, and one vermilion seal.
+  `tests/landing.test.mjs` fails if any hex outside a pigment declaration is a
+  literal rather than a `var()`, and if any translucent wash is neither neutral
+  nor one of those pigments. The app shell (`styles-premium.css`) stays neutral
+  grey, because it sits behind a student's work rather than beside a painting.
+  The reading pages share the landing page's five core pigments, and a test
+  compares the two stylesheets token by token so the halves cannot drift.
 - **Square corners, hairline rules.** No `border-radius` in the landing page or
   the premium shell; cards share a single 1px border instead of casting a
   shadow. Depth is a line, not a blur.
@@ -19,10 +22,16 @@ places it deliberately breaks a generic rule. Written so that the next person
   (5.80:1). `#5f5f5f` (3.14:1) and `#6f6f6f` (3.99:1) were removed in 2.23.0.
 - **One size floor.** Nothing functional is set below 11px, including the mono
   labels, the index numbers and the legal fine print.
-- **Motion is a courtesy, never a claim.** Nothing loops on its own. The two
-  landing-page animations are entrances; the reduced-motion block restores every
-  element that starts hidden, so a reader who dislikes motion sees the whole
-  page rather than an empty hero.
+- **Motion is a courtesy, never a claim.** *Changed in 2.31.0 at the user's
+  request — "where are the animations" — from "nothing loops" to a named
+  allowance.* Three decorative layers may loop, and only these three: the hero
+  painting drifting, the mist crossing it, the dust rising. None of them carries a
+  word. Everything that carries type either enters once (and finishes) or is
+  driven by the reader's own scroll, so it cannot run ahead of them. The
+  reduced-motion block stops all of it and restores every element that starts
+  hidden, so a reader who dislikes motion sees the whole page rather than an
+  empty hero. A test reads the allowlist out of the stylesheet rather than
+  keeping a second copy of it, and fails if anything else ever loops.
 - **No JavaScript on the landing page.** `/welcome` is a document: no script
   tag, no host but this one, and it must still read correctly with CSS motion
   switched off.
@@ -52,14 +61,50 @@ places it deliberately breaks a generic rule. Written so that the next person
   than designed. The hero sets its three lines three ways and turns the plate in
   perspective; a margin rule inks itself down; a drawing draws itself. A test
   fails if two hero elements ever share an entrance again.
-- **Movement comes from the material.** The vocabulary of this page is
-  hairlines, margin rules and type. So the motion is lines being drawn, type
-  being set, a sheet being turned — never stripes, fields, parallax or glow. If
-  a movement could belong to any other site, it does not belong here.
+- **Movement comes from the material.** The vocabulary of this page is ink,
+  paper and brush. So the motion is a press laying type down, a sheet being
+  turned, a stroke being drawn, a seal being stamped, paint washing across a
+  plate, and a room breathing while you look at it. Never parallax on text, never
+  stripes, never glow. If a movement could belong to any other site, it does not
+  belong here.
+- **A picture is a plate, not a hero image.** Four paintings were made for this
+  page, and they are used as printed plates: the library at dusk behind the
+  opening, the open book with the brush in its gutter beside the claim, a band of
+  sumi ink between the painted half and the paper half, and the lantern room the
+  page closes in. Every plate is local, WebP, inside a 520KB budget for all four,
+  precached by the worker, and described in its alt text. `tests/painted.test.mjs`
+  fails if one is missing from the cache, oversized, mislabelled or fetching
+  from another host.
+- **Text is never set directly on a painting.** The hero puts a wash of ink
+  between the plate and the type and sets the type above both; the closing room
+  gets the same wash. The inks used there are checked against 4.5:1 in the test,
+  computed from the tokens, so a repaint cannot quietly dim the body copy.
 
 Those five, the size floor, the grey floor and the "nothing loops" rule are
 asserted in `tests/design-rules.test.mjs`, so they survive the audit tool being
 uninstalled.
+
+## The painted edition (2.31.0)
+
+The site proposes a book, so the last release painted the book. Four plates were
+made for it in the register of an ink-and-gouache background painting — a school
+library at dusk, an open textbook with the brush still in the gutter, a sweep of
+sumi ink, and a lantern-lit reading room — and the page now alternates between
+two worlds: a painted one where the app is explained, and a paper one where the
+reader is being taught.
+
+The type did not change. The headlines are still set in one voice, the body is
+still one measure, the folios still sit in the margin, and the corners are still
+square. What changed is what is behind them: paper cream instead of black on the
+language board, the proof and the writing; a page of paper instead of a dark card
+for the specimen answer, lying a degree off square on the table with a vermilion
+seal pressed into the painting beside it. The brush strokes under the section
+headings and the ensō behind the plate are inline SVG drawn in `currentColor`, so
+they take the section's own ink and cost no request.
+
+The app got the same opening and nothing more: a strip of the library fades into
+the first screen and leaves as soon as a conversation starts. A student opening
+the app to ask a question is not watching a film.
 
 ## Deliberate breaks, with the reason
 
