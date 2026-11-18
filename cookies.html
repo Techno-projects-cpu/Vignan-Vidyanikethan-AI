@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="robots" content="index,follow">
+  <meta name="description" content="Exactly what Vignan Vidyanikethan AI stores in your browser, why, how long it stays, and how to clear it. No advertising cookies and no third-party trackers.">
+  <title>Cookies and local storage — Vignan AI</title>
+  <link rel="canonical" href="https://vignan-vidyanikethan-ai-1.onrender.com/cookies.html">
+  <link rel="icon" href="./icons/icon.svg?v=65" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-48.png?v=65" type="image/png" sizes="48x48">
+  <link rel="stylesheet" href="./styles-legal.css?v=65">
+</head>
+<body>
+  <a class="skip" href="#content">Skip to cookies</a>
+  <header class="legal-header"><a class="wordmark" href="./">VIGNAN <span>/ AI</span></a><a href="./">Back to the study space ↗</a></header>
+  <main id="content" class="legal-main">
+    <div class="legal-intro"><h1>Cookies<br><span>&amp; local storage.</span></h1><p>Six keys, all first-party, none of them for advertising. This page lists what each one is for and how to remove it.</p><p class="updated">Last updated 27 October 2026</p></div>
+    <div class="legal-copy">
+<section><h2>01 / The short version</h2><p>This site sets <strong>no advertising cookies and no third-party tracking cookies</strong>. It uses one session cookie for signing in, and it keeps your work in your own browser's local storage so that the app still opens offline. Nothing in that storage is transmitted anywhere unless a feature you choose sends it — an AI provider you configured, or the search fallback.</p></section><section><h2>02 / The session cookie</h2><p><strong>vv_session</strong> — set by this site only when you sign in to an account. It is <strong>HttpOnly</strong> (page scripts cannot read it), <strong>SameSite=Lax</strong> (it is not sent on cross-site posts, which is part of the CSRF defence) and <strong>Secure</strong> on HTTPS deployments. It expires when you sign out, when it times out, or when the server session ends. Without it you are still a guest: every study feature works, only syncing and the social layer need it.</p></section><section><h2>03 / Local storage keys</h2><ul class="legal-list"><li><strong>vignan-chat</strong> — your conversations, kept on this device so a reload does not lose them. Deleted by <em>Delete all local data</em>.</li><li><strong>vignan-settings</strong> — theme, font, motion and provider choices, including a provider key if you typed one. The key never leaves this browser except to the provider you picked.</li><li><strong>vignan-progress</strong> — chapters read, cards due, quiz scores, streak. Exported to <em>Export data</em> as JSON.</li><li><strong>vignan-books</strong> — the text you imported. It stays here; it is never uploaded.</li><li><strong>vignan-social-cache</strong> — a short-lived copy of friend and leaderboard lists so the board does not flash empty. Refresh replaces it.</li><li><strong>vignan-install</strong> — one flag saying the install prompt was already offered, and service-worker cache names, which is how offline mode works.</li></ul></section><section><h2>04 / Caches and offline mode</h2><p>The service worker keeps a versioned cache of the app's own files — pages, styles, scripts, fonts and the painted backgrounds — so the site opens on a weak connection. A new release installs a new cache and deletes the old one on activation; a cache is never shared with another origin. Images and sounds are all local files: <strong>no CDN asset is requested</strong>, which is why this list has no third parties in it.</p></section><section><h2>05 / What other people see</h2><p>Your hosting provider sees ordinary request metadata (IP address, user agent, timestamps) for security and diagnostics. If a search fallback is on, your query is sent to Wikipedia and DuckDuckGo; if an AI provider is configured, the question is sent there. Those are requests, not cookies set by us, and they are described in the <a href="./privacy.html">privacy policy</a> and the <a href="./subprocessors.html">sub-processor list</a>.</p></section><section><h2>06 / How to remove it</h2><p>In the app: <strong>Settings &rarr; Delete all local data</strong> clears the app's own keys. To remove the cache as well, use your browser's site-data controls (in Chrome: Settings &rarr; Privacy &rarr; Third-party cookies &rarr; See all site data; in Safari: Settings &rarr; Privacy &rarr; Manage Website Data). Signing out ends the session cookie. Clearing site data also deletes your API keys and imported books, and that cannot be undone.</p></section>
+    </div>
+  </main>
+  <footer class="legal-footer"><div><strong>BUILT BY A STUDENT</strong><p>Vignan Vidyanikethan English Medium High School<br>INSPIRE-MANAK science fair</p></div><nav aria-label="Legal and project links"><a href="./legal.html">All legal documents ↗</a><a href="./welcome.html">About the project ↗</a><a href="./judge.html">Judge mode ↗</a></nav></footer>
+</body>
+</html>

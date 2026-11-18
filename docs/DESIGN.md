@@ -106,6 +106,113 @@ The app got the same opening and nothing more: a strip of the library fades into
 the first screen and leaves as soon as a conversation starts. A student opening
 the app to ask a question is not watching a film.
 
+## The painted edition, twelve plates (2.32.0)
+
+2.31.0 proved the idea with four plates. 2.32.0 makes it the system: **twelve**
+painted backgrounds, twelve measured palettes, seven of them full themes in
+Settings, and the four-plate look kept intact as the theme called **Legacy**.
+
+### A plate is either a ground or a picture, and the measurement decides
+
+The first genuine design problem was not generating pictures, it was deciding
+which ones may sit under text. Colour theory answers it if the answer is allowed
+to be a number. `tools/palette-report.mjs` decodes each WebP with Magick, converts
+pixels to CIELAB and runs a deterministic k-means to get three roles — dominant,
+secondary, accent — then reports the share each one holds.
+
+By the 60-30-10 rule a ground may carry an interface only if its measured share is
+within tolerance of 60 / 30 / 10 (±8 / ±8 / ±5, applied by `balance()` in
+`js/colour.js`). The measurements split the set cleanly:
+
+| Plate | Dominant / secondary / accent | Verdict |
+| --- | --- | --- |
+| rain-window | 59.5 / 32.3 / 8.2 | ground — the reference case |
+| book-stair | 67.3 / 24.4 / 8.3 | ground |
+| paper-night | 67.8 / 20.4 / 11.8 | ground (Legacy) |
+| aurora-teal | 71.2 / 20.4 / 8.5 | ground |
+| ember-rose | 73.0 / 15.5 / 11.6 | ground |
+| moss-hall | 74.2 / 16.4 / 9.4 | ground |
+| indigo-shelf | 64.8 / 19.7 / 15.5 | ground |
+| brush-band | 70.0 / 20.4 / 9.6 | accent plate |
+| library-dusk | 46.1 / 28.3 / 25.5 | accent plate |
+| dawn-desk | 51.4 / 27.2 / 21.4 | accent plate |
+| frost-glass | 46.4 / 35.9 / 17.8 | accent plate |
+| open-book | 44.4 / 43.0 / 12.5 | accent plate |
+
+That is not a taste judgement: a plate at 46 / 36 / 18 has no dominant field for
+type to sit in, so it is hung as a framed picture instead — a full-bleed section
+with no interface text over it. The distinction is asserted in
+`tests/painted-themes.test.mjs`, which fails if a theme claims a ground it cannot
+measure.
+
+### A theme's colours are the plate's colours
+
+Every theme value is derived, not chosen. For each ground plate the script takes
+the dominant tone, scales it down in linear light until lightness is at most 16
+(the page), takes the mid-tone with the *same hue* (within 1°) and less light for
+the panel, and lifts the accent until it is the most chromatic of the three.
+Ink is the plate's own cream, checked at 8.6:1 against the page. Then the glass
+alpha is the smallest value at which ink still clears 4.6:1 when the panel tint is
+composited over *every* role in the plate — the worst case, not the average.
+
+The two exceptions are documented in `js/theme-paint.js` with an `accentSource`
+field rather than a comment nobody reads. **Legacy** takes its accent from the
+house seal (`#b23a29`, lifted to ΔE 14.7 so it reads as the same vermilion in a
+darker room). **Ember** takes a mid-tone rather than the k-means accent, because
+its accent was a highlight rather than a pigment.
+
+The test uses two different measurements on purpose. ΔE (CIEDE2000) answers "is
+this a different colour?" — the right question for panel versus page. Hue distance
+answers "is this the same pigment under less light?" — the right question for the
+two escape hatches, where ΔE cannot distinguish a shade from a stranger.
+
+### Glass, because there is a painting under it
+
+Every card, panel, command panel, sidebar and composer on a painted theme is a
+frosted sheet: `backdrop-filter: blur(18px) saturate(118%)`, the panel tint at
+55–76% over a `noiseDataUri()` grain so the surface has a tooth rather than
+looking like a gradient. The tint is thick enough that the ink test passes over
+the *busiest* part of every plate — that is why the alphas differ per theme (0.60
+on book-stair, 0.76 on ember-rose) instead of being one shared number.
+
+The generator auto-thickens a theme's glass if any ink falls below the floor, which
+is how `rain` moved from 0.60 to 0.66: its cream accent made a thin panel fail.
+
+### Motion, and why the page moves at all
+
+The complaint that produced this round was that the animations were not visible
+enough. The answer is not bigger decoration on the same elements; it is to give
+every part of the page a job that involves moving, and to make the movement part
+of the reading.
+
+- **The view itself arrives.** `vn-view-in` wipes the screen with a clip-path,
+  rises 16px and settles from 0.996 scale over 420ms, on every screen change.
+- **Content arrives in an order.** `vn-panel-in` staggers the first six children of
+  a panel from 40ms to 240ms, so a page assembles rather than appearing.
+- **Glass answers the pointer.** A specular sweep crosses a painted card on hover
+  and on `focus-within` over 900ms — one sweep, not a shimmer, and it runs for a
+  keyboard user too.
+- **The landing page is read, not scrolled past.** Cells, steps, numbers and the
+  closing lines rise 10px as they enter the viewport, driven by
+  `animation-timeline: view()` — no script, no scroll listener. The ink band under
+  the claim finishes drawing itself as you reach it.
+- **The paintings keep moving.** Twelve plates, each with its own 46–58s drift, so
+  no background is ever static; the landscape keeps its mist, motes and ensō.
+
+Everything above is in a `prefers-reduced-motion: reduce` block that sets the
+final state, and the painted sheet's own reduced-motion rule stops the drift. No
+animation carries words: the loading indicator is a drawn stroke, not moving
+type, and no sentence is ever animated in and out of legibility.
+
+### Security and the paperwork
+
+The policy is no longer a sentence in a document. `serve.mjs` generates a
+Content-Security-Policy at boot: a `sha256` hash per inline script (computed from
+the HTML, so it cannot go stale), no `unsafe-inline`, no `eval`, and a
+`connect-src` that names the app's real traffic instead of `https:`. The legal
+set grew from four documents to ten, indexed at `legal.html`; the reasoning and
+the out-of-scope list are in `docs/THREAT-MODEL.md`.
+
 ## Deliberate breaks, with the reason
 
 These are reported by `impeccable detect` **and are not defects**. Each one is a

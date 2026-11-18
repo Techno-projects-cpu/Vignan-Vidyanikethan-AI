@@ -1,0 +1,48 @@
+{
+  "plate": "aurora-teal",
+  "roles": [
+    {
+      "hex": "#162d2a",
+      "weight": 71.2,
+      "chroma": 9.9,
+      "lightness": 16.7
+    },
+    {
+      "hex": "#4a8376",
+      "weight": 20.4,
+      "chroma": 21.9,
+      "lightness": 50.3
+    },
+    {
+      "hex": "#e0e5e4",
+      "weight": 8.5,
+      "chroma": 1.7,
+      "lightness": 90.3
+    }
+  ],
+  "balance": {
+    "share": [
+      71.1,
+      20.4,
+      8.5
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 28.9,
+    "secondaryAccent": 34.8,
+    "dominantAccent": 72.1
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.27,
+    "darkWorst": 1.37
+  },
+  "safe": {
+    "forCream": 71.1,
+    "forInk": 8.5
+  },
+  "measured": true
+}

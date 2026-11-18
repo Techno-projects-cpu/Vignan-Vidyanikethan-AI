@@ -1,0 +1,48 @@
+{
+  "plate": "indigo-shelf",
+  "roles": [
+    {
+      "hex": "#0e141b",
+      "weight": 64.8,
+      "chroma": 5.3,
+      "lightness": 7.1
+    },
+    {
+      "hex": "#686d72",
+      "weight": 19.7,
+      "chroma": 3.5,
+      "lightness": 45.6
+    },
+    {
+      "hex": "#dcdbd6",
+      "weight": 15.5,
+      "chroma": 3.2,
+      "lightness": 87.5
+    }
+  ],
+  "balance": {
+    "share": [
+      64.8,
+      19.7,
+      15.5
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 29.3,
+    "secondaryAccent": 34,
+    "dominantAccent": 79.3
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#201c15",
+    "lightWorst": 1.39,
+    "darkWorst": 1.09
+  },
+  "safe": {
+    "forCream": 84.5,
+    "forInk": 15.5
+  },
+  "measured": true
+}

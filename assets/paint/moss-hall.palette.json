@@ -1,0 +1,48 @@
+{
+  "plate": "moss-hall",
+  "roles": [
+    {
+      "hex": "#1a1e14",
+      "weight": 74.2,
+      "chroma": 7.5,
+      "lightness": 10.6
+    },
+    {
+      "hex": "#444c36",
+      "weight": 16.4,
+      "chroma": 14.9,
+      "lightness": 31.9
+    },
+    {
+      "hex": "#dee1d7",
+      "weight": 9.4,
+      "chroma": 4.9,
+      "lightness": 89.7
+    }
+  ],
+  "balance": {
+    "share": [
+      74.2,
+      16.4,
+      9.4
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 15.1,
+    "secondaryAccent": 51.5,
+    "dominantAccent": 78.5
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.32,
+    "darkWorst": 1.17
+  },
+  "safe": {
+    "forCream": 90.6,
+    "forInk": 9.4
+  },
+  "measured": true
+}

@@ -26,6 +26,40 @@ h1 span { color: #999; }
 .legal-copy p { margin: 0 0 15px; color: #d0d0d0; font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
 .legal-copy p:last-child { margin-bottom: 0; }
 .legal-copy strong { color: #fff; }
+.legal-copy a { text-underline-offset: 3px; }
+.legal-copy em { color: #e6e6e6; font-style: italic; }
+/* The legal index is a list of documents, not prose, so it gets its own rhythm:
+   each row is a link and a one-line summary, aligned in a single column. */
+.legal-list { margin: 0; padding: 0; list-style: none; }
+.legal-list li { padding: 10px 0; border-top: 1px solid #262626; color: #d0d0d0; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+.legal-list li:first-child { border-top-color: #383838; }
+.legal-list a { font-weight: 700; text-decoration-thickness: 1px; }
+.legal-copy kbd {
+  padding: 1px 5px;
+  border: 1px solid #4a4a4a;
+  border-radius: 3px;
+  background: #161616;
+  color: #f0f0f0;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
+/* A hairline of light under the header, the same move as the glass bar on the
+   landing page: depth stays a line in this project, never a shadow. */
+.legal-header { position: relative; }
+.legal-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #f5f5f5 18%, #f5f5f5 32%, transparent 70%);
+  opacity: .28;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .legal-header::after { animation: legal-rule-in 900ms cubic-bezier(.22,.61,.36,1) both; }
+}
+@keyframes legal-rule-in { from { transform: scaleX(0); transform-origin: left center; } to { transform: none; } }
 .legal-footer { display: flex; justify-content: space-between; gap: 30px; max-width: 1400px; margin: auto; padding: 28px 0 50px; border-top: 1px solid #383838; }
 .legal-footer strong { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: .12em; }
 .legal-footer p { color: #aaa; font-size: 11px; line-height: 1.6; }

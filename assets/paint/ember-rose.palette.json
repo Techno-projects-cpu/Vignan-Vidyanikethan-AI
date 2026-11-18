@@ -1,0 +1,48 @@
+{
+  "plate": "ember-rose",
+  "roles": [
+    {
+      "hex": "#261717",
+      "weight": 73,
+      "chroma": 8,
+      "lightness": 9.5
+    },
+    {
+      "hex": "#8b5848",
+      "weight": 15.5,
+      "chroma": 22.6,
+      "lightness": 45.2
+    },
+    {
+      "hex": "#eeebe7",
+      "weight": 11.6,
+      "chroma": 2.5,
+      "lightness": 92.7
+    }
+  ],
+  "balance": {
+    "share": [
+      72.9,
+      15.5,
+      11.6
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 27,
+    "secondaryAccent": 43.9,
+    "dominantAccent": 83.4
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.19,
+    "darkWorst": 1.15
+  },
+  "safe": {
+    "forCream": 88.4,
+    "forInk": 11.6
+  },
+  "measured": true
+}

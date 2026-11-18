@@ -1,0 +1,48 @@
+{
+  "plate": "open-book",
+  "roles": [
+    {
+      "hex": "#f6f0e0",
+      "weight": 44.4,
+      "chroma": 8.4,
+      "lightness": 94.7
+    },
+    {
+      "hex": "#ddcbaa",
+      "weight": 43,
+      "chroma": 19,
+      "lightness": 82.4
+    },
+    {
+      "hex": "#796243",
+      "weight": 12.5,
+      "chroma": 21.2,
+      "lightness": 45.4
+    }
+  ],
+  "balance": {
+    "share": [
+      44.4,
+      43,
+      12.5
+    ],
+    "within": false,
+    "accentLeads": true
+  },
+  "separation": {
+    "dominantSecondary": 10.4,
+    "secondaryAccent": 33.5,
+    "dominantAccent": 41.7
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.14,
+    "darkWorst": 3.45
+  },
+  "safe": {
+    "forCream": 12.5,
+    "forInk": 87.5
+  },
+  "measured": true
+}
