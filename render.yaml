@@ -24,7 +24,7 @@ services:
       - key: STUDY_AI_FREE_ROUTER
         value: "true"
       - key: STUDY_AI_FREE_ROUTER_ORDER
-        value: gemini,groq,cloudflare,openrouter,mistral,cohere,arena,primary
+        value: gemini,groq,cloudflare,openrouter,mistral,cohere,bytez,arena,primary
       # A quota-limited key is paused for one minute; student keys are tried
       # only after every Render key has failed.
       - key: STUDY_AI_KEY_COOLDOWN_MS
@@ -47,6 +47,13 @@ services:
         value: open-mistral-nemo
       - key: STUDY_AI_COHERE_MODEL
         value: command-r-08-2024
+      # Bytez: metered in credits, never a free tier. It is built only when the
+      # key below is set, so leaving it empty costs nothing and the router simply
+      # steps over it. Swap the model for one from https://bytez.com/models.
+      - key: STUDY_AI_BYTEZ_MODEL
+        value: Qwen/Qwen3-4B
+      - key: STUDY_AI_BYTEZ_ENDPOINT
+        value: https://api.bytez.com/models/v2/openai/v1
       - key: STUDY_AI_ARENA_MODEL
         value: coding-router-preview
       - key: STUDY_AI_SUPABASE_EMAIL_DOMAIN
@@ -69,6 +76,8 @@ services:
         sync: false
       - key: STUDY_AI_COHERE_KEY
         sync: false
+      - key: STUDY_AI_BYTEZ_KEY
+        sync: false
       - key: STUDY_AI_ARENA_KEY
         sync: false
       # Optional plural aliases. Leave empty if you used comma-separated values
@@ -84,6 +93,8 @@ services:
       - key: STUDY_AI_MISTRAL_KEYS
         sync: false
       - key: STUDY_AI_COHERE_KEYS
+        sync: false
+      - key: STUDY_AI_BYTEZ_KEYS
         sync: false
       - key: STUDY_AI_ARENA_KEYS
         sync: false

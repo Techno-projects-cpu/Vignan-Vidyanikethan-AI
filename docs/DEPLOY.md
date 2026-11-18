@@ -142,7 +142,7 @@ SUPABASE_URL=https://dwmzbrrnqxzdoxrxbrna.supabase.co
 SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 STUDY_AI_FREE_ROUTER=true
-STUDY_AI_FREE_ROUTER_ORDER=gemini,groq,cloudflare,openrouter,mistral,cohere,arena,primary
+STUDY_AI_FREE_ROUTER_ORDER=gemini,groq,cloudflare,openrouter,mistral,cohere,bytez,arena,primary
 STUDY_AI_KEY_COOLDOWN_MS=60000
 STUDY_AI_STUDENT_KEY_FALLBACK=true
 ```
@@ -205,6 +205,10 @@ STUDY_AI_CLOUDFLARE_ACCOUNT_ID=<Cloudflare account id>
 STUDY_AI_CLOUDFLARE_TOKEN=<Cloudflare token 1>,<Cloudflare token 2>
 STUDY_AI_MISTRAL_KEY=<Mistral free-mode keys>
 STUDY_AI_COHERE_KEY=<Cohere trial keys>
+# Bytez is metered, not free: it answers only when this key is set, and it sits
+# after the free tiers in the order above. See 4d.
+STUDY_AI_BYTEZ_KEY=<Bytez key>
+STUDY_AI_BYTEZ_MODEL=Qwen/Qwen3-4B
 STUDY_AI_ARENA_KEY=<Arena workspace API key, optional>
 ```
 
@@ -222,6 +226,23 @@ When every official Render key is over, students can open **Settings → Advance
 
 `STUDY_AI_STUDENT_KEY_FALLBACK=false` disables this school-wide. Warn students not to add keys on shared computers. Direct browser provider keys also rotate, but the server proxy remains the safer production path.
 
+### 4d. Metered providers: Bytez
+
+**Bytez is not a free tier.** It is one OpenAI-compatible door onto a catalogue of open-weight models (Qwen, Llama, Mistral, Gemma …) and it bills per call in credits. Because the whole point of this project is a $0 default, Bytez sits **after** the free providers in `STUDY_AI_FREE_ROUTER_ORDER` and is built only when `STUDY_AI_BYTEZ_KEY` is set — no key, no upstream, no surprise invoice.
+
+Two details that make the difference between working and a 404:
+
+- the chat route is **nested**: `https://api.bytez.com/models/v2/openai/v1/chat/completions`, not `https://api.bytez.com/v1/chat/completions`. Set `STUDY_AI_BYTEZ_ENDPOINT=https://api.bytez.com/models/v2/openai/v1` and leave it alone; the router appends `/chat/completions` itself.
+- `STUDY_AI_BYTEZ_MODEL` must be a model id from <https://bytez.com/models>. The default is `Qwen/Qwen3-4B`, the model Bytez documents in its own chat example. A wrong id is a 4xx from Bytez, which the router treats as a failed provider and steps past.
+
+```dotenv
+STUDY_AI_BYTEZ_KEY=<your Bytez key>
+STUDY_AI_BYTEZ_MODEL=Qwen/Qwen3-4B
+STUDY_AI_BYTEZ_ENDPOINT=https://api.bytez.com/models/v2/openai/v1
+```
+
+**Pasting a whole environment at once.** Render → Environment accepts **Add from .env**: paste a file of `NAME=value` lines and every variable is created in one go. A filled-in `.env` is exactly that file; `.env` is git-ignored, so it stays on your machine. Do not paste a partial file over a working service without checking that the account variables (`STUDY_AI_ACCOUNTS_BACKEND`, `SUPABASE_*`, `STUDY_AI_ADMIN_TOKEN`) are already present — Render keeps variables you do not mention, but re-typing a value by hand is where they get broken.
+
 Free-tier reality (Oct 2026):
 
 - Gemini has free Flash / Flash-Lite rows, but Google no longer publishes fixed free RPM/RPD; limits are shown per project in AI Studio ([overview](https://www.memetik.ai/guides/gemini-api-free-tier-limits)).
@@ -229,6 +250,7 @@ Free-tier reality (Oct 2026):
 - OpenRouter free models are capped at 20 RPM and 50 requests/day on an unfunded account ([rate limits](https://openrouter.zendesk.com/hc/en-us/articles/39501163636379-OpenRouter-Rate-Limits-What-You-Need-to-Know)).
 - Cloudflare Workers AI gives 10,000 free Neurons/day ([official pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/)).
 - Mistral Free mode and Cohere trial keys have account-specific limits; Cohere trial keys are for evaluation only.
+- **Bytez is metered** — credits per call, no free tier, catalogue and pricing at <https://bytez.com>. It is an optional top-up for quiet periods, never the default engine.
 - **Arena.ai free-router keys are not for websites.** They are documented for Claude Code / Claude Desktop; other harnesses such as `curl` or a server-side `fetch` get 403 restrictions ([Arena docs](https://platform.arena.ai/docs), [harness note](https://portal.api.preview.arena.ai/docs/windows)). Use only a workspace API key if you add Arena.
 
 There is no legitimate “free unlimited AI API”. The local open-weight model and the cited-excerpt engine are the truly unlimited $0 fallbacks.

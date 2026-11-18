@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildUpstreams, callFreeRouter, FREE_ROUTER_DEFAULT_ORDER, resetKeyCooldownsForTests } from "../server/free-router.mjs";
+import { buildProviderRequest, buildUpstreams, callFreeRouter, FREE_ROUTER_DEFAULT_ORDER, resetKeyCooldownsForTests } from "../server/free-router.mjs";
 import { KeyCooldowns } from "../js/key-pool.js";
 import { buildStudentUpstreams } from "../server/student-keys.mjs";
 
@@ -21,11 +21,12 @@ test("free router builds providers only from configured keys", () => {
     STUDY_AI_OPENROUTER_KEY: "or-key",
     STUDY_AI_MISTRAL_KEY: "mistral-key",
     STUDY_AI_COHERE_KEY: "cohere-key",
+    STUDY_AI_BYTEZ_KEY: "bytez-key",
     STUDY_AI_ARENA_KEY: "arena-workspace-key",
   });
   assert.deepEqual(
     upstreams.map((item) => item.id),
-    ["gemini", "groq", "cloudflare", "openrouter", "mistral", "cohere", "arena"],
+    ["gemini", "groq", "cloudflare", "openrouter", "mistral", "cohere", "bytez", "arena"],
   );
   assert.equal(upstreams[0].model, "gemini-3.5-flash-lite");
   assert.equal(upstreams[1].model, "openai/gpt-oss-20b");
@@ -33,12 +34,35 @@ test("free router builds providers only from configured keys", () => {
   assert.equal(upstreams[3].model, "openrouter/free");
   assert.equal(upstreams[4].model, "open-mistral-nemo");
   assert.equal(upstreams[5].model, "command-r-08-2024");
-  assert.equal(upstreams[6].kind, "arena");
-  assert.equal(upstreams[6].endpoint, "https://api.arena.ai");
+  assert.equal(upstreams[6].kind, "openai");
+  assert.equal(upstreams[6].model, "Qwen/Qwen3-4B");
+  assert.equal(upstreams[7].kind, "arena");
+  assert.equal(upstreams[7].endpoint, "https://api.arena.ai");
   assert.deepEqual(FREE_ROUTER_DEFAULT_ORDER, [
-    "gemini", "groq", "cloudflare", "openrouter", "mistral", "cohere", "arena", "primary",
+    "gemini", "groq", "cloudflare", "openrouter", "mistral", "cohere", "bytez", "arena", "primary",
   ]);
 });
+
+test("bytez keys build one OpenAI-compatible upstream per key", () => {
+  const upstreams = buildUpstreams({
+    STUDY_AI_BYTEZ_KEY: "bytez-one,bytez-two",
+    STUDY_AI_BYTEZ_MODEL: "meta-llama/Llama-3.1-8B-Instruct",
+    STUDY_AI_FREE_ROUTER_ORDER: "bytez",
+  });
+  assert.deepEqual(upstreams.map((item) => item.id), ["bytez", "bytez"]);
+  assert.deepEqual(upstreams.map((item) => item.apiKey), ["bytez-one", "bytez-two"]);
+  assert.equal(upstreams[0].endpoint, "https://api.bytez.com/models/v2/openai/v1");
+  assert.equal(upstreams[0].model, "meta-llama/Llama-3.1-8B-Instruct");
+  // The chat route lives under /models/v2/openai/v1, so the request URL has to be
+  // that prefix plus /chat/completions — not the bare host.
+  const request = buildProviderRequest(upstreams[0], [{ role: "user", content: "Hi" }]);
+  assert.equal(request.url, "https://api.bytez.com/models/v2/openai/v1/chat/completions");
+  assert.equal(request.headers.Authorization, "Bearer bytez-one");
+  assert.equal(request.body.model, "meta-llama/Llama-3.1-8B-Instruct");
+  // No key, no provider: the router never calls a paid endpoint by accident.
+  assert.deepEqual(buildUpstreams({}).map((item) => item.id), []);
+});
+
 
 test("free router honours custom order, aliases and disable flag", () => {
   const upstreams = buildUpstreams({
