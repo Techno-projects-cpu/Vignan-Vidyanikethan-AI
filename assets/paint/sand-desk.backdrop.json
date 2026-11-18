@@ -1,0 +1,24 @@
+{
+  "plate": "sand-desk",
+  "stack": {
+    "veil": "#fdf7f25c",
+    "fields": [
+      "#f4b9c54d",
+      "#f0d9b64d",
+      "#8fd9d04d",
+      "#f8c9ae4d"
+    ],
+    "sheet": "#fffaf694"
+  },
+  "sheet": {
+    "ink": 10.85,
+    "muted": 5.13,
+    "accent": 5.67
+  },
+  "raw": {
+    "ink": 2.75,
+    "muted": 1.3,
+    "accent": 1.43
+  },
+  "measured": true
+}

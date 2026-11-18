@@ -219,6 +219,38 @@ test("the menu is a drawer that slides in from the left edge", () => {
   assert.doesNotMatch(css, /\.app-menu-panel \{[^}]*max-height: min\(76vh, 640px\)/);
 });
 
+test("the drawer scrolls, because a menu you cannot reach is not a menu", () => {
+  // The bug: `.app-menu-scroll` had `overflow: auto` but was a flex child, and a
+  // flex child defaults to `min-height: auto` — so it grew to its content instead
+  // of scrolling, pushed the footer out of the panel, and the bottom half of the
+  // menu was unreachable on a short screen. Three declarations fix it, and all
+  // three have to stay.
+  const panel = /\.app-menu-panel \{([\s\S]*?)\n\}/.exec(css)?.[1];
+  assert.ok(panel, "the drawer is still a drawer");
+  assert.match(panel, /min-height: 0;/, "the panel may be shorter than its children");
+  assert.match(panel, /display: flex;\s*\n?\s*flex-direction: column;/);
+
+  const scroller = /\.app-menu-scroll \{([\s\S]*?)\n\}/.exec(css)?.[1];
+  assert.ok(scroller, "the middle column exists");
+  assert.match(scroller, /flex: 1 1 auto;/, "it takes the space between the head and the foot");
+  assert.match(scroller, /min-height: 0;/, "and it is allowed to be shorter than its content");
+  assert.match(scroller, /overflow-y: auto;/, "so the overflow goes to a scrollbar");
+  assert.match(scroller, /overscroll-behavior: contain;/, "a flick at the end does not scroll the page behind it");
+
+  // The head and the foot are fixed ends: the close button never scrolls away.
+  for (const name of ["app-menu-head", "app-menu-foot", "app-menu-account"]) {
+    const block = new RegExp(`\\.${name} \\{([\\s\\S]*?)\\n\\}`).exec(css)?.[1];
+    assert.ok(block, `${name} exists`);
+    assert.match(block, /flex: 0 0 auto;/, `${name} keeps its height`);
+  }
+
+  // And on a glass screen it is a sheet with the room showing through, not an
+  // opaque wall in another palette.
+  const glass = read("styles-glass.css");
+  assert.match(glass, /html\[data-style="glass"\] body\.premium-ui \.app-menu-panel \{[\s\S]{0,400}backdrop-filter: var\(--tg-filter\)/, "the drawer is glass");
+  assert.match(glass, /html\[data-style="glass"\] body\.premium-ui \.app-menu-overlay \{[\s\S]{0,300}backdrop-filter: blur\(2px\)/, "the screen behind it is blurred, not hidden");
+});
+
 test("the logo is a small target in the top-left corner", () => {
   assert.match(css, /\.home-logo \{[^}]*top: calc\(var\(--vn-space-3\) \+ env\(safe-area-inset-top\)\)/);
   assert.match(css, /\.home-logo \{[^}]*width: 40px;[^}]*height: 40px;/);

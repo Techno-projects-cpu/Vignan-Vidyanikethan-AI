@@ -52,8 +52,8 @@ html[data-style="glass"] body.premium-ui {
   /* The one style in the set where a corner is round: a square sheet of glass is
      a window, and this is meant to read as a lens. */
   --p-radius: 18px;
-  --brand: #0b726b;
-  --brand-2: #0d8a80;
+  --brand: #075c56;
+  --brand-2: #0a6f68;
   --brand-ink: #ffffff;
   --brand-soft: rgba(11, 114, 107, .12);
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -68,7 +68,7 @@ html[data-style="glass"] body.premium-ui {
   --tg-edge-dark: rgba(96, 68, 74, .13);
   --tg-ink: #2b2430;
   --tg-muted: #5f5560;
-  --tg-accent: #0b726b;
+  --tg-accent: #075c56;
   --tg-blush: #f4b9c5;
   --tg-sand: #f0d9b6;
   --tg-lagoon: #8fd9d0;
@@ -76,6 +76,27 @@ html[data-style="glass"] body.premium-ui {
   --tg-blur: 8px;
   --tg-saturate: 180%;
   --tg-bright: 1.06;
+
+  /* THE BACKDROP IS A PAINTING.
+     Four soft radial fields over a cream page are a *gradient*, and a gradient
+     behind frosted glass is why the first attempt read as milky plastic: there
+     was nothing in particular behind a panel for the glass to bend. So the room
+     is one of the project's own paintings — 11.7 KB, WebP, already in the
+     offline cache — and the fields become a wash of the theme's four colours
+     over it. Every sheet then has real detail under it: the arch, the shelf,
+     the shaft of light, sliding and splitting at the rim.
+
+     `--tg-plate` is set per room below; `plain` sets it to `none` and the old
+     fields-only page is still available. */
+  --tg-plate: url("./assets/paint/blush-hall.webp");
+  --tg-plate-tone: saturate(1.04) contrast(1.02) brightness(1.03);
+  /* The warm veil between painting and glass. 36%, and measured by
+     `tools/backdrop-report.mjs`: with the fields at 30% and the sheet at 58%, the
+     ink clears 10:1 and the accent 5.4:1 over the *darkest pixel* of the darkest
+     plate. Thinner and it stops being readable; thicker and the painting greys. */
+  --tg-veil: rgba(253, 247, 242, .36);
+  /* What the app dims to behind the menu. */
+  --tg-scrim: rgba(43, 36, 48, .26);
   --tg-sheet: linear-gradient(150deg, rgba(255, 255, 255, .78), rgba(255, 255, 255, .34) 46%, rgba(255, 255, 255, .16) 74%);
   --tg-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
 
@@ -127,34 +148,41 @@ html[data-style="glass"] body.premium-ui {
 }
 
 /* ------------------------------------------------------------------ */
-/* 2. The fields behind everything                                     */
+/* 2. The room behind everything: a painting, a wash, a sheet            */
 /* ------------------------------------------------------------------ */
+
+/* The room. Pick one with the control in §10; the choice is remembered and
+   applied before the first frame by the inline script in `index.html`. */
+html[data-style="glass"][data-room="blush-hall"] body.premium-ui { --tg-plate: url("./assets/paint/blush-hall.webp"); }
+html[data-style="glass"][data-room="mint-class"] body.premium-ui { --tg-plate: url("./assets/paint/mint-class.webp"); }
+html[data-style="glass"][data-room="sand-desk"] body.premium-ui { --tg-plate: url("./assets/paint/sand-desk.webp"); }
+html[data-style="glass"][data-room="plain"] body.premium-ui { --tg-plate: none; }
 
 html[data-style="glass"] body.premium-ui {
   position: relative;
   isolation: isolate;
 }
 
+/* The painting itself, fixed, bled past the edges so the drift never shows one. */
 html[data-style="glass"] body.premium-ui::before {
   content: "";
   position: fixed;
-  /* Bleed so the drift never exposes an edge. */
-  inset: -18%;
+  inset: -7%;
   z-index: -2;
   pointer-events: none;
-  background:
-    radial-gradient(46% 42% at 14% 22%, #f4b9c5, transparent 70%),
-    radial-gradient(40% 36% at 86% 14%, #f0d9b6, transparent 72%),
-    radial-gradient(48% 42% at 72% 90%, #8fd9d0, transparent 74%),
-    radial-gradient(38% 38% at 10% 86%, #f8c9ae, transparent 76%);
-  opacity: .82;
+  background-image: var(--tg-plate);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: var(--tg-plate-tone);
   transform: translate3d(0, 0, 0) scale(1);
-  animation: tg-aurora 58s cubic-bezier(.45, .05, .55, .95) infinite alternate;
+  animation: tg-aurora 76s cubic-bezier(.45, .05, .55, .95) infinite alternate;
   will-change: transform;
 }
 
-/* The paper tooth and the vignette, in one layer: a warm inner edge keeps the
-   corners from looking like a gradient that ran out of paint. */
+/* The wash: four pastel fields at 30%, the veil, a light from above, the paper
+   tooth. Nothing here darkens the painting — a vignette under text is a contrast
+   leak, and this theme measures its contrast. */
 html[data-style="glass"] body.premium-ui::after {
   content: "";
   position: fixed;
@@ -162,15 +190,22 @@ html[data-style="glass"] body.premium-ui::after {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(120% 92% at 50% -12%, rgba(255, 255, 255, .72), transparent 62%),
-    radial-gradient(130% 110% at 50% 122%, rgba(150, 112, 118, .18), transparent 60%),
+    radial-gradient(46% 42% at 14% 22%, rgba(244, 185, 197, .30), transparent 70%),
+    radial-gradient(40% 36% at 86% 14%, rgba(240, 217, 182, .30), transparent 72%),
+    radial-gradient(48% 42% at 72% 90%, rgba(143, 217, 208, .30), transparent 74%),
+    radial-gradient(38% 38% at 10% 86%, rgba(248, 201, 174, .30), transparent 76%),
+    linear-gradient(180deg, var(--tg-veil), var(--tg-veil)),
+    radial-gradient(120% 92% at 50% -12%, rgba(255, 255, 255, .46), transparent 62%),
     var(--tg-grain);
-  background-repeat: no-repeat, no-repeat, repeat;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+  background-blend-mode: normal, normal, normal, normal, normal, normal, overlay;
 }
 
+/* A slow drift, because a still photograph behind glass reads as a screenshot.
+   76s and under 3% of travel: you should notice it only when you stop looking. */
 @keyframes tg-aurora {
-  from { transform: translate3d(-1.4%, -1%, 0) scale(1.02) rotate(-.5deg); }
-  to   { transform: translate3d(1.8%, 1.4%, 0) scale(1.07) rotate(.7deg); }
+  from { transform: translate3d(-1.2%, -.8%, 0) scale(1.02); }
+  to   { transform: translate3d(1.4%, 1.1%, 0) scale(1.06); }
 }
 
 /* ------------------------------------------------------------------ */
@@ -476,6 +511,43 @@ html[data-style="glass"] body.premium-ui blockquote {
   }
 }
 
+/* THE PAGE ITSELF IS THE ROOM.
+   `styles-next.css` gives `.workspace` an opaque `--vn-canvas`, which is what
+   hid the painting: every panel was glass over a flat cream wall. With it
+   transparent the painting runs edge to edge, and the only opaque things left on
+   the screen are sheets of glass. */
+html[data-style="glass"] body.premium-ui .workspace,
+html[data-style="glass"] body.premium-ui .main,
+html[data-style="glass"] body.premium-ui .view {
+  background: transparent;
+}
+
+/* Text that used to sit straight on the page — the numbered page head and the
+   Ask hero — is now text on a *painting*, and the measurement says why that is
+   not allowed: the raw ink is 1.9:1 over the mint plate. Both become sheets, so
+   what the reader reads is the 10.3:1 that `tools/backdrop-report.mjs` prints. */
+html[data-style="glass"] body.premium-ui .page-head {
+  margin: 0 var(--tg-space, 16px) 14px;
+  border: 0;
+  border-radius: var(--tg-r-slab);
+  background-color: var(--tg-tint);
+  background-image: var(--tg-sheet);
+  -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow: var(--tg-rim);
+}
+
+html[data-style="glass"] body.premium-ui .premium-hero {
+  margin: 0 0 18px;
+  border-radius: var(--tg-r-slab);
+  corner-shape: var(--tg-corner, round);
+  background-color: var(--tg-tint);
+  background-image: var(--tg-sheet);
+  -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow: var(--tg-rim);
+}
+
 /* ------------------------------------------------------------------ */
 /* 8. Cheap mode, for the devices that need it                         */
 /* ------------------------------------------------------------------ */
@@ -548,11 +620,69 @@ html[data-lite="1"] body.premium-ui::before {
 
 html[data-style="glass"] body.premium-ui .gg-kit {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, auto) auto minmax(0, 1fr);
   align-items: center;
   gap: 12px 18px;
   margin: 20px 0 4px;
 }
+
+/* --- the room control ----------------------------------------------------- */
+
+/* Four swatches of the four paintings this theme can stand in. The swatch is the
+   painting itself (a 2.1 KB AVIF tile), which is the only honest way to choose a
+   background: no colour chip can tell you what the glass will bend. */
+.gg-rooms {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--tg-r-pill);
+  background-color: var(--tg-tint);
+  -webkit-backdrop-filter: var(--tg-filter);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow: var(--tg-rim-small);
+}
+
+.gg-room {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, .5);
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(96, 68, 74, .16);
+  transition: transform 160ms var(--vn-ease, ease), box-shadow 160ms var(--vn-ease, ease);
+}
+
+.gg-room img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gg-room[data-room="blush-hall"] { background-image: url("./assets/paint/blush-hall-640.webp"); }
+.gg-room[data-room="mint-class"] { background-image: url("./assets/paint/mint-class-640.webp"); }
+.gg-room[data-room="sand-desk"] { background-image: url("./assets/paint/sand-desk-640.webp"); }
+
+/* `plain` is the four fields with no painting — the look this theme had before,
+   kept as a choice rather than deleted. */
+.gg-room[data-room="plain"] {
+  background-image: linear-gradient(140deg, #f4b9c5, #f0d9b6 40%, #8fd9d0 78%, #f8c9ae);
+}
+
+.gg-room:hover { transform: translateY(-1px); }
+
+.gg-room[aria-pressed="true"] {
+  box-shadow: 0 0 0 2px var(--tg-accent), 0 4px 10px -6px rgba(96, 68, 74, .6);
+}
+
+.gg-room:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: 2px; }
 
 /* --- the segmented control ------------------------------------------------ */
 
@@ -682,9 +812,17 @@ html[data-style="glass"][data-lite="1"] body.premium-ui .gg-stat {
   box-shadow: inset 0 0 0 1px var(--tg-edge-dark);
 }
 
+/* Between a phone and a desktop the three controls do not fit on one line, so the
+   tiles take their own row instead of pushing the page sideways. */
+@media (max-width: 1080px) {
+  html[data-style="glass"] body.premium-ui .gg-kit { grid-template-columns: minmax(0, 1fr) auto; }
+  .gg-stats { grid-column: 1 / -1; }
+}
+
 /* A phone stacks the rail under the control and keeps the tiles equal. */
 @media (max-width: 720px) {
   html[data-style="glass"] body.premium-ui .gg-kit { grid-template-columns: minmax(0, 1fr); }
+  .gg-rooms { justify-self: start; }
   .gg-seg { width: 100%; justify-content: space-between; }
   .gg-seg-item { padding: 8px 11px; }
   .gg-stats { width: 100%; }
@@ -693,6 +831,175 @@ html[data-style="glass"][data-lite="1"] body.premium-ui .gg-stat {
 
 @media print {
   .gg-kit { display: none !important; }
+}
+
+/* ========================================================================
+   §11  THE DRAWER — glass over the painting, and it scrolls
+   ------------------------------------------------------------------------
+   The menu is the one screen where the reader is looking *past* the interface:
+   the conversation dims and blurs behind it, and the drawer itself is a sheet
+   with the room showing through. It also had a real bug — the middle column
+   could not shrink, so a long menu was clipped by the window instead of
+   scrolling. The layout fix is in `styles-next.css` (flex + `min-height: 0`);
+   this is the skin. */
+
+html[data-style="glass"] body.premium-ui .app-menu-overlay {
+  /* 26% plum and a 2px blur: the conversation is still there, out of focus, the
+     way a room is when you look at the window instead. Not an opaque curtain —
+     that is what made the drawer feel like a different application. */
+  background: var(--tg-scrim);
+  -webkit-backdrop-filter: blur(2px) saturate(120%);
+  backdrop-filter: blur(2px) saturate(120%);
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-panel {
+  border: 0;
+  border-radius: 0 var(--tg-r-slab) var(--tg-r-slab) 0;
+  corner-shape: round;
+  background-color: var(--tg-tint-strong);
+  background-image: var(--tg-sheet);
+  -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow:
+    var(--tg-rim),
+    18px 0 60px -30px rgba(43, 36, 48, .55);
+}
+
+/* The head stays put while the list moves under it: the close button is the one
+   control that must never scroll away. */
+html[data-style="glass"] body.premium-ui .app-menu-head {
+  padding: 16px 14px 14px 18px;
+  border-bottom: 1px solid rgba(96, 68, 74, .12);
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-head strong {
+  font-size: 12px;
+  letter-spacing: .14em;
+  color: var(--tg-muted);
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-account {
+  margin: 12px 12px 6px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: var(--tg-r-sheet);
+  background: rgba(255, 255, 255, .56);
+  box-shadow: var(--tg-rim-small);
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-avatar {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .8);
+  box-shadow: inset 0 1px 0 #fff, 0 1px 3px rgba(96, 68, 74, .18);
+  color: var(--tg-accent);
+  font-weight: 650;
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-account-actions button {
+  min-height: 34px;
+  border: 0;
+  border-radius: var(--tg-r-pill);
+  background: rgba(255, 255, 255, .7);
+  box-shadow: var(--tg-rim-small);
+  font-weight: 600;
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-account-actions button.primary {
+  background: linear-gradient(180deg, #0a6f68, var(--tg-accent));
+  color: #ffffff;
+}
+
+/* The scrolling part: a little air at the bottom so the last row is not glued to
+   the footer, and a scrollbar thin enough to ignore but visible enough to answer
+   "is there more?" — which was the whole complaint. */
+html[data-style="glass"] body.premium-ui .app-menu-scroll {
+  padding: 4px 10px 18px;
+  scroll-padding-block: 8px 18px;
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-scroll::-webkit-scrollbar { width: 8px; }
+html[data-style="glass"] body.premium-ui .app-menu-scroll::-webkit-scrollbar-track { background: transparent; }
+html[data-style="glass"] body.premium-ui .app-menu-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 99px;
+  background-clip: padding-box;
+  background-color: rgba(11, 92, 86, .35);
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-group {
+  padding: 0 0 8px;
+  border-bottom: 0;
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-label {
+  padding: 12px 10px 6px;
+  font-size: 11px;
+  letter-spacing: .16em;
+  color: var(--tg-muted);
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-item {
+  min-height: 42px;
+  gap: 11px;
+  padding: 0 12px;
+  border-radius: 13px;
+  color: var(--tg-ink);
+  font-weight: 550;
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-item svg {
+  width: 17px;
+  height: 17px;
+  opacity: .85;
+}
+
+/* The screen you are on is lifted out of the list, with the accent as a tick on
+   the left — the same idiom as the segmented control, so the two controls teach
+   each other. */
+html[data-style="glass"] body.premium-ui .app-menu-item[aria-current="page"] {
+  background: rgba(255, 255, 255, .8);
+  box-shadow: var(--tg-rim-small);
+  font-weight: 650;
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-item[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 11px;
+  bottom: 11px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--tg-accent);
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-item { position: relative; }
+
+html[data-style="glass"] body.premium-ui .app-menu-item:active {
+  background: rgba(255, 255, 255, .9);
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-foot {
+  padding: 12px 18px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(96, 68, 74, .12);
+  background: rgba(255, 255, 255, .3);
+  font-size: 12px;
+}
+
+html[data-style="glass"] body.premium-ui .app-menu-foot a { color: var(--tg-accent); }
+
+/* A slow device: no blur on the scrim, a solid drawer, no lens. */
+html[data-style="glass"][data-lite="1"] body.premium-ui .app-menu-overlay,
+html[data-style="glass"][data-lite="1"] body.premium-ui .app-menu-panel {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html[data-style="glass"][data-lite="1"] body.premium-ui .app-menu-panel {
+  background-color: rgba(253, 247, 242, .97);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -731,6 +1038,14 @@ html[data-style="glass"][data-lite="1"] body.premium-ui .gg-stat {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+}
+
+/* The painting stays in cheap mode — it is 11.7 KB and it is the room — but it
+   stops being filtered and it stops drifting, which are the two things a slow
+   GPU actually pays for. */
+html[data-lite="1"] body.premium-ui::before {
+  animation: none;
+  filter: none;
 }
 
 /* A phone has no spare GPU for a full-screen blur under a scrolling list, so the

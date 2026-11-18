@@ -1,0 +1,24 @@
+{
+  "plate": "blush-hall",
+  "stack": {
+    "veil": "#fdf7f25c",
+    "fields": [
+      "#f4b9c54d",
+      "#f0d9b64d",
+      "#8fd9d04d",
+      "#f8c9ae4d"
+    ],
+    "sheet": "#fffaf694"
+  },
+  "sheet": {
+    "ink": 12.14,
+    "muted": 5.74,
+    "accent": 6.35
+  },
+  "raw": {
+    "ink": 6.76,
+    "muted": 3.2,
+    "accent": 3.53
+  },
+  "measured": true
+}

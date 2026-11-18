@@ -1,6 +1,6 @@
 {
-  "version": 70,
-  "generatedAt": "2026-11-18T14:20:16.324Z",
+  "version": 71,
+  "generatedAt": "2026-11-18T14:59:05.405Z",
   "urls": [
     "./",
     "./index.html",
@@ -24,6 +24,7 @@
     "./assets/paint/blush-hall-1280.avif",
     "./assets/paint/blush-hall-640.avif",
     "./assets/paint/blush-hall-640.webp",
+    "./assets/paint/blush-hall.backdrop.json",
     "./assets/paint/blush-hall.palette.json",
     "./assets/paint/blush-hall.webp",
     "./assets/paint/book-stair-1280.avif",
@@ -85,6 +86,7 @@
     "./assets/paint/mint-class-1280.avif",
     "./assets/paint/mint-class-640.avif",
     "./assets/paint/mint-class-640.webp",
+    "./assets/paint/mint-class.backdrop.json",
     "./assets/paint/mint-class.palette.json",
     "./assets/paint/mint-class.webp",
     "./assets/paint/moss-hall-1280.avif",
@@ -135,6 +137,7 @@
     "./assets/paint/sand-desk-1280.avif",
     "./assets/paint/sand-desk-640.avif",
     "./assets/paint/sand-desk-640.webp",
+    "./assets/paint/sand-desk.backdrop.json",
     "./assets/paint/sand-desk.palette.json",
     "./assets/paint/sand-desk.webp",
     "./blog/a-demo-that-survives-a-power-cut.html",

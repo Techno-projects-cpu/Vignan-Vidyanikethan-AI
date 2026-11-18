@@ -138,7 +138,7 @@ request at all**, and the whole theme is 9KB of CSS.
   clears 4.5:1 there. Measured worst case: ink **12.9:1**, muted **6.1:1**, accent
   **4.9:1**. `tests/glass.test.mjs` recomposites all four fields and fails if a
   thinner sheet reads worse without saying so.
-- **Blur 8px, saturation 180%.** A 24px blur turned the pastels grey; the
+- **Blur 8px, saturation 180%, brightness 1.06.** A 24px blur turned the pastels grey; the
   refraction lens is what makes it glass, and the blur is only a safety net under
   the type (2px, the glasswork value, is unreadable where the lens is unavailable).
   Saturation is what makes frosted glass read as
@@ -146,6 +146,60 @@ request at all**, and the whole theme is 9KB of CSS.
 - **A light page needs a darker accent, not a brighter one.** White on `#0b726b` is
   **5.78:1**; the first candidate, `#0f8b83`, was 3.92:1 on the page and was
   rejected by the test, not by taste.
+
+### The room: a painting behind the glass
+
+The theme used to draw its own background — four radial fields on a cream page —
+and that was the mistake. A gradient has no detail to bend, so a panel over it
+reads as frosted plastic no matter how good the rim is. The room is now **one of
+the project's own paintings**, hung full-bleed and fixed:
+
+    painting (assets/paint/blush-hall.webp, 11.7 KB, precached)
+      → four pastel fields at 30%          (the theme's colours, as a wash)
+      → the veil, 36% warm white           (--tg-veil)
+      → a light from above, and the grain  (never anything darker)
+      → the sheet                          (--tg-tint, 58%)
+
+Every layer above the painting is measured by `tools/backdrop-report.mjs`, which
+composites the stack **pixel by pixel** and keeps the worst result. Measured
+through the sheet, over the darkest pixel of each room:
+
+| room | ink | muted | accent | ink straight on the painting |
+| --- | --- | --- | --- | --- |
+| blush hall | 12.1:1 | 5.7:1 | 6.3:1 | 6.8:1 |
+| mint class | 10.4:1 | 4.9:1 | 5.4:1 | **1.9:1** |
+| sand desk | 10.8:1 | 5.1:1 | 5.7:1 | **2.8:1** |
+
+The last column is why the Ask hero and the numbered page head became sheets: on
+the mint wall, dark ink straight on the painting is 1.9:1. Nothing readable is
+allowed to sit on the page itself.
+
+Two decisions follow from those numbers:
+
+- **The accent moved from `#0b726b` to `#075c56`.** The old one cleared 4.5:1 over
+  a flat gradient (4.9:1) and managed only 3.96:1 over the mint painting. The
+  deeper teal clears 5.4:1 there and 7.85:1 for white text on a filled button.
+  The landing page keeps `#0b726b`, because it is a paper document on a flat
+  sheet, not glass over a photograph.
+- **`plain` still exists.** The four fields with no painting is one of the four
+  choices in the room control, so the old look was kept rather than deleted.
+
+The room is chosen with the swatch control in the glass kit (the swatch *is* the
+painting, at 2.1 KB), stored as `vignan.room`, applied as `data-room` on `<html>`,
+and read before the first frame by the inline script in `index.html` so a reload
+never flashes the wrong wall. Cheap mode keeps the painting — it is 12 KB and it
+is the room — and drops the filter and the drift, which is what a slow GPU pays
+for.
+
+### The drawer
+
+The menu had a real bug: `.app-menu-scroll` was a flex child with
+`overflow: auto` and no `min-height: 0`, so instead of scrolling it grew to its
+content and pushed the footer out of the panel. Everything below the fold was
+unreachable, which is what "the menu is not scrollable" meant. Three declarations
+fix it (`flex: 1 1 auto; min-height: 0; overflow-y: auto`), the head and foot are
+pinned ends, and the drawer is now a glass sheet over a 2px-blurred scrim rather
+than an opaque wall in a second palette.
 
 ### The four layers a sheet is made of
 

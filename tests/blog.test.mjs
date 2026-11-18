@@ -255,7 +255,7 @@ test("the reading page is designed, not default", () => {
   // halves of the project from drifting apart one release at a time.
   // The reading page and the landing page are two halves of one project, so the
   // reading page may use any colour the landing page declares — and nothing else.
-  // It used to be five named pigments; from 2.35.0 the landing page's palette is
+  // It used to be five named pigments; from 2.36.0 the landing page's palette is
   // the whole daylight set, so the rule is simply "no colour of its own".
   const shared = new Set(
     [...landingCss.matchAll(/--wl-[a-z0-9-]+:\s*(#[0-9a-f]{6});/gi)].map((match) =>

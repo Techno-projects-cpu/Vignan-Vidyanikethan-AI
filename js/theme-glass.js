@@ -19,9 +19,14 @@
  * the glass over each of the four fields and takes the **worst** result, because a
  * panel sits over blush in one corner and over sand in another:
  *
- *   ink    12.9:1 over the strongest field   (floor: 7:1)
- *   muted   6.1:1 over the strongest field   (floor: 4.5:1)
- *   accent  4.9:1 over the strongest field   (floor: 4.5:1)
+ *   ink    10.3:1 through the sheet, over the darkest pixel of the darkest room
+ *   muted   4.9:1                                     (floor: 4.5:1)
+ *   accent  5.4:1                                     (floor: 4.5:1)
+ *
+ * Those are measured by `tools/backdrop-report.mjs`, which composites the real
+ * stack — painting, four fields, veil, sheet — pixel by pixel and takes the worst.
+ * The accent moved from `#0b726b` to `#075c56` because of it: the old one cleared
+ * 4.5:1 over a flat gradient and only managed 3.96:1 over the mint painting.
  *
  * The sheet is white at 58%: any thinner and the accent starts dropping below AA
  * on the blush corner; any thicker and the fields stop being visible through the
@@ -40,7 +45,7 @@ export const GLASS_THEME = {
   bg: "#fdf7f2",
   surface: "#fffaf6",
   ink: "#2b2430",
-  accent: "#0b726b",
+  accent: "#075c56",
   /** Ink that sits *on* the accent (the filled button's label). */
   accentInk: "#ffffff",
   /** The quiet ink: captions, meta, anything that is not the sentence itself. */
@@ -51,10 +56,10 @@ export const GLASS_THEME = {
    * a field that covers a third of the screen is a second background, not a glow.
    */
   aurora: [
-    { id: "blush", hex: "#f4b9c5", alpha: 0.62, at: ["14%", "22%"], r: ["46%", "42%"] },
-    { id: "sand", hex: "#f0d9b6", alpha: 0.58, at: ["86%", "14%"], r: ["40%", "36%"] },
-    { id: "lagoon", hex: "#8fd9d0", alpha: 0.5, at: ["72%", "90%"], r: ["48%", "42%"] },
-    { id: "peach", hex: "#f8c9ae", alpha: 0.44, at: ["10%", "86%"], r: ["38%", "38%"] },
+    { id: "blush", hex: "#f4b9c5", alpha: 0.3, at: ["14%", "22%"], r: ["46%", "42%"] },
+    { id: "sand", hex: "#f0d9b6", alpha: 0.3, at: ["86%", "14%"], r: ["40%", "36%"] },
+    { id: "lagoon", hex: "#8fd9d0", alpha: 0.3, at: ["72%", "90%"], r: ["48%", "42%"] },
+    { id: "peach", hex: "#f8c9ae", alpha: 0.3, at: ["10%", "86%"], r: ["38%", "38%"] },
   ],
 
   /** White glass, as an alpha over whatever is behind it. */
@@ -85,6 +90,18 @@ export const GLASS_THEME = {
   bright: 1.06,
   /** The colour the glass is made of. Light glass is white with a warm cast. */
   glassColour: "#fffaf6",
+
+  /**
+   * The room behind the glass: one of the project's own paintings, plus the four
+   * pastel fields washed over it at 30%. Chosen with the control in the glass kit
+   * and remembered per device. `plain` is the four fields with no painting —
+   * this theme as it was before the paintings were put behind it.
+   */
+  room: {
+    default: "blush-hall",
+    plates: ["blush-hall", "mint-class", "sand-desk"],
+    veil: 0.36,
+  },
 };
 
 /** The tint as a CSS colour, from the same numbers the test measures. */
