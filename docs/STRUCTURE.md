@@ -9,12 +9,14 @@ is somebody else's.
 /
 ├── index.html              the app (one document, eleven screens)
 ├── welcome.html            the landing page — no JavaScript at all
-├── judge.html  privacy.html  terms.html  security.html  copyright.html
+├── judge.html  legal.html  privacy.html  terms.html  acceptable-use.html
+│                           cookies.html  security.html  subprocessors.html
+│                           accessibility.html  disclaimer.html  copyright.html
 ├── blog/                   ten pieces + an index, hand-written HTML
 │
-├── js/                     75 modules, native ES modules, no bundler
-├── styles*.css             11 stylesheets, one per surface (see below)
-├── assets/                 two bundled fonts, brand marks, four painted plates
+├── js/                     77 modules, native ES modules, no bundler
+├── styles*.css             12 stylesheets, one per surface (see below)
+├── assets/                 two bundled fonts, brand marks, twelve painted plates (WebP)
 ├── icons/                  app icons, 48 → 512, plus the maskable pair
 ├── vendor/pdfjs/           the PDF reader, vendored so it works offline
 │
@@ -25,7 +27,7 @@ is somebody else's.
 ├── precache.json           generated: every file the worker installs
 ├── manifest.webmanifest    the installable-app manifest
 │
-├── tests/                  76 files, `node --test`, no dependencies
+├── tests/                  80 files, `node --test`, no dependencies
 ├── tools/                  precache generator, offline simulator, secret scan,
 │                           the live-deploy check, and the address rewriter
 ├── docs/                   this folder: design, deploy, credits, checklist

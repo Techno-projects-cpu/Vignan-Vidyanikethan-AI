@@ -339,7 +339,12 @@ test("the palette is the paintings' palette, and nothing else", () => {
   // one depth cue on the page is the drop shadow under the paper specimen, which
   // is a page lying on a table rather than a card floating in a dashboard.
   assert.doesNotMatch(css, /border-radius:\s*(?!0)/, "no rounded corners");
-  assert.doesNotMatch(css, /box-shadow:/, "no shadows: depth is a line, except the paper");
+  // Depth is still a line, with two named exceptions: the sheet of paper lying on
+  // the table, and the one-pixel highlight along the top edge of the glass bar —
+  // which is a line pretending to be light, not a shadow.
+  for (const [, value] of css.matchAll(/box-shadow:\s*([^;]+);/g)) {
+    assert.match(value.trim(), /^inset 0 1px 0 /, `only a hairline highlight, found "${value.trim()}"`);
+  }
   assert.match(css, /filter: drop-shadow\(/, "the specimen is a page on a table");
   assert.match(css, /\.wl-stack \{ border: 1px solid var\(--wl-line\); \}/);
   assert.match(css, /\.wl-cell \{[\s\S]*?border-bottom: 1px solid var\(--wl-line\)/);

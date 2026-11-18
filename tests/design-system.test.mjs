@@ -140,8 +140,12 @@ test("the layer stays a surface layer", () => {
   }
   // !important is a last resort; a handful for the legacy sr-only overrides is
   // acceptable, dozens would mean the layer is fighting itself.
+  // The budget went from 20 to 26 in 2.32.0: the reduced-motion block has to
+  // force the view entrance and the glass sweep off against more specific rules,
+  // and `!important` is the correct tool for exactly that. Beyond a couple of
+  // dozen, the layer would be fighting itself rather than the shell above it.
   const important = (css.match(/!important/g) || []).length;
-  assert.ok(important <= 20, `!important count is ${important}`);
+  assert.ok(important <= 26, `!important count is ${important}`);
 });
 
 test("the two faces are preloaded, not discovered late", () => {
@@ -181,7 +185,9 @@ test("every colour and size the design layer uses actually exists", () => {
   // A `var(--vn-ink-3)` that nobody defines does not fall back to something
   // sensible: the whole declaration is dropped, and the rule silently does
   // nothing. That is how a "capped" border and a focus ring can ship invisible.
-  const base = ["styles.css", "styles-premium.css", "styles-identity.css", "styles-legal.css"]
+  // The painted themes live in their own generated sheet (`styles-painted.css`)
+  // and are referenced by name from this layer, so it counts as a definition too.
+  const base = ["styles.css", "styles-premium.css", "styles-identity.css", "styles-legal.css", "styles-painted.css"]
     .filter((file) => { try { readFileSync(new URL(`../${file}`, import.meta.url)); return true; } catch { return false; } })
     .map((file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8"))
     .join("\n");

@@ -21,6 +21,7 @@
 
 import http from "node:http";
 import fs from "node:fs/promises";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { isIP } from "node:net";
 import { fileURLToPath } from "node:url";
@@ -196,20 +197,120 @@ const socialRouter = socialService
 
 // Restrict executable content while keeping the app's offline workers, local
 // model downloads, browser-generated videos and Arena's embedded preview usable.
-const CONTENT_SECURITY_POLICY = [
-  "default-src 'self'",
-  "script-src 'self' 'wasm-unsafe-eval'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
-  "font-src 'self' data: blob:",
-  "connect-src 'self' https: http: wss: ws:",
-  "worker-src 'self' blob:",
-  "media-src 'self' data: blob:",
-  "frame-src 'self' blob:",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-].join("; ");
+/**
+ * The address of every service the browser is allowed to talk to.
+ *
+ * Until 2.32.0 `connect-src` was `https: http: wss: ws:` — which is to say, any
+ * address at all. A policy that permits everything is not a policy; it turns a
+ * cross-site-scripting bug from "the attacker can read this page" into "the
+ * attacker can send this page's contents anywhere". The list below is the app's
+ * actual traffic, read out of `js/providers.js`, `js/web.js` and `js/local-ai.js`:
+ * the model providers a student may key in, the search fallbacks, the model files
+ * WebLLM downloads once, Wikipedia, and the deployment's own Supabase project.
+ * Anything else is refused by the browser, not by our judgement.
+ */
+const BROWSER_CONNECT_SOURCES = [
+  // Model providers the app can call directly, with the student's own key.
+  "https://api.openai.com",
+  "https://api.anthropic.com",
+  "https://api.groq.com",
+  "https://api.mistral.ai",
+  "https://api.cohere.ai",
+  "https://api.deepseek.com",
+  "https://api.together.xyz",
+  "https://openrouter.ai",
+  "https://generativelanguage.googleapis.com",
+  "https://api.cloudflare.com",
+  "https://api.arena.ai",
+  // A local model server the student runs on their own machine, and the two
+  // ports the app documents for it.
+  "http://localhost:11434",
+  "http://127.0.0.1:11434",
+  "http://localhost:1234",
+  "http://127.0.0.1:1234",
+  // Model files for the keyless on-device engine, fetched once, then cached.
+  "https://huggingface.co",
+  "https://cdn-lfs.huggingface.co",
+  "https://cdn-lfs-us-1.hf.co",
+  "https://raw.githubusercontent.com",
+  // Search fallbacks and the reference shelf.
+  "https://en.wikipedia.org",
+  "https://*.wikipedia.org",
+  "https://api.duckduckgo.com",
+];
+
+/** The deployment's own Supabase project, if one is configured. */
+function supabaseConnectSource() {
+  try {
+    const host = new URL(SUPABASE_URL).host;
+    return host ? [`https://${host}`, `wss://${host}`] : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * A hash for every inline `<script>` in the pages we serve.
+ *
+ * The app paints the saved theme before the first frame from a tiny inline
+ * script, and the reading pages carry JSON-LD. Both are legitimate; neither
+ * needs `unsafe-inline`, which would throw away most of the value of having a
+ * policy at all. Instead each page's inline scripts are hashed at startup and the
+ * hashes are listed, so an injected tag is refused while our own tags run. Only
+ * HTML in the repository is scanned, at boot, once.
+ */
+function inlineScriptHashes(root = ROOT) {
+  const hashes = new Set();
+  const walk = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.name.startsWith(".") || entry.name === "node_modules" || entry.name === "vendor") continue;
+      const full = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+        continue;
+      }
+      if (!entry.name.endsWith(".html")) continue;
+      const html = readFileSync(full, "utf8");
+      for (const [, attributes, body] of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)) {
+        if (/\bsrc\s*=/.test(attributes)) continue;
+        if (!body.trim()) continue;
+        hashes.add(`'sha256-${createHash("sha256").update(body, "utf8").digest("base64")}'`);
+      }
+    }
+  };
+  walk(root);
+  return [...hashes].sort();
+}
+
+function contentSecurityPolicy() {
+  const hashes = inlineScriptHashes();
+  const connect = ["'self'", ...BROWSER_CONNECT_SOURCES, ...supabaseConnectSource()];
+  return [
+    "default-src 'self'",
+    // Our own bundles, the on-device engine's WebAssembly, and the hashes of the
+    // two genuinely inline scripts. No 'unsafe-inline', no eval.
+    `script-src 'self' 'wasm-unsafe-eval' ${hashes.join(" ")}`.trim(),
+    // Inline *style* is unavoidable in a theme gallery (a swatch is set from
+    // data); it cannot execute anything, so this one is a real, bounded exception.
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self' data: blob:",
+    `connect-src ${connect.join(" ")}`,
+    "worker-src 'self' blob:",
+    "media-src 'self' data: blob:",
+    "frame-src 'self' blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    // Framing stays open on purpose: the live preview embeds this page in an
+    // iframe. Clickjacking is bounded by CSRF tokens and the same-origin check on
+    // every mutation. No frame directive is emitted here at all, and the reason is
+    // written down in docs/THREAT-MODEL.md.
+    "upgrade-insecure-requests",
+  ].join("; ");
+}
+
+const CONTENT_SECURITY_POLICY = contentSecurityPolicy();
 
 /** True when the request reached us over TLS (directly or via a proxy). */
 function isHttps(request) {
@@ -961,7 +1062,7 @@ function buildInfo() {
 function health() {
   return {
     ok: true,
-    version: "2.31.0",
+    version: "2.32.0",
     // `version` is what the code says; `build` is what the host says it built.
     // When those two disagree with the repository, the deploy target is wrong,
     // not the code.
@@ -1193,7 +1294,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.31.0</strong></div>
+      <div><span>release</span><strong>2.32.0</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1307,7 +1408,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.31.0",
+    release: "2.32.0",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);

@@ -557,13 +557,97 @@ body.premium-ui .view:not(.active) {
   contain-intrinsic-size: auto 900px;
 }
 
+/* Entering a screen.
+ *
+ * The old entrance was a 6px rise and a fade — invisible unless you knew to look.
+ * A screen now arrives the way a page is turned: the new surface is wiped in from
+ * the top edge, settles down onto the table, and its panels follow in order. One
+ * movement per screen, then it stops; nothing loops in a working surface, because
+ * a student is usually typing into it. */
 body.premium-ui .view.active {
-  animation: vn-view-in var(--vn-slow) var(--vn-ease) both;
+  animation: vn-view-in 420ms var(--vn-ease) both;
 }
 
 @keyframes vn-view-in {
-  from { opacity: 0; transform: translateY(6px); }
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 14% 0);
+    transform: translateY(16px) scale(.996);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+
+/* Its panels follow it in, 40ms apart, so the screen assembles rather than
+ * appearing. Capped at six children: past that it is a queue, not a gesture. */
+body.premium-ui .view.active > *:nth-child(-n + 6) {
+  animation: vn-panel-in 460ms var(--vn-ease) both;
+}
+body.premium-ui .view.active > *:nth-child(1) { animation-delay: 40ms; }
+body.premium-ui .view.active > *:nth-child(2) { animation-delay: 80ms; }
+body.premium-ui .view.active > *:nth-child(3) { animation-delay: 120ms; }
+body.premium-ui .view.active > *:nth-child(4) { animation-delay: 160ms; }
+body.premium-ui .view.active > *:nth-child(5) { animation-delay: 200ms; }
+body.premium-ui .view.active > *:nth-child(6) { animation-delay: 240ms; }
+
+@keyframes vn-panel-in {
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
+}
+
+/* The glass answers the pointer.
+ *
+ * A specular sweep across a frosted panel: one band of light travelling from the
+ * top-left to the bottom-right, once, on hover — and only in the painted themes,
+ * where there is a light behind the panel for it to catch. On a flat style there
+ * is nothing behind the glass, so nothing happens. */
+html[data-paint="1"] body.premium-ui .card,
+html[data-paint="1"] body.premium-ui .panel {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 220ms var(--vn-ease), transform 260ms var(--vn-ease);
+}
+
+html[data-paint="1"] body.premium-ui .card::before,
+html[data-paint="1"] body.premium-ui .panel::before {
+  content: "";
+  position: absolute;
+  inset: -40% -60%;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, .12) 48%, rgba(255, 255, 255, .04) 54%, transparent 62%);
+  transform: translate3d(-70%, 0, 0);
+  transition: transform 900ms var(--vn-ease);
+}
+
+html[data-paint="1"] body.premium-ui .card:hover::before,
+html[data-paint="1"] body.premium-ui .panel:hover::before,
+html[data-paint="1"] body.premium-ui .card:focus-within::before {
+  transform: translate3d(70%, 0, 0);
+}
+
+html[data-paint="1"] body.premium-ui .card:hover {
+  border-color: color-mix(in srgb, var(--tp-accent) 46%, transparent);
+}
+
+/* Content sits above the sweep. */
+html[data-paint="1"] body.premium-ui .card > *,
+html[data-paint="1"] body.premium-ui .panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* A painted theme's buttons press into the glass rather than jumping. */
+html[data-paint="1"] body.premium-ui .button,
+html[data-paint="1"] body.premium-ui .premium-button {
+  transition: transform 140ms var(--vn-ease), box-shadow 200ms var(--vn-ease), background 200ms var(--vn-ease);
+}
+html[data-paint="1"] body.premium-ui .button:active,
+html[data-paint="1"] body.premium-ui .premium-button:active {
+  transform: translateY(1px) scale(.99);
 }
 
 body.premium-ui .section-toolbar {
@@ -1564,6 +1648,9 @@ body.premium-ui .update-row strong {
   }
 
   body.premium-ui .view.active { animation: none; }
+  body.premium-ui .view.active > * { animation: none !important; opacity: 1 !important; transform: none !important; }
+  html[data-paint="1"] body.premium-ui .card::before,
+  html[data-paint="1"] body.premium-ui .panel::before { display: none !important; }
 }
 
 @media (prefers-contrast: more) {

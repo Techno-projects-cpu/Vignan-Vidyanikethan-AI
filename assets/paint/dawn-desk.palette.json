@@ -1,0 +1,48 @@
+{
+  "plate": "dawn-desk",
+  "roles": [
+    {
+      "hex": "#f1e4c6",
+      "weight": 51.4,
+      "chroma": 15.9,
+      "lightness": 91.5
+    },
+    {
+      "hex": "#bb996e",
+      "weight": 27.2,
+      "chroma": 27,
+      "lightness": 65.8
+    },
+    {
+      "hex": "#714d31",
+      "weight": 21.4,
+      "chroma": 24.3,
+      "lightness": 36.3
+    }
+  ],
+  "balance": {
+    "share": [
+      51.4,
+      27.2,
+      21.4
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 19.9,
+    "secondaryAccent": 29.8,
+    "dominantAccent": 47.5
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.26,
+    "darkWorst": 2.66
+  },
+  "safe": {
+    "forCream": 21.4,
+    "forInk": 78.6
+  },
+  "measured": true
+}

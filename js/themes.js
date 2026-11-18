@@ -17,7 +17,17 @@
  *      does, only how it looks, and it is saved per device.
  */
 
-/** Six styles, ordered from quietest to loudest. */
+import { PAINTED_THEMES, asTheme } from "./theme-paint.js?v=65";
+
+/**
+ * Six classic styles plus the painted edition, ordered from quietest to loudest.
+ *
+ * The painted ones are generated from `js/theme-paint.js` (a plate, a palette
+ * measured from that plate, and a glass alpha that is raised until the theme is
+ * readable). They arrive last because they are the loudest thing here, and
+ * because a school table used to the six quiet looks should not open on a
+ * painting it did not ask for.
+ */
 export const THEMES = [
   {
     id: "minimal",
@@ -83,7 +93,13 @@ export const THEMES = [
     bg: "#f2efe6", surface: "#fffdf5", ink: "#0b0b0b", accent: "#ffe14d",
     swatches: ["#f2efe6", "#fffdf5", "#ffe14d"],
   },
+  ...PAINTED_THEMES.map(asTheme),
 ];
+
+/** Is this a painted (plate-backed) theme? Used by the app to set `data-paint`. */
+export function isPaintedStyle(id) {
+  return PAINTED_THEMES.some((theme) => theme.id === id);
+}
 
 export const DEFAULT_STYLE = "minimal";
 

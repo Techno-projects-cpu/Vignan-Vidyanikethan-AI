@@ -1,9 +1,9 @@
 /** Clearly labelled, extractive answers from outside the student's books. */
-import { retrieve } from "./retrieval.js?v=64";
-import { linkTopic, searchTopic } from "./conversation.js?v=64";
-import { salientSentences, splitSentences, tokenize } from "./text.js?v=64";
-import { truncate } from "./util.js?v=64";
-import { t } from "./i18n.js?v=64";
+import { retrieve } from "./retrieval.js?v=65";
+import { linkTopic, searchTopic } from "./conversation.js?v=65";
+import { salientSentences, splitSentences, tokenize } from "./text.js?v=65";
+import { truncate } from "./util.js?v=65";
+import { t } from "./i18n.js?v=65";
 
 function quoteFrom(text, query, { opening = false, limit = 2, maxChars = 600 } = {}) {
   const raw = opening ? splitSentences(text).slice(0, limit) : salientSentences(text, query, limit);

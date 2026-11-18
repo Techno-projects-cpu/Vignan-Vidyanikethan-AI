@@ -6,14 +6,14 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=64";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=64";
-import { ingestPdf, ingestText } from "./ingest.js?v=64";
-import { splitSentences } from "./text.js?v=64";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=64";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=64";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=64";
-import { carryOverHits, contextChipLabel, conversationBrief, resolveQuery } from "./memory.js?v=64";
+import * as db from "./db.js?v=65";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=65";
+import { ingestPdf, ingestText } from "./ingest.js?v=65";
+import { splitSentences } from "./text.js?v=65";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=65";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=65";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=65";
+import { carryOverHits, contextChipLabel, conversationBrief, resolveQuery } from "./memory.js?v=65";
 import {
   LANGUAGES as CODE_LANGUAGES,
   checkPrediction,
@@ -29,20 +29,20 @@ import {
   predictOutput,
   requestedCodeLesson,
   unpredictableReason,
-} from "./code-mode.js?v=64";
-import { answerOutOfView, isFollowing, readChatBox, scrollForAnswer, scrollForLatest } from "./chat-scroll.js?v=64";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=64";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=64";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=64";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=64";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=64";
+} from "./code-mode.js?v=65";
+import { answerOutOfView, isFollowing, readChatBox, scrollForAnswer, scrollForLatest } from "./chat-scroll.js?v=65";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=65";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=65";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=65";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=65";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=65";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=64";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=64";
-import { RELEASE, startUpdateWatch } from "./updates.js?v=64";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=64";
+} from "./pro-mode.js?v=65";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=65";
+import { RELEASE, startUpdateWatch } from "./updates.js?v=65";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=65";
 import {
   SHORTCUTS,
   fitComposerHeight,
@@ -54,18 +54,18 @@ import {
   shouldShowToTop,
   shortcutForKey,
   windowScrollState,
-} from "./viewport.js?v=64";
+} from "./viewport.js?v=65";
 import {
   OFFLINE_MODE_LABEL,
   OFFLINE_MODE_NOTE,
   isOfflineMode,
   networkAllowed,
   setOfflineMode,
-} from "./offline-mode.js?v=64";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=64";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=64";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=64";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=64";
+} from "./offline-mode.js?v=65";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=65";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=65";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=65";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=65";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -73,8 +73,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=64";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=64";
+} from "./llm.js?v=65";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=65";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -86,7 +86,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=64";
+} from "./local-ai.js?v=65";
 import {
   EXAMS,
   MODES,
@@ -101,12 +101,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=64";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=64";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=64";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=64";
-import { TASKS } from "./model-router.js?v=64";
-import { PROVIDERS, providerList } from "./providers.js?v=64";
+} from "./exam-packs.js?v=65";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=65";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=65";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=65";
+import { TASKS } from "./model-router.js?v=65";
+import { PROVIDERS, providerList } from "./providers.js?v=65";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -115,30 +115,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=64";
-import { parseApiKeys } from "./key-pool.js?v=64";
+} from "./settings.js?v=65";
+import { parseApiKeys } from "./key-pool.js?v=65";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=64";
+} from "./student-keys.js?v=65";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=64";
+} from "./quiz.js?v=65";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=64";
+} from "./flashcards.js?v=65";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=64";
+} from "./study-decks.js?v=65";
 import {
   accuracy,
   currentStreak,
@@ -149,17 +149,17 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=64";
-import { externalSearchUrl, searchWeb } from "./web.js?v=64";
-import { openEditStudio } from "./edit-studio.js?v=64";
-import { openReader } from "./reader.js?v=64";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=64";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=64";
-import { DEFAULT_STYLE, THEMES, isKnownStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=64";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=64";
-import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=64";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=64";
-import * as ui from "./ui.js?v=64";
+} from "./progress.js?v=65";
+import { externalSearchUrl, searchWeb } from "./web.js?v=65";
+import { openEditStudio } from "./edit-studio.js?v=65";
+import { openReader } from "./reader.js?v=65";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=65";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=65";
+import { DEFAULT_STYLE, THEMES, isKnownStyle, isPaintedStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=65";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=65";
+import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=65";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=65";
+import * as ui from "./ui.js?v=65";
 import {
   clearReferral,
   getLeaderboard,
@@ -169,8 +169,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=64";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=64";
+} from "./auth.js?v=65";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=65";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -178,14 +178,14 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=64";
-import { initMotion, revealVisible } from "./motion.js?v=64";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=64";
-import { recentQuestions, todaySummary, whenText } from "./ask-recent.js?v=64";
-import { buildStudyCard, cardTitle } from "./study-card.js?v=64";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=64";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=64";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=64";
+} from "./premium-ui.js?v=65";
+import { initMotion, revealVisible } from "./motion.js?v=65";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=65";
+import { recentQuestions, todaySummary, whenText } from "./ask-recent.js?v=65";
+import { buildStudyCard, cardTitle } from "./study-card.js?v=65";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=65";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=65";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=65";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -1600,6 +1600,11 @@ function applyStyle(id, { save = true, remember = true } = {}) {
   const root = document.documentElement;
   if (style === DEFAULT_STYLE) root.removeAttribute("data-style");
   else root.dataset.style = style;
+  // A painted theme is a plate behind frosted glass; every other style is a flat
+  // surface. One attribute switches the whole treatment in styles-painted.css, so
+  // a style that is not painted cannot inherit a painting's ground by accident.
+  if (isPaintedStyle(style)) root.dataset.paint = "1";
+  else root.removeAttribute("data-paint");
   if (remember) {
     try { localStorage.setItem(STYLE_MIRROR_KEY, style); } catch { /* private mode */ }
   }
@@ -6310,7 +6315,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=64");
+            const { social } = await import("./social.js?v=65");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));

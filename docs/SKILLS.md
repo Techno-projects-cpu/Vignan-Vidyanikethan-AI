@@ -122,6 +122,42 @@ The pictures themselves were generated as image models output, not traced from
 any work, and no third-party asset, font or script was shipped: four WebP files,
 404KB together, committed here and precached.
 
+### The second painted round (2.32.0) — the skills, and colour science as a check
+
+The user asked for many more of the backgrounds, glass over them, the current look
+kept as a Legacy theme, palettes justified by colour theory, stronger animation,
+security and legal papers. The four skills were applied again, but this round a
+second, harder critic joined them: measurement.
+
+- **Cloveric/claude-drawing-skill** — the ink and watercolour constraints were
+  reused for all eight new plates: at most three glazes, one light, dry-brush edges
+  thinning into bare paper, warm off-white instead of white, and a rim that only
+  torn on part of an edge. That is why `frost-glass` is read by the k-means as an
+  accent plate: its glaze field is too broken up to be a ground, and the report
+  says so before a human notices.
+- **Bangtutorial/bang-motion** — its two rules that shaped this round were "the
+  background never static" (twelve plates, each with its own slow drift) and the
+  text-pocket luminance rule. The glass tint alphas are that rule, made numeric:
+  ink must clear 4.6:1 over every plate role, which is how a panel ends up at 0.76
+  instead of a pretty 0.5.
+- **Alchaincyf/huashu-art-motion** — the style lock ("one style, six pigments, no
+  people") is what makes twelve plates look like one book rather than twelve
+  wallpapers, and its ban on blue-purple is the same law the palette derivation
+  enforces by taking the plate's own hue.
+- **Alisa0808/vox-director** — storyboard discipline again: every plate and every
+  animation is a finished frame first. The reduced-motion block is that promise
+  made executable.
+
+**What changed in the method:** taste was replaced with a derivation wherever it
+could be. Three hand-tuning attempts failed — accents 19–42 ΔE from the seal,
+panels collapsing to 2.6–7.5 ΔE from their page, ink at 3.64:1 through glass —
+before the rule now written in `js/theme-paint.js` was found. The lesson is
+recorded there: a palette is derived from the painting, then checked against WCAG,
+then checked against the 60-30-10 rule; it is never chosen by eye and defended in
+prose. `js/colour.js` (compositing, CIEDE2000, circular hue, 60-30-10 balance) is
+the instrument, and `tests/colour.test.mjs` pins it to published reference values
+(including the Sharma/Wu/Dalal ΔE pairs) so the instrument itself is calibrated.
+
 ## The skills the site itself carries
 
 Separately from the four above, the design work is checked by

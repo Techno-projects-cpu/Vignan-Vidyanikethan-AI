@@ -21,10 +21,18 @@ const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(fileURLToPath(new URL(path, root)), "utf8");
 const html = read("index.html");
 const css = read("styles-custom.css");
+const paintedCss = read("styles-painted.css");
+// Painted themes are generated into their own sheet; both are the app's look.
+const everySheet = `${css}\n${paintedCss}`;
 const app = read("js/app.js");
 
-test("six styles, complete and distinct", () => {
-  assert.equal(THEMES.length, 6);
+test("thirteen styles — six classic and seven painted — complete and distinct", () => {
+  // 2.32.0 added the painted edition: seven plate-backed themes generated from
+  // js/theme-paint.js. The six classic looks are untouched, including Minimal,
+  // which is still the absence of an attribute rather than a block of CSS.
+  assert.equal(THEMES.length, 13);
+  assert.equal(THEMES.filter((theme) => theme.painted).length, 7);
+  assert.equal(THEMES.filter((theme) => !theme.painted).length, 6);
   const ids = THEMES.map((theme) => theme.id);
   assert.equal(new Set(ids).size, ids.length, "every id is unique");
   assert.ok(ids.includes(DEFAULT_STYLE));
@@ -75,21 +83,30 @@ test("a stale or unknown saved style can never blank the app", () => {
 
 test("the preview swatches and the stylesheet agree, colour for colour", () => {
   for (const theme of THEMES.filter((entry) => entry.id !== "minimal")) {
-    const start = css.indexOf(`html[data-style="${theme.id}"] body.premium-ui {`);
-    const block = css.slice(start, css.indexOf("}", start));
+    const start = everySheet.indexOf(`html[data-style="${theme.id}"] body.premium-ui {`);
+    const block = everySheet.slice(start, everySheet.indexOf("}", start));
+    // Painted themes set their surface and ink through the app's tokens; their own
+    // `--tp-` block carries the same three colours in the theme's own names.
+    const tp = everySheet.slice(everySheet.indexOf(`html[data-style="${theme.id}"] {`));
+    const own = tp.slice(0, tp.indexOf("}"));
     const read = (token) => (block.match(new RegExp(`${token}:\\s*(#[0-9a-f]{6})`, "i")) || [])[1];
     assert.equal(read("--p-bg"), theme.bg, `${theme.id}: background matches`);
     assert.equal(read("--p-surface\\b"), theme.surface, `${theme.id}: surface matches`);
     assert.equal(read("--p-ink\\b"), theme.ink, `${theme.id}: ink matches`);
+    if (theme.painted) {
+      assert.match(own, new RegExp(`--tp-bg: ${theme.bg};`), `${theme.id}: plate block background`);
+      assert.match(own, new RegExp(`--tp-surface: ${theme.surface};`), `${theme.id}: plate block surface`);
+      assert.match(own, new RegExp(`--tp-accent: ${theme.accent};`), `${theme.id}: plate block accent`);
+    }
   }
 });
 
 test("every style has all its tokens, so none borrows from another", () => {
   const tokens = ["--p-bg", "--p-surface", "--p-surface-2", "--p-surface-3", "--p-ink", "--p-ink-2", "--p-muted", "--p-line", "--p-line-strong", "--p-radius", "--font"];
   for (const theme of THEMES.filter((entry) => entry.id !== "minimal")) {
-    const start = css.indexOf(`html[data-style="${theme.id}"] body.premium-ui {`);
+    const start = everySheet.indexOf(`html[data-style="${theme.id}"] body.premium-ui {`);
     assert.ok(start > 0, `${theme.id} has its own block`);
-    const block = css.slice(start, css.indexOf("}", start));
+    const block = everySheet.slice(start, everySheet.indexOf("}", start));
     for (const token of tokens) {
       assert.ok(block.includes(token), `${theme.id} sets ${token}`);
     }

@@ -1,0 +1,398 @@
+/*
+ * Painted themes — GENERATED FILE, do not edit.
+ *
+ *   node tools/generate-painted-css.mjs
+ *
+ * Source: js/theme-paint.js. Every block below is one entry in that file; the
+ * palette of each comes from the painting it is built on, measured by
+ * tools/palette-report.mjs. If this file is edited by hand, `npm run check`
+ * fails with the command to regenerate it.
+ *
+ * The glass: each theme's panel alpha was verified against the brightest and the
+ * darkest role of its own plate. The floor for that theme is printed beside it.
+ * Anything below 4.5:1 would have failed generation.
+ */
+
+/* The grain, once. A frosted surface without a tooth reads as a flat rectangle. */
+html {
+  --tp-grain-shared: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='%23fff' opacity='0.06'%3E%3Ccircle cx='33.4' cy='127.9' r='0.95'/%3E%3Ccircle cx='129.8' cy='6.9' r='1.17'/%3E%3Ccircle cx='50.5' cy='7.4' r='0.46'/%3E%3Ccircle cx='137.8' cy='136.2' r='0.88'/%3E%3Ccircle cx='63.3' cy='76.7' r='0.94'/%3E%3Ccircle cx='108.8' cy='109.2' r='0.78'/%3E%3Ccircle cx='66.4' cy='119.3' r='0.73'/%3E%3Ccircle cx='67.4' cy='12.9' r='1.07'/%3E%3Ccircle cx='116.8' cy='50.1' r='0.56'/%3E%3Ccircle cx='137.4' cy='17.1' r='0.81'/%3E%3Ccircle cx='63.9' cy='15.1' r='0.50'/%3E%3Ccircle cx='87.0' cy='108.2' r='0.48'/%3E%3Ccircle cx='84.8' cy='129.7' r='0.64'/%3E%3Ccircle cx='82.7' cy='49.4' r='0.68'/%3E%3Ccircle cx='71.7' cy='99.6' r='0.68'/%3E%3Ccircle cx='22.1' cy='122.4' r='0.96'/%3E%3Ccircle cx='53.1' cy='139.5' r='0.84'/%3E%3Ccircle cx='24.9' cy='35.5' r='1.23'/%3E%3Ccircle cx='82.3' cy='69.0' r='0.56'/%3E%3Ccircle cx='60.8' cy='25.0' r='0.40'/%3E%3Ccircle cx='96.8' cy='106.4' r='0.53'/%3E%3Ccircle cx='76.0' cy='103.9' r='1.19'/%3E%3Ccircle cx='52.0' cy='56.9' r='0.97'/%3E%3Ccircle cx='116.0' cy='70.5' r='0.83'/%3E%3Ccircle cx='110.0' cy='134.0' r='0.69'/%3E%3Ccircle cx='123.9' cy='29.0' r='0.65'/%3E%3Ccircle cx='133.0' cy='100.1' r='0.59'/%3E%3Ccircle cx='7.3' cy='41.1' r='1.14'/%3E%3Ccircle cx='106.4' cy='29.5' r='0.86'/%3E%3Ccircle cx='105.9' cy='58.4' r='0.70'/%3E%3Ccircle cx='49.3' cy='28.8' r='1.18'/%3E%3Ccircle cx='28.6' cy='95.0' r='1.03'/%3E%3Ccircle cx='61.7' cy='37.6' r='0.87'/%3E%3Ccircle cx='47.2' cy='14.1' r='0.75'/%3E%3Ccircle cx='65.2' cy='105.1' r='1.18'/%3E%3Ccircle cx='108.3' cy='32.4' r='1.02'/%3E%3Ccircle cx='81.9' cy='10.7' r='1.07'/%3E%3Ccircle cx='115.2' cy='78.8' r='1.17'/%3E%3Ccircle cx='8.0' cy='104.6' r='0.79'/%3E%3Ccircle cx='139.3' cy='127.6' r='0.58'/%3E%3Ccircle cx='39.5' cy='118.7' r='1.13'/%3E%3Ccircle cx='137.9' cy='133.3' r='0.43'/%3E%3Ccircle cx='123.7' cy='33.4' r='1.28'/%3E%3Ccircle cx='33.7' cy='129.4' r='1.15'/%3E%3Ccircle cx='90.7' cy='78.7' r='0.73'/%3E%3Ccircle cx='26.0' cy='3.8' r='0.41'/%3E%3Ccircle cx='18.9' cy='107.0' r='0.48'/%3E%3Ccircle cx='51.3' cy='68.8' r='1.29'/%3E%3Ccircle cx='26.5' cy='77.5' r='0.86'/%3E%3Ccircle cx='57.1' cy='75.3' r='0.45'/%3E%3Ccircle cx='94.8' cy='32.9' r='0.80'/%3E%3Ccircle cx='25.2' cy='104.7' r='1.07'/%3E%3Ccircle cx='60.4' cy='16.4' r='1.22'/%3E%3Ccircle cx='11.9' cy='82.1' r='0.54'/%3E%3Ccircle cx='118.3' cy='52.3' r='0.98'/%3E%3Ccircle cx='64.7' cy='37.7' r='0.71'/%3E%3Ccircle cx='95.5' cy='42.4' r='0.41'/%3E%3Ccircle cx='110.3' cy='78.7' r='0.94'/%3E%3Ccircle cx='106.9' cy='74.5' r='0.66'/%3E%3Ccircle cx='28.7' cy='133.6' r='1.11'/%3E%3Ccircle cx='3.9' cy='45.5' r='0.87'/%3E%3Ccircle cx='8.2' cy='73.4' r='1.22'/%3E%3Ccircle cx='59.8' cy='128.8' r='0.41'/%3E%3Ccircle cx='138.5' cy='34.3' r='0.79'/%3E%3Ccircle cx='131.1' cy='34.5' r='0.52'/%3E%3Ccircle cx='132.2' cy='19.2' r='0.70'/%3E%3Ccircle cx='4.7' cy='75.8' r='0.56'/%3E%3Ccircle cx='95.4' cy='129.5' r='0.79'/%3E%3Ccircle cx='8.3' cy='121.9' r='0.81'/%3E%3Ccircle cx='2.4' cy='72.0' r='1.07'/%3E%3Ccircle cx='40.5' cy='55.4' r='0.91'/%3E%3Ccircle cx='120.6' cy='136.5' r='0.96'/%3E%3Ccircle cx='15.2' cy='1.6' r='0.58'/%3E%3Ccircle cx='131.6' cy='81.5' r='1.13'/%3E%3Ccircle cx='96.9' cy='102.6' r='0.54'/%3E%3Ccircle cx='92.0' cy='31.6' r='0.45'/%3E%3Ccircle cx='127.0' cy='77.7' r='0.73'/%3E%3Ccircle cx='121.6' cy='115.8' r='0.91'/%3E%3Ccircle cx='0.6' cy='57.3' r='1.15'/%3E%3Ccircle cx='127.6' cy='109.9' r='0.66'/%3E%3Ccircle cx='136.5' cy='0.1' r='1.28'/%3E%3Ccircle cx='32.9' cy='73.9' r='1.19'/%3E%3Ccircle cx='58.0' cy='90.2' r='1.05'/%3E%3Ccircle cx='118.7' cy='67.6' r='0.64'/%3E%3Ccircle cx='36.6' cy='53.6' r='0.75'/%3E%3Ccircle cx='100.1' cy='117.7' r='0.77'/%3E%3Ccircle cx='16.8' cy='101.3' r='0.77'/%3E%3Ccircle cx='92.4' cy='112.7' r='0.56'/%3E%3Ccircle cx='123.6' cy='106.8' r='0.82'/%3E%3Ccircle cx='58.5' cy='47.2' r='0.49'/%3E%3Ccircle cx='43.4' cy='62.5' r='0.61'/%3E%3Ccircle cx='97.2' cy='9.6' r='1.15'/%3E%3Ccircle cx='136.5' cy='99.0' r='0.43'/%3E%3Ccircle cx='85.1' cy='121.3' r='0.56'/%3E%3Ccircle cx='110.0' cy='50.2' r='0.72'/%3E%3Ccircle cx='21.3' cy='112.7' r='0.73'/%3E%3Ccircle cx='2.2' cy='58.3' r='0.76'/%3E%3Ccircle cx='68.6' cy='117.3' r='0.68'/%3E%3Ccircle cx='98.6' cy='10.9' r='0.90'/%3E%3Ccircle cx='66.6' cy='83.8' r='0.57'/%3E%3Ccircle cx='32.9' cy='61.6' r='1.22'/%3E%3Ccircle cx='121.5' cy='40.7' r='0.79'/%3E%3Ccircle cx='25.5' cy='35.0' r='1.01'/%3E%3Ccircle cx='119.1' cy='119.6' r='1.09'/%3E%3Ccircle cx='135.2' cy='19.5' r='1.02'/%3E%3Ccircle cx='100.1' cy='51.3' r='0.58'/%3E%3Ccircle cx='102.2' cy='130.9' r='0.56'/%3E%3Ccircle cx='68.0' cy='33.8' r='0.77'/%3E%3Ccircle cx='6.3' cy='45.2' r='0.63'/%3E%3Ccircle cx='134.5' cy='3.2' r='0.66'/%3E%3Ccircle cx='108.5' cy='66.5' r='0.75'/%3E%3Ccircle cx='83.8' cy='109.8' r='0.57'/%3E%3Ccircle cx='87.7' cy='101.7' r='0.87'/%3E%3Ccircle cx='4.4' cy='17.9' r='1.24'/%3E%3Ccircle cx='102.3' cy='18.2' r='0.78'/%3E%3Ccircle cx='38.7' cy='118.2' r='1.15'/%3E%3Ccircle cx='2.6' cy='36.6' r='0.66'/%3E%3Ccircle cx='132.7' cy='36.5' r='0.68'/%3E%3Ccircle cx='52.0' cy='5.8' r='0.95'/%3E%3Ccircle cx='89.2' cy='66.0' r='1.28'/%3E%3Ccircle cx='54.9' cy='27.9' r='0.80'/%3E%3Ccircle cx='3.9' cy='120.8' r='1.18'/%3E%3Ccircle cx='66.8' cy='43.1' r='0.54'/%3E%3Ccircle cx='134.0' cy='121.2' r='0.63'/%3E%3Ccircle cx='68.4' cy='100.7' r='0.71'/%3E%3Ccircle cx='68.0' cy='79.2' r='0.86'/%3E%3Ccircle cx='139.4' cy='32.6' r='0.60'/%3E%3Ccircle cx='97.0' cy='129.7' r='0.57'/%3E%3Ccircle cx='93.8' cy='68.1' r='0.50'/%3E%3Ccircle cx='67.0' cy='116.5' r='0.71'/%3E%3Ccircle cx='27.9' cy='3.7' r='1.06'/%3E%3Ccircle cx='79.0' cy='17.6' r='0.96'/%3E%3Ccircle cx='129.8' cy='25.6' r='1.17'/%3E%3Ccircle cx='55.6' cy='35.2' r='0.77'/%3E%3Ccircle cx='80.4' cy='73.4' r='0.98'/%3E%3Ccircle cx='17.2' cy='27.8' r='0.74'/%3E%3Ccircle cx='99.4' cy='23.1' r='1.26'/%3E%3Ccircle cx='62.2' cy='15.4' r='0.86'/%3E%3Ccircle cx='59.5' cy='98.5' r='0.63'/%3E%3Ccircle cx='67.6' cy='51.2' r='0.69'/%3E%3Ccircle cx='94.7' cy='94.5' r='0.50'/%3E%3Ccircle cx='112.5' cy='12.2' r='0.54'/%3E%3Ccircle cx='60.3' cy='8.1' r='0.45'/%3E%3Ccircle cx='17.2' cy='13.3' r='1.20'/%3E%3Ccircle cx='103.4' cy='36.5' r='0.92'/%3E%3Ccircle cx='131.0' cy='27.1' r='0.57'/%3E%3Ccircle cx='88.9' cy='16.6' r='0.49'/%3E%3Ccircle cx='132.1' cy='86.8' r='0.42'/%3E%3Ccircle cx='139.2' cy='48.5' r='1.20'/%3E%3Ccircle cx='114.0' cy='43.2' r='1.00'/%3E%3Ccircle cx='84.3' cy='94.5' r='1.15'/%3E%3Ccircle cx='139.9' cy='99.0' r='1.07'/%3E%3Ccircle cx='58.3' cy='15.9' r='0.43'/%3E%3Ccircle cx='18.7' cy='128.9' r='1.21'/%3E%3Ccircle cx='102.4' cy='67.6' r='1.21'/%3E%3Ccircle cx='79.8' cy='56.5' r='0.50'/%3E%3Ccircle cx='57.6' cy='16.4' r='1.13'/%3E%3Ccircle cx='110.3' cy='132.3' r='1.25'/%3E%3Ccircle cx='133.9' cy='72.8' r='0.76'/%3E%3Ccircle cx='70.5' cy='105.5' r='0.49'/%3E%3Ccircle cx='83.3' cy='43.2' r='1.19'/%3E%3Ccircle cx='25.3' cy='98.6' r='1.14'/%3E%3Ccircle cx='44.2' cy='10.0' r='0.99'/%3E%3Ccircle cx='139.5' cy='99.4' r='1.01'/%3E%3Ccircle cx='56.5' cy='54.3' r='0.95'/%3E%3Ccircle cx='20.2' cy='64.2' r='0.66'/%3E%3Ccircle cx='18.4' cy='28.3' r='0.67'/%3E%3Ccircle cx='32.2' cy='102.9' r='0.61'/%3E%3Ccircle cx='55.8' cy='92.5' r='0.41'/%3E%3Ccircle cx='74.0' cy='10.3' r='1.22'/%3E%3Ccircle cx='109.2' cy='57.8' r='0.69'/%3E%3Ccircle cx='76.4' cy='114.7' r='1.28'/%3E%3Ccircle cx='51.9' cy='113.5' r='0.48'/%3E%3Ccircle cx='105.0' cy='97.3' r='1.06'/%3E%3Ccircle cx='39.6' cy='72.5' r='0.93'/%3E%3Ccircle cx='9.9' cy='126.2' r='0.49'/%3E%3Ccircle cx='85.1' cy='38.3' r='0.79'/%3E%3Ccircle cx='119.1' cy='75.2' r='0.40'/%3E%3Ccircle cx='29.8' cy='7.0' r='0.92'/%3E%3Ccircle cx='135.7' cy='129.6' r='0.98'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* The plate, behind everything, drifting slowly enough to read as a room rather
+   than as an animation. One rule for all painted themes: they supply the tokens. */
+html[data-paint="1"] body.premium-ui {
+  background-color: var(--tp-bg);
+  background-image: var(--tp-plate);
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: var(--tp-focus, 50% 45%);
+  animation: tp-drift var(--tp-drift, 52s) ease-in-out infinite alternate;
+}
+
+@keyframes tp-drift {
+  from { background-position: var(--tp-focus, 50% 45%); }
+  to { background-position: calc(var(--tp-focus-x, 50%) + 6%) calc(var(--tp-focus-y, 45%) - 4%); }
+}
+
+/* A wash between the painting and the interface. Painted grounds are busy at the
+   edges; the wash is what lets a frosted panel be a panel instead of a smear. */
+html[data-paint="1"] body.premium-ui::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .34) 72%, rgba(0, 0, 0, .5) 100%);
+}
+
+/* Frosted glass, shared by every panel in a painted theme.
+   Three layers: the tint, a blur that carries the painting through it, and the
+   hairline highlight along the top edge that stops it reading as a flat box. */
+html[data-paint="1"] body.premium-ui .card,
+html[data-paint="1"] body.premium-ui .panel,
+html[data-paint="1"] body.premium-ui .command-panel,
+html[data-paint="1"] body.premium-ui .sidebar,
+html[data-paint="1"] body.premium-ui .composer {
+  background: var(--tp-glass);
+  -webkit-backdrop-filter: blur(18px) saturate(118%);
+  backdrop-filter: blur(18px) saturate(118%);
+  border: 1px solid var(--tp-edge);
+  box-shadow: inset 0 1px 0 var(--tp-sheen), 0 18px 40px rgba(0, 0, 0, .28);
+}
+
+/* The texture of the glass: one grain over the whole surface, from a data URI so
+   it costs no request and the CSP never has to allow anything for it. */
+html[data-paint="1"] body.premium-ui .card::after,
+html[data-paint="1"] body.premium-ui .panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: var(--tp-grain);
+  mix-blend-mode: overlay;
+  opacity: .5;
+}
+
+/* The one place the accent is allowed to be a surface rather than a line. */
+html[data-paint="1"] body.premium-ui .button.primary,
+html[data-paint="1"] body.premium-ui .premium-button.primary {
+  background: var(--tp-accent);
+  color: var(--tp-accent-ink);
+  border-color: var(--tp-accent);
+}
+html[data-paint="1"] body.premium-ui .button.primary:hover,
+html[data-paint="1"] body.premium-ui .premium-button.primary:hover {
+  background: var(--tp-accent-hi);
+}
+
+/* Nothing in a painted theme moves under a student's hand; the drift is on the
+   background only, and it stops when the device asks it to. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-paint="1"] body.premium-ui {
+    animation: none !important;
+    background-attachment: scroll;
+  }
+}
+
+/* ---- Legacy · paper-night · glass 0.62 · floor 12.79:1 ---- */
+html[data-style="legacy"] {
+  --tp-bg: #08090c;
+  --tp-surface: #251d14;
+  --tp-ink: #f7efdd;
+  --tp-accent: #d9664b;
+  --tp-accent-hi: #eb785d;
+  --tp-accent-ink: #0b0907;
+  --tp-plate: url("./assets/paint/paper-night.webp");
+  --tp-focus: 50% 45%;
+  --tp-focus-x: 50%;
+  --tp-focus-y: 45%;
+  --tp-drift: 46s;
+  --tp-glass: rgba(37, 29, 20, 0.62);
+  --tp-edge: rgba(255, 255, 255, .13);
+  --tp-sheen: rgba(255, 255, 255, .1);
+  --tp-grain: var(--tp-grain-shared);
+}
+
+/* Legacy mapped onto the app's own tokens. */
+html[data-style="legacy"] body.premium-ui {
+  color-scheme: dark;
+  --p-bg: #08090c;
+  --p-surface: #251d14;
+  --p-surface-2: #251d14;
+  --p-surface-3: #08090c;
+  --p-ink: #f7efdd;
+  --p-ink-2: #f7efdd;
+  --p-muted: color-mix(in srgb, #f7efdd 72%, #08090c);
+  --p-line: color-mix(in srgb, #f7efdd 18%, #08090c);
+  --p-line-strong: color-mix(in srgb, #f7efdd 32%, #08090c);
+  --p-radius: 2px;
+  --brand-ink: #d9664b;
+  --brand: #d9664b;
+  --brand-2: #eb785d;
+  --brand-soft: color-mix(in srgb, #d9664b 18%, #08090c);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: none;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
+  background: #08090c;
+  color: #f7efdd;
+}
+
+/* ---- Rain window · rain-window · glass 0.66 · floor 4.66:1 ---- */
+html[data-style="rain"] {
+  --tp-bg: #1b1a16;
+  --tp-surface: #3f4339;
+  --tp-ink: #f2ece0;
+  --tp-accent: #cbb28f;
+  --tp-accent-hi: #ddc4a1;
+  --tp-accent-ink: #0b0907;
+  --tp-plate: url("./assets/paint/rain-window.webp");
+  --tp-focus: 50% 45%;
+  --tp-focus-x: 50%;
+  --tp-focus-y: 45%;
+  --tp-drift: 54s;
+  --tp-glass: rgba(63, 67, 57, 0.66);
+  --tp-edge: rgba(255, 255, 255, .13);
+  --tp-sheen: rgba(255, 255, 255, .1);
+  --tp-grain: var(--tp-grain-shared);
+}
+
+/* Rain window mapped onto the app's own tokens. */
+html[data-style="rain"] body.premium-ui {
+  color-scheme: dark;
+  --p-bg: #1b1a16;
+  --p-surface: #3f4339;
+  --p-surface-2: #3f4339;
+  --p-surface-3: #1b1a16;
+  --p-ink: #f2ece0;
+  --p-ink-2: #f2ece0;
+  --p-muted: color-mix(in srgb, #f2ece0 72%, #1b1a16);
+  --p-line: color-mix(in srgb, #f2ece0 18%, #1b1a16);
+  --p-line-strong: color-mix(in srgb, #f2ece0 32%, #1b1a16);
+  --p-radius: 2px;
+  --brand-ink: #cbb28f;
+  --brand: #cbb28f;
+  --brand-2: #ddc4a1;
+  --brand-soft: color-mix(in srgb, #cbb28f 18%, #1b1a16);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: none;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
+  background: #1b1a16;
+  color: #f2ece0;
+}
+
+/* ---- Book stair · book-stair · glass 0.6 · floor 6.23:1 ---- */
+html[data-style="stair"] {
+  --tp-bg: #17130d;
+  --tp-surface: #433323;
+  --tp-ink: #f4ead6;
+  --tp-accent: #d2a066;
+  --tp-accent-hi: #e4b278;
+  --tp-accent-ink: #0b0907;
+  --tp-plate: url("./assets/paint/book-stair.webp");
+  --tp-focus: 50% 45%;
+  --tp-focus-x: 50%;
+  --tp-focus-y: 45%;
+  --tp-drift: 58s;
+  --tp-glass: rgba(67, 51, 35, 0.60);
+  --tp-edge: rgba(255, 255, 255, .13);
+  --tp-sheen: rgba(255, 255, 255, .1);
+  --tp-grain: var(--tp-grain-shared);
+}
+
+/* Book stair mapped onto the app's own tokens. */
+html[data-style="stair"] body.premium-ui {
+  color-scheme: dark;
+  --p-bg: #17130d;
+  --p-surface: #433323;
+  --p-surface-2: #433323;
+  --p-surface-3: #17130d;
+  --p-ink: #f4ead6;
+  --p-ink-2: #f4ead6;
+  --p-muted: color-mix(in srgb, #f4ead6 72%, #17130d);
+  --p-line: color-mix(in srgb, #f4ead6 18%, #17130d);
+  --p-line-strong: color-mix(in srgb, #f4ead6 32%, #17130d);
+  --p-radius: 2px;
+  --brand-ink: #d2a066;
+  --brand: #d2a066;
+  --brand-2: #e4b278;
+  --brand-soft: color-mix(in srgb, #d2a066 18%, #17130d);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: none;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
+  background: #17130d;
+  color: #f4ead6;
+}
+
+/* ---- Aurora hall · aurora-teal · glass 0.72 · floor 4.60:1 ---- */
+html[data-style="aurora"] {
+  --tp-bg: #152b28;
+  --tp-surface: #264740;
+  --tp-ink: #eaf6ef;
+  --tp-accent: #7fd8b6;
+  --tp-accent-hi: #91eac8;
+  --tp-accent-ink: #0b0907;
+  --tp-plate: url("./assets/paint/aurora-teal.webp");
+  --tp-focus: 50% 45%;
+  --tp-focus-x: 50%;
+  --tp-focus-y: 45%;
+  --tp-drift: 50s;
+  --tp-glass: rgba(38, 71, 64, 0.72);
+  --tp-edge: rgba(255, 255, 255, .13);
+  --tp-sheen: rgba(255, 255, 255, .1);
+  --tp-grain: var(--tp-grain-shared);
+}
+
+/* Aurora hall mapped onto the app's own tokens. */
+html[data-style="aurora"] body.premium-ui {
+  color-scheme: dark;
+  --p-bg: #152b28;
+  --p-surface: #264740;
+  --p-surface-2: #264740;
+  --p-surface-3: #152b28;
+  --p-ink: #eaf6ef;
+  --p-ink-2: #eaf6ef;
+  --p-muted: color-mix(in srgb, #eaf6ef 72%, #152b28);
+  --p-line: color-mix(in srgb, #eaf6ef 18%, #152b28);
+  --p-line-strong: color-mix(in srgb, #eaf6ef 32%, #152b28);
+  --p-radius: 2px;
+  --brand-ink: #7fd8b6;
+  --brand: #7fd8b6;
+  --brand-2: #91eac8;
+  --brand-soft: color-mix(in srgb, #7fd8b6 18%, #152b28);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: none;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
+  background: #152b28;
+  color: #eaf6ef;
+}
+
+/* ---- Ember room · ember-rose · glass 0.76 · floor 4.66:1 ---- */
+html[data-style="ember"] {
+  --tp-bg: #261717;
+  --tp-surface: #5a382d;
+  --tp-ink: #f6e9e4;
+  --tp-accent: #f09b76;
+  --tp-accent-hi: #ffad88;
+  --tp-accent-ink: #0b0907;
+  --tp-plate: url("./assets/paint/ember-rose.webp");
+  --tp-focus: 50% 45%;
+  --tp-focus-x: 50%;
+  --tp-focus-y: 45%;
+  --tp-drift: 52s;
+  --tp-glass: rgba(90, 56, 45, 0.76);
+  --tp-edge: rgba(255, 255, 255, .13);
+  --tp-sheen: rgba(255, 255, 255, .1);
+  --tp-grain: var(--tp-grain-shared);
+}
+
+/* Ember room mapped onto the app's own tokens. */
+html[data-style="ember"] body.premium-ui {
+  color-scheme: dark;
+  --p-bg: #261717;
+  --p-surface: #5a382d;
+  --p-surface-2: #5a382d;
+  --p-surface-3: #261717;
+  --p-ink: #f6e9e4;
+  --p-ink-2: #f6e9e4;
+  --p-muted: color-mix(in srgb, #f6e9e4 72%, #261717);
+  --p-line: color-mix(in srgb, #f6e9e4 18%, #261717);
+  --p-line-strong: color-mix(in srgb, #f6e9e4 32%, #261717);
+  --p-radius: 2px;
+  --brand-ink: #f09b76;
+  --brand: #f09b76;
+  --brand-2: #ffad88;
+  --brand-soft: color-mix(in srgb, #f09b76 18%, #261717);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: none;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
+  background: #261717;
+  color: #f6e9e4;
+}
+
+/* ---- Moss corridor · moss-hall · glass 0.74 · floor 4.63:1 ---- */
+html[data-style="moss"] {
+  --tp-bg: #1a1e14;
+  --tp-surface: #3e4631;
+  --tp-ink: #eef1e6;
+  --tp-accent: #d8c078;
+  --tp-accent-hi: #ead28a;
+  --tp-accent-ink: #0b0907;
+  --tp-plate: url("./assets/paint/moss-hall.webp");
+  --tp-focus: 50% 45%;
+  --tp-focus-x: 50%;
+  --tp-focus-y: 45%;
+  --tp-drift: 56s;
+  --tp-glass: rgba(62, 70, 49, 0.74);
+  --tp-edge: rgba(255, 255, 255, .13);
+  --tp-sheen: rgba(255, 255, 255, .1);
+  --tp-grain: var(--tp-grain-shared);
+}
+
+/* Moss corridor mapped onto the app's own tokens. */
+html[data-style="moss"] body.premium-ui {
+  color-scheme: dark;
+  --p-bg: #1a1e14;
+  --p-surface: #3e4631;
+  --p-surface-2: #3e4631;
+  --p-surface-3: #1a1e14;
+  --p-ink: #eef1e6;
+  --p-ink-2: #eef1e6;
+  --p-muted: color-mix(in srgb, #eef1e6 72%, #1a1e14);
+  --p-line: color-mix(in srgb, #eef1e6 18%, #1a1e14);
+  --p-line-strong: color-mix(in srgb, #eef1e6 32%, #1a1e14);
+  --p-radius: 2px;
+  --brand-ink: #d8c078;
+  --brand: #d8c078;
+  --brand-2: #ead28a;
+  --brand-soft: color-mix(in srgb, #d8c078 18%, #1a1e14);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: none;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
+  background: #1a1e14;
+  color: #eef1e6;
+}
+
+/* ---- Indigo shelf · indigo-shelf · glass 0.74 · floor 4.65:1 ---- */
+html[data-style="indigo"] {
+  --tp-bg: #0e141b;
+  --tp-surface: #3f4246;
+  --tp-ink: #e8eef4;
+  --tp-accent: #a8c4e0;
+  --tp-accent-hi: #bad6f2;
+  --tp-accent-ink: #0b0907;
+  --tp-plate: url("./assets/paint/indigo-shelf.webp");
+  --tp-focus: 50% 45%;
+  --tp-focus-x: 50%;
+  --tp-focus-y: 45%;
+  --tp-drift: 48s;
+  --tp-glass: rgba(63, 66, 70, 0.74);
+  --tp-edge: rgba(255, 255, 255, .13);
+  --tp-sheen: rgba(255, 255, 255, .1);
+  --tp-grain: var(--tp-grain-shared);
+}
+
+/* Indigo shelf mapped onto the app's own tokens. */
+html[data-style="indigo"] body.premium-ui {
+  color-scheme: dark;
+  --p-bg: #0e141b;
+  --p-surface: #3f4246;
+  --p-surface-2: #3f4246;
+  --p-surface-3: #0e141b;
+  --p-ink: #e8eef4;
+  --p-ink-2: #e8eef4;
+  --p-muted: color-mix(in srgb, #e8eef4 72%, #0e141b);
+  --p-line: color-mix(in srgb, #e8eef4 18%, #0e141b);
+  --p-line-strong: color-mix(in srgb, #e8eef4 32%, #0e141b);
+  --p-radius: 2px;
+  --brand-ink: #a8c4e0;
+  --brand: #a8c4e0;
+  --brand-2: #bad6f2;
+  --brand-soft: color-mix(in srgb, #a8c4e0 18%, #0e141b);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: none;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
+  background: #0e141b;
+  color: #e8eef4;
+}

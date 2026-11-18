@@ -1,0 +1,48 @@
+{
+  "plate": "brush-band",
+  "roles": [
+    {
+      "hex": "#e7e0d5",
+      "weight": 70,
+      "chroma": 6.3,
+      "lightness": 89.6
+    },
+    {
+      "hex": "#121815",
+      "weight": 20.4,
+      "chroma": 3,
+      "lightness": 8.2
+    },
+    {
+      "hex": "#7d7b71",
+      "weight": 9.6,
+      "chroma": 5.8,
+      "lightness": 51.3
+    }
+  ],
+  "balance": {
+    "share": [
+      70,
+      20.4,
+      9.6
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 81.6,
+    "secondaryAccent": 34.2,
+    "dominantAccent": 29.3
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.31,
+    "darkWorst": 1.1
+  },
+  "safe": {
+    "forCream": 20.4,
+    "forInk": 70
+  },
+  "measured": true
+}
