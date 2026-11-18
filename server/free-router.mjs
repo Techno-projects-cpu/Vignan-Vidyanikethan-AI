@@ -14,7 +14,17 @@
 
 import { isQuotaFailure, KeyCooldowns, parseApiKeys, providerKeyVariants } from "../js/key-pool.js";
 
-const DEFAULT_ORDER = ["gemini", "groq", "cloudflare", "openrouter", "mistral", "cohere", "arena", "primary"];
+const DEFAULT_ORDER = [
+  "gemini",
+  "groq",
+  "cloudflare",
+  "openrouter",
+  "mistral",
+  "cohere",
+  "bytez",
+  "arena",
+  "primary",
+];
 export const FREE_ROUTER_DEFAULT_ORDER = DEFAULT_ORDER;
 
 function readEnv(env, name, fallback = "") {
@@ -188,6 +198,26 @@ export function buildUpstreams(env = process.env) {
       extraHeaders: readArenaHeaders(env),
     },
     readKeys(env, "ARENA_KEY", "ARENA_KEYS", "ARENA_API_KEY"),
+  );
+
+  // Bytez: one OpenAI-compatible door onto a catalogue of open-weight models
+  // (Qwen, Llama, Mistral, Gemma …). The chat route is NOT the usual
+  // `/chat/completions` at the root: it lives under /models/v2/openai/v1, which
+  // is why the endpoint below carries the whole prefix. Bytez bills per call in
+  // credits rather than offering a free tier, so it sits after the free
+  // providers in the fallback order and only answers when a key is present.
+  // Pick a model id from <https://bytez.com/models> and put it in
+  // STUDY_AI_BYTEZ_MODEL; the default is the one Bytez documents in its chat
+  // example.
+  catalog.bytez = expandTemplate(
+    "bytez",
+    {
+      label: "Bytez model catalogue",
+      kind: "openai",
+      endpoint: readEnv(env, "BYTEZ_ENDPOINT", "https://api.bytez.com/models/v2/openai/v1"),
+      model: readEnv(env, "BYTEZ_MODEL", "Qwen/Qwen3-4B"),
+    },
+    readKeys(env, "BYTEZ_KEY", "BYTEZ_KEYS"),
   );
 
   const configuredOrder = readEnv(env, "FREE_ROUTER_ORDER");

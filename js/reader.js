@@ -1,8 +1,8 @@
 /** Page-level textbook reader used by every citation. */
 
-import { closeModal, element, openModal, qs, showToast } from "./ui.js?v=73";
-import { t } from "./i18n.js?v=73";
-import { downloadBlob, safeUrl, truncate } from "./util.js?v=73";
+import { closeModal, element, openModal, qs, showToast } from "./ui.js?v=74";
+import { t } from "./i18n.js?v=74";
+import { downloadBlob, safeUrl, truncate } from "./util.js?v=74";
 import {
   addNote,
   notesFor,
@@ -12,7 +12,7 @@ import {
   readNotes,
   removeNote,
   writeNotes,
-} from "./notes.js?v=73";
+} from "./notes.js?v=74";
 
 const LAST_PAGE_PREFIX = "vignan.reader.page.";
 
