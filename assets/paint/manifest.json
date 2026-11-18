@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T03:05:55.762Z",
+  "generatedAt": "2026-11-18T03:21:24.059Z",
   "budget": {
     "canonicalTotal": 1200000,
     "canonicalEach": 110000,
@@ -22,6 +22,24 @@
         71.3,
         20.2,
         8.5
+      ],
+      "ground": false
+    },
+    {
+      "name": "blush-hall",
+      "width": 1280,
+      "height": 698,
+      "bytes": {
+        "canonical": 11680,
+        "tileWebp": 3672,
+        "canonicalAvif": 4220,
+        "tileAvif": 2119
+      },
+      "placeholder": "#fae2d5",
+      "balance": [
+        48.8,
+        44.9,
+        6.3
       ],
       "ground": false
     },
@@ -66,12 +84,12 @@
       "width": 1280,
       "height": 698,
       "bytes": {
-        "canonical": 70886,
-        "tileWebp": 25370,
-        "canonicalAvif": 50064,
-        "tileAvif": 19499
+        "canonical": 68972,
+        "tileWebp": 25362,
+        "canonicalAvif": 49799,
+        "tileAvif": 19487
       },
-      "placeholder": "#2d4038",
+      "placeholder": "#2f4139",
       "balance": [
         57.1,
         25.5,
@@ -138,16 +156,16 @@
       "width": 1080,
       "height": 602,
       "bytes": {
-        "canonical": 75016,
-        "tileWebp": 33970,
-        "canonicalAvif": 50795,
-        "tileAvif": 22066
+        "canonical": 74228,
+        "tileWebp": 34484,
+        "canonicalAvif": 50944,
+        "tileAvif": 21968
       },
       "placeholder": "#676155",
       "balance": [
         46.8,
-        35.8,
-        17.4
+        35.5,
+        17.7
       ],
       "ground": false
     },
@@ -166,6 +184,24 @@
         64.9,
         19.7,
         15.4
+      ],
+      "ground": false
+    },
+    {
+      "name": "lagoon-window",
+      "width": 1280,
+      "height": 698,
+      "bytes": {
+        "canonical": 17596,
+        "tileWebp": 6732,
+        "canonicalAvif": 7180,
+        "tileAvif": 3696
+      },
+      "placeholder": "#cef3eb",
+      "balance": [
+        44.4,
+        29.8,
+        25.8
       ],
       "ground": false
     },
@@ -192,18 +228,36 @@
       "width": 1280,
       "height": 714,
       "bytes": {
-        "canonical": 60936,
-        "tileWebp": 23602,
-        "canonicalAvif": 39304,
-        "tileAvif": 17522
+        "canonical": 58466,
+        "tileWebp": 23068,
+        "canonicalAvif": 39185,
+        "tileAvif": 17356
       },
-      "placeholder": "#392f22",
+      "placeholder": "#382f22",
       "balance": [
-        46.5,
-        28,
-        25.4
+        46.4,
+        28.1,
+        25.5
       ],
       "ground": false
+    },
+    {
+      "name": "mint-class",
+      "width": 1280,
+      "height": 698,
+      "bytes": {
+        "canonical": 31774,
+        "tileWebp": 9846,
+        "canonicalAvif": 13702,
+        "tileAvif": 6150
+      },
+      "placeholder": "#c6eddf",
+      "balance": [
+        67,
+        22.5,
+        10.5
+      ],
+      "ground": true
     },
     {
       "name": "moss-hall",
@@ -228,16 +282,16 @@
       "width": 1280,
       "height": 714,
       "bytes": {
-        "canonical": 70428,
-        "tileWebp": 29050,
-        "canonicalAvif": 49556,
-        "tileAvif": 22213
+        "canonical": 69184,
+        "tileWebp": 28760,
+        "canonicalAvif": 49118,
+        "tileAvif": 22176
       },
-      "placeholder": "#f5f0e0",
+      "placeholder": "#f6f0e0",
       "balance": [
-        44.1,
-        43.3,
-        12.5
+        43.8,
+        43.5,
+        12.7
       ],
       "ground": false
     },
@@ -258,6 +312,24 @@
         11.5
       ],
       "ground": false
+    },
+    {
+      "name": "peach-shelf",
+      "width": 1280,
+      "height": 698,
+      "bytes": {
+        "canonical": 45286,
+        "tileWebp": 15420,
+        "canonicalAvif": 22161,
+        "tileAvif": 9752
+      },
+      "placeholder": "#e4ceb9",
+      "balance": [
+        59.1,
+        31.9,
+        9
+      ],
+      "ground": true
     },
     {
       "name": "pine-window",
@@ -314,6 +386,24 @@
       "ground": false
     },
     {
+      "name": "rose-arch",
+      "width": 1024,
+      "height": 1024,
+      "bytes": {
+        "canonical": 21586,
+        "tileWebp": 9682,
+        "canonicalAvif": 9167,
+        "tileAvif": 5467
+      },
+      "placeholder": "#dbb6aa",
+      "balance": [
+        36.3,
+        36.1,
+        27.6
+      ],
+      "ground": false
+    },
+    {
       "name": "saffron-arch",
       "width": 1280,
       "height": 698,
@@ -330,12 +420,30 @@
         20.6
       ],
       "ground": false
+    },
+    {
+      "name": "sand-desk",
+      "width": 1024,
+      "height": 1024,
+      "bytes": {
+        "canonical": 32410,
+        "tileWebp": 15152,
+        "canonicalAvif": 14596,
+        "tileAvif": 8780
+      },
+      "placeholder": "#f1e8da",
+      "balance": [
+        70.5,
+        20.9,
+        8.6
+      ],
+      "ground": false
     }
   ],
   "totals": {
-    "canonical": 867096,
-    "tileWebp": 322094,
-    "tileAvif": 232087,
-    "canonicalAvif": 549685
+    "canonical": 1021012,
+    "tileWebp": 382280,
+    "tileAvif": 267738,
+    "canonicalAvif": 620038
   }
 }

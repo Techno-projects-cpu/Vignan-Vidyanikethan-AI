@@ -1,0 +1,48 @@
+{
+  "plate": "sand-desk",
+  "roles": [
+    {
+      "hex": "#f1e8da",
+      "weight": 70.5,
+      "chroma": 8,
+      "lightness": 92.4
+    },
+    {
+      "hex": "#dfc4a5",
+      "weight": 20.9,
+      "chroma": 20.1,
+      "lightness": 80.9
+    },
+    {
+      "hex": "#af9b84",
+      "weight": 8.6,
+      "chroma": 15.2,
+      "lightness": 65.2
+    }
+  ],
+  "balance": {
+    "share": [
+      70.5,
+      20.9,
+      8.6
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 11,
+    "secondaryAccent": 11.9,
+    "dominantAccent": 19.9
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.21,
+    "darkWorst": 7.43
+  },
+  "safe": {
+    "forCream": 0,
+    "forInk": 100
+  },
+  "measured": true
+}

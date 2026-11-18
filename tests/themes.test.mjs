@@ -32,12 +32,15 @@ const glassCss = read("styles-glass.css");
 const everySheet = `${css}\n${glassCss}\n${paintedCss}`;
 const app = read("js/app.js");
 
-test("fourteen styles — glass, six classic and seven painted — complete and distinct", () => {
-  // 2.32.0 added the painted edition; 2.33.0 put Glass Morphism in front of it and
-  // made it the default. Glass has no painting (it is made of light), so it is the
-  // one theme that is neither classic nor plate-backed.
-  assert.equal(THEMES.length, 14);
-  assert.equal(THEMES.filter((theme) => theme.painted).length, 7);
+test("seventeen styles — glass, six classic and ten painted — complete and distinct", () => {
+  // 2.32.0 added the painted edition; 2.34.0 put Glass Morphism in front of it and
+  // made it the default; 2.34.0 added three daylight rooms (blush, sand, mint) so
+  // the painted set is not a set of night rooms with a light default in front of
+  // it. Glass has no painting (it is made of light), so it is the one theme that
+  // is neither classic nor plate-backed.
+  assert.equal(THEMES.length, 17);
+  assert.equal(THEMES.filter((theme) => theme.painted).length, 10);
+  assert.equal(THEMES.filter((theme) => theme.painted && theme.scheme === "light").length, 3);
   assert.equal(THEMES.filter((theme) => theme.glass === true).length, 1, "exactly one glass theme");
   assert.equal(THEMES.filter((theme) => !theme.painted && !theme.glass).length, 6);
   assert.equal(THEMES[0].id, "glass", "the default is the first tile in Settings");
@@ -160,8 +163,8 @@ test("a light style stays light even when the invert switch says dark", () => {
   assert.match(css, /html\[data-style="soft"\] body\.premium-ui,\s*\nhtml\[data-style="editorial"\] body\.premium-ui/);
   const lightStyles = THEMES.filter((theme) => theme.scheme === "light").map((theme) => theme.id);
   for (const id of lightStyles) {
-    const start = css.indexOf(`html[data-style="${id}"] body.premium-ui {`);
-    assert.ok(css.slice(start, start + 400).includes("color-scheme: light"), `${id} pins its colour scheme`);
+    const start = everySheet.indexOf(`html[data-style="${id}"] body.premium-ui {`);
+    assert.ok(everySheet.slice(start, start + 400).includes("color-scheme: light"), `${id} pins its colour scheme`);
   }
 });
 
@@ -287,7 +290,7 @@ test("a new device starts in the school's style, and its own choice always wins"
   // The list covers every shipped style, painted rooms included, and the server's
   // fallback is the same painted room the app defaults to — a tablet that painted
   // one style before boot and another after it would flicker between worlds.
-  assert.match(server, /const STYLE_IDS = \[\s*"glass",\s*"minimal", "soft", "editorial", "luxury", "terminal", "brutal",\s*"legacy", "rain", "stair", "aurora", "ember", "moss", "indigo",\s*\]/);
+  assert.match(server, /const STYLE_IDS = \[\s*"glass",\s*"minimal", "soft", "editorial", "luxury", "terminal", "brutal",\s*"legacy", "rain", "stair", "aurora", "ember", "moss", "indigo",\s*"blush", "sand", "mint",\s*\]/);
   for (const theme of THEMES) {
     assert.ok(server.includes(`"${theme.id}"`), `the school can choose ${theme.id}`);
   }

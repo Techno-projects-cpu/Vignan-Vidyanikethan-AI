@@ -16,7 +16,7 @@ is somebody else's.
 │
 ├── js/                     78 modules, native ES modules, no bundler
 ├── styles*.css             13 stylesheets, one per surface (see below)
-├── assets/                 two bundled fonts, brand marks, eighteen painted plates (WebP + AVIF, two widths each)
+├── assets/                 two bundled fonts, brand marks, twenty-four painted plates (WebP + AVIF, two widths each)
 ├── icons/                  app icons, 48 → 512, plus the maskable pair
 ├── vendor/pdfjs/           the PDF reader, vendored so it works offline
 │

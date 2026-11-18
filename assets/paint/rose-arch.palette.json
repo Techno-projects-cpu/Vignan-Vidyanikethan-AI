@@ -1,0 +1,48 @@
+{
+  "plate": "rose-arch",
+  "roles": [
+    {
+      "hex": "#dbb6aa",
+      "weight": 36.3,
+      "chroma": 16.8,
+      "lightness": 76.4
+    },
+    {
+      "hex": "#f0e6d8",
+      "weight": 36.1,
+      "chroma": 7.9,
+      "lightness": 91.8
+    },
+    {
+      "hex": "#dfcfbd",
+      "weight": 27.6,
+      "chroma": 11.3,
+      "lightness": 84
+    }
+  ],
+  "balance": {
+    "share": [
+      36.3,
+      36.1,
+      27.6
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 15.1,
+    "secondaryAccent": 5.7,
+    "dominantAccent": 10.9
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.23,
+    "darkWorst": 10.68
+  },
+  "safe": {
+    "forCream": 0,
+    "forInk": 100
+  },
+  "measured": true
+}

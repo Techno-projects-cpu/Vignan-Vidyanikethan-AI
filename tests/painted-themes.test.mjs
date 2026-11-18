@@ -39,8 +39,10 @@ const report = (plate) => JSON.parse(read(`assets/paint/${plate}.palette.json`))
 // the sort of claim this project exists to avoid.
 const TOLERANCE = [15, 15, 6];
 
-test("seven painted themes, each complete and each on a real plate", () => {
-  assert.equal(PAINTED_THEMES.length, 7);
+test("ten painted themes — seven rooms at night, three in daylight — each on a real plate", () => {
+  assert.equal(PAINTED_THEMES.length, 10);
+  assert.equal(PAINTED_THEMES.filter((theme) => theme.scheme === "light").length, 3, "three daylight rooms");
+  assert.equal(PAINTED_THEMES.filter((theme) => theme.scheme === "dark").length, 7);
   const ids = PAINTED_THEMES.map((theme) => theme.id);
   assert.equal(new Set(ids).size, ids.length, "ids are unique");
   assert.ok(ids.includes("legacy"), "the painted edition of this round is kept as Legacy");
@@ -94,6 +96,13 @@ test("the theme's colours are the painting's colours, and the accent is the acce
       const lifted = lightness(theme.accent) > lightness(secondary.hex);
       assert.ok(lifted, `${theme.id}: the accent is the mid-tone lifted, not darkened`);
       assert.ok(hueDelta(theme.accent, secondary.hex) < 26, `${theme.id}: accent keeps the painting's hue (${hueDelta(theme.accent, secondary.hex).toFixed(0)}°)`);
+    } else if (theme.accentSource === "deep") {
+      // On a light painting the accent cannot be a highlight — it has to carry
+      // text — so it is the same pigment taken down. Hue is the check that it is
+      // the same pigment; ΔE cannot tell a shade from a stranger.
+      assert.ok(hueDelta(theme.accent, accent.hex) < 26, `${theme.id}: accent keeps the painting's hue (${hueDelta(theme.accent, accent.hex).toFixed(0)}°)`);
+      assert.ok(lightness(theme.accent) < lightness(accent.hex), `${theme.id}: and it is taken down, not lifted`);
+      assert.ok(contrast(theme.accent, theme.bg) >= 4.5, `${theme.id}: the deepened accent reads on the page`);
     } else {
       assert.ok(deltaE(theme.accent, accent.hex) < 26, `${theme.id}: accent comes out of the painting`);
     }
@@ -110,6 +119,13 @@ test("the theme's colours are the painting's colours, and the accent is the acce
       { hex: theme.accent, weight: 10 },
     ]);
     assert.ok(measured.accentLeads, `${theme.id}: the accent is the most chromatic colour`);
+  }
+});
+
+test("a daylight room is light, and its ink is dark", () => {
+  for (const theme of PAINTED_THEMES.filter((entry) => entry.scheme === "light")) {
+    assert.ok(lightness(theme.bg) > 90, `${theme.id}: the page is near-white (L* ${lightness(theme.bg).toFixed(0)})`);
+    assert.ok(lightness(theme.ink) < 40, `${theme.id}: the ink is dark`);
   }
 });
 
@@ -232,6 +248,13 @@ test("no painting is shipped without a place on the site", () => {
   assert.match(app, /preview\.style\.backgroundImage/);
 
   // The page shows every theme (glass included) and frames the rest.
-  assert.equal((landing.match(/class="wl-room[ "]/g) || []).length, 8, "eight rooms are shown, glass among them");
-  assert.equal((landing.match(/class="wl-picture"/g) || []).length, 11, "eleven plates are framed");
+  assert.equal((landing.match(/class="wl-room[ ">]/g) || []).length, 11, "eleven rooms are shown, glass among them");
+  assert.equal((landing.match(/class="wl-picture"/g) || []).length, 9, "nine plates are framed here");
+  // Every one of the twenty-four paintings is on the page: eleven as room tiles,
+  // nine as framed pictures in this list, and the five accent plates hung in the
+  // specimen section further down.
+  assert.equal(plates.length, 24, "twenty-four paintings on disk");
+  for (const plate of plates) {
+    assert.ok(landing.includes(`assets/paint/${plate}.webp`), `${plate} is visible on the landing page`);
+  }
 });

@@ -169,6 +169,77 @@ export const PAINTED_THEMES = [
     glass: 0.74,
     drift: 48,
   },
+
+  /* ------------------------------------------------------------------ */
+  /* The daylight rooms.                                                 */
+  /*                                                                     */
+  /* Three paintings that are light enough to build a page on. The rules */
+  /* are the same as the dark ones, with one addition: on a light plate  */
+  /* the accent has to be taken *down* rather than up, because a bright  */
+  /* accent cannot carry text on a bright page. That is what            */
+  /* `accentSource: "deep"` documents — the same pigment, less light,   */
+  /* which is exactly what hue distance is for.                          */
+  /* ------------------------------------------------------------------ */
+  {
+    id: "blush",
+    name: "Blush hall",
+    note: "A sunlit corridor of plaster pink with one turquoise door frame. 48.8 / 44.9 / 6.3 measured, and the lightest room in the set.",
+    tags: ["painted", "pink", "light", "daylight"],
+    scheme: "light",
+    switchable: false,
+    plate: "blush-hall",
+    // The dominant tone, held at near-white: this is a page, and a pale pink page
+    // has to stay pale or the dark ink loses its job.
+    bg: "#fdf4ee",
+    // The wall's own shadow, which is what a panel is here — the same plaster, one
+    // step down (10.4 ΔE from the plate's middle, 10.2 from the page).
+    surface: "#f2d3c6",
+    ink: "#3a2b2e",
+    // From the plate's turquoise accent (#a7d6cd, 182°), taken down to 183° and a
+    // lightness that clears 4.75:1 on the page. Same pigment, less light.
+    accent: "#17635a",
+    accentSource: "deep",
+    glass: 0.78,
+    drift: 54,
+  },
+  {
+    id: "sand",
+    name: "Sand desk",
+    note: "A desk of warm sand paper and cream exercise books, with one turquoise pencil cup. 70.5 / 20.9 / 8.6 measured.",
+    tags: ["painted", "beige", "light", "daylight"],
+    scheme: "light",
+    switchable: false,
+    plate: "sand-desk",
+    bg: "#fdf8f1",
+    surface: "#efdcc0",
+    ink: "#3a2f22",
+    // The plate's third tone (#af9b84, 76°) taken down to 79°: a deep sand brown
+    // that reads as text at 5.47:1 instead of as a highlight.
+    accent: "#725729",
+    accentSource: "deep",
+    glass: 0.80,
+    drift: 56,
+  },
+  {
+    id: "mint",
+    name: "Mint class",
+    note: "A bright classroom wall in mint with warm beige desks and a hint of pink. 67.0 / 22.5 / 10.5 measured.",
+    tags: ["painted", "turquoise", "light", "daylight"],
+    scheme: "light",
+    switchable: false,
+    plate: "mint-class",
+    bg: "#f8fdfa",
+    // The desks: the plate's middle tone, which is warm enough to keep the mint
+    // page from reading as clinical.
+    surface: "#e8cfa8",
+    ink: "#2c3a33",
+    // From that same tan (#d9b383, 76°), taken down to 72°: the darkest, warmest
+    // thing on a cool page.
+    accent: "#6f4f22",
+    accentSource: "deep",
+    glass: 0.82,
+    drift: 50,
+  },
 ];
 
 /**

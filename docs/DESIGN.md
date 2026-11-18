@@ -106,12 +106,18 @@ The app got the same opening and nothing more: a strip of the library fades into
 the first screen and leaves as soon as a conversation starts. A student opening
 the app to ask a question is not watching a film.
 
-## Glass Morphism, the default (2.33.0)
+## Glass Morphism, the default (2.34.0)
 
-Twelve paintings shipped and the app still looked the same on a school tablet,
+Eighteen paintings shipped and the app still looked the same on a school tablet,
 because the default was the one theme that is *not* painted. The correction was not
 to pick a painting as the default — it was to give the site a look that could be
 the default: **Glass Morphism**, which is made of light, not of a photograph.
+
+Then the same thing happened one level down. The glass theme was built for a dark
+screen, and a dark default in a classroom reads as a phone at night. 2.34.0 repaints
+the theme in daylight — pink, sand, turquoise and peach — and adds three painted
+rooms that are light enough to sit beside it, so the default is no longer the only
+light thing in a set of night rooms.
 
 ### Why it is built from gradients
 
@@ -124,41 +130,68 @@ request at all**, and the whole theme is 9KB of CSS.
 
 ### The numbers, and why they are numbers
 
-- **60%** the base, `#071113`; **30%** the four fields at 20–58%; **10%** the mint
-  accent, which only ever marks something live — the send button, the active tab.
-- **The tint is 36%.** Not a mood: it is the thinnest sheet at which the ink still
-  clears **7:1** composited over the *brightest* field (emerald at 58%), and the
-  accent still clears 4.5:1 there. `tests/glass.test.mjs` recomposites all four
-  fields and fails if a thinner sheet reads worse without saying so.
-- **Blur 26px, saturation 160%.** Saturation is what makes frosted glass read as
+- **60%** the base, `#fdf7f2`; **30%** the four fields at 44–62%; **10%** the lagoon
+  teal accent, `#0b726b`, which only ever marks something live — the send button,
+  the active tab.
+- **The sheet is 58% white.** Not a mood: it is the lightest sheet at which the ink
+  still clears **7:1** composited over the *strongest* field, and the accent still
+  clears 4.5:1 there. Measured worst case: ink **12.9:1**, muted **6.1:1**, accent
+  **4.9:1**. `tests/glass.test.mjs` recomposites all four fields and fails if a
+  thinner sheet reads worse without saying so.
+- **Blur 24px, saturation 145%.** Saturation is what makes frosted glass read as
   glass rather than as fog: it concentrates the colour behind it.
+- **A light page needs a darker accent, not a brighter one.** White on `#0b726b` is
+  **5.78:1**; the first candidate, `#0f8b83`, was 3.92:1 on the page and was
+  rejected by the test, not by taste.
 
 ### The four layers a sheet is made of
 
-1. the tint, at 36%;
-2. `backdrop-filter: blur(26px) saturate(160%)`, which is the glass itself;
-3. `inset 0 1px 0 rgba(255,255,255,.34)` — the lit top edge, the single line that
-   stops a translucent box reading as a flat rectangle;
+1. the tint, at 58% warm white (`#fffaf6`);
+2. `backdrop-filter: blur(24px) saturate(145%)`, which is the glass itself;
+3. `inset 0 1px 0 #fff` — the lit top edge, the single line that stops a
+   translucent box reading as a flat rectangle;
 4. a specular band that crosses the sheet once on hover **or keyboard focus**, and
    a slow 18s sheen on the sidebar and composer so the screen is never frozen.
+
+### The three daylight rooms
+
+A painting is only a theme here if its colours can be a page: near 60/30/10, a
+dominant tone light enough that dark ink sits on it at 7:1, and an accent that is
+either a pigment already in the plate or that pigment taken *down*. Measured:
+
+| theme | plate | dominant / secondary / accent | page | accent |
+| --- | --- | --- | --- | --- |
+| blush | `blush-hall` | 48.8 / 44.9 / 6.3 | `#fdf4ee` | `#17635a` (6.52:1) |
+| sand | `sand-desk` | 70.5 / 20.9 / 8.6 | `#fdf8f1` | `#725729` (6.39:1) |
+| mint | `mint-class` | 67.0 / 22.5 / 10.5 | `#f8fdfa` | `#6f4f22` (7.25:1) |
+
+On a light plate the accent is the same pigment **deepened**, which is why
+`PAINTED_THEMES` carries `accentSource: "deep"` and the test checks **hue distance**
+(≤26°) rather than ΔE: ΔE cannot tell a shade from a stranger.
 
 ### The cheap mode is part of the design
 
 Blur is a per-panel GPU pass, and that is the whole cost of this theme. `data-lite`
-is set from the device (≤4 cores, ≤4GB, or a metered connection) and it halves the
-blur to 8px, raises the tint to 62% so the sheets stay legible without the blur
-carrying them, and stops every animation. A phone in Guntur gets the idea of glass
+is set from the device (≤4 cores, ≤4GB, or a metered connection) and it cuts the
+blur to 8px, raises the tint to 80% so the sheets stay opaque enough to read on
+without the blur carrying them, and stops every animation. A phone in Guntur gets the idea of glass
 without the bill for it.
 
 ### The paintings stay, and they got faster
 
-Twenty-eight encodings of eighteen paintings: a canonical 1280px WebP for a
+Ninety-six encodings of twenty-four paintings: a canonical 1280px WebP for a
 full-bleed theme, a 640px AVIF/WebP pair for a gallery tile, and a placeholder
 colour per plate so a tile never flashes an empty box. AVIF is served first —
 roughly 40% smaller than WebP at the same quality — and the whole set is inside a
 measured budget, so "add a painting" cannot quietly make the site slower. The
-gallery went from downloading 1376px files to paint 280px boxes, to about 13KB per
-tile on a phone.
+canonical set is **997KB** (606KB of it AVIF); the tiles are **373KB** as WebP and
+**261KB** as AVIF, which is about 11KB per tile on a phone.
+
+And every one of the twenty-four is on the landing page, because a painting that
+exists only in `assets/` is a painting nobody sees: eleven as room tiles (glass has
+no plate), nine framed as pictures, five hung as the accents worn inside the night
+rooms. `tests/painted-themes.test.mjs` fails if a plate on disk is on neither a
+theme nor the page.
 
 **Minimal** is still a style, and so is **Legacy**; neither was removed. Glass is
 simply what a device that has never chosen now opens on.

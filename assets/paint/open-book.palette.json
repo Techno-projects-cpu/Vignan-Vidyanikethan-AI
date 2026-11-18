@@ -2,47 +2,47 @@
   "plate": "open-book",
   "roles": [
     {
-      "hex": "#f5f0e0",
-      "weight": 44.1,
+      "hex": "#f6f0e0",
+      "weight": 43.8,
       "chroma": 8.6,
       "lightness": 94.8
     },
     {
-      "hex": "#ddccaa",
-      "weight": 43.3,
+      "hex": "#ddcdab",
+      "weight": 43.5,
       "chroma": 18.8,
-      "lightness": 82.5
+      "lightness": 82.6
     },
     {
-      "hex": "#786344",
-      "weight": 12.5,
-      "chroma": 20.9,
-      "lightness": 45.5
+      "hex": "#816a49",
+      "weight": 12.7,
+      "chroma": 20.8,
+      "lightness": 45.9
     }
   ],
   "balance": {
     "share": [
-      44.1,
-      43.3,
-      12.5
+      43.8,
+      43.5,
+      12.7
     ],
     "within": false,
     "accentLeads": true
   },
   "separation": {
-    "dominantSecondary": 10.4,
-    "secondaryAccent": 33.4,
-    "dominantAccent": 41.4
+    "dominantSecondary": 10.1,
+    "secondaryAccent": 30.6,
+    "dominantAccent": 38.6
   },
   "ink": {
     "light": "#ffffff",
     "dark": "#0b0907",
     "lightWorst": 1.14,
-    "darkWorst": 3.47
+    "darkWorst": 3.87
   },
   "safe": {
-    "forCream": 12.5,
-    "forInk": 87.5
+    "forCream": 0,
+    "forInk": 87.3
   },
   "measured": true
 }

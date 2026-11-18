@@ -1,0 +1,48 @@
+{
+  "plate": "lagoon-window",
+  "roles": [
+    {
+      "hex": "#cef3eb",
+      "weight": 44.4,
+      "chroma": 13.3,
+      "lightness": 93.4
+    },
+    {
+      "hex": "#e0ccb4",
+      "weight": 29.8,
+      "chroma": 14.9,
+      "lightness": 83.3
+    },
+    {
+      "hex": "#eff0e5",
+      "weight": 25.8,
+      "chroma": 6.2,
+      "lightness": 95.2
+    }
+  ],
+  "balance": {
+    "share": [
+      44.4,
+      29.8,
+      25.8
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 22.1,
+    "secondaryAccent": 12,
+    "dominantAccent": 12.2
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.15,
+    "darkWorst": 12.75
+  },
+  "safe": {
+    "forCream": 0,
+    "forInk": 100
+  },
+  "measured": true
+}

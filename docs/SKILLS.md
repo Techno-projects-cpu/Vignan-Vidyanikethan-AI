@@ -158,7 +158,7 @@ prose. `js/colour.js` (compositing, CIEDE2000, circular hue, 60-30-10 balance) i
 the instrument, and `tests/colour.test.mjs` pins it to published reference values
 (including the Sharma/Wu/Dalal ΔE pairs) so the instrument itself is calibrated.
 
-### The glass round (2.33.0) — light instead of a painting
+### The glass round (2.34.0) — light instead of a painting
 
 The correction was precise: the paintings were good, but the *default* was still
 the one theme with no paint in it, and the images were too heavy for a low-end
@@ -167,15 +167,15 @@ phone. So this round is about a look that can be a default, and about weight.
 - **Bangtutorial/bang-motion** — the rule that the background is never static is
   what the aurora obeys: two layers drifting at 54s and 18s, at different speeds,
   so the screen never reads as a loop. Its text-pocket luminance rule became the
-  36% tint: the thinnest sheet at which text still clears 7:1 over the brightest
+  58% sheet: the lightest sheet at which text still clears 7:1 over the strongest
   field.
 - **Cloveric/claude-drawing-skill** — its "one light, three glazes" discipline was
   reused for the six new plates, and its note that white objects are warm off-white
   is why the new chalk and copper plates are cream and umber rather than grey.
 - **Alchaincyf/huashu-art-motion** — the style lock (one style, six pigments, no
-  people) is what lets eighteen paintings read as one book; the ban on blue-purple
-  is why the glass theme's four fields are emerald, amber, rose and cool teal, with
-  no violet anywhere.
+  people) is what lets twenty-four paintings read as one book; the ban on blue-purple is why
+  the glass theme's four fields are blush, sand, lagoon and peach, with no violet
+  anywhere and nothing darker than a shadow.
 - **Alisa0808/vox-director** — storyboard discipline again: the mock screen on the
   landing page is a finished frame drawn in CSS, and it is honest about being an
   illustration.
@@ -185,6 +185,42 @@ tools/optimise-paint.mjs` writes two widths and two formats per plate and record
 the bytes in `assets/paint/manifest.json`; the suite fails if the set grows past
 its budget, if a tile is not meaningfully smaller than its plate, or if a plate has
 no 640 variant. Weight is now something a commit can get wrong loudly.
+
+### The daylight round (2.34.0) — make it lighter, and put the paintings in front of people
+
+The round after the glass round answered two complaints in one sentence each:
+*the paintings you added are nowhere in sight*, and *use light colours like pink,
+beige, turquoise*. Both were fair. 2.33.0 had shipped eighteen plates, but the
+landing gallery still showed eight rooms and eleven pictures, so six of the new
+plates were only ever reachable as a background after signing in — and the
+default look was a dark room at night.
+
+- **Bangtutorial/bang-motion** — the text-pocket rule, run in the other
+  direction. On a dark sheet a tint is *thinned* until it looks like glass; on a
+  pale field the sheet has to stay *thick* enough that plum ink still reads. The
+  58% white sheet is the thinnest value that holds 7:1 over the strongest field,
+  and because the rule is numeric, the light theme did not have to be guessed at.
+- **Cloveric/claude-drawing-skill** — "white objects are warm off-white, not
+  grey" is why the base is `#fdf7f2` rather than `#f8f9fa`, and why the six new
+  pastel plates keep a warm ground under their pink and turquoise. It also gave
+  the three daylight themes their rule: a room may be pale, but its shadow must
+  still be warm.
+- **Alchaincyf/huashu-art-motion** — the style lock is what keeps twenty-four
+  plates one book: the pastel set repeats the same six ornaments (arch, window,
+  shelf, desk, plaster wall, one glaze) at a new key, instead of inventing a
+  second style. The blue-purple ban is why the turquoise sits at 187° — lagoon
+  green, never indigo.
+- **Alisa0808/vox-director** — storyboard discipline: each pastel plate exists
+  to do one job on the page it lands on (a ground for a room, or a picture with
+  nothing written over it), and none was painted as decoration to fill a grid.
+
+**What changed in the method:** "is it visible?" became a test, not a claim.
+`tests/painted-themes.test.mjs` fails if any plate on disk is on neither a theme
+nor the landing page, and it counts the rooms and the frames so the gallery cannot
+silently fall behind the asset folder again. The light theme's accent rule also
+grew a distinction the dark set never needed: on a pale plate the accent is the
+same pigment **deepened**, so the test checks hue distance rather than ΔE — a
+measurement that cannot tell a shade from a stranger.
 
 ## The skills the site itself carries
 
