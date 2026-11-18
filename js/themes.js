@@ -17,7 +17,7 @@
  *      does, only how it looks, and it is saved per device.
  */
 
-import { PAINTED_THEMES, asTheme } from "./theme-paint.js?v=65";
+import { PAINTED_THEMES, asTheme } from "./theme-paint.js?v=66";
 
 /**
  * Six classic styles plus the painted edition, ordered from quietest to loudest.

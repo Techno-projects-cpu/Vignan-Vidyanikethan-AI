@@ -21,7 +21,7 @@
  */
 
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -173,4 +173,37 @@ test("the app switches the painted treatment on with one attribute", () => {
   assert.match(read("index.html"), /dataset\.paint = "1"/);
   assert.match(read("index.html"), /styles-painted\.css/);
   assert.match(read("js/themes.js"), /\.\.\.PAINTED_THEMES\.map\(asTheme\)/, "one list, not two");
+});
+
+test("no painting is shipped without a place on the site", () => {
+  // Twelve plates were painted for this release. A plate that no page shows and no
+  // theme uses is 100KB of the offline cache spent on nothing, and it is exactly
+  // what happens when a set grows quickly. Every plate must be either a theme's
+  // ground (through js/theme-paint.js) or hung as a framed picture on the landing
+  // page; the accent plates are the framed ones, and they say so on the page.
+  const plates = readdirSync(new URL("../assets/paint/", import.meta.url))
+    .filter((name) => name.endsWith(".webp"))
+    .map((name) => name.replace(/\.webp$/, ""));
+  assert.ok(plates.length >= 12, `expected the twelve painted plates, found ${plates.length}`);
+
+  const themes = readFileSync(new URL("../js/theme-paint.js", import.meta.url), "utf8");
+  const landing = readFileSync(new URL("../welcome.html", import.meta.url), "utf8");
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  const gallery = landing.slice(landing.indexOf('class="wl-rooms"'));
+
+  for (const plate of plates) {
+    const asGround = themes.includes(`plate: "${plate}"`);
+    const asPicture = gallery.includes(`assets/paint/${plate}.webp`);
+    assert.ok(asGround || asPicture, `${plate} is neither a theme ground nor a framed picture`);
+    // And either way it carries its measurement: a report exists for every plate.
+    assert.ok(existsSync(new URL(`../assets/paint/${plate}.palette.json`, import.meta.url)), `${plate} has a palette report`);
+  }
+
+  // The theme picker shows the painting itself, not only three rectangles.
+  assert.match(app, /style-preview\$\{theme\.painted \? " painted" : ""\}/);
+  assert.match(app, /preview\.style\.backgroundImage/);
+
+  // The two roles the page describes: seven grounds, five pictures.
+  assert.equal((landing.match(/class="wl-room"/g) || []).length, 7, "seven rooms are shown");
+  assert.equal((landing.match(/class="wl-picture"/g) || []).length, 5, "five plates are framed");
 });
