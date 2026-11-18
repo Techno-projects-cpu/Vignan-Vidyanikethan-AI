@@ -3,8 +3,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
+  CLASSIC_STYLE,
   DEFAULT_STYLE,
+  STYLE_ERA,
   THEMES,
+  isPaintedStyle,
+  migrateStyleChoice,
   contrast,
   isKnownStyle,
   normalizeStyle,
@@ -67,6 +71,29 @@ test("every style is readable, measured not assumed", () => {
   assert.equal(Math.round(contrast("#777777", "#777777")), 1);
 });
 
+test("a device that predates the painted themes is moved once, and only once", () => {
+  // The old default was `minimal`, written before any painting existed, so an old
+  // value of `minimal` cannot be told apart from "never chose" — and that is what
+  // made a whole release look like it had not shipped: every returning device kept
+  // the one theme that is not painted.
+  const old = normalizeSettings({ style: "minimal" });
+  assert.equal(old.style, DEFAULT_STYLE, "an old default moves to the painted default");
+  assert.equal(old.styleEra, STYLE_ERA, "and the movement is recorded");
+
+  // A choice is never overwritten, in either era.
+  assert.equal(normalizeSettings({ style: "terminal", styleEra: 1 }).style, "terminal");
+  assert.equal(normalizeSettings({ style: "luxury", styleEra: 1 }).style, "luxury");
+  assert.equal(normalizeSettings({ style: "legacy" }).style, "legacy");
+  // Once the era is current, `minimal` means what it says: a choice.
+  assert.equal(normalizeSettings({ style: "minimal", styleEra: STYLE_ERA }).style, "minimal");
+  assert.equal(normalizeSettings({ style: "minimal", styleEra: STYLE_ERA + 1 }).style, "minimal");
+
+  // The helper is the single authority, and it reports whether it moved anything.
+  assert.deepEqual(migrateStyleChoice({ style: "minimal", era: 0 }), { style: DEFAULT_STYLE, changed: true, era: STYLE_ERA });
+  assert.deepEqual(migrateStyleChoice({ style: "", era: 0 }).changed, true);
+  assert.deepEqual(migrateStyleChoice({ style: "minimal", era: STYLE_ERA }).changed, false);
+});
+
 test("a stale or unknown saved style can never blank the app", () => {
   assert.equal(normalizeStyle("luxury"), "luxury");
   assert.equal(normalizeStyle("nonsense"), DEFAULT_STYLE);
@@ -75,10 +102,16 @@ test("a stale or unknown saved style can never blank the app", () => {
   assert.equal(normalizeStyle("__proto__"), DEFAULT_STYLE, "prototype keys are not styles");
   assert.equal(isKnownStyle("brutal"), true);
   assert.equal(themeById("nope").id, DEFAULT_STYLE);
-  assert.equal(DEFAULT_SETTINGS.style, "minimal", "the app starts as it always looked");
+  // Since 2.32.2 the app opens on a painted room, not on the classic base look.
+  assert.equal(DEFAULT_SETTINGS.style, DEFAULT_STYLE);
+  assert.equal(isPaintedStyle(DEFAULT_STYLE), true, "and the default is one of the paintings");
   assert.equal(normalizeSettings({ style: "terminal" }).style, "terminal");
-  assert.equal(normalizeSettings({ style: "made-up" }).style, "minimal");
-  assert.equal(normalizeSettings({}).style, "minimal");
+  assert.equal(normalizeSettings({ style: "made-up" }).style, DEFAULT_STYLE);
+  assert.equal(normalizeSettings({}).style, DEFAULT_STYLE);
+  // The classic look is still reachable by name, and still sets no attribute —
+  // but only a device that has seen this era can mean it. Without an era, the
+  // value is the old default and is moved (that case is its own test above).
+  assert.equal(normalizeSettings({ style: "minimal", styleEra: STYLE_ERA }).style, "minimal");
 });
 
 test("the preview swatches and the stylesheet agree, colour for colour", () => {
@@ -128,7 +161,11 @@ test("the style is applied by attribute, mirrored, and rendered as tiles", () =>
   assert.match(app, /root\.dataset\.style = style/);
   assert.match(app, /root\.removeAttribute\("data-style"\)/, "minimal is the absence of the attribute");
   assert.match(app, /localStorage\.setItem\(STYLE_MIRROR_KEY, style\)/, "the mirror is written synchronously");
-  assert.match(app, /applyStyle\(isKnownStyle\(mirroredStyle\) \? mirroredStyle : state\.settings\.style, \{ save: false, remember: false \}\)/, "the saved style is applied at boot, without becoming a fresh choice");
+  assert.match(app, /applyStyle\(bootStyle, \{ save: false, remember: false \}\)/, "the saved style is applied at boot, without becoming a fresh choice");
+  // ...but the mirror loses to a migration, or a device that predates the painted
+  // edition would be restored to the old default on every single load.
+  assert.match(app, /const restoredOldDefault = mirroredStyle === CLASSIC_STYLE && state\.settings\.style !== CLASSIC_STYLE/);
+  assert.match(app, /const bootStyle = isKnownStyle\(mirroredStyle\) && !restoredOldDefault \? mirroredStyle : state\.settings\.style/);
   assert.match(app, /function renderStyleTiles\(/);
   assert.match(app, /tile\.setAttribute\("aria-pressed"/);
   assert.match(html, /<div class="style-grid" id="style-grid" role="group"/);
@@ -239,7 +276,14 @@ test("a new device starts in the school's style, and its own choice always wins"
   assert.equal(resolveStyle({ stored: "", schoolDefault: "comic-sans" }), DEFAULT_STYLE);
   // The server validates its own env var, so a typo cannot blank the app.
   const server = readFileSync(fileURLToPath(new URL("serve.mjs", root)), "utf8");
-  assert.match(server, /const STYLE_IDS = \["minimal", "soft", "editorial", "luxury", "terminal", "brutal"\]/);
+  // The list covers every shipped style, painted rooms included, and the server's
+  // fallback is the same painted room the app defaults to — a tablet that painted
+  // one style before boot and another after it would flicker between worlds.
+  assert.match(server, /const STYLE_IDS = \[\s*"minimal", "soft", "editorial", "luxury", "terminal", "brutal",\s*"legacy", "rain", "stair", "aurora", "ember", "moss", "indigo",\s*\]/);
+  for (const theme of THEMES) {
+    assert.ok(server.includes(`"${theme.id}"`), `the school can choose ${theme.id}`);
+  }
+  assert.match(server, /: "rain";/, "the server's fallback is the app's default");
   assert.match(server, /SCHOOL_DEFAULT_STYLE = STYLE_IDS\.includes/);
   assert.match(server, /defaultStyle: SCHOOL_DEFAULT_STYLE/);
   // The app applies it once, only when the device has never chosen.

@@ -204,6 +204,28 @@ final state, and the painted sheet's own reduced-motion rule stops the drift. No
 animation carries words: the loading indicator is a drawn stroke, not moving
 type, and no sentence is ever animated in and out of legibility.
 
+### The default had to change (2.32.2)
+
+Twelve paintings shipped, and the site still looked identical to a returning
+visitor, because `DEFAULT_STYLE` was `minimal` — the one theme that is not
+painted. Everything new lived behind a Settings tab nobody had a reason to open,
+and a device with a saved `minimal` was restored to it by the first-frame mirror
+on every single load.
+
+Three things had to change together, and a test now holds them:
+
+1. **The default is a painted room** (`rain`, the most evenly measured ground, so
+   it is also the safest surface for any screen). `minimal` still exists by name
+   and still sets no `data-style` attribute — it is the base sheet, not a theme.
+2. **A migration, not a switch.** `styleEra` is stored in settings. Below era 2, a
+   value of `minimal` cannot be told apart from "never chose", because the painted
+   themes did not exist when it was written — so it is moved once, with a toast
+   that names the way back. Any other choice is never touched, in any era.
+3. **The mirror loses to the migration.** `applyStyle` is called at boot from the
+   first-frame mirror; when that mirror holds the old default and settings have
+   moved forward, the migration wins and the mirror is rewritten. Otherwise the
+   app repaints itself into the past on every load.
+
 ### Security and the paperwork
 
 The policy is no longer a sentence in a document. `serve.mjs` generates a

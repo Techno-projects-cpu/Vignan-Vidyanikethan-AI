@@ -17,7 +17,7 @@
  *      does, only how it looks, and it is saved per device.
  */
 
-import { PAINTED_THEMES, asTheme } from "./theme-paint.js?v=66";
+import { PAINTED_THEMES, asTheme } from "./theme-paint.js?v=67";
 
 /**
  * Six classic styles plus the painted edition, ordered from quietest to loudest.
@@ -101,7 +101,49 @@ export function isPaintedStyle(id) {
   return PAINTED_THEMES.some((theme) => theme.id === id);
 }
 
-export const DEFAULT_STYLE = "minimal";
+/** The original look: the app with no `data-style` attribute at all. */
+export const CLASSIC_STYLE = "minimal";
+
+/**
+ * What a device paints when nobody has chosen.
+ *
+ * Until 2.32.1 this was `minimal`, and that was the whole problem: a student who
+ * opened the site after the painted edition shipped saw the same grey app they
+ * had always seen, because the default was the one theme that is *not* painted.
+ * All twelve paintings lived behind a Settings tab nobody had a reason to open.
+ * The default is now the reference room — the most evenly measured ground, so it
+ * is also the one that is safe to put any screen on top of.
+ */
+export const DEFAULT_STYLE = "rain";
+
+/**
+ * The settings version at which the default changed.
+ *
+ * A migration that only changed the default constant would do nothing for anybody
+ * who already had a saved setting, and a migration that overwrote a saved setting
+ * would throw away a choice someone made on purpose. So the era is stored instead:
+ * below 2, a value of `minimal` is indistinguishable from "never chose", and it is
+ * moved to the new default once. Anything else the student picked is left alone,
+ * forever. `minimal` is still there, under its own name, for anyone who wants it.
+ */
+export const STYLE_ERA = 2;
+
+/**
+ * Bring a stored style choice up to the current era.
+ *
+ * Returns the style to use and whether this device was moved, so the app can say
+ * so once in a toast rather than silently restyling somebody's screen.
+ */
+export function migrateStyleChoice({ style = "", era = 0 } = {}) {
+  const chosen = String(style || "");
+  const generation = Number(era) || 0;
+  if (generation >= STYLE_ERA) return { style: normalizeStyle(chosen), changed: false, era: STYLE_ERA };
+  // Before the era was recorded, `minimal` (or nothing) means "the old default",
+  // not "I looked at twelve themes and chose this one", because the painted themes
+  // did not exist when that value was written.
+  const untouched = !chosen || chosen === CLASSIC_STYLE;
+  return { style: untouched ? DEFAULT_STYLE : normalizeStyle(chosen), changed: untouched, era: STYLE_ERA };
+}
 
 /**
  * The look a brand-new device starts in, before the student has chosen one.
