@@ -14,7 +14,8 @@ is somebody else's.
 │                           accessibility.html  disclaimer.html  copyright.html
 ├── blog/                   ten pieces + an index, hand-written HTML
 │
-├── js/                     78 modules, native ES modules, no bundler
+├── js/                     79 modules, native ES modules, no bundler
+├── LICENSES/               third-party licence texts for vendored code (glasswork)
 ├── styles*.css             13 stylesheets, one per surface (see below)
 ├── assets/                 two bundled fonts, brand marks, twenty-four painted plates (WebP + AVIF, two widths each)
 ├── icons/                  app icons, 48 → 512, plus the maskable pair

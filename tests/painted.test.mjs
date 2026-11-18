@@ -27,6 +27,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { composite, contrast } from "../js/colour.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const read = (file) => readFileSync(path.join(root, file), "utf8");
@@ -112,23 +113,26 @@ test("nothing paints offline that is not in the cache", () => {
   }
 });
 
-test("a painted image carries its true size, real alt text and lazy loading", () => {
-  // Only the paintings are checked here: the brand mark in the header is an SVG
-  // icon, and it has its own test in branding.test.mjs.
-  const images = [...page.matchAll(/<img\b[^>]*class="wl-paint"[^>]*>/g)].map((match) => match[0]);
-  assert.ok(images.length >= 1, "the page shows its painting as an image");
+test("every painting on the page carries its true size, real alt text and lazy loading", () => {
+  // 2.35.0 rebuilt the page around the gallery, so the check is no longer "the
+  // one hero plate": it is every plate the page shows, found by the path rather
+  // than by a class. A picture that lies about its size is a layout shift, and a
+  // page of twenty-four of them is a page that jumps while it loads.
+  const images = [...page.matchAll(/<img\b[^>]*>/g)].map((match) => match[0])
+    .filter((tag) => /src="\.\/assets\/paint\//.test(tag));
+  assert.ok(images.length >= 20, `the page shows the paintings (${images.length} images)`);
   for (const tag of images) {
     const src = tag.match(/src="\.\/(assets\/paint\/[^"?]+)(?:\?[^"]*)?"/);
     assert.ok(src, "the image is a plate from this repository, not another host");
     const [width, height] = PLATES[src[1]] || [];
     assert.ok(width, `${src[1]} is one of the plates`);
-    assert.match(tag, new RegExp(`width="${width}"`), "the width is the file's width");
-    assert.match(tag, new RegExp(`height="${height}"`), "the height is the file's height");
+    assert.match(tag, new RegExp(`width="${width}"`), `${src[1]}: the width is the file's width`);
+    assert.match(tag, new RegExp(`height="${height}"`), `${src[1]}: the height is the file's height`);
     const alt = tag.match(/alt="([^"]*)"/)?.[1] ?? "";
-    assert.ok(alt.length > 25, "the alt text describes the painting rather than naming the file");
+    assert.ok(alt.length > 25, `${src[1]}: the alt text describes the painting`);
     assert.doesNotMatch(alt, /\.webp|^image$|^picture$|screenshot/i, "alt text is written for a reader");
-    assert.match(tag, /loading="lazy"/, "a picture below the fold does not hold up the page");
-    assert.match(tag, /decoding="async"/, "and it decodes off the main thread");
+    assert.match(tag, /loading="lazy"/, `${src[1]}: a picture below the fold does not hold up the page`);
+    assert.match(tag, /decoding="async"/, `${src[1]}: and it decodes off the main thread`);
   }
   // Nothing is fetched from another host: the page still works on a dead Wi-Fi.
   // The canonical link names this site and the footer credits Zero Vast; neither
@@ -137,65 +141,62 @@ test("a painted image carries its true size, real alt text and lazy loading", ()
   assert.doesNotMatch(withoutCanonical, /(?:src|href)="https?:\/\/(?!zero-vast)/, "no remote images");
 });
 
-test("text is never set directly on a painting", () => {
-  // The hero puts a wash of ink between the plate and the type, and the type sits
-  // above both. Without this the title lands on a busy bookshelf.
-  assert.match(css, /\.wl-hero-paint \{[\s\S]*?z-index: 0;/, "the painting is the back layer");
-  assert.match(css, /\.wl-hero::after \{[\s\S]*?linear-gradient\([\s\S]*?z-index: 1;/, "a scrim sits over it");
-  assert.match(css, /\.wl-hero-copy \{[\s\S]*?z-index: 2;/, "the words sit above the scrim");
-  assert.match(css, /\.wl-night::before \{[\s\S]*?linear-gradient/, "the closing room gets the same treatment");
-
-  // The inks on those two surfaces have to stay readable. Ratios are computed
-  // from the tokens, so a repaint cannot quietly dim the body copy.
+test("text is never set directly on a field: the sheet under it is measured", () => {
+  // The 2.35.0 page has no photograph behind its type. It has four pastel fields
+  // and sheets of glass, which is a harder promise to keep honestly: the reader is
+  // looking through a translucent pane at a moving colour. So the promise is
+  // computed rather than asserted — take the tinted sheet at its *thinnest*
+  // declared value, composite it over each field at full strength, and require the
+  // ink to clear 4.5:1 on all four.
   const token = (name) => {
     const hex = new RegExp(`--wl-${name}:\\s*(#[0-9a-f]{6})`, "i").exec(css)?.[1];
     assert.ok(hex, `--wl-${name} is declared`);
-    return [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+    return hex;
   };
-  const luminance = (rgb) => {
-    const [r, g, b] = rgb.map((value) => (value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4));
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  };
-  const contrast = (a, b) => {
-    const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-    return (light + 0.05) / (dark + 0.05);
-  };
-  for (const [ink, paper, floor] of [
-    ["ink", "bg", 4.5],
-    ["soft", "bg", 4.5],
-    ["quiet", "bg", 4.5],
-    ["paper-ink", "paper", 4.5],
-    ["paper-ink-quiet", "paper", 4.5],
-  ]) {
+  const thin = Number(/--wl-tint-thin: color-mix\(in srgb, var\(--wl-sheet\) (\d+)%/.exec(css)?.[1]);
+  assert.ok(thin >= 40 && thin <= 60, `the thinnest sheet is declared (${thin}%)`);
+  const alpha = Math.round((thin / 100) * 255).toString(16).padStart(2, "0");
+  for (const field of ["blush", "dune", "lagoon", "peach"]) {
+    // A field is painted at full colour and dimmed by the layer's opacity, so the
+    // worst case is that field at full strength — which is what this composites.
+    const under = composite(`${token(field)}ff`, token("bg"));
+    const sheet = composite(`${token("sheet")}${alpha}`, under);
+    for (const [ink, floor] of [["ink", 4.5], ["soft", 4.5], ["quiet", 4.5]]) {
+      const ratio = contrast(token(ink), sheet);
+      assert.ok(ratio >= floor, `${ink} on the ${field} field through glass is ${ratio.toFixed(2)}:1, needs ${floor}`);
+    }
+  }
+
+  // And the page itself, before any glass: the numbers a reader actually reads.
+  for (const [ink, paper, floor] of [["ink", "bg", 12], ["soft", "bg", 7], ["quiet", "bg", 4.5]]) {
     const ratio = contrast(token(ink), token(paper));
     assert.ok(ratio >= floor, `${ink} on ${paper} is ${ratio.toFixed(2)}:1, needs ${floor}`);
   }
+  // Type sits on a sheet or on the page, never on a bare field: the hero's copy
+  // column has no background of its own, and every card that holds a paragraph
+  // does.
+  assert.match(css, /\.wl-hero-copy \{ display: grid; gap: 20px; align-content: center; \}/, "the hero copy is on the page");
+  assert.match(css, /\.wl-cell \{[\s\S]*?background: var\(--wl-tint\);/, "a card with a paragraph is a sheet");
+  assert.match(css, /\.wl-steps li \{[\s\S]*?background: var\(--wl-tint\);/, "so is a step");
 });
 
-test("the ornaments are drawn, not pasted, and they are only decoration", () => {
-  // The ensō, the two brush sweeps and the seal are inline SVG: they take the
-  // page's ink through `currentColor`, so they cannot introduce a colour of their
-  // own, and they need no request.
-  for (const [name, pattern] of [
-    ["the ensō", /<svg class="wl-enso"[\s\S]*?<\/svg>/],
-    ["the brush stroke", /<svg class="wl-stroke"[\s\S]*?<\/svg>/],
-    ["the seal", /<svg class="wl-seal"[\s\S]*?<\/svg>/],
-  ]) {
-    const svg = page.match(pattern)?.[0];
-    assert.ok(svg, `${name} is in the page`);
-    assert.match(svg, /aria-hidden="true"/, `${name} is hidden from a screen reader`);
-    assert.match(svg, /focusable="false"/, `${name} is not a tab stop`);
-    assert.match(svg, /<path\b/, `${name} is drawn with a path`);
+test("the decoration is drawn, not pasted, and it is only decoration", () => {
+  // The page has no inline SVG at all now, and no ornament image: the ring, the
+  // brush sweep and the seal were replaced by the material itself — four fields,
+  // a haze, dust, and the rim light on every sheet. That is a stronger version of
+  // the same rule, so it is checked more strictly: there is nothing to paste.
+  assert.doesNotMatch(page, /<svg\b/, "no ornament is pasted into the page");
+  const decorative = [...page.matchAll(/<(?:div|span)\b[^>]*class="(wl-hero-paint|wl-hero-mist|wl-motes)"[^>]*>/g)];
+  assert.equal(decorative.length, 3, "the three decorative layers are in the page");
+  for (const layer of decorative) assert.match(layer[0], /aria-hidden="true"/, "and each is hidden from a screen reader");
+  for (const layer of ["wl-hero-paint", "wl-hero-mist", "wl-motes"]) {
+    assert.match(css, new RegExp(`\\.${layer} \\{[\\s\\S]*?(?:position: fixed|inset: 0)`), `${layer} is a drawn layer`);
   }
-  assert.match(css, /\.wl-enso path \{[\s\S]*?stroke: currentColor;/, "the ring takes the page's ink");
-  assert.match(css, /\.wl-stroke path \{ fill: currentColor; \}/, "the sweep does too");
-  assert.match(css, /\.wl-seal \{[\s\S]*?color: var\(--wl-vermilion\);/, "the seal is the one red mark");
-
-  // One seal per page. A second would stop being a signature and start being a
-  // motif.
-  assert.equal((page.match(/class="wl-seal"/g) || []).length, 1, "one seal, in one place");
-  // And a brush under every section heading, so the page keeps the same hand.
-  assert.equal((page.match(/class="wl-brush"/g) || []).length, 4, "a brush stroke under each section head");
+  // No image is loaded as decoration: the only <img> tags are the brand mark and
+  // the paintings themselves.
+  for (const tag of page.matchAll(/<img\b[^>]*>/g)) {
+    assert.match(tag[0], /src="\.\/(?:icons\/|assets\/paint\/)/, "an image is the mark or a painting");
+  }
   for (const match of page.matchAll(/<h2[^>]*>([\s\S]*?)<\/h2>/g)) {
     assert.doesNotMatch(match[1], /<em|<i\b|<b\b|<strong|<mark/, "a heading is still set in one voice");
   }

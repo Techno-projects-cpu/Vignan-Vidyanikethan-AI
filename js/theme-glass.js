@@ -59,10 +59,30 @@ export const GLASS_THEME = {
 
   /** White glass, as an alpha over whatever is behind it. */
   glass: 0.58,
-  /** Blur radius of the frosted sheet, in px. Halved in lite mode. */
-  blur: 24,
-  /** Saturation lift: frosted glass concentrates colour, it does not wash it out. */
-  saturate: 145,
+  /**
+   * Blur radius of the frosted sheet, in px.
+   *
+   * 24px was a milky sheet: it turned the four fields into a grey wash and made
+   * the interface read as frosted *plastic*. The glasswork recipe (see
+   * `js/glass-lens.js`) blurs only 2px and does the real work with a displacement
+   * lens in `backdrop-filter` — but that lens is Chromium-only, and on the other
+   * browsers a 2px blur is no blur at all, so the type would sit on a moving field.
+   *
+   * 8px is the compromise that keeps both promises: soft enough that a moving
+   * field cannot get between a letter and its background (worst-case ink is still
+   * 12.9:1 over the strongest field), thin enough that the pastels stay pastel
+   * instead of turning grey. The refraction, the rim and the dispersion are what
+   * make it read as glass; the blur is only the safety net under them.
+   */
+  blur: 8,
+  /**
+   * Saturation lift, at the top of the glasswork range: frosted glass concentrates
+   * colour, it does not wash it out. At 180% the blush and the lagoon stay pink and
+   * turquoise through the sheet instead of drifting towards beige.
+   */
+  saturate: 180,
+  /** Brightness lift — the 6% that reads as "lit from behind". */
+  bright: 1.06,
   /** The colour the glass is made of. Light glass is white with a warm cast. */
   glassColour: "#fffaf6",
 };

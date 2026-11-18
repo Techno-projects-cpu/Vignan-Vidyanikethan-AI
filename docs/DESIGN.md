@@ -138,7 +138,10 @@ request at all**, and the whole theme is 9KB of CSS.
   clears 4.5:1 there. Measured worst case: ink **12.9:1**, muted **6.1:1**, accent
   **4.9:1**. `tests/glass.test.mjs` recomposites all four fields and fails if a
   thinner sheet reads worse without saying so.
-- **Blur 24px, saturation 145%.** Saturation is what makes frosted glass read as
+- **Blur 8px, saturation 180%.** A 24px blur turned the pastels grey; the
+  refraction lens is what makes it glass, and the blur is only a safety net under
+  the type (2px, the glasswork value, is unreadable where the lens is unavailable).
+  Saturation is what makes frosted glass read as
   glass rather than as fog: it concentrates the colour behind it.
 - **A light page needs a darker accent, not a brighter one.** White on `#0b726b` is
   **5.78:1**; the first candidate, `#0f8b83`, was 3.92:1 on the page and was
@@ -147,11 +150,34 @@ request at all**, and the whole theme is 9KB of CSS.
 ### The four layers a sheet is made of
 
 1. the tint, at 58% warm white (`#fffaf6`);
-2. `backdrop-filter: blur(24px) saturate(145%)`, which is the glass itself;
+2. `backdrop-filter: blur(8px) saturate(180%)` plus the `--glass-lens` refraction, which is the glass itself;
 3. `inset 0 1px 0 #fff` — the lit top edge, the single line that stops a
    translucent box reading as a flat rectangle;
 4. a specular band that crosses the sheet once on hover **or keyboard focus**, and
    a slow 18s sheen on the sidebar and composer so the screen is never frozen.
+
+### The glass kit: two components, not a repaint
+
+The material above is only interesting if the interface has furniture made of it.
+The glass theme carries one control surface of its own (`styles-glass.css` §10),
+hidden on every other theme:
+
+- **`.gg-seg`** — a segmented control on the Ask screen. The rail is a frosted,
+  lensed pill; the selected item is a white lens with a lit top edge, a shadow
+  *under* it and a 14px accent tick, so the selection reads as a physical slider
+  rather than a coloured button. It is navigation, not decoration: each item
+  carries a `data-view` and the handler calls the same `setView()` the sidebar
+  uses, so there is one definition of which screen is open, and `setView()` marks
+  the item `aria-current="page"` like every other nav control.
+- **`.gg-stats`** — three tiles: paintings, languages, trackers. The numbers are
+  checked against `assets/paint/manifest.json` and `SUPPORTED_LANGUAGES` by
+  `tests/glass.test.mjs`, so a tile cannot quietly drift away from the release.
+  The tiles get the tint and the rim but **not** the lens: each
+  `var(--glass-lens)` is a separate SVG displacement filter, and three small tiles
+  are not worth three of them.
+
+Lite mode paints the kit flat (no blur, no shadow stack, one inset border) and a
+phone stacks the rail above the tiles.
 
 ### The three daylight rooms
 
