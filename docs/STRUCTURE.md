@@ -30,7 +30,9 @@ is somebody else's.
 │
 ├── tests/                  81 files, `node --test`, no dependencies
 ├── tools/                  precache generator, offline simulator, secret scan,
-│                           the live-deploy check, and the address rewriter
+│                           the live-deploy check, the address rewriter, and the
+│                           two colour reporters (palette of a plate, and the
+│                           contrast of the glass stack over a plate)
 ├── docs/                   this folder: design, deploy, credits, checklist
 └── .github/                CI and the two issue templates
 ```

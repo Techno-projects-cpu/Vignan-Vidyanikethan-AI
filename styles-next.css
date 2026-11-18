@@ -2401,6 +2401,13 @@ body.premium-ui .ask-layout.show-sources .source-column {
   width: min(320px, 86vw);
   display: flex;
   flex-direction: column;
+  /* The drawer scrolls, and it did not: a flex child defaults to
+     `min-height: auto`, so a long menu made the middle column taller than the
+     panel instead of scrolling inside it, and everything below the fold was
+     unreachable on a 700px phone. `min-height: 0` is the whole fix; `height: 100%`
+     is the belt to its braces for older Safari. */
+  min-height: 0;
+  height: 100%;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   border: 0;
@@ -2431,6 +2438,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 }
 
 .app-menu-head {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2447,6 +2455,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 }
 
 .app-menu-account {
+  flex: 0 0 auto;
   padding: var(--vn-space-3) var(--vn-space-4);
   border-bottom: var(--vn-hairline) solid var(--vn-rule);
 }
@@ -2500,8 +2509,18 @@ body.premium-ui .ask-layout.show-sources .source-column {
 }
 
 .app-menu-scroll {
-  overflow: auto;
+  /* The one part of the drawer that scrolls. `flex: 1 1 auto` + `min-height: 0`
+     let it shrink below its content and hand the overflow to the scrollbar
+     instead of the window; `overscroll-behavior` keeps a flick that reaches the
+     end from scrolling the conversation underneath it. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: var(--vn-space-2) 0;
+  scrollbar-width: thin;
 }
 
 .app-menu-group {
@@ -2567,6 +2586,7 @@ body.premium-ui .ask-layout.show-sources .source-column {
 }
 
 .app-menu-foot {
+  flex: 0 0 auto;
   margin: 0;
   padding: var(--vn-space-3) var(--vn-space-4);
   border-top: var(--vn-hairline) solid var(--vn-rule);

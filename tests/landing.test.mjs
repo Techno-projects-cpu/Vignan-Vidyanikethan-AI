@@ -378,7 +378,7 @@ test("the palette is the paintings' palette, and nothing else", () => {
     assert.ok(neutral || named, `rgba(${rgb.join(", ")}) is neither neutral nor a named pigment`);
   }
 
-  // 2.35.0 changed the visual language on the user's instruction: the page is
+  // 2.36.0 changed the visual language on the user's instruction: the page is
   // daylight glass now, so corners are round and every sheet carries a rim. What
   // has not changed is the discipline behind it — a radius is one of five named
   // steps and a shadow is one of three named rims. The old page could be checked
@@ -444,10 +444,12 @@ test("the page counts the looks and the paintings it actually ships", () => {
     "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
     "nineteen", "twenty", "twenty-one", "twenty-two", "twenty-three", "twenty-four"];
   const word = (n) => WORDS[n];
-  const looks = [...page.matchAll(/>([A-Za-z-]+) looks\b/g)].map((match) => match[1].toLowerCase());
+  const counted = (noun) => [...page.matchAll(new RegExp(`\\b(${WORDS.join("|")}) ${noun}\\b`, "gi"))]
+    .map((match) => match[1].toLowerCase());
+  const looks = counted("looks");
   assert.ok(looks.length >= 1, "the page states how many looks there are");
   for (const claim of looks) assert.equal(claim, word(THEMES.length), `the page says ${claim} looks; the app ships ${THEMES.length}`);
-  const paintings = [...page.matchAll(/([A-Za-z-]+) paintings\b/g)].map((match) => match[1].toLowerCase());
+  const paintings = counted("paintings");
   assert.ok(paintings.length >= 1, "and how many paintings");
   for (const claim of paintings) assert.equal(claim, word(PLATES_COUNT), `the page says ${claim} paintings; the repository has ${PLATES_COUNT}`);
   // A number the theme change made stale: the cheap mode no longer halves the

@@ -10,7 +10,7 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, statSync } from "node:fs";
 import { chroma, composite, contrast, hue, lightness } from "../js/colour.js";
 import { GLASS_THEME, auroraColour, auroraHex8, glassTint, tintHex8 } from "../js/theme-glass.js";
 import { DEFAULT_STYLE, THEMES, isGlassTheme, isPaintedStyle, themeById } from "../js/themes.js";
@@ -117,20 +117,64 @@ test("the stylesheet uses the numbers the module exports", () => {
   assert.ok(css.includes(`--tg-saturate: ${GLASS_THEME.saturate}%`), "the saturation is exported too");
 });
 
-test("the default screen makes no image request", () => {
-  // The whole point of a theme made of light: nothing to download. The only url()
-  // in the sheet is the inline SVG grain, which is a data URI and costs no request.
-  const urls = [...css.matchAll(/url\((["']?)([^)"']+)\1\)/g)].map((match) => match[2]);
-  assert.ok(urls.length > 0, "the grain is there");
+test("the room behind the glass is one measured painting, not a mystery", () => {
+  // This theme used to promise "no image request". It no longer can: the whole
+  // point of the redesign is that there is something *behind* the glass to bend,
+  // so the page loads one painting and hangs it on the wall. What replaces the
+  // old promise is a stricter one — exactly one plate, from this repository, in
+  // the offline cache, small enough for a phone, and measured against the ink
+  // that sits on top of it.
+  const urls = [...css.matchAll(/url\(([\"']?)([^)\"']+)\1\)/g)].map((match) => match[2]);
+  assert.ok(urls.length > 0, "the grain and the rooms are there");
   for (const url of urls) {
-    // Either the inline SVG itself, or a fragment reference inside that SVG.
-    assert.match(url, /^(data:image\/svg\+xml|%23)/, `${url} is an inline asset, not a request`);
+    const inline = /^(data:image\/svg\+xml|%23)/.test(url);
+    const plate = /^\.\/assets\/paint\/[a-z-]+(?:-640)?\.webp$/.test(url);
+    assert.ok(inline || plate, `${url} is inline or a plate from this repository, nothing else`);
   }
-  assert.doesNotMatch(css, /assets\/paint/, "glass does not use a painting");
-  // ...and the app links this sheet before the app bundle, so the first frame has it.
+  // The swatches in the room control use the 640 tiles, the rooms use the
+  // canonical plate; both are covered below.
+  const plates = [...new Set(urls.filter((url) => /assets\/paint\/[a-z-]+\.webp$/.test(url)))];
+  assert.deepEqual(plates.sort(), [
+    "./assets/paint/blush-hall.webp",
+    "./assets/paint/mint-class.webp",
+    "./assets/paint/sand-desk.webp",
+  ], "three rooms, all paintings this repository already ships");
+
+  // Each one is on disk, inside the tile budget, and in the offline cache: a room
+  // that is not cached is a hole in the wall when the Wi-Fi is off.
+  const precache = JSON.parse(read("precache.json"));
+  const list = Array.isArray(precache) ? precache : precache.urls;
+  for (const plate of plates) {
+    const path = plate.replace("./", "");
+    assert.ok(existsSync(new URL(`../${path}`, import.meta.url)), `${path} exists`);
+    const bytes = statSync(new URL(`../${path}`, import.meta.url)).size;
+    assert.ok(bytes <= 46 * 1024, `${path} is ${Math.round(bytes / 1024)} KB, inside the 46 KB tile budget`);
+    assert.ok(list.includes(plate) || list.some((entry) => String(entry).includes(path)), `${path} is precached`);
+  }
+
+  // The measured promise: `tools/backdrop-report.mjs` composites painting →
+  // fields → veil → sheet for every pixel and keeps the worst. The numbers it
+  // wrote are what the test reads, so the claim cannot drift from the paint.
+  for (const name of ["blush-hall", "mint-class", "sand-desk"]) {
+    const report = JSON.parse(read(`assets/paint/${name}.backdrop.json`));
+    assert.equal(report.measured, true, `${name} has been measured`);
+    assert.ok(report.sheet.ink >= 7, `${name}: ink through the sheet is ${report.sheet.ink}:1`);
+    assert.ok(report.sheet.muted >= 4.5, `${name}: muted ink is ${report.sheet.muted}:1`);
+    assert.ok(report.sheet.accent >= 4.5, `${name}: the accent is ${report.sheet.accent}:1`);
+    // ...and the reason the hero is a sheet rather than text on the page: on the
+    // raw painting even the dark ink drops to 1.9:1 on the mint wall.
+    assert.ok(report.raw.ink < 7, `${name}: text straight on the painting would not clear 7:1`);
+  }
+  assert.match(css, /html\[data-style="glass"\] body\.premium-ui \.premium-hero \{[^}]*background-color: var\(--tg-tint\)/, "the hero is a sheet");
+  assert.match(css, /html\[data-style="glass"\] body\.premium-ui \.page-head \{[^}]*background-color: var\(--tg-tint\)/, "so is the page head");
+  assert.match(css, /html\[data-style="glass"\] body\.premium-ui \.workspace,[\s\S]{0,200}background: transparent/, "the page is the room");
+
+  // Also: the app links this sheet before the app bundle, so the first frame has it.
   const html = read("index.html");
   assert.match(html, /<link rel="stylesheet" href="\.\/styles-glass\.css\?v=\d+">/);
   assert.ok(html.indexOf("styles-glass.css") < html.indexOf("js/boot.js"), "painted before boot");
+  // And the first frame already knows which room, before any module loads.
+  assert.match(html, /localStorage\.getItem\("vignan\.room"\)/, "the room is read before the first paint");
 });
 
 test("a slow device gets the glass without the blur pass", () => {
@@ -239,4 +283,46 @@ test("the refraction lens runs on glass only, and the credit travels with it", (
   assert.match(credits, /WebGL/, "and the part deliberately left out");
   assert.ok(existsSync(new URL("../LICENSES/glasswork.txt", import.meta.url)), "the licence text ships with the code");
   assert.match(lens, /MIT/, "and the file says so at the top");
+});
+
+test("the room control really changes the room, and remembers it", () => {
+  // A background switcher that only changes a class name would be decoration. The
+  // control sets one attribute on <html>, the stylesheet reads it through
+  // `--tg-plate`, the choice survives a reload, and the swatch is the painting
+  // itself so nobody is choosing a colour they cannot see.
+  const html = read("index.html");
+  const app = read("js/app.js");
+  const rooms = [...html.matchAll(/class="gg-room" data-room="([a-z-]+)"/g)].map((match) => match[1]);
+  assert.deepEqual(rooms, [...GLASS_THEME.room.plates, "plain"], "four rooms: the three daylight paintings, and the fields alone");
+  for (const room of GLASS_THEME.room.plates) {
+    assert.ok(existsSync(new URL(`../assets/paint/${room}.webp`, import.meta.url)), `${room} is a plate we ship`);
+    assert.match(
+      css,
+      new RegExp(`\\[data-style="glass"\\]\\[data-room="${room}"\\] body\\.premium-ui \\{[^}]*url\\(\"\\./assets/paint/${room}\\.webp\"\\)`),
+      `${room} sets --tg-plate`,
+    );
+    assert.match(css, new RegExp(`\\.gg-room\\[data-room="${room}"\\] \\{ background-image: url`), `${room} is its own swatch`);
+  }
+  // "plain" keeps the theme as it was: the four fields, no painting at all.
+  assert.match(css, /html\[data-style="glass"\]\[data-room="plain"\] body\.premium-ui \{ --tg-plate: none; \}/, "the painting can be turned off");
+  assert.match(css, /\.gg-room\[data-room="plain"\] \{[\s\S]{0,120}linear-gradient/, "and its swatch is the four fields");
+
+  // The control: pressed state, a real attribute, and a saved preference.
+  assert.match(app, /\$\$\("\.gg-room"\)\.forEach/);
+  assert.match(app, /document\.documentElement\.dataset\.room = room/, "the room is an attribute on the document");
+  assert.match(app, /localStorage\.setItem\("vignan\.room", room\)/, "and it is remembered");
+  assert.match(app, /setAttribute\("aria-pressed", String\(swatch\.dataset\.room === room\)\)/, "the pressed state follows");
+  // The default room is not written as an attribute, so an untouched install is
+  // exactly the default — which is what the first-frame script assumes.
+  assert.match(app, /if \(room === "blush-hall"\) delete document\.documentElement\.dataset\.room;/);
+  assert.equal(GLASS_THEME.room.default, "blush-hall");
+  assert.match(css, /--tg-plate: url\("\.\/assets\/paint\/blush-hall\.webp"\);/, "the default is the blush hall");
+
+  // Before the first frame, so a reload never flashes the wrong room.
+  assert.match(html, /const room = localStorage\.getItem\("vignan\.room"\);/);
+  assert.match(html, /document\.documentElement\.dataset\.room = room/);
+  // And the painting is fetched with the fonts, not after the app boots.
+  assert.match(html, /<link rel="preload" href="\.\/assets\/paint\/blush-hall\.webp" as="image" type="image\/webp">/);
+  // Cheap mode keeps the room but stops paying for it.
+  assert.match(css, /html\[data-lite="1"\] body\.premium-ui::before \{\s*animation: none;\s*filter: none;/, "lite drops the filter and the drift");
 });

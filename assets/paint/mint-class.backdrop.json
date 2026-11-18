@@ -1,0 +1,24 @@
+{
+  "plate": "mint-class",
+  "stack": {
+    "veil": "#fdf7f25c",
+    "fields": [
+      "#f4b9c54d",
+      "#f0d9b64d",
+      "#8fd9d04d",
+      "#f8c9ae4d"
+    ],
+    "sheet": "#fffaf694"
+  },
+  "sheet": {
+    "ink": 10.38,
+    "muted": 4.91,
+    "accent": 5.43
+  },
+  "raw": {
+    "ink": 1.94,
+    "muted": 1.03,
+    "accent": 1.01
+  },
+  "measured": true
+}
