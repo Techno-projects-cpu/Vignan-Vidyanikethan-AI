@@ -286,43 +286,97 @@ test("the refraction lens runs on glass only, and the credit travels with it", (
 });
 
 test("the room control really changes the room, and remembers it", () => {
-  // A background switcher that only changes a class name would be decoration. The
-  // control sets one attribute on <html>, the stylesheet reads it through
-  // `--tg-plate`, the choice survives a reload, and the swatch is the painting
-  // itself so nobody is choosing a colour they cannot see.
+  // Four swatches that do something. Each one is a painting, that painting's own
+  // measured colours as a wash, and an accent taken from the same pigment — so a
+  // tap changes the light, the accent and the picture together. The failure this
+  // guards against is the one that prompted the rewrite: four anonymous blocks
+  // that changed nothing anyone could see.
   const html = read("index.html");
   const app = read("js/app.js");
   const rooms = [...html.matchAll(/class="gg-room" data-room="([a-z-]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(rooms, [...GLASS_THEME.room.plates, "plain"], "four rooms: the three daylight paintings, and the fields alone");
-  for (const room of GLASS_THEME.room.plates) {
-    assert.ok(existsSync(new URL(`../assets/paint/${room}.webp`, import.meta.url)), `${room} is a plate we ship`);
-    assert.match(
-      css,
-      new RegExp(`\\[data-style="glass"\\]\\[data-room="${room}"\\] body\\.premium-ui \\{[^}]*url\\(\"\\./assets/paint/${room}\\.webp\"\\)`),
-      `${room} sets --tg-plate`,
-    );
-    assert.match(css, new RegExp(`\\.gg-room\\[data-room="${room}"\\] \\{ background-image: url`), `${room} is its own swatch`);
-  }
-  // "plain" keeps the theme as it was: the four fields, no painting at all.
-  assert.match(css, /html\[data-style="glass"\]\[data-room="plain"\] body\.premium-ui \{ --tg-plate: none; \}/, "the painting can be turned off");
-  assert.match(css, /\.gg-room\[data-room="plain"\] \{[\s\S]{0,120}linear-gradient/, "and its swatch is the four fields");
+  assert.deepEqual(rooms, GLASS_THEME.rooms.map((room) => room.id), "every room in the theme has a swatch");
+  assert.deepEqual(rooms, ["blush-hall", "mint-class", "sand-desk", "plain"]);
 
-  // The control: pressed state, a real attribute, and a saved preference.
-  assert.match(app, /\$\$\("\.gg-room"\)\.forEach/);
+  // 1. Every room is a plate we ship, at its own plate, wash and accent.
+  const accents = new Set();
+  for (const room of GLASS_THEME.rooms) {
+    const rule = new RegExp(`\\[data-room="${room.id}"\\] body\\.premium-ui \\{([\\s\\S]*?)\\n\\}`).exec(css)?.[1];
+    assert.ok(rule, `${room.id} has a rule`);
+    assert.ok(rule.includes(`--tg-accent: ${room.accent};`), `${room.id} uses its own accent (${room.accent})`);
+    accents.add(room.accent);
+    if (room.fields) {
+      assert.ok(existsSync(new URL(`../assets/paint/${room.id}.webp`, import.meta.url)), `${room.id} is a plate we ship`);
+      assert.ok(rule.includes(`url("./assets/paint/${room.id}.webp")`), `${room.id} sets --tg-plate`);
+      // The wash is the plate's own colours, not the theme's four again.
+      for (const hex of room.fields) {
+        const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+        assert.ok(rule.includes(`rgba(${r}, ${g}, ${b},`), `${room.id} washes with its own ${hex}`);
+      }
+      assert.ok(room.fields.some((hex) => !GLASS_THEME.aurora.some((field) => field.hex === hex)),
+        `${room.id} is not just the theme's four fields under a different photo`);
+    } else {
+      assert.match(rule, /--tg-plate: none;/, "the painting can be turned off");
+    }
+  }
+  assert.equal(accents.size, GLASS_THEME.rooms.length, "no two rooms share an accent");
+
+  // 2. The control itself: the painting is the swatch, the name is written under
+  //    it, and it was bound to something.
+  for (const room of GLASS_THEME.rooms.filter((entry) => entry.fields)) {
+    assert.match(html, new RegExp(`<button type="button" class="gg-room" data-room="${room.id}"[^>]*>\\s*<img src="\\./assets/paint/${room.id}-640\\.webp"`),
+      `${room.id} shows its own painting`);
+  }
+  for (const label of ["Blush", "Mint", "Sand", "Fields"]) {
+    assert.match(html, new RegExp(`<span class="gg-room-label">${label}<\\/span>`), `${label} is named under its swatch`);
+  }
+  assert.match(app, /const setRoom = \(room\) => \{/, "one function owns the room");
   assert.match(app, /document\.documentElement\.dataset\.room = room/, "the room is an attribute on the document");
   assert.match(app, /localStorage\.setItem\("vignan\.room", room\)/, "and it is remembered");
-  assert.match(app, /setAttribute\("aria-pressed", String\(swatch\.dataset\.room === room\)\)/, "the pressed state follows");
-  // The default room is not written as an attribute, so an untouched install is
-  // exactly the default — which is what the first-frame script assumes.
-  assert.match(app, /if \(room === "blush-hall"\) delete document\.documentElement\.dataset\.room;/);
-  assert.equal(GLASS_THEME.room.default, "blush-hall");
-  assert.match(css, /--tg-plate: url\("\.\/assets\/paint\/blush-hall\.webp"\);/, "the default is the blush hall");
-
-  // Before the first frame, so a reload never flashes the wrong room.
-  assert.match(html, /const room = localStorage\.getItem\("vignan\.room"\);/);
+  assert.match(app, /swatch\.setAttribute\("aria-pressed", String\(active\)\)/, "the pressed state follows");
+  assert.match(app, /swatch\.classList\.toggle\("active", active\)/, "and so does the ring");
+  assert.match(app, /button\.addEventListener\("click", \(\) => setRoom\(button\.dataset\.room\)\)/, "a tap sets it");
+  // A saved room is restored on load, so a reload does not silently revert.
+  assert.match(app, /const savedRoom = localStorage\.getItem\("vignan\.room"\);/);
+  // Before the first frame too, so the wall never flashes.
   assert.match(html, /document\.documentElement\.dataset\.room = room/);
-  // And the painting is fetched with the fonts, not after the app boots.
   assert.match(html, /<link rel="preload" href="\.\/assets\/paint\/blush-hall\.webp" as="image" type="image\/webp">/);
-  // Cheap mode keeps the room but stops paying for it.
-  assert.match(css, /html\[data-lite="1"\] body\.premium-ui::before \{\s*animation: none;\s*filter: none;/, "lite drops the filter and the drift");
+  assert.match(css, /\.gg-room\.active img,[\s\S]{0,120}box-shadow/, "the selected swatch is ringed");
+
+  // 3. Cheap mode keeps the room but stops paying for it.
+  assert.match(css, /html\[data-lite="1"\] body\.premium-ui::before \{\s*animation: none;\s*\/\*[\s\S]{0,120}?\*\/\s*filter: none;\s*\}/, "lite drops the filter and the drift");
+});
+
+test("the room fills the screen, on a phone as much as on a desktop", () => {
+  // The bug this pins: `.app-shell` was only made transparent inside the desktop
+  // media query, so on a phone it painted an opaque cream wall over the painting
+  // and the room showed as a strip in the margins. The transparency must not be
+  // inside a breakpoint, and the plate must be a full-viewport fixed layer.
+  const fullBleed = css.slice(css.indexOf("/* THE ROOM IS EDGE TO EDGE"), css.indexOf("@media (min-width: 861px) {"));
+  for (const selector of [".app-shell", ".auth-gate"]) {
+    assert.ok(fullBleed.includes(selector), `${selector} is transparent outside every breakpoint`);
+  }
+  assert.ok(!fullBleed.includes("@media"), "none of it is inside a media query");
+  assert.match(fullBleed, /html\[data-style="glass"\] body\.premium-ui \.world|html\[data-style="glass"\] body\.premium-ui \.workspace/, "the workspace is in the same list");
+  for (const selector of ["workspace", "main", "view"]) {
+    assert.match(fullBleed, new RegExp(`body\\.premium-ui \\.${selector}`), `${selector} is transparent`);
+  }
+
+  const plate = /html\[data-style="glass"\] body\.premium-ui::before \{([\s\S]*?)\n\}/.exec(css)?.[1];
+  assert.ok(plate, "the plate is a layer of its own");
+  assert.match(plate, /position: fixed;/);
+  assert.match(plate, /background-size: cover;/);
+  assert.match(plate, /min-height: 100dvh;/, "a full dynamic viewport, so a phone's address bar cannot clip it");
+
+  // On a phone the framing moves and the drift stops: a moving full-screen image
+  // is a battery cost with nothing to show for it.
+  const phone = css.slice(css.indexOf('@media (max-width: 720px) {\n  html[data-style="glass"] body.premium-ui::before'));
+  const phoneBlock = phone.slice(0, phone.indexOf("}\n}") + 3);
+  assert.ok(phoneBlock.length > 40, "there is a phone block for the plate");
+  assert.match(phoneBlock, /background-position: center 34%/, "the plate is framed for a tall screen");
+  assert.match(phoneBlock, /animation: none;/, "and it stops moving");
+  assert.match(phoneBlock, /inset: 0;/, "with no bleed to crop against the viewport edge");
+
+  // The stylesheet is loaded before the sheets that would paint over it.
+  const html = read("index.html");
+  assert.ok(html.indexOf("styles-glass.css") < html.indexOf("styles-next.css"), "glass is read before the sheet that sets an opaque canvas");
 });
