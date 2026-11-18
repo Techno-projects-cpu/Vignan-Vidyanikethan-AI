@@ -40,17 +40,37 @@
   --wl-bg: #0b0907;          /* warm sumi black */
   --wl-panel: #15110c;
   --wl-ink: #f7efdd;         /* washi cream */
+  /* Three inks, named once. These were var() references with nothing behind
+     them until 2.34.0: every quiet line silently inherited full-strength cream,
+     which is why the page had no secondary tier at all. */
+  --wl-ink-2: #ddcfb4;
+  --wl-ink-3: #b3a487;
+  --wl-night: #0b0907;
   --wl-soft: #ddcfb4;
   --wl-quiet: #b3a487;
   --wl-line: #3a3125;
   --wl-line-soft: #241d15;
   --wl-paper: #efe3c8;       /* the page itself */
   --wl-paper-hi: #f7eeda;
+  --wl-shade: #5a3c42;       /* the warm plum shade under a daylight sheet */
   --wl-vermilion: #b23a29;   /* the seal, used once per plate */
   --wl-ochre: #c08a3e;
   --wl-moss: #5c6a49;
   /* The bar under each plate is a measurement, not decoration: the two quieter
      steps are the stone and straw that the painted grounds are made of. */
+  /* The daylight set, borrowed from the glass theme and the three light
+     paintings: the page the glass sits on, its plum ink, and the lagoon teal
+     that stands in for the seal on light ground. */
+  --wl-day: #fdf7f2;
+  --wl-sheet: #fffaf6;   /* the glass itself, over the day */
+  /* The three fields the daylight glass is made of, named so the miniature in
+     showcase 05 is painted from the same bucket as the real theme. */
+  --wl-blush: #f4b9c5;
+  --wl-dune: #f0d9b6;
+  --wl-lagoon: #8fd9d0;
+  --wl-peach: #f8c9ae;
+  --wl-plum: #2b2430;
+  --wl-teal: #0b726b;
   --wl-stone: #6f6a5e;
   --wl-straw: #a89e88;
   /* Paper, edge to edge: the sheet, its highlight, the shade under a fold, the
@@ -1462,6 +1482,11 @@ img { display: block; }
   object-position: center 42%;
   filter: saturate(104%);
 }
+.wl-room.wl-room-day .wl-room-plate figcaption {
+  background: linear-gradient(180deg, transparent, rgba(253, 247, 242, .9));
+  color: var(--wl-plum);
+}
+.wl-room.wl-room-day .wl-room-note { color: var(--wl-ink-2); }
 .wl-room-plate figcaption {
   position: absolute;
   right: 0;
@@ -1520,6 +1545,10 @@ img { display: block; }
 }
 .wl-picture figcaption { margin-top: 7px; color: var(--wl-ink-3); font-size: 12px; line-height: 1.5; }
 .wl-picture-metric { font-family: var(--wl-mono); letter-spacing: .05em; color: var(--wl-ink-2); }
+/* The five accent plates are hung beside the free ones, and their measurement is
+   printed in the lagoon teal so it is clear they are worn *inside* a room rather
+   than offered as a ground of their own. */
+.wl-picture-accent .wl-picture-metric { color: var(--wl-teal); }
 .wl-rooms-foot { max-width: 62ch; margin: clamp(26px, 3vw, 40px) 0 0; color: var(--wl-ink-2); font-size: 14px; line-height: 1.7; }
 .wl-rooms-foot a { color: var(--wl-ink); text-underline-offset: 4px; }
 
@@ -1570,12 +1599,14 @@ img { display: block; }
      would be the one rounded thing on it. */
   background-image: radial-gradient(closest-side, rgba(255, 255, 255, .18), transparent);
 }
-.wl-glass-tile span:nth-child(1) { inset: 4% auto auto 2%; width: 62%; height: 58%; background-color: rgba(255, 255, 255, .1); }
-.wl-glass-tile span:nth-child(2) { inset: auto 2% 22% auto; width: 54%; height: 52%; background-color: rgba(255, 255, 255, .06); }
+.wl-glass-tile span:nth-child(1) { inset: 4% auto auto 2%; width: 62%; height: 58%; background-color: var(--wl-blush); }
+.wl-glass-tile span:nth-child(2) { inset: auto 2% 22% auto; width: 54%; height: 52%; background-color: var(--wl-lagoon); }
+.wl-glass-tile span:nth-child(3) { outline-color: rgba(255, 255, 255, .9); }
+.wl-glass-tile { background-color: var(--wl-day); }
 .wl-glass-tile span:nth-child(3) {
   inset: 18% 12% 16% 12%;
-  background-image: linear-gradient(158deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, .05) 58%, rgba(255, 255, 255, .02));
-  outline: 1px solid rgba(255, 255, 255, .22);
+  background-image: linear-gradient(158deg, rgba(255, 255, 255, .82), rgba(255, 255, 255, .34) 58%, rgba(255, 255, 255, .16));
+  outline: 1px solid rgba(255, 255, 255, .9);
   outline-offset: -1px;
 }
 .wl-room-name {
@@ -1637,8 +1668,12 @@ img { display: block; }
 .wl-mock-fields i {
   position: absolute;
   display: block;
-  background-image: radial-gradient(closest-side, rgba(255, 255, 255, .2), transparent 72%);
+  background-image: radial-gradient(closest-side, var(--field), transparent 74%);
 }
+.wl-mock-fields i:nth-child(1) { --field: color-mix(in srgb, var(--wl-blush) 95%, transparent); }
+.wl-mock-fields i:nth-child(2) { --field: color-mix(in srgb, var(--wl-dune) 95%, transparent); }
+.wl-mock-fields i:nth-child(3) { --field: color-mix(in srgb, var(--wl-lagoon) 90%, transparent); }
+.wl-mock-fields i:nth-child(4) { --field: color-mix(in srgb, var(--wl-peach) 85%, transparent); }
 .wl-mock-fields i:nth-child(1) { inset: -6% auto auto -4%; width: 62%; height: 58%; }
 .wl-mock-fields i:nth-child(2) { inset: -8% -6% auto auto; width: 56%; height: 52%; opacity: .72; }
 .wl-mock-fields i:nth-child(3) { inset: auto auto -10% 12%; width: 70%; height: 58%; opacity: .6; }
@@ -1650,42 +1685,45 @@ img { display: block; }
   display: grid;
   gap: 12px;
   padding: 14px;
-  background: rgba(8, 9, 12, .34);
-  border: 1px solid rgba(255, 255, 255, .18);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .26);
+  /* Day glass: a warm white sheet at 58% over the four fields. */
+  background: color-mix(in srgb, var(--wl-sheet) 58%, transparent);
+  border: 1px solid rgba(255, 255, 255, .85);
+  box-shadow: inset 0 1px 0 #fff;
+  color: var(--wl-plum);
   -webkit-backdrop-filter: blur(14px) saturate(150%);
   backdrop-filter: blur(14px) saturate(150%);
 }
-.wl-mock-top { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+.wl-mock-top { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid rgba(90, 60, 66, .14); }
 .wl-mock-dot { width: 12px; height: 12px; background: var(--wl-vermilion); }
 .wl-mock-title { font-family: var(--wl-display); font-size: 12px; font-weight: 600; letter-spacing: .02em; }
 .wl-mock-pill {
   margin-left: auto;
   padding: 3px 7px;
-  border: 1px solid rgba(255, 255, 255, .24);
+  border: 1px solid rgba(11, 114, 107, .34);
+  color: var(--wl-teal);
   font-family: var(--wl-mono);
   font-size: 11px;
   letter-spacing: .04em;
 }
 .wl-mock-row { display: flex; gap: 8px; align-items: flex-start; }
-.wl-mock-avatar { flex: 0 0 auto; width: 18px; height: 18px; border: 1px solid rgba(255, 255, 255, .3); }
+.wl-mock-avatar { flex: 0 0 auto; width: 18px; height: 18px; border: 1px solid rgba(90, 60, 66, .3); background: rgba(255, 255, 255, .55); }
 .wl-mock-mark { background: var(--wl-vermilion); border-color: var(--wl-vermilion); }
 .wl-mock-bubble {
   padding: 9px 11px;
-  background: rgba(255, 255, 255, .09);
-  border: 1px solid rgba(255, 255, 255, .14);
-  color: var(--wl-ink);
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(90, 60, 66, .12);
+  color: var(--wl-plum);
   font-size: 12.5px;
   line-height: 1.55;
 }
 .wl-mock-reply { flex-direction: row-reverse; }
-.wl-mock-answer { background: rgba(255, 255, 255, .13); }
+.wl-mock-answer { background: rgba(255, 255, 255, .88); }
 .wl-mock-answer em {
   display: block;
   margin-top: 6px;
   padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, .16);
-  color: var(--wl-ink-3);
+  border-top: 1px solid rgba(90, 60, 66, .16);
+  color: var(--wl-teal);
   font-family: var(--wl-mono);
   font-size: 11px;
   font-style: normal;
@@ -1696,27 +1734,27 @@ img { display: block; }
   align-items: center;
   gap: 10px;
   padding: 10px 10px 10px 12px;
-  background: rgba(255, 255, 255, .06);
-  border: 1px solid rgba(255, 255, 255, .16);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2);
+  background: rgba(255, 255, 255, .8);
+  border: 1px solid rgba(90, 60, 66, .14);
+  box-shadow: inset 0 1px 0 #fff;
 }
 .wl-mock-lines {
   flex: 1 1 auto;
   height: 7px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, .22) 0 46%, transparent 46% 54%, rgba(255, 255, 255, .22) 54%);
+  background: linear-gradient(90deg, rgba(90, 60, 66, .22) 0 46%, transparent 46% 54%, rgba(90, 60, 66, .22) 54%);
 }
-.wl-mock-send { width: 30px; height: 22px; background: var(--wl-vermilion); }
+.wl-mock-send { width: 30px; height: 22px; background: var(--wl-teal); }
 .wl-mock-chip {
   position: absolute;
   padding: 5px 8px;
   border: 1px solid rgba(255, 255, 255, .24);
-  background: rgba(8, 9, 12, .42);
+  background: color-mix(in srgb, var(--wl-sheet) 82%, transparent);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   font-family: var(--wl-mono);
   font-size: 11px;
   letter-spacing: .04em;
-  color: var(--wl-ink-2);
+  color: var(--wl-plum);
 }
 .wl-mock-chip-a { top: 6%; right: -14px; }
 .wl-mock-chip-b { bottom: 9%; left: -14px; }

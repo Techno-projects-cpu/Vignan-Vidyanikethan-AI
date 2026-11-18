@@ -4,45 +4,45 @@
     {
       "hex": "#676155",
       "weight": 46.8,
-      "chroma": 7.6,
-      "lightness": 41.6
+      "chroma": 7.7,
+      "lightness": 41.5
     },
     {
-      "hex": "#484439",
-      "weight": 35.8,
-      "chroma": 7.2,
+      "hex": "#474338",
+      "weight": 35.5,
+      "chroma": 7.3,
       "lightness": 28.7
     },
     {
       "hex": "#8b8474",
-      "weight": 17.4,
+      "weight": 17.7,
       "chroma": 9.4,
-      "lightness": 55.6
+      "lightness": 55.5
     }
   ],
   "balance": {
     "share": [
       46.8,
-      35.8,
-      17.4
+      35.5,
+      17.7
     ],
     "within": false,
     "accentLeads": true
   },
   "separation": {
-    "dominantSecondary": 10.3,
-    "secondaryAccent": 24,
+    "dominantSecondary": 10.6,
+    "secondaryAccent": 24.3,
     "dominantAccent": 13.9
   },
   "ink": {
     "light": "#ffffff",
     "dark": "#0b0907",
     "lightWorst": 3.72,
-    "darkWorst": 2.05
+    "darkWorst": 2.01
   },
   "safe": {
-    "forCream": 82.6,
-    "forInk": 17.4
+    "forCream": 82.3,
+    "forInk": 17.7
   },
   "measured": true
 }

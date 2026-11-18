@@ -1,0 +1,48 @@
+{
+  "plate": "blush-hall",
+  "roles": [
+    {
+      "hex": "#fae2d5",
+      "weight": 48.8,
+      "chroma": 11.3,
+      "lightness": 90.7
+    },
+    {
+      "hex": "#faf1e6",
+      "weight": 44.9,
+      "chroma": 6.6,
+      "lightness": 95.7
+    },
+    {
+      "hex": "#a7d6cd",
+      "weight": 6.3,
+      "chroma": 17,
+      "lightness": 81.8
+    }
+  ],
+  "balance": {
+    "share": [
+      48.8,
+      44.9,
+      6.3
+    ],
+    "within": false,
+    "accentLeads": true
+  },
+  "separation": {
+    "dominantSecondary": 6.7,
+    "secondaryAccent": 21,
+    "dominantAccent": 27.2
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.12,
+    "darkWorst": 12.44
+  },
+  "safe": {
+    "forCream": 0,
+    "forInk": 100
+  },
+  "measured": true
+}

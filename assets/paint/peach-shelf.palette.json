@@ -1,0 +1,48 @@
+{
+  "plate": "peach-shelf",
+  "roles": [
+    {
+      "hex": "#e4ceb9",
+      "weight": 59.1,
+      "chroma": 14.1,
+      "lightness": 83.5
+    },
+    {
+      "hex": "#dbdbd7",
+      "weight": 31.9,
+      "chroma": 3.2,
+      "lightness": 87.3
+    },
+    {
+      "hex": "#8f7d69",
+      "weight": 9,
+      "chroma": 12.5,
+      "lightness": 53.8
+    }
+  ],
+  "balance": {
+    "share": [
+      59.1,
+      31.9,
+      9
+    ],
+    "within": true,
+    "accentLeads": true
+  },
+  "separation": {
+    "dominantSecondary": 10.5,
+    "secondaryAccent": 27.9,
+    "dominantAccent": 24
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.39,
+    "darkWorst": 5.02
+  },
+  "safe": {
+    "forCream": 0,
+    "forInk": 100
+  },
+  "measured": true
+}

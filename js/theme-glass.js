@@ -1,70 +1,75 @@
 /**
- * Glass Morphism — the default theme, and the one that has no painting.
+ * Glass Morphism — the default theme, in daylight.
  *
- * The painted themes are built on a picture: the plate decides the palette. This
- * one is built on **light**, so it has the opposite constraint — every colour has
- * to survive being looked at through a translucent sheet, over a background that
- * is deliberately moving. That is the whole design, and it is the reason the
- * numbers below are measured rather than picked.
+ * The dark version of this theme was a room at night: four luminous fields behind
+ * smoked glass. This is the same idea with the curtains open — **blush pink, warm
+ * sand, lagoon turquoise and peach** behind sheets of white glass, with deep plum
+ * ink on top. The brief was "light colours: pink, beige, turquoise", and the work
+ * was making that readable rather than merely pretty.
  *
- * Four colour fields sit behind the interface (emerald, amber, rose, cool glass)
- * on a deep teal-ink base. Three percentages do the work of the 60-30-10 rule:
+ * The 60-30-10 rule, in a light key:
  *
- *   60%  the base, `#071113`, which is most of the screen most of the time
- *   30%  the four fields, at 20-58% opacity, which is what makes the glass visible
- *   10%  the mint accent, `#5fd6b4`, which only ever marks "this is live"
+ *   60%  the base, `#fdf7f2`, a warm porcelain white
+ *   30%  the four fields, at 44-62%, plus the white glass that sits on them
+ *   10%  the accent, `#0b726b` — a deep lagoon teal, and the only dark, saturated
+ *        colour on the screen. It marks what is live: the send button, the active
+ *        tab, a citation rule.
  *
- * The panel tint is the base lifted toward teal (`#16282e`) at 36% opacity. That
- * number is not a mood: it is the smallest tint at which the ink still clears
- * **7:1** composited over the brightest field (emerald at 58%), and the accent
- * still clears 4.5:1 there. A thinner sheet looks better and reads worse; this is
- * where the two meet. `tests/glass.test.mjs` recomputes it from these values.
+ * Every number below is measured, not chosen. `tests/glass.test.mjs` composites
+ * the glass over each of the four fields and takes the **worst** result, because a
+ * panel sits over blush in one corner and over sand in another:
+ *
+ *   ink    12.9:1 over the strongest field   (floor: 7:1)
+ *   muted   6.1:1 over the strongest field   (floor: 4.5:1)
+ *   accent  4.9:1 over the strongest field   (floor: 4.5:1)
+ *
+ * The sheet is white at 58%: any thinner and the accent starts dropping below AA
+ * on the blush corner; any thicker and the fields stop being visible through the
+ * glass, which is the whole point of the theme.
  */
 
 export const GLASS_THEME = {
   id: "glass",
   name: "Glass Morphism",
-  note: "Light through frosted sheets: four colour fields behind translucent panels, mint for anything live.",
-  tags: ["glass", "translucent", "colour", "default"],
-  scheme: "dark",
+  note: "Blush, sand and lagoon behind white glass. The light theme: pink, beige, turquoise, and deep teal for anything live.",
+  tags: ["glass", "light", "pastel", "default"],
+  scheme: "light",
   switchable: false,
 
-  /**
-   * The colours the interface uses. `bg`, `surface`, `ink` and `accent` are the
-   * four the app already speaks in; the rest are this theme's own.
-   */
-  bg: "#071113",
-  surface: "#16282e",
-  ink: "#eef6f3",
-  accent: "#5fd6b4",
-  /** Ink that sits *on* the accent (a filled button's label). */
-  accentInk: "#04110d",
+  /** The four colours the interface speaks in. */
+  bg: "#fdf7f2",
+  surface: "#fffaf6",
+  ink: "#2b2430",
+  accent: "#0b726b",
+  /** Ink that sits *on* the accent (the filled button's label). */
+  accentInk: "#ffffff",
   /** The quiet ink: captions, meta, anything that is not the sentence itself. */
-  muted: "#a7c4bf",
+  muted: "#5f5560",
 
   /**
-   * The four fields. `alpha` is how much of the colour is in the mix over `bg`,
-   * `at` is where its centre sits, `r` is its radius. Kept as data because the
-   * contrast test has to be able to composite the *brightest* one.
+   * The four fields: the 30%. Light, saturated, and deliberately unequal in area —
+   * a field that covers a third of the screen is a second background, not a glow.
    */
   aurora: [
-    { id: "emerald", hex: "#268a78", alpha: 0.58, at: ["16%", "24%"], r: ["42%", "38%"] },
-    { id: "amber", hex: "#d69648", alpha: 0.42, at: ["84%", "16%"], r: ["38%", "34%"] },
-    { id: "rose", hex: "#be5858", alpha: 0.36, at: ["68%", "92%"], r: ["46%", "40%"] },
-    { id: "cool", hex: "#78bec8", alpha: 0.3, at: ["12%", "84%"], r: ["34%", "36%"] },
+    { id: "blush", hex: "#f4b9c5", alpha: 0.62, at: ["14%", "22%"], r: ["46%", "42%"] },
+    { id: "sand", hex: "#f0d9b6", alpha: 0.58, at: ["86%", "14%"], r: ["40%", "36%"] },
+    { id: "lagoon", hex: "#8fd9d0", alpha: 0.5, at: ["72%", "90%"], r: ["48%", "42%"] },
+    { id: "peach", hex: "#f8c9ae", alpha: 0.44, at: ["10%", "86%"], r: ["38%", "38%"] },
   ],
 
-  /** Panel tint, as an alpha over whatever is behind it. */
-  glass: 0.36,
+  /** White glass, as an alpha over whatever is behind it. */
+  glass: 0.58,
   /** Blur radius of the frosted sheet, in px. Halved in lite mode. */
-  blur: 26,
+  blur: 24,
   /** Saturation lift: frosted glass concentrates colour, it does not wash it out. */
-  saturate: 160,
+  saturate: 145,
+  /** The colour the glass is made of. Light glass is white with a warm cast. */
+  glassColour: "#fffaf6",
 };
 
 /** The tint as a CSS colour, from the same numbers the test measures. */
 export function glassTint(alpha = GLASS_THEME.glass) {
-  const hex = GLASS_THEME.surface.replace("#", "");
+  const hex = GLASS_THEME.glassColour.replace("#", "");
   const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
@@ -83,7 +88,7 @@ export function auroraHex8(field) {
 
 /** The panel tint in the same form, so the test can composite it. */
 export function tintHex8(alpha = GLASS_THEME.glass) {
-  return `${GLASS_THEME.surface}${Math.round(alpha * 255).toString(16).padStart(2, "0")}`;
+  return `${GLASS_THEME.glassColour}${Math.round(alpha * 255).toString(16).padStart(2, "0")}`;
 }
 
 /** Is this id the glass theme? */
@@ -104,7 +109,7 @@ export function asGlassTheme(theme = GLASS_THEME) {
     surface: theme.surface,
     ink: theme.ink,
     accent: theme.accent,
-    swatches: [theme.bg, theme.surface, theme.accent],
+    swatches: [theme.bg, theme.accent, theme.aurora[0].hex],
     painted: false,
     glass: true,
   };

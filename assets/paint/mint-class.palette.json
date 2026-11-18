@@ -1,0 +1,48 @@
+{
+  "plate": "mint-class",
+  "roles": [
+    {
+      "hex": "#c6eddf",
+      "weight": 67,
+      "chroma": 15.5,
+      "lightness": 90.7
+    },
+    {
+      "hex": "#d9b383",
+      "weight": 22.5,
+      "chroma": 30.6,
+      "lightness": 75.3
+    },
+    {
+      "hex": "#faf4d9",
+      "weight": 10.5,
+      "chroma": 10.8,
+      "lightness": 93.4
+    }
+  ],
+  "balance": {
+    "share": [
+      67,
+      22.5,
+      10.5
+    ],
+    "within": true,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 28.1,
+    "secondaryAccent": 18.2,
+    "dominantAccent": 15.6
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.1,
+    "darkWorst": 10.15
+  },
+  "safe": {
+    "forCream": 0,
+    "forInk": 100
+  },
+  "measured": true
+}

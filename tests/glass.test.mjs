@@ -11,7 +11,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
-import { composite, contrast } from "../js/colour.js";
+import { chroma, composite, contrast, hue, lightness } from "../js/colour.js";
 import { GLASS_THEME, auroraColour, auroraHex8, glassTint, tintHex8 } from "../js/theme-glass.js";
 import { DEFAULT_STYLE, THEMES, isGlassTheme, isPaintedStyle, themeById } from "../js/themes.js";
 
@@ -34,10 +34,30 @@ test("glass is the default, the first tile, and it is not painted", () => {
   assert.equal(isGlassTheme("rain"), false);
   assert.equal(isPaintedStyle("glass"), false, "there is no plate to measure");
   assert.equal(themeById("glass").painted, false);
-  assert.deepEqual(themeById("glass").swatches, [GLASS_THEME.bg, GLASS_THEME.surface, GLASS_THEME.accent]);
+  // The tile shows the page, the accent and a field — the three colours someone
+  // is choosing between, not three shades of the same white.
+  assert.deepEqual(themeById("glass").swatches, [GLASS_THEME.bg, GLASS_THEME.accent, GLASS_THEME.aurora[0].hex]);
   // And the two older looks are still in the list, by name.
   assert.ok(THEMES.some((theme) => theme.id === "minimal"), "Minimal is still a style");
   assert.ok(THEMES.some((theme) => theme.id === "legacy"), "Legacy is still a style");
+});
+
+test("it is a light theme, and the ink is dark on light glass", () => {
+  assert.equal(GLASS_THEME.scheme, "light");
+  assert.ok(lightness(GLASS_THEME.bg) > 92, "the page is near-white");
+  assert.ok(lightness(GLASS_THEME.ink) < 30, "and the ink is dark");
+  // Pink, beige and turquoise are the brief — checked as hues, not as hex codes.
+  const hues = GLASS_THEME.aurora.map((field) => ({ id: field.id, hue: hue(field.hex), chroma: chroma(field.hex) }));
+  const pink = hues.find((entry) => entry.id === "blush");
+  const sand = hues.find((entry) => entry.id === "sand");
+  const lagoon = hues.find((entry) => entry.id === "lagoon");
+  assert.ok(pink.hue > 320 || pink.hue < 12, `blush is pink (${pink.hue.toFixed(0)}°)`);
+  assert.ok(sand.hue > 20 && sand.hue < 95, `sand is beige (${sand.hue.toFixed(0)}°)`);
+  assert.ok(lagoon.hue > 150 && lagoon.hue < 195, `lagoon is turquoise (${lagoon.hue.toFixed(0)}°)`);
+  for (const field of hues) assert.ok(field.chroma > 8, `${field.id} is actually a colour, not a grey`);
+  // The accent is the one dark saturated colour on the screen.
+  assert.ok(contrast(GLASS_THEME.accent, GLASS_THEME.bg) >= 4.5, "accent as text on the page");
+  assert.ok(contrast(GLASS_THEME.accentInk, GLASS_THEME.accent) >= 4.5, "white label on the accent");
 });
 
 test("the text clears 7:1 over every field, not just the average one", () => {
@@ -83,15 +103,15 @@ test("the stylesheet uses the numbers the module exports", () => {
   assert.match(tokens, new RegExp(`--p-surface: ${GLASS_THEME.surface};`));
   assert.match(tokens, new RegExp(`--p-ink: ${GLASS_THEME.ink};`));
   assert.match(tokens, new RegExp(`--brand: ${GLASS_THEME.accent};`));
-  // The four fields, as the gradient the browser paints.
+  // The four fields, as the gradient the browser paints. A light theme's fields
+  // are painted at full colour and dimmed by the layer's opacity, so the hex is
+  // what has to appear; the alphas live in the module and are measured there.
   for (const field of GLASS_THEME.aurora) {
-    // CSS writes `.58`, the module writes `0.58`; the numbers are what matter.
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(field.hex.slice(i, i + 2), 16));
-    const pattern = new RegExp(`rgba\\(\\s*${r},\\s*${g},\\s*${b},\\s*0?\\.${String(Math.round(field.alpha * 100)).padStart(2, "0")}\\s*\\)`);
-    assert.match(css, pattern, `${field.id} appears in the aurora with its measured alpha`);
+    assert.ok(css.includes(field.hex), `${field.id} ${field.hex} appears in the aurora`);
   }
   const tintAlpha = `0?\\.${String(Math.round(GLASS_THEME.glass * 100)).padStart(2, "0")}`;
-  assert.match(css, new RegExp(`rgba\\(22, 40, 46, ${tintAlpha}\\)`), "the tint is the exported alpha");
+  assert.match(css, new RegExp(`rgba\\(255, 250, 246, ${tintAlpha}\\)`), "the tint is the exported alpha");
+  assert.ok(css.includes(`--tg-blur: ${GLASS_THEME.blur}px`), "the blur is the exported radius");
   assert.ok(css.includes(`--tg-blur: ${GLASS_THEME.blur}px`), "the blur is the exported radius");
   assert.ok(css.includes(`--tg-saturate: ${GLASS_THEME.saturate}%`), "the saturation is exported too");
 });

@@ -43,7 +43,7 @@ html[data-paint="1"] body.premium-ui::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 50% 0%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .34) 72%, rgba(0, 0, 0, .5) 100%);
+    radial-gradient(120% 90% at 50% 0%, transparent 0%, var(--tp-wash) 72%, var(--tp-wash-end) 100%);
 }
 
 /* Frosted glass, shared by every panel in a painted theme.
@@ -58,7 +58,7 @@ html[data-paint="1"] body.premium-ui .composer {
   -webkit-backdrop-filter: blur(18px) saturate(118%);
   backdrop-filter: blur(18px) saturate(118%);
   border: 1px solid var(--tp-edge);
-  box-shadow: inset 0 1px 0 var(--tp-sheen), 0 18px 40px rgba(0, 0, 0, .28);
+  box-shadow: inset 0 1px 0 var(--tp-sheen), var(--tp-shadow);
 }
 
 /* The texture of the glass: one grain over the whole surface, from a data URI so
@@ -112,6 +112,12 @@ html[data-style="legacy"] {
   --tp-glass: rgba(37, 29, 20, 0.62);
   --tp-edge: rgba(255, 255, 255, .13);
   --tp-sheen: rgba(255, 255, 255, .1);
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: rgba(0, 0, 0, .34);
+  --tp-wash-end: rgba(0, 0, 0, .5);
+  --tp-shadow: 0 18px 40px rgba(0, 0, 0, .28);
   --tp-grain: var(--tp-grain-shared);
 }
 
@@ -155,6 +161,12 @@ html[data-style="rain"] {
   --tp-glass: rgba(63, 67, 57, 0.66);
   --tp-edge: rgba(255, 255, 255, .13);
   --tp-sheen: rgba(255, 255, 255, .1);
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: rgba(0, 0, 0, .34);
+  --tp-wash-end: rgba(0, 0, 0, .5);
+  --tp-shadow: 0 18px 40px rgba(0, 0, 0, .28);
   --tp-grain: var(--tp-grain-shared);
 }
 
@@ -198,6 +210,12 @@ html[data-style="stair"] {
   --tp-glass: rgba(67, 51, 35, 0.60);
   --tp-edge: rgba(255, 255, 255, .13);
   --tp-sheen: rgba(255, 255, 255, .1);
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: rgba(0, 0, 0, .34);
+  --tp-wash-end: rgba(0, 0, 0, .5);
+  --tp-shadow: 0 18px 40px rgba(0, 0, 0, .28);
   --tp-grain: var(--tp-grain-shared);
 }
 
@@ -241,6 +259,12 @@ html[data-style="aurora"] {
   --tp-glass: rgba(38, 71, 64, 0.72);
   --tp-edge: rgba(255, 255, 255, .13);
   --tp-sheen: rgba(255, 255, 255, .1);
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: rgba(0, 0, 0, .34);
+  --tp-wash-end: rgba(0, 0, 0, .5);
+  --tp-shadow: 0 18px 40px rgba(0, 0, 0, .28);
   --tp-grain: var(--tp-grain-shared);
 }
 
@@ -284,6 +308,12 @@ html[data-style="ember"] {
   --tp-glass: rgba(90, 56, 45, 0.76);
   --tp-edge: rgba(255, 255, 255, .13);
   --tp-sheen: rgba(255, 255, 255, .1);
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: rgba(0, 0, 0, .34);
+  --tp-wash-end: rgba(0, 0, 0, .5);
+  --tp-shadow: 0 18px 40px rgba(0, 0, 0, .28);
   --tp-grain: var(--tp-grain-shared);
 }
 
@@ -327,6 +357,12 @@ html[data-style="moss"] {
   --tp-glass: rgba(62, 70, 49, 0.74);
   --tp-edge: rgba(255, 255, 255, .13);
   --tp-sheen: rgba(255, 255, 255, .1);
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: rgba(0, 0, 0, .34);
+  --tp-wash-end: rgba(0, 0, 0, .5);
+  --tp-shadow: 0 18px 40px rgba(0, 0, 0, .28);
   --tp-grain: var(--tp-grain-shared);
 }
 
@@ -370,6 +406,12 @@ html[data-style="indigo"] {
   --tp-glass: rgba(63, 66, 70, 0.74);
   --tp-edge: rgba(255, 255, 255, .13);
   --tp-sheen: rgba(255, 255, 255, .1);
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: rgba(0, 0, 0, .34);
+  --tp-wash-end: rgba(0, 0, 0, .5);
+  --tp-shadow: 0 18px 40px rgba(0, 0, 0, .28);
   --tp-grain: var(--tp-grain-shared);
 }
 
@@ -395,4 +437,151 @@ html[data-style="indigo"] body.premium-ui {
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
   background: #0e141b;
   color: #e8eef4;
+}
+
+/* ---- Blush hall · blush-hall · glass 0.78 · floor 9.26:1 ---- */
+html[data-style="blush"] {
+  --tp-bg: #fdf4ee;
+  --tp-surface: #f2d3c6;
+  --tp-ink: #3a2b2e;
+  --tp-accent: #17635a;
+  --tp-accent-hi: #29756c;
+  --tp-accent-ink: #ffffff;
+  --tp-plate: url("./assets/paint/blush-hall.webp");
+  --tp-focus: 50% 45%;
+  --tp-focus-x: 50%;
+  --tp-focus-y: 45%;
+  --tp-drift: 54s;
+  --tp-glass: rgba(242, 211, 198, 0.78);
+  --tp-edge: rgba(58, 43, 46, 0.14);
+  --tp-sheen: rgba(255, 255, 255, 0.86);
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: rgba(58, 43, 46, 0.10);
+  --tp-wash-end: rgba(58, 43, 46, 0.20);
+  --tp-shadow: 0 18px 40px rgba(58, 43, 46, 0.14);
+  --tp-grain: var(--tp-grain-shared);
+}
+
+/* Blush hall mapped onto the app's own tokens. */
+html[data-style="blush"] body.premium-ui {
+  color-scheme: light;
+  --p-bg: #fdf4ee;
+  --p-surface: #f2d3c6;
+  --p-surface-2: #f2d3c6;
+  --p-surface-3: #fdf4ee;
+  --p-ink: #3a2b2e;
+  --p-ink-2: #3a2b2e;
+  --p-muted: color-mix(in srgb, #3a2b2e 72%, #fdf4ee);
+  --p-line: color-mix(in srgb, #3a2b2e 18%, #fdf4ee);
+  --p-line-strong: color-mix(in srgb, #3a2b2e 32%, #fdf4ee);
+  --p-radius: 2px;
+  --brand-ink: #17635a;
+  --brand: #17635a;
+  --brand-2: #29756c;
+  --brand-soft: color-mix(in srgb, #17635a 18%, #fdf4ee);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: none;
+  --shadow-soft: 0 18px 40px rgba(58, 43, 46, 0.14);
+  background: #fdf4ee;
+  color: #3a2b2e;
+}
+
+/* ---- Sand desk · sand-desk · glass 0.8 · floor 8.58:1 ---- */
+html[data-style="sand"] {
+  --tp-bg: #fdf8f1;
+  --tp-surface: #efdcc0;
+  --tp-ink: #3a2f22;
+  --tp-accent: #725729;
+  --tp-accent-hi: #84693b;
+  --tp-accent-ink: #ffffff;
+  --tp-plate: url("./assets/paint/sand-desk.webp");
+  --tp-focus: 50% 45%;
+  --tp-focus-x: 50%;
+  --tp-focus-y: 45%;
+  --tp-drift: 56s;
+  --tp-glass: rgba(239, 220, 192, 0.80);
+  --tp-edge: rgba(58, 47, 34, 0.14);
+  --tp-sheen: rgba(255, 255, 255, 0.86);
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: rgba(58, 47, 34, 0.10);
+  --tp-wash-end: rgba(58, 47, 34, 0.20);
+  --tp-shadow: 0 18px 40px rgba(58, 47, 34, 0.14);
+  --tp-grain: var(--tp-grain-shared);
+}
+
+/* Sand desk mapped onto the app's own tokens. */
+html[data-style="sand"] body.premium-ui {
+  color-scheme: light;
+  --p-bg: #fdf8f1;
+  --p-surface: #efdcc0;
+  --p-surface-2: #efdcc0;
+  --p-surface-3: #fdf8f1;
+  --p-ink: #3a2f22;
+  --p-ink-2: #3a2f22;
+  --p-muted: color-mix(in srgb, #3a2f22 72%, #fdf8f1);
+  --p-line: color-mix(in srgb, #3a2f22 18%, #fdf8f1);
+  --p-line-strong: color-mix(in srgb, #3a2f22 32%, #fdf8f1);
+  --p-radius: 2px;
+  --brand-ink: #725729;
+  --brand: #725729;
+  --brand-2: #84693b;
+  --brand-soft: color-mix(in srgb, #725729 18%, #fdf8f1);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: none;
+  --shadow-soft: 0 18px 40px rgba(58, 47, 34, 0.14);
+  background: #fdf8f1;
+  color: #3a2f22;
+}
+
+/* ---- Mint class · mint-class · glass 0.82 · floor 7.55:1 ---- */
+html[data-style="mint"] {
+  --tp-bg: #f8fdfa;
+  --tp-surface: #e8cfa8;
+  --tp-ink: #2c3a33;
+  --tp-accent: #6f4f22;
+  --tp-accent-hi: #816134;
+  --tp-accent-ink: #ffffff;
+  --tp-plate: url("./assets/paint/mint-class.webp");
+  --tp-focus: 50% 45%;
+  --tp-focus-x: 50%;
+  --tp-focus-y: 45%;
+  --tp-drift: 50s;
+  --tp-glass: rgba(232, 207, 168, 0.82);
+  --tp-edge: rgba(44, 58, 51, 0.14);
+  --tp-sheen: rgba(255, 255, 255, 0.86);
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: rgba(44, 58, 51, 0.10);
+  --tp-wash-end: rgba(44, 58, 51, 0.20);
+  --tp-shadow: 0 18px 40px rgba(44, 58, 51, 0.14);
+  --tp-grain: var(--tp-grain-shared);
+}
+
+/* Mint class mapped onto the app's own tokens. */
+html[data-style="mint"] body.premium-ui {
+  color-scheme: light;
+  --p-bg: #f8fdfa;
+  --p-surface: #e8cfa8;
+  --p-surface-2: #e8cfa8;
+  --p-surface-3: #f8fdfa;
+  --p-ink: #2c3a33;
+  --p-ink-2: #2c3a33;
+  --p-muted: color-mix(in srgb, #2c3a33 72%, #f8fdfa);
+  --p-line: color-mix(in srgb, #2c3a33 18%, #f8fdfa);
+  --p-line-strong: color-mix(in srgb, #2c3a33 32%, #f8fdfa);
+  --p-radius: 2px;
+  --brand-ink: #6f4f22;
+  --brand: #6f4f22;
+  --brand-2: #816134;
+  --brand-soft: color-mix(in srgb, #6f4f22 18%, #f8fdfa);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: none;
+  --shadow-soft: 0 18px 40px rgba(44, 58, 51, 0.14);
+  background: #f8fdfa;
+  color: #2c3a33;
 }

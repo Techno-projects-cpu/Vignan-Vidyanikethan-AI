@@ -121,7 +121,7 @@ html[data-paint="1"] body.premium-ui::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 50% 0%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .34) 72%, rgba(0, 0, 0, .5) 100%);
+    radial-gradient(120% 90% at 50% 0%, transparent 0%, var(--tp-wash) 72%, var(--tp-wash-end) 100%);
 }
 
 /* Frosted glass, shared by every panel in a painted theme.
@@ -136,7 +136,7 @@ html[data-paint="1"] body.premium-ui .composer {
   -webkit-backdrop-filter: blur(18px) saturate(118%);
   backdrop-filter: blur(18px) saturate(118%);
   border: 1px solid var(--tp-edge);
-  box-shadow: inset 0 1px 0 var(--tp-sheen), 0 18px 40px rgba(0, 0, 0, .28);
+  box-shadow: inset 0 1px 0 var(--tp-sheen), var(--tp-shadow);
 }
 
 /* The texture of the glass: one grain over the whole surface, from a data URI so
@@ -194,8 +194,14 @@ html[data-style="${theme.id}"] {
   --tp-focus-y: ${focus[1]}%;
   --tp-drift: ${theme.drift}s;
   --tp-glass: ${rgba(theme.surface, alpha)};
-  --tp-edge: rgba(255, 255, 255, .13);
-  --tp-sheen: rgba(255, 255, 255, .1);
+  --tp-edge: ${theme.scheme === "light" ? rgba(theme.ink, 0.14) : "rgba(255, 255, 255, .13)"};
+  --tp-sheen: ${theme.scheme === "light" ? rgba("#ffffff", 0.86) : "rgba(255, 255, 255, .1)"};
+  /* A wash and a shadow that follow the plate's own light: a night room is
+     knocked back with black, a daylight room with its own ink, and a pale panel
+     drops a warm shadow rather than a grey one. */
+  --tp-wash: ${theme.scheme === "light" ? rgba(theme.ink, 0.1) : "rgba(0, 0, 0, .34)"};
+  --tp-wash-end: ${theme.scheme === "light" ? rgba(theme.ink, 0.2) : "rgba(0, 0, 0, .5)"};
+  --tp-shadow: 0 18px 40px ${theme.scheme === "light" ? rgba(theme.ink, 0.14) : "rgba(0, 0, 0, .28)"};
   --tp-grain: var(--tp-grain-shared);
 }
 
@@ -218,7 +224,7 @@ html[data-style="${theme.id}"] body.premium-ui {
   --brand-soft: color-mix(in srgb, ${theme.accent} 18%, ${theme.bg});
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
-  --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
+  --shadow-soft: 0 18px 40px ${theme.scheme === "light" ? rgba(theme.ink, 0.14) : "rgba(0, 0, 0, .28)"};
   background: ${theme.bg};
   color: ${theme.ink};
 }
