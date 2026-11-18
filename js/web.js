@@ -7,8 +7,8 @@
  * can turn it off; configured JSON search providers remain optional.
  */
 
-import { safeUrl, truncate } from "./util.js?v=72";
-import { LANGUAGE_CODES } from "./languages.js?v=72";
+import { safeUrl, truncate } from "./util.js?v=73";
+import { LANGUAGE_CODES } from "./languages.js?v=73";
 
 function firstArray(data) {
   if (Array.isArray(data)) return data;

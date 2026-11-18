@@ -1,0 +1,25 @@
+{
+  "plate": "study-afternoon",
+  "accent": "#063a35",
+  "stack": {
+    "veil": "#fdf7f242",
+    "fields": [
+      "#f4b9c542",
+      "#f0d9b642",
+      "#8fd9d042",
+      "#f8c9ae42"
+    ],
+    "sheet": "#fffaf657"
+  },
+  "sheet": {
+    "ink": 7.19,
+    "muted": 5.28,
+    "accent": 5.42
+  },
+  "raw": {
+    "ink": 1.26,
+    "muted": 1,
+    "accent": 1
+  },
+  "measured": true
+}

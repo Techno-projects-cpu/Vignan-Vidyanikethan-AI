@@ -19,18 +19,22 @@
  * the glass over each of the four fields and takes the **worst** result, because a
  * panel sits over blush in one corner and over sand in another:
  *
- *   ink    10.3:1 through the sheet, over the darkest pixel of the darkest room
- *   muted   4.9:1                                     (floor: 4.5:1)
- *   accent  5.4:1                                     (floor: 4.5:1)
+ *   ink     8.4:1 through the sheet, over the darkest pixel of the wall
+ *   muted   5.3:1                                     (floor: 4.5:1)
+ *   accent  5.1:1                                     (floor: 4.5:1)
  *
  * Those are measured by `tools/backdrop-report.mjs`, which composites the real
  * stack — painting, four fields, veil, sheet — pixel by pixel and takes the worst.
- * The accent moved from `#0b726b` to `#075c56` because of it: the old one cleared
- * 4.5:1 over a flat gradient and only managed 3.96:1 over the mint painting.
+ * The veil is 20% rather than 36% because the wall is a *detailed* painting now:
+ * more veil is what made the old plate disappear, and the deeper accent pays for
+ * the thinner pane.
  *
- * The sheet is white at 58%: any thinner and the accent starts dropping below AA
- * on the blush corner; any thicker and the fields stop being visible through the
- * glass, which is the whole point of the theme.
+ * The sheet is white at **34%**. 58% was opaque paper: over a light painting it
+ * rendered the panel about 85% white, which is why the glass read as a milky card
+ * with the room only visible in the margins. 34% is the compromise measured by
+ * `tools/backdrop-report.mjs` — thin enough that the classroom, the blackboard and
+ * the window frames are all legible *through* a panel, thick enough that the ink
+ * still clears 7:1 over the darkest pixel of the wall.
  */
 
 export const GLASS_THEME = {
@@ -44,26 +48,26 @@ export const GLASS_THEME = {
   /** The four colours the interface speaks in. */
   bg: "#fdf7f2",
   surface: "#fffaf6",
-  ink: "#2b2430",
-  accent: "#075c56",
+  ink: "#221b28",
+  accent: "#063a35",
   /** Ink that sits *on* the accent (the filled button's label). */
   accentInk: "#ffffff",
   /** The quiet ink: captions, meta, anything that is not the sentence itself. */
-  muted: "#5f5560",
+  muted: "#3a323f",
 
   /**
    * The four fields: the 30%. Light, saturated, and deliberately unequal in area —
    * a field that covers a third of the screen is a second background, not a glow.
    */
   aurora: [
-    { id: "blush", hex: "#f4b9c5", alpha: 0.3, at: ["14%", "22%"], r: ["46%", "42%"] },
-    { id: "sand", hex: "#f0d9b6", alpha: 0.3, at: ["86%", "14%"], r: ["40%", "36%"] },
-    { id: "lagoon", hex: "#8fd9d0", alpha: 0.3, at: ["72%", "90%"], r: ["48%", "42%"] },
-    { id: "peach", hex: "#f8c9ae", alpha: 0.3, at: ["10%", "86%"], r: ["38%", "38%"] },
+    { id: "blush", hex: "#f4b9c5", alpha: 0.26, at: ["14%", "22%"], r: ["46%", "42%"] },
+    { id: "sand", hex: "#f0d9b6", alpha: 0.26, at: ["86%", "14%"], r: ["40%", "36%"] },
+    { id: "lagoon", hex: "#8fd9d0", alpha: 0.26, at: ["72%", "90%"], r: ["48%", "42%"] },
+    { id: "peach", hex: "#f8c9ae", alpha: 0.26, at: ["10%", "86%"], r: ["38%", "38%"] },
   ],
 
   /** White glass, as an alpha over whatever is behind it. */
-  glass: 0.58,
+  glass: 0.34,
   /**
    * Blur radius of the frosted sheet, in px.
    *
@@ -92,62 +96,25 @@ export const GLASS_THEME = {
   glassColour: "#fffaf6",
 
   /**
-   * The rooms behind the glass. One of the project's own paintings, plus the
-   * **painting's own three colours** washed over it at 30%, plus an accent taken
-   * from that painting. The fields are the plate's measured palette roles, so
-   * switching room changes the light in the room, not just the photograph: the
-   * blush hall washes pink and accents teal, the sand desk washes sand and
-   * accents brown, the mint class washes mint and accents tan.
+   * The wall: one full-screen painting of a sunlit classroom, painted for this
+   * project, behind everything. It replaced a set of 1280x714 *plates* — pictures
+   * made to sit behind a panel, with a cream paper margin — which read as a blank
+   * wall once they were stretched across the whole screen. There is one wall, not a
+   * picker: the theme is the design, not a choice of four nearly identical
+   * pastels.
    *
-   * `plain` is the four-field version of this theme with no painting at all.
+   * Two framings, because `cover` crops a 16:9 picture down to its middle third on
+   * a phone and throws the composition away: a 1920x1080 landscape and a
+   * 1080x1920 portrait, chosen by `<picture>` media queries so only one is fetched.
    */
-  rooms: [
-    {
-      id: "blush-hall",
-      name: "Blush hall",
-      note: "pink plaster, one turquoise door",
-      fields: ["#fae2d5", "#faf1e6", "#a7d6cd"],
-      accent: "#17635a",
-    },
-    {
-      id: "mint-class",
-      name: "Mint class",
-      note: "a bright mint wall, warm beige desks",
-      fields: ["#c6eddf", "#d9b383", "#faf4d9"],
-      accent: "#6f4f22",
-    },
-    {
-      id: "sand-desk",
-      name: "Sand desk",
-      note: "warm sand paper, cream books",
-      fields: ["#f1e8da", "#dfc4a5", "#af9b84"],
-      accent: "#725729",
-    },
-    {
-      id: "plain",
-      name: "Fields only",
-      note: "no painting, four pastel fields",
-      fields: null,
-      accent: "#075c56",
-    },
-  ],
-  /**
-   * The veil between painting and glass, and the alpha the fields are washed on
-   * at. Both are measured, not chosen: `tools/backdrop-report.mjs` composites
-   * painting → fields → veil → sheet for every pixel of every room and keeps the
-   * worst, and the room's accent has to clear 4.5:1 through it.
-   */
-  room: {
-    default: "blush-hall",
-    veil: 0.36,
-    fieldAlpha: 0.3,
+  wall: {
+    room: "study-afternoon",
+    /** The veil between painting and glass. Measured: see tools/backdrop-report.mjs. */
+    veil: 0.26,
+    /** The alpha the four pastel fields are washed over the painting at. */
+    fieldAlpha: 0.26,
   },
 };
-
-/** One room by id, falling back to the default. */
-export function roomById(id) {
-  return GLASS_THEME.rooms.find((room) => room.id === id) || GLASS_THEME.rooms[0];
-}
 
 /** The tint as a CSS colour, from the same numbers the test measures. */
 export function glassTint(alpha = GLASS_THEME.glass) {
