@@ -1,11 +1,12 @@
 {
-  "version": 69,
-  "generatedAt": "2026-11-18T03:29:34.055Z",
+  "version": 70,
+  "generatedAt": "2026-11-18T14:13:47.787Z",
   "urls": [
     "./",
     "./index.html",
     "./.impeccable/config.json",
     "./.well-known/security.txt",
+    "./LICENSES/glasswork.txt",
     "./acceptable-use.html",
     "./accessibility.html",
     "./assets/brand/nezaad-mark.png",
@@ -184,6 +185,7 @@
     "./js/flashcards.js",
     "./js/free-apis.js",
     "./js/friends-ui.js",
+    "./js/glass-lens.js",
     "./js/goal-cards.js",
     "./js/i18n.js",
     "./js/ingest.js",

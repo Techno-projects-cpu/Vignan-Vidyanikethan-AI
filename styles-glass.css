@@ -2,21 +2,36 @@
  * Glass Morphism, in daylight — the default appearance.
  *
  * Hand-written, unlike `styles-painted.css`: a painted theme is generated from a
- * painting, but glass is generated from light. There is no plate to measure, so
- * there is nothing to generate — only four pastel fields, one white sheet and the
- * geometry of the panels. The numbers here are the ones `js/theme-glass.js`
- * exports, and `tests/glass.test.mjs` fails if they drift apart.
+ * painting, but glass is generated from light. What it is made of, in the order
+ * the browser composites it:
  *
- * The palette, in the 60-30-10 sense:
+ *   1. four pastel fields, drifting behind everything;
+ *   2. a wash and a grain over them, so the fields read as a room, not a gradient;
+ *   3. per panel, a *thin* white tint plus a blur with saturation and a little
+ *      brightness — the brightness matters: it is what keeps a blur from turning
+ *      into grey fog (a fogged white sheet over a pastel field reads as mud);
+ *   4. a rim: two highlights, one on the top-left edge and one on the
+ *      bottom-right, a hairline outline, and four soft bevel bands just inside
+ *      the edge. This is the part that makes it a *slab* rather than a rectangle
+ *      of 20% white, and it costs no requests;
+ *   5. in Chromium only, real refraction at that rim: `js/glass-lens.js` writes a
+ *      displacement filter into `--glass-lens`, and the backdrop-filter below
+ *      ends with it. Everywhere else the variable is empty and the glass is the
+ *      CSS above. That is the whole reason this theme can look like ice on a
+ *      phone and still work on a phone.
+ *
+ * The numbers are still the ones `js/theme-glass.js` exports, and
+ * `tests/glass.test.mjs` fails if they drift apart:
  *
  *   60%  porcelain base      #fdf7f2
  *   30%  blush / sand /      #f4b9c5  #f0d9b6  #8fd9d0  #f8c9ae
  *        lagoon / peach
  *   10%  deep lagoon accent  #0b726b   (the only dark saturated colour)
  *
- * Everything else is white glass at 58% and deep plum ink at 12.9:1. The sheet is
- * white because a *light* theme's glass darkens what is behind it — a tinted sheet
- * on a pastel field turns to mud in the corner where the blush is strongest.
+ * The tint is white at 58%: on a *light* theme the sheet has to be white, because
+ * a tinted sheet over a pastel field turns to mud where the blush is strongest,
+ * and 58% is the thinnest value at which the ink still clears 7:1 over the
+ * strongest field. Thinner than that and this is a pretty theme nobody can read.
  */
 
 /* ------------------------------------------------------------------ */
@@ -58,13 +73,57 @@ html[data-style="glass"] body.premium-ui {
   --tg-sand: #f0d9b6;
   --tg-lagoon: #8fd9d0;
   --tg-peach: #f8c9ae;
-  --tg-blur: 24px;
-  --tg-saturate: 145%;
+  --tg-blur: 8px;
+  --tg-saturate: 180%;
+  --tg-bright: 1.06;
   --tg-sheet: linear-gradient(150deg, rgba(255, 255, 255, .78), rgba(255, 255, 255, .34) 46%, rgba(255, 255, 255, .16) 74%);
   --tg-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
 
+  /* Geometry. One radius for a sheet, one for a slab, one for a control. */
+  --tg-r-sheet: 18px;
+  --tg-r-slab: 26px;
+  --tg-r-pill: 999px;
+
+  /* The rim, as one value so every surface catches the same light. It is the
+     single most important line in this sheet: two highlights on opposite
+     corners, a hairline outline, four bevel bands just inside the edge, and a
+     soft cast shadow underneath. */
+  --tg-rim:
+    inset 1.5px 1.5px 1px -1px rgba(255, 255, 255, .95),
+    inset -1.5px -1.5px 1px -1px rgba(255, 255, 255, .6),
+    inset 0 0 0 .5px rgba(255, 255, 255, .34),
+    0 0 0 .5px rgba(96, 68, 74, .12),
+    0 18px 44px -28px rgba(96, 68, 74, .5),
+    inset 0 6px 8px -6px rgba(255, 255, 255, .5),
+    inset 4px 0 8px -6px rgba(255, 255, 255, .22),
+    inset -4px 0 8px -6px rgba(255, 255, 255, .12),
+    inset 0 -6px 8px -6px rgba(96, 68, 74, .06);
+  --tg-rim-raised:
+    inset 1.5px 1.5px 1px -1px rgba(255, 255, 255, 1),
+    inset -1.5px -1.5px 1px -1px rgba(255, 255, 255, .7),
+    inset 0 0 0 .5px rgba(255, 255, 255, .4),
+    0 0 0 .5px rgba(11, 114, 107, .16),
+    0 26px 60px -30px rgba(96, 68, 74, .58),
+    inset 0 6px 10px -6px rgba(255, 255, 255, .6),
+    inset 0 -6px 10px -6px rgba(11, 114, 107, .1);
+  --tg-rim-small:
+    inset 1px 1px .5px -.5px rgba(255, 255, 255, .96),
+    inset -1px -1px .5px -.5px rgba(255, 255, 255, .55),
+    0 0 0 .5px rgba(96, 68, 74, .12),
+    0 8px 18px -12px rgba(96, 68, 74, .45);
+  --tg-filter: blur(var(--tg-blur)) saturate(var(--tg-saturate)) brightness(var(--tg-bright));
+
   background-color: var(--tg-base);
   color: var(--tg-ink);
+}
+
+/* Continuous corners, where the browser draws them (Chromium 139+). A
+   superellipse is why the panels in the reference material look moulded rather
+   than cut; everywhere else the plain radius above stays. */
+@supports (corner-shape: superellipse(1.6)) {
+  html[data-style="glass"] body.premium-ui {
+    --tg-corner: superellipse(1.6);
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -131,24 +190,24 @@ html[data-style="glass"] body.premium-ui .auth-gate-panel,
 html[data-style="glass"] body.premium-ui .sidebar,
 html[data-style="glass"] body.premium-ui .composer {
   position: relative;
-  border: 1px solid var(--tg-edge);
-  border-radius: var(--p-radius);
+  border: 0;
+  border-radius: var(--tg-r-sheet);
+  corner-shape: var(--tg-corner, round);
   background-color: var(--tg-tint);
   background-image: var(--tg-sheet);
-  -webkit-backdrop-filter: blur(var(--tg-blur)) saturate(var(--tg-saturate));
-  backdrop-filter: blur(var(--tg-blur)) saturate(var(--tg-saturate));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .95),
-    0 0 0 1px var(--tg-edge-dark),
-    var(--shadow);
-  transition: border-color 240ms var(--vn-ease, ease), box-shadow 260ms var(--vn-ease, ease), transform 260ms var(--vn-ease, ease);
+  -webkit-backdrop-filter: var(--tg-filter);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow: var(--tg-rim);
+  transition: box-shadow 260ms var(--vn-ease, ease), background-color 200ms var(--vn-ease, ease), transform 260ms var(--vn-ease, ease);
 }
 
 /* The lit rim: a white highlight along the top edge and a cool shade along the
-   bottom, which is how a sheet of glass catches a room. */
+   bottom, which is how a sheet of glass catches a room. Drawn as a gradient
+   rather than a shadow so it follows the superellipse corner. */
 html[data-style="glass"] body.premium-ui .card::after,
 html[data-style="glass"] body.premium-ui .panel::after,
 html[data-style="glass"] body.premium-ui .command-panel::after,
+html[data-style="glass"] body.premium-ui .app-menu-panel::after,
 html[data-style="glass"] body.premium-ui .sidebar::after,
 html[data-style="glass"] body.premium-ui .composer::after {
   content: "";
@@ -156,6 +215,7 @@ html[data-style="glass"] body.premium-ui .composer::after {
   inset: 0;
   z-index: 0;
   border-radius: inherit;
+  corner-shape: inherit;
   pointer-events: none;
   background: linear-gradient(180deg, rgba(255, 255, 255, .9), transparent 16%, transparent 84%, rgba(120, 90, 96, .07));
 }
@@ -164,17 +224,21 @@ html[data-style="glass"] body.premium-ui .card:hover,
 html[data-style="glass"] body.premium-ui .panel:hover,
 html[data-style="glass"] body.premium-ui .card:focus-within,
 html[data-style="glass"] body.premium-ui .panel:focus-within {
-  border-color: rgba(11, 114, 107, .38);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .95),
-    0 0 0 1px rgba(11, 114, 107, .22),
-    0 30px 66px -32px rgba(96, 68, 74, .55);
+  box-shadow: var(--tg-rim-raised);
 }
 
 html[data-style="glass"] body.premium-ui .card > *,
 html[data-style="glass"] body.premium-ui .panel > * {
   position: relative;
   z-index: 1;
+}
+
+/* The one slab in the app that is thicker than a sheet: the composer. It is the
+   thing a student touches, so it sits above the page and is a shade denser. */
+html[data-style="glass"] body.premium-ui .composer {
+  --tg-tint: rgba(255, 250, 246, .74);
+  border-radius: var(--tg-r-slab);
+  background-image: none;
 }
 
 /* ------------------------------------------------------------------ */
@@ -227,21 +291,24 @@ html[data-style="glass"] body.premium-ui .composer::before {
 html[data-style="glass"] body.premium-ui .button,
 html[data-style="glass"] body.premium-ui .premium-button,
 html[data-style="glass"] body.premium-ui .chip,
-html[data-style="glass"] body.premium-ui .tabs button {
-  border: 1px solid rgba(96, 68, 74, .16);
-  border-radius: 999px;
+html[data-style="glass"] body.premium-ui .mode-chip,
+html[data-style="glass"] body.premium-ui .tabs button,
+html[data-style="glass"] body.premium-ui .icon-button {
+  border: 0;
+  border-radius: var(--tg-r-pill);
   background: rgba(255, 255, 255, .72);
   -webkit-backdrop-filter: blur(10px) saturate(130%);
   backdrop-filter: blur(10px) saturate(130%);
-  box-shadow: inset 0 1px 0 #fff, 0 2px 6px -4px rgba(96, 68, 74, .5);
+  box-shadow: var(--tg-rim-small);
   color: var(--tg-ink);
-  transition: transform 140ms var(--vn-ease, ease), background 180ms var(--vn-ease, ease), border-color 180ms var(--vn-ease, ease);
+  transition: transform 140ms var(--vn-ease, ease), background 180ms var(--vn-ease, ease), box-shadow 180ms var(--vn-ease, ease);
 }
 
 html[data-style="glass"] body.premium-ui .button:hover,
-html[data-style="glass"] body.premium-ui .premium-button:hover {
+html[data-style="glass"] body.premium-ui .premium-button:hover,
+html[data-style="glass"] body.premium-ui .icon-button:hover {
   background: #ffffff;
-  border-color: rgba(11, 114, 107, .4);
+  box-shadow: var(--tg-rim-small), 0 0 0 1px rgba(11, 114, 107, .28);
 }
 
 html[data-style="glass"] body.premium-ui .button:active,
@@ -253,10 +320,13 @@ html[data-style="glass"] body.premium-ui .premium-button:active {
 html[data-style="glass"] body.premium-ui .button-primary,
 html[data-style="glass"] body.premium-ui .premium-button.primary,
 html[data-style="glass"] body.premium-ui .send-button {
-  border-color: #0b726b;
   background: linear-gradient(180deg, #0f8880, #0b726b);
   color: #ffffff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 12px 26px -16px rgba(11, 114, 107, .8);
+  box-shadow:
+    inset 1px 1px .5px -.5px rgba(255, 255, 255, .55),
+    inset -1px -1px .5px -.5px rgba(0, 0, 0, .18),
+    0 0 0 .5px rgba(11, 114, 107, .9),
+    0 12px 26px -16px rgba(11, 114, 107, .8);
 }
 
 html[data-style="glass"] body.premium-ui .composer textarea,
@@ -267,6 +337,18 @@ html[data-style="glass"] body.premium-ui input[type="password"] {
   border: 1px solid rgba(96, 68, 74, .16);
   border-radius: 14px;
   color: var(--tg-ink);
+  box-shadow: inset 0 1px 2px rgba(96, 68, 74, .06);
+}
+
+/* A field that is being typed into catches the same light as a sheet: the
+   accent appears on the edge, not on a fat outline. */
+html[data-style="glass"] body.premium-ui .composer textarea:focus,
+html[data-style="glass"] body.premium-ui input[type="text"]:focus,
+html[data-style="glass"] body.premium-ui input[type="search"]:focus,
+html[data-style="glass"] body.premium-ui input[type="password"]:focus {
+  border-color: rgba(11, 114, 107, .5);
+  box-shadow: inset 0 1px 2px rgba(96, 68, 74, .06), 0 0 0 3px rgba(11, 114, 107, .12);
+  outline: none;
 }
 
 html[data-style="glass"] body.premium-ui ::placeholder {
@@ -281,6 +363,24 @@ html[data-style="glass"] body.premium-ui :focus-visible {
 html[data-style="glass"] body.premium-ui * {
   scrollbar-color: rgba(11, 114, 107, .45) transparent;
   scrollbar-width: thin;
+}
+
+/* A row of the app — a menu item, a nav item, a command — is a sheet at rest and
+   a sheet caught by the light when it is under the pointer. */
+html[data-style="glass"] body.premium-ui .nav-item,
+html[data-style="glass"] body.premium-ui .app-menu-item,
+html[data-style="glass"] body.premium-ui .command-item {
+  border-radius: 12px;
+  transition: background-color 160ms var(--vn-ease, ease), box-shadow 160ms var(--vn-ease, ease);
+}
+
+html[data-style="glass"] body.premium-ui .nav-item:hover,
+html[data-style="glass"] body.premium-ui .app-menu-item:hover,
+html[data-style="glass"] body.premium-ui .command-item:hover,
+html[data-style="glass"] body.premium-ui .nav-item.active,
+html[data-style="glass"] body.premium-ui .nav-item[aria-current="page"] {
+  background: rgba(255, 255, 255, .62);
+  box-shadow: var(--tg-rim-small);
 }
 
 /* ------------------------------------------------------------------ */
@@ -336,16 +436,58 @@ html[data-style="glass"] body.premium-ui blockquote {
 }
 
 /* ------------------------------------------------------------------ */
-/* 7. Cheap mode, for the devices that need it                         */
+/* 7. The shell: floating sheets, not a dashboard of rectangles         */
+/* ------------------------------------------------------------------ */
+
+/* The sidebar stops being a wall with a rule down its edge and becomes a held
+   sheet: inset from the window, its own radius, the same rim light as a panel.
+   Everything below is inside a media query, because on a phone the sidebar is
+   the drawer and the drawer is a sheet over the page. */
+@media (min-width: 861px) {
+  html[data-style="glass"] body.premium-ui .app-shell {
+    gap: 14px;
+    padding: 14px;
+    background: transparent;
+  }
+
+  html[data-style="glass"] body.premium-ui .sidebar {
+    top: 14px;
+    height: calc(100vh - 28px);
+    border: 0;
+    border-radius: var(--tg-r-slab);
+    corner-shape: var(--tg-corner, round);
+    margin: 0;
+  }
+
+  /* The top bar is a floating pill rather than a strip pinned to the window. */
+  html[data-style="glass"] body.premium-ui .premium-topbar,
+  html[data-style="glass"] body.premium-ui .topbar {
+    margin: 6px 6px 0;
+    border: 0;
+    border-radius: var(--tg-r-pill);
+    background: rgba(255, 250, 246, .6);
+    box-shadow: var(--tg-rim-small);
+  }
+
+  /* The composer floats over the conversation instead of ending it. */
+  html[data-style="glass"] body.premium-ui .composer {
+    margin: 0 6px 10px;
+    border-top: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. Cheap mode, for the devices that need it                         */
 /* ------------------------------------------------------------------ */
 
 /* `data-lite` is set from the device itself: few cores, little memory, or a
    browser that says the connection is metered. Blur is the expensive part of this
-   theme (a GPU pass per panel), so it drops to 8px, the grain and the flares go,
-   and nothing animates. The sheet is made more opaque so it stays legible without
-   the blur doing the work. */
+   theme — a GPU pass per panel, over a full-screen aurora — so it drops to zero and
+   the grain and the flares go with it. The sheet is made more opaque (58% → 80%) so
+   it stays legible without the blur doing any work. `fitGlass` reads the same flag
+   and never builds a refraction filter at all. */
 html[data-style="glass"][data-lite="1"] body.premium-ui {
-  --tg-blur: 8px;
+  --tg-blur: 0px;
   --tg-tint: rgba(255, 250, 246, .8);
   --tg-sheet: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .2));
 }
@@ -385,8 +527,173 @@ html[data-lite="1"] body.premium-ui::before {
 }
 
 /* ------------------------------------------------------------------ */
-/* 8. Motion, honestly                                                 */
+/* 9. Motion, honestly                                                 */
 /* ------------------------------------------------------------------ */
+
+/* ========================================================================
+   §10  THE GLASS KIT — the theme's own components
+   ------------------------------------------------------------------------
+   Everything above is a material. This is furniture made from it: a segmented
+   control whose selected item is a lit lens sunk into a frosted rail, and a rail
+   of three tiles carrying the numbers that describe the app when the Wi-Fi is
+   gone. Both are hidden unless `data-style="glass"`, so the two older looks keep
+   their own layout instead of inheriting a reskin of it.
+
+   The lens is applied to the rail and *not* to each stat tile on purpose: every
+   `var(--glass-lens)` is a separate SVG displacement filter, and a row of three
+   small tiles is not worth three of them. The tiles get the rim and the tint,
+   which is what a small surface can actually show. */
+
+.gg-kit { display: none; }
+
+html[data-style="glass"] body.premium-ui .gg-kit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 18px;
+  margin: 20px 0 4px;
+}
+
+/* --- the segmented control ------------------------------------------------ */
+
+.gg-seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-radius: var(--tg-r-pill);
+  corner-shape: round;
+  background-color: var(--tg-tint);
+  background-image: var(--tg-sheet);
+  -webkit-backdrop-filter: var(--tg-filter);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow: var(--tg-rim), inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+
+.gg-seg::-webkit-scrollbar { display: none; }
+
+.gg-seg-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 8px 15px;
+  border: 0;
+  border-radius: var(--tg-r-pill);
+  background: transparent;
+  color: var(--tg-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -.005em;
+  cursor: pointer;
+  transition: color 180ms var(--vn-ease, ease), background-color 180ms var(--vn-ease, ease), box-shadow 180ms var(--vn-ease, ease);
+}
+
+.gg-seg-item svg { width: 15px; height: 15px; stroke-width: 1.8; opacity: .8; }
+
+.gg-seg-item:hover { color: var(--tg-ink); background-color: rgba(255, 255, 255, .34); }
+
+/* The selected item is the lens: white glass, a lit top edge and a shadow *under*
+   the pill, which is what makes it read as a physical slider rather than a
+   coloured button. */
+.gg-seg-item.active {
+  color: var(--tg-ink);
+  background-image: linear-gradient(168deg, rgba(255, 255, 255, .96), rgba(255, 255, 255, .68) 62%, rgba(255, 255, 255, .52));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(255, 255, 255, .5),
+    0 1px 2px rgba(96, 68, 74, .16),
+    0 6px 14px -6px rgba(96, 68, 74, .3);
+}
+
+.gg-seg-item.active svg { opacity: 1; }
+
+/* The accent tick under the selection: the 10% of the 60-30-10, doing the work of
+   telling you where you are. */
+.gg-seg-item.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  width: 14px;
+  height: 2px;
+  margin-left: -7px;
+  border-radius: var(--tg-r-pill);
+  background: linear-gradient(90deg, transparent, var(--tg-accent) 18%, var(--tg-accent) 82%, transparent);
+}
+
+.gg-seg-item:focus-visible {
+  outline: 2px solid var(--tg-accent);
+  outline-offset: 2px;
+}
+
+/* --- the stat rail ------------------------------------------------------- */
+
+.gg-stats {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gg-stat {
+  display: grid;
+  gap: 1px;
+  min-width: 74px;
+  padding: 9px 15px 10px;
+  border-radius: var(--tg-r-sheet);
+  background-color: var(--tg-tint-strong);
+  background-image: linear-gradient(160deg, rgba(255, 255, 255, .7), rgba(255, 255, 255, .18));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    inset 0 -1px 0 rgba(255, 255, 255, .35),
+    0 8px 18px -14px rgba(96, 68, 74, .45);
+}
+
+.gg-stat strong {
+  font-size: 20px;
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -.03em;
+  color: var(--tg-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.gg-stat span {
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tg-muted);
+}
+
+/* A slow device paints the kit flat: no blur, no shadow stack, one border. */
+html[data-style="glass"][data-lite="1"] body.premium-ui .gg-seg,
+html[data-style="glass"][data-lite="1"] body.premium-ui .gg-stat {
+  background-image: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px var(--tg-edge-dark);
+}
+
+/* A phone stacks the rail under the control and keeps the tiles equal. */
+@media (max-width: 720px) {
+  html[data-style="glass"] body.premium-ui .gg-kit { grid-template-columns: minmax(0, 1fr); }
+  .gg-seg { width: 100%; justify-content: space-between; }
+  .gg-seg-item { padding: 8px 11px; }
+  .gg-stats { width: 100%; }
+  .gg-stat { flex: 1 1 0; min-width: 0; text-align: center; }
+}
+
+@media print {
+  .gg-kit { display: none !important; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   html[data-style="glass"] body.premium-ui::before,
@@ -405,10 +712,33 @@ html[data-lite="1"] body.premium-ui::before {
   }
 }
 
-/* A phone has no spare GPU for a full-screen blur under a scrolling list. */
+/* A reader who asked the system for less transparency is asking this theme the
+   most direct question it can be asked. The answer is a solid sheet in the same
+   tint — not a lighter blur, which is still fog. */
+@media (prefers-reduced-transparency: reduce) {
+  html[data-style="glass"] body.premium-ui .card,
+  html[data-style="glass"] body.premium-ui .panel,
+  html[data-style="glass"] body.premium-ui .command-panel,
+  html[data-style="glass"] body.premium-ui .app-menu-panel,
+  html[data-style="glass"] body.premium-ui .sheet-panel,
+  html[data-style="glass"] body.premium-ui .exam-panel,
+  html[data-style="glass"] body.premium-ui .friends-panel,
+  html[data-style="glass"] body.premium-ui .play-panel,
+  html[data-style="glass"] body.premium-ui .sidebar,
+  html[data-style="glass"] body.premium-ui .composer {
+    background-color: rgba(255, 252, 249, .97);
+    background-image: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* A phone has no spare GPU for a full-screen blur under a scrolling list, so the
+   sheet gets half the desktop blur and a little more body instead. */
 @media (max-width: 640px) {
   html[data-style="glass"] body.premium-ui {
-    --tg-blur: 14px;
+    --tg-blur: 4px;
     --tg-tint: rgba(255, 250, 246, .72);
+    --tg-r-slab: 20px;
   }
 }

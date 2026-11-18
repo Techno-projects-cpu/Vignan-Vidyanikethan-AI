@@ -253,15 +253,19 @@ test("the reading page is designed, not default", () => {
   // laptop. The palette is neutral greys plus the five pigments the reading page
   // shares with the landing page — the cross-check below is what keeps the two
   // halves of the project from drifting apart one release at a time.
+  // The reading page and the landing page are two halves of one project, so the
+  // reading page may use any colour the landing page declares — and nothing else.
+  // It used to be five named pigments; from 2.35.0 the landing page's palette is
+  // the whole daylight set, so the rule is simply "no colour of its own".
   const shared = new Set(
-    [...landingCss.matchAll(/--wl-(?:bg|ink|soft|quiet|line):\s*(#[0-9a-f]{6});/gi)].map((match) =>
+    [...landingCss.matchAll(/--wl-[a-z0-9-]+:\s*(#[0-9a-f]{6});/gi)].map((match) =>
       match[1].toLowerCase(),
     ),
   );
   const colours = [...new Set([...css.matchAll(/#([0-9a-f]{6})\b/gi)].map((match) => match[1].toLowerCase()))];
   for (const hex of colours) {
     const [r, g, b] = hex.match(/.{2}/g).map((pair) => parseInt(pair, 16));
-    assert.ok(r === g && g === b || shared.has(`#${hex}`), `#${hex} is a grey or a shared pigment`);
+    assert.ok(r === g && g === b || shared.has(`#${hex}`), `#${hex} is a grey or a pigment the landing page declares`);
   }
   assert.doesNotMatch(css, /border-radius:\s*(?!0)/);
   assert.doesNotMatch(css, /box-shadow:/);

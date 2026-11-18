@@ -14,6 +14,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { chroma, composite, contrast, hue, lightness } from "../js/colour.js";
 import { GLASS_THEME, auroraColour, auroraHex8, glassTint, tintHex8 } from "../js/theme-glass.js";
 import { DEFAULT_STYLE, THEMES, isGlassTheme, isPaintedStyle, themeById } from "../js/themes.js";
+import { SUPPORTED_LANGUAGES } from "../js/i18n.js";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const css = read("styles-glass.css");
@@ -136,7 +137,10 @@ test("a slow device gets the glass without the blur pass", () => {
   // Lite mode is the performance story of this theme, so it is a test, not a note.
   assert.match(css, /html\[data-style="glass"\]\[data-lite="1"\] body\.premium-ui \{/);
   const lite = css.slice(css.indexOf('html[data-style="glass"][data-lite="1"] body.premium-ui {'));
-  assert.match(lite.slice(0, 400), /--tg-blur: 8px/, "the blur drops to 8px");
+  assert.match(lite.slice(0, 400), /--tg-blur: 0px/, "the blur pass is dropped entirely, not halved");
+  // ...and no other tier may be more expensive than the default, or "lite" lies.
+  const phone = Number(/@media \(max-width: 640px\) \{[\s\S]*?--tg-blur: (\d+)px/.exec(css)?.[1]);
+  assert.ok(phone > 0 && phone <= GLASS_THEME.blur, `a phone blurs ${phone}px, no more than the default`);
   assert.match(css, /html\[data-lite="1"\] body\.premium-ui::before \{[^}]*animation: none/s, "the aurora stops");
   assert.match(css, /html\[data-lite="1"\] \.card::before[\s\S]{0,120}display: none/, "the specular is removed");
 
@@ -170,4 +174,69 @@ test("the theme is documented where a reader will look", () => {
   assert.match(design, /Glass Morphism/);
   assert.match(design, /60-30-10|60 \/ 30 \/ 10/);
   assert.ok(existsSync(new URL("../styles-glass.css", import.meta.url)));
+});
+
+test("the glass kit is a control, not a picture of one", () => {
+  // Two components, and both have to be real. The segmented rail is navigation:
+  // every item carries a view the app already has, and the handler goes through
+  // `setView`, so there is one definition of the open screen. The rail of tiles
+  // carries numbers a reader can check — they are computed here, not typed into
+  // the page and left to drift.
+  const html = read("index.html");
+  const app = read("js/app.js");
+  const kit = html.slice(html.indexOf('class="gg-kit"'));
+  assert.ok(kit, "the kit is in the page");
+  const items = [...kit.matchAll(/class="gg-seg-item[^"]*" data-view="([a-z]+)"/g)].map((match) => match[1]);
+  assert.deepEqual(items, ["ask", "quiz", "exam", "progress"], "the rail names four screens, in nav order");
+  for (const view of items) assert.match(read("index.html"), new RegExp(`data-panel="${view}"`), `${view} is a screen the app has`);
+  assert.match(app, /\$\$\("\.gg-seg-item"\)\.forEach/, "the kit is bound once, beside the sidebar");
+  assert.match(app, /addEventListener\("click", \(\) => setView\(button\.dataset\.view\)\)/, "and it navigates");
+  assert.match(app, /\$\$\("\.nav-item, \.mobile-nav-item, \.gg-seg-item"\)/, "the open screen is named in the kit too");
+
+  // The three tiles: paintings, languages, trackers — each from its own source.
+  const plates = JSON.parse(read("assets/paint/manifest.json")).plates.length;
+  const tiles = [...kit.matchAll(/<li class="gg-stat"><strong>(\d+)<\/strong><span>([a-z]+)<\/span>/g)]
+    .map((match) => [Number(match[1]), match[2]]);
+  assert.deepEqual(tiles, [[plates, "paintings"], [SUPPORTED_LANGUAGES.length, "languages"], [0, "trackers"]]);
+
+  // Hidden unless the glass theme is on, and the sheet that shows it is the glass
+  // one — Minimal and Legacy keep their own screens.
+  assert.match(css, /\.gg-kit \{ display: none; \}/, "the kit is off by default");
+  assert.match(css, /html\[data-style="glass"\] body\.premium-ui \.gg-kit \{[\s\S]{0,200}display: grid/, "glass turns it on");
+  assert.match(css, /\.gg-seg \{[\s\S]{0,600}backdrop-filter: var\(--tg-filter\) var\(--glass-lens,\)/, "the rail is a lensed surface");
+  assert.match(css, /\.gg-seg-item\.active \{[\s\S]{0,400}box-shadow:/, "the selection is lifted, not just tinted");
+  assert.match(css, /@media \(max-width: 720px\)[\s\S]{0,200}\.gg-seg \{ width: 100%/, "a phone gets the full-width row");
+  assert.match(css, /\[data-lite="1"\][\s\S]{0,200}\.gg-seg[\s\S]{0,400}backdrop-filter: none/, "a slow device paints it flat");
+  for (const item of kit.matchAll(/<button type="button" class="gg-seg-item"[^>]*>/g)) {
+    assert.doesNotMatch(item[0], /tabindex="-1"/, "every item is reachable by keyboard");
+  }
+});
+
+test("the refraction lens runs on glass only, and the credit travels with it", () => {
+  // A displacement filter per panel is expensive, and on another theme it is
+  // pointless — the sheet it refracts is gone. So it is built when glass is
+  // chosen and torn down when anything else is, in the one function that decides
+  // the style.
+  const app = read("js/app.js");
+  const applyStyle = app.slice(app.indexOf("function applyStyle("));
+  const body = applyStyle.slice(0, applyStyle.indexOf("\n}\n") + 3);
+  assert.match(body, /if \(style === "glass"\) void fitGlass\(/, "the lens is built for glass");
+  assert.match(body, /else stopGlass\(\);/, "and every other style tears it down");
+  assert.match(app, /import \{ fitGlass, stopGlass \} from "\.\/glass-lens\.js\?v=\d+"/, "the lens is a versioned module like every other");
+
+  // It is a lens, not a lookalike: one filter, capped, torn down when it leaves.
+  const lens = read("js/glass-lens.js");
+  assert.match(lens, /isLensSupported\(\)/, "the browser is asked, not assumed");
+  assert.match(lens, /MAX_LENSES/, "the count is capped");
+  assert.match(lens, /prefers-reduced-transparency/, "and a reader can ask for solid glass");
+  assert.match(lens, /IntersectionObserver/, "a surface out of view holds no filter");
+
+  // The MIT notice is where a reader looks for it, and it names what was *not*
+  // taken: the upstream WebGL renderer and its Safari/Firefox fallback.
+  const credits = read("docs/OPEN_SOURCE_CREDITS.md");
+  assert.match(credits, /glasswork/, "the upstream project is named");
+  assert.match(credits, /MIT/, "and its licence");
+  assert.match(credits, /WebGL/, "and the part deliberately left out");
+  assert.ok(existsSync(new URL("../LICENSES/glasswork.txt", import.meta.url)), "the licence text ships with the code");
+  assert.match(lens, /MIT/, "and the file says so at the top");
 });
