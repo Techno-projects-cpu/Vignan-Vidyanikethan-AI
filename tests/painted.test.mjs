@@ -38,12 +38,13 @@ const appCss = read("styles-next.css");
 const index = read("index.html");
 const precache = JSON.parse(read("precache.json"));
 
-const PLATES = {
-  "assets/paint/library-dusk.webp": [1376, 768],
-  "assets/paint/open-book.webp": [1376, 768],
-  "assets/paint/paper-night.webp": [1376, 768],
-  "assets/paint/brush-band.webp": [1584, 672],
-};
+// The set is data now: `assets/paint/manifest.json` is written by
+// tools/optimise-paint.mjs and records every plate's real dimensions and bytes.
+// Typing them here again is how the map drifted from the files last time.
+const MANIFEST = JSON.parse(read("assets/paint/manifest.json"));
+const PLATES = Object.fromEntries(
+  MANIFEST.plates.map((plate) => [`assets/paint/${plate.name}.webp`, [plate.width, plate.height]]),
+);
 
 /** WebP is a RIFF container whose form type is WEBP; the first 12 bytes say so. */
 function isWebp(buffer) {
@@ -78,9 +79,20 @@ test("every painted plate is a real WebP, and the whole set fits an offline budg
     assert.deepEqual(webpSize(data), [width, height], `${file} is ${width}x${height}`);
     total += statSync(path.join(root, file)).size;
   }
-  // Four paintings on a school connection: the whole set has to be lighter than a
-  // single photograph would be, or the page is slower than the one it replaced.
-  assert.ok(total <= 520 * 1024, `the four plates weigh ${Math.round(total / 1024)}KB, budget is 520KB`);
+  // Eighteen paintings on a school connection. The budget is the manifest's, so
+  // adding a plate is a deliberate decision rather than a silent regression.
+  assert.ok(
+    total <= MANIFEST.budget.canonicalTotal,
+    `the plates weigh ${Math.round(total / 1024)}KB, budget is ${Math.round(MANIFEST.budget.canonicalTotal / 1024)}KB`,
+  );
+  // The gallery never downloads the canonical file on a phone: a 640 tile must
+  // exist, be WebP, and be a fraction of the size.
+  for (const plate of MANIFEST.plates) {
+    const tile = bytes(`assets/paint/${plate.name}-640.webp`);
+    assert.ok(isWebp(tile), `${plate.name}-640 is WebP`);
+    assert.equal(webpSize(tile)[0], 640, `${plate.name}-640 is 640px wide`);
+    assert.ok(tile.length < plate.bytes.canonical, `${plate.name}: the tile is smaller than the plate`);
+  }
 });
 
 test("nothing paints offline that is not in the cache", () => {

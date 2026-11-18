@@ -26,17 +26,22 @@ const read = (path) => readFileSync(fileURLToPath(new URL(path, root)), "utf8");
 const html = read("index.html");
 const css = read("styles-custom.css");
 const paintedCss = read("styles-painted.css");
-// Painted themes are generated into their own sheet; both are the app's look.
-const everySheet = `${css}\n${paintedCss}`;
+const glassCss = read("styles-glass.css");
+// Painted themes are generated into their own sheet and glass has a hand-written
+// one; together with the token map they are the app's whole look.
+const everySheet = `${css}\n${glassCss}\n${paintedCss}`;
 const app = read("js/app.js");
 
-test("thirteen styles — six classic and seven painted — complete and distinct", () => {
-  // 2.32.0 added the painted edition: seven plate-backed themes generated from
-  // js/theme-paint.js. The six classic looks are untouched, including Minimal,
-  // which is still the absence of an attribute rather than a block of CSS.
-  assert.equal(THEMES.length, 13);
+test("fourteen styles — glass, six classic and seven painted — complete and distinct", () => {
+  // 2.32.0 added the painted edition; 2.33.0 put Glass Morphism in front of it and
+  // made it the default. Glass has no painting (it is made of light), so it is the
+  // one theme that is neither classic nor plate-backed.
+  assert.equal(THEMES.length, 14);
   assert.equal(THEMES.filter((theme) => theme.painted).length, 7);
-  assert.equal(THEMES.filter((theme) => !theme.painted).length, 6);
+  assert.equal(THEMES.filter((theme) => theme.glass === true).length, 1, "exactly one glass theme");
+  assert.equal(THEMES.filter((theme) => !theme.painted && !theme.glass).length, 6);
+  assert.equal(THEMES[0].id, "glass", "the default is the first tile in Settings");
+  assert.equal(DEFAULT_STYLE, "glass");
   const ids = THEMES.map((theme) => theme.id);
   assert.equal(new Set(ids).size, ids.length, "every id is unique");
   assert.ok(ids.includes(DEFAULT_STYLE));
@@ -104,7 +109,8 @@ test("a stale or unknown saved style can never blank the app", () => {
   assert.equal(themeById("nope").id, DEFAULT_STYLE);
   // Since 2.32.2 the app opens on a painted room, not on the classic base look.
   assert.equal(DEFAULT_SETTINGS.style, DEFAULT_STYLE);
-  assert.equal(isPaintedStyle(DEFAULT_STYLE), true, "and the default is one of the paintings");
+  assert.equal(DEFAULT_STYLE, "glass", "the default is the glass theme");
+  assert.equal(isPaintedStyle(DEFAULT_STYLE), false, "glass has no painting to be measured against");
   assert.equal(normalizeSettings({ style: "terminal" }).style, "terminal");
   assert.equal(normalizeSettings({ style: "made-up" }).style, DEFAULT_STYLE);
   assert.equal(normalizeSettings({}).style, DEFAULT_STYLE);
@@ -146,6 +152,8 @@ test("every style has all its tokens, so none borrows from another", () => {
   }
   // Minimal is the original look: it is the absence of the attribute, not a block.
   assert.ok(css.includes("minimal") === false || !css.includes('html[data-style="minimal"]'));
+  // Glass, by contrast, is a block — it has its own sheet and its own tokens.
+  assert.match(glassCss, /html\[data-style="glass"\] body\.premium-ui \{/);
 });
 
 test("a light style stays light even when the invert switch says dark", () => {
@@ -279,11 +287,11 @@ test("a new device starts in the school's style, and its own choice always wins"
   // The list covers every shipped style, painted rooms included, and the server's
   // fallback is the same painted room the app defaults to — a tablet that painted
   // one style before boot and another after it would flicker between worlds.
-  assert.match(server, /const STYLE_IDS = \[\s*"minimal", "soft", "editorial", "luxury", "terminal", "brutal",\s*"legacy", "rain", "stair", "aurora", "ember", "moss", "indigo",\s*\]/);
+  assert.match(server, /const STYLE_IDS = \[\s*"glass",\s*"minimal", "soft", "editorial", "luxury", "terminal", "brutal",\s*"legacy", "rain", "stair", "aurora", "ember", "moss", "indigo",\s*\]/);
   for (const theme of THEMES) {
     assert.ok(server.includes(`"${theme.id}"`), `the school can choose ${theme.id}`);
   }
-  assert.match(server, /: "rain";/, "the server's fallback is the app's default");
+  assert.match(server, /: "glass";/, "the server's fallback is the app's default");
   assert.match(server, /SCHOOL_DEFAULT_STYLE = STYLE_IDS\.includes/);
   assert.match(server, /defaultStyle: SCHOOL_DEFAULT_STYLE/);
   // The app applies it once, only when the device has never chosen.

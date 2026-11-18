@@ -182,7 +182,7 @@ html[data-style="rain"] body.premium-ui {
   color: #f2ece0;
 }
 
-/* ---- Book stair · book-stair · glass 0.6 · floor 6.23:1 ---- */
+/* ---- Book stair · book-stair · glass 0.6 · floor 6.53:1 ---- */
 html[data-style="stair"] {
   --tp-bg: #17130d;
   --tp-surface: #433323;
@@ -225,7 +225,7 @@ html[data-style="stair"] body.premium-ui {
   color: #f4ead6;
 }
 
-/* ---- Aurora hall · aurora-teal · glass 0.72 · floor 4.60:1 ---- */
+/* ---- Aurora hall · aurora-teal · glass 0.72 · floor 4.61:1 ---- */
 html[data-style="aurora"] {
   --tp-bg: #152b28;
   --tp-surface: #264740;
@@ -268,7 +268,7 @@ html[data-style="aurora"] body.premium-ui {
   color: #eaf6ef;
 }
 
-/* ---- Ember room · ember-rose · glass 0.76 · floor 4.66:1 ---- */
+/* ---- Ember room · ember-rose · glass 0.76 · floor 4.70:1 ---- */
 html[data-style="ember"] {
   --tp-bg: #261717;
   --tp-surface: #5a382d;
@@ -311,7 +311,7 @@ html[data-style="ember"] body.premium-ui {
   color: #f6e9e4;
 }
 
-/* ---- Moss corridor · moss-hall · glass 0.74 · floor 4.63:1 ---- */
+/* ---- Moss corridor · moss-hall · glass 0.74 · floor 4.57:1 ---- */
 html[data-style="moss"] {
   --tp-bg: #1a1e14;
   --tp-surface: #3e4631;
@@ -354,7 +354,7 @@ html[data-style="moss"] body.premium-ui {
   color: #eef1e6;
 }
 
-/* ---- Indigo shelf · indigo-shelf · glass 0.74 · floor 4.65:1 ---- */
+/* ---- Indigo shelf · indigo-shelf · glass 0.74 · floor 4.67:1 ---- */
 html[data-style="indigo"] {
   --tp-bg: #0e141b;
   --tp-surface: #3f4246;

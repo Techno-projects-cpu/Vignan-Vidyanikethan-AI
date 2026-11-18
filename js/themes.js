@@ -17,18 +17,21 @@
  *      does, only how it looks, and it is saved per device.
  */
 
-import { PAINTED_THEMES, asTheme } from "./theme-paint.js?v=67";
+import { PAINTED_THEMES, asTheme } from "./theme-paint.js?v=68";
+import { GLASS_THEME, asGlassTheme, isGlassStyle } from "./theme-glass.js?v=68";
 
 /**
- * Six classic styles plus the painted edition, ordered from quietest to loudest.
+ * Glass Morphism, six classic styles, then the painted edition.
  *
- * The painted ones are generated from `js/theme-paint.js` (a plate, a palette
- * measured from that plate, and a glass alpha that is raised until the theme is
- * readable). They arrive last because they are the loudest thing here, and
- * because a school table used to the six quiet looks should not open on a
- * painting it did not ask for.
+ * Glass is first because it is the default and because it is the one look the
+ * whole site is built around — it has its own stylesheet (`styles-glass.css`) and
+ * no painting, since it is made of light rather than of a photograph. The six
+ * classic looks follow, unchanged. The painted ones are generated from
+ * `js/theme-paint.js` and arrive last: they are the loudest, and a school tablet
+ * that has never been touched should open on glass, not on someone's artwork.
  */
 export const THEMES = [
+  asGlassTheme(GLASS_THEME),
   {
     id: "minimal",
     name: "Minimal",
@@ -101,6 +104,11 @@ export function isPaintedStyle(id) {
   return PAINTED_THEMES.some((theme) => theme.id === id);
 }
 
+/** Is this the glass theme? It has a stylesheet of its own and no plate. */
+export function isGlassTheme(id) {
+  return isGlassStyle(String(id || ""));
+}
+
 /** The original look: the app with no `data-style` attribute at all. */
 export const CLASSIC_STYLE = "minimal";
 
@@ -114,7 +122,7 @@ export const CLASSIC_STYLE = "minimal";
  * The default is now the reference room — the most evenly measured ground, so it
  * is also the one that is safe to put any screen on top of.
  */
-export const DEFAULT_STYLE = "rain";
+export const DEFAULT_STYLE = GLASS_THEME.id;
 
 /**
  * The settings version at which the default changed.
@@ -126,7 +134,7 @@ export const DEFAULT_STYLE = "rain";
  * moved to the new default once. Anything else the student picked is left alone,
  * forever. `minimal` is still there, under its own name, for anyone who wants it.
  */
-export const STYLE_ERA = 2;
+export const STYLE_ERA = 3;
 
 /**
  * Bring a stored style choice up to the current era.
@@ -138,11 +146,13 @@ export function migrateStyleChoice({ style = "", era = 0 } = {}) {
   const chosen = String(style || "");
   const generation = Number(era) || 0;
   if (generation >= STYLE_ERA) return { style: normalizeStyle(chosen), changed: false, era: STYLE_ERA };
-  // Before the era was recorded, `minimal` (or nothing) means "the old default",
-  // not "I looked at twelve themes and chose this one", because the painted themes
-  // did not exist when that value was written.
-  const untouched = !chosen || chosen === CLASSIC_STYLE;
-  return { style: untouched ? DEFAULT_STYLE : normalizeStyle(chosen), changed: untouched, era: STYLE_ERA };
+  // Before an era was recorded, a value can only be an old default rather than a
+  // deliberate choice, because the newer themes did not exist when it was written.
+  //   era 0/1: `minimal` was the default        -> move to the current default
+  //   era 2:   `rain` was the default           -> move to the current default
+  // Anything else is a choice, and a choice is never overwritten.
+  const oldDefaults = !chosen || chosen === CLASSIC_STYLE || chosen === "rain";
+  return { style: oldDefaults ? DEFAULT_STYLE : normalizeStyle(chosen), changed: oldDefaults, era: STYLE_ERA };
 }
 
 /**

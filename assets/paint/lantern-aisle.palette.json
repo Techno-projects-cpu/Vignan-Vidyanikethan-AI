@@ -1,0 +1,48 @@
+{
+  "plate": "lantern-aisle",
+  "roles": [
+    {
+      "hex": "#241f1a",
+      "weight": 48.2,
+      "chroma": 4,
+      "lightness": 12
+    },
+    {
+      "hex": "#654934",
+      "weight": 34.7,
+      "chroma": 19.2,
+      "lightness": 33.1
+    },
+    {
+      "hex": "#eae3d4",
+      "weight": 17.1,
+      "chroma": 8.2,
+      "lightness": 89.9
+    }
+  ],
+  "balance": {
+    "share": [
+      48.2,
+      34.7,
+      17.1
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 18.7,
+    "secondaryAccent": 50,
+    "dominantAccent": 77.9
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.28,
+    "darkWorst": 1.22
+  },
+  "safe": {
+    "forCream": 82.9,
+    "forInk": 17.1
+  },
+  "measured": true
+}

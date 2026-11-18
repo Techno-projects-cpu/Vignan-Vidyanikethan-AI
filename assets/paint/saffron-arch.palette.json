@@ -1,0 +1,48 @@
+{
+  "plate": "saffron-arch",
+  "roles": [
+    {
+      "hex": "#c49278",
+      "weight": 55.5,
+      "chroma": 26,
+      "lightness": 64.8
+    },
+    {
+      "hex": "#563628",
+      "weight": 24,
+      "chroma": 19.4,
+      "lightness": 25.7
+    },
+    {
+      "hex": "#f6eedc",
+      "weight": 20.6,
+      "chroma": 9.5,
+      "lightness": 94.3
+    }
+  ],
+  "balance": {
+    "share": [
+      55.4,
+      24,
+      20.6
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 37,
+    "secondaryAccent": 61.5,
+    "dominantAccent": 25.9
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.15,
+    "darkWorst": 1.85
+  },
+  "safe": {
+    "forCream": 24,
+    "forInk": 76
+  },
+  "measured": true
+}

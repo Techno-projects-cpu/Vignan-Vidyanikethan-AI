@@ -1393,6 +1393,7 @@ img { display: block; }
     opacity: 1 !important;
     transform: none !important;
   }
+  .wl-glass-tile span:nth-child(1), .wl-glass-tile span:nth-child(2),
   .wl-hero-paint, .wl-hero-mist, .wl-enso, .wl-stroke, .wl-seal,
   .wl-brush, .wl-paint {
     animation: none !important;
@@ -1490,8 +1491,6 @@ img { display: block; }
 .wl-bal i:nth-child(1) { background: var(--wl-stone); }
 .wl-bal i:nth-child(2) { background: var(--wl-straw); }
 .wl-bal i:nth-child(3) { background: var(--wl-vermilion); }
-.wl-room-pigment { display: flex; gap: 4px; margin: 0; }
-.wl-room-pigment i { display: block; width: 22px; height: 10px; outline: 1px solid var(--wl-line); }
 
 .wl-pictures-title {
   margin: clamp(46px, 6vw, 76px) 0 12px;
@@ -1544,6 +1543,196 @@ img { display: block; }
   .wl-room { padding: 10px; }
   .wl-room-note { font-size: 12px; }
   .wl-pictures { grid-template-columns: 1fr 1fr; gap: 10px; }
+}
+
+/* ------------------------------------------------------------------ */
+/* The glass room in the grid, and the mock screen                     */
+/* ------------------------------------------------------------------ */
+
+/* Glass is the one tile with no painting, so its preview is drawn: four fields
+   behind a frosted pane, in the same proportions the app uses. This is the same
+   trick as the theme itself — the picture is the light. */
+.wl-room-glass { grid-column: span 1; }
+.wl-glass-tile {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 4px;
+  overflow: hidden;
+  background: linear-gradient(150deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .01));
+  outline: 1px solid var(--wl-line);
+  outline-offset: -1px;
+}
+.wl-glass-tile span {
+  position: absolute;
+  /* Soft by gradient rather than by a radius: this page is square, and a circle
+     would be the one rounded thing on it. */
+  background-image: radial-gradient(closest-side, rgba(255, 255, 255, .18), transparent);
+}
+.wl-glass-tile span:nth-child(1) { inset: 4% auto auto 2%; width: 62%; height: 58%; background-color: rgba(255, 255, 255, .1); }
+.wl-glass-tile span:nth-child(2) { inset: auto 2% 22% auto; width: 54%; height: 52%; background-color: rgba(255, 255, 255, .06); }
+.wl-glass-tile span:nth-child(3) {
+  inset: 18% 12% 16% 12%;
+  background-image: linear-gradient(158deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, .05) 58%, rgba(255, 255, 255, .02));
+  outline: 1px solid rgba(255, 255, 255, .22);
+  outline-offset: -1px;
+}
+.wl-room-name {
+  margin: 0;
+  font-family: var(--wl-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.wl-room-default {
+  margin-left: 8px;
+  padding: 2px 5px;
+  border: 1px solid var(--wl-line);
+  color: var(--wl-ink-3);
+  font-family: var(--wl-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  vertical-align: 2px;
+}
+.wl-room-roles b { color: var(--wl-ink-2); font-weight: 600; }
+
+/* The showcase: a mock of the real screen, square because this page is square. */
+.wl-showcase {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: clamp(32px, 6vw, 80px);
+  align-items: center;
+  padding: clamp(56px, 8vw, 110px) 0;
+  border-top: 1px solid var(--wl-line);
+}
+.wl-showcase-copy h2 {
+  margin: 8px 0 20px;
+  font-family: var(--wl-display);
+  font-size: clamp(32px, 4.4vw, 60px);
+  font-weight: 500;
+  line-height: .98;
+  letter-spacing: -.045em;
+}
+.wl-showcase-copy p { max-width: 54ch; margin: 0 0 16px; color: var(--wl-ink-2); font-size: 15px; line-height: 1.72; }
+.wl-showcase-list { display: grid; gap: 12px; margin: 24px 0 30px; padding: 0; list-style: none; }
+.wl-showcase-list li {
+  padding: 12px 0 0;
+  border-top: 1px solid var(--wl-line);
+  color: var(--wl-ink-2);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.wl-showcase-list strong { display: block; margin-bottom: 3px; color: var(--wl-ink); font-size: 13px; }
+
+.wl-mock {
+  position: relative;
+  margin: 0;
+  padding: clamp(16px, 2.4vw, 28px);
+  background: linear-gradient(155deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .012));
+  outline: 1px solid var(--wl-line);
+  outline-offset: -1px;
+}
+.wl-mock-fields { position: absolute; inset: 0; overflow: hidden; }
+.wl-mock-fields i {
+  position: absolute;
+  display: block;
+  background-image: radial-gradient(closest-side, rgba(255, 255, 255, .2), transparent 72%);
+}
+.wl-mock-fields i:nth-child(1) { inset: -6% auto auto -4%; width: 62%; height: 58%; }
+.wl-mock-fields i:nth-child(2) { inset: -8% -6% auto auto; width: 56%; height: 52%; opacity: .72; }
+.wl-mock-fields i:nth-child(3) { inset: auto auto -10% 12%; width: 70%; height: 58%; opacity: .6; }
+.wl-mock-fields i:nth-child(4) { inset: auto -6% -6% auto; width: 48%; height: 46%; opacity: .5; }
+
+/* The screen is the sheet: one tint, one lit edge, a blur that carries the fields. */
+.wl-mock-screen {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  background: rgba(8, 9, 12, .34);
+  border: 1px solid rgba(255, 255, 255, .18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .26);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+}
+.wl-mock-top { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+.wl-mock-dot { width: 12px; height: 12px; background: var(--wl-vermilion); }
+.wl-mock-title { font-family: var(--wl-display); font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+.wl-mock-pill {
+  margin-left: auto;
+  padding: 3px 7px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  font-family: var(--wl-mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+}
+.wl-mock-row { display: flex; gap: 8px; align-items: flex-start; }
+.wl-mock-avatar { flex: 0 0 auto; width: 18px; height: 18px; border: 1px solid rgba(255, 255, 255, .3); }
+.wl-mock-mark { background: var(--wl-vermilion); border-color: var(--wl-vermilion); }
+.wl-mock-bubble {
+  padding: 9px 11px;
+  background: rgba(255, 255, 255, .09);
+  border: 1px solid rgba(255, 255, 255, .14);
+  color: var(--wl-ink);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.wl-mock-reply { flex-direction: row-reverse; }
+.wl-mock-answer { background: rgba(255, 255, 255, .13); }
+.wl-mock-answer em {
+  display: block;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, .16);
+  color: var(--wl-ink-3);
+  font-family: var(--wl-mono);
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: .04em;
+}
+.wl-mock-composer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 10px 12px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2);
+}
+.wl-mock-lines {
+  flex: 1 1 auto;
+  height: 7px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, .22) 0 46%, transparent 46% 54%, rgba(255, 255, 255, .22) 54%);
+}
+.wl-mock-send { width: 30px; height: 22px; background: var(--wl-vermilion); }
+.wl-mock-chip {
+  position: absolute;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  background: rgba(8, 9, 12, .42);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-family: var(--wl-mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: var(--wl-ink-2);
+}
+.wl-mock-chip-a { top: 6%; right: -14px; }
+.wl-mock-chip-b { bottom: 9%; left: -14px; }
+.wl-mock figcaption { position: relative; margin-top: 12px; color: var(--wl-ink-3); font-size: 12px; line-height: 1.55; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .wl-glass-tile span:nth-child(1) { animation: wl-field-a 26s ease-in-out infinite alternate; }
+  .wl-glass-tile span:nth-child(2) { animation: wl-field-b 31s ease-in-out infinite alternate; }
+}
+@keyframes wl-field-a { from { transform: translate3d(-4%, -3%, 0); } to { transform: translate3d(6%, 4%, 0); } }
+@keyframes wl-field-b { from { transform: translate3d(3%, 5%, 0); } to { transform: translate3d(-5%, -4%, 0); } }
+
+@media (max-width: 860px) {
+  .wl-showcase { grid-template-columns: 1fr; gap: 34px; }
+  .wl-mock-chip-a { right: 4px; }
+  .wl-mock-chip-b { left: 4px; }
 }
 
 /* ------------------------------------------------------------------ */

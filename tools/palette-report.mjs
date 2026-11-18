@@ -142,6 +142,22 @@ export function report(file) {
   };
 }
 
+/**
+ * Measure one plate by name and commit the report beside it.
+ *
+ * The optimiser calls this after re-encoding, so a plate and its measurement are
+ * written together — a re-encoded file with a stale palette is the kind of drift
+ * nobody notices until the theme's contrast check starts failing.
+ */
+export function reportFor(name, { write = true } = {}) {
+  const entry = report(path.join(PAINT, `${name}.webp`));
+  entry.measured = true;
+  if (write) {
+    writeFileSync(path.join(PAINT, `${name}.palette.json`), `${JSON.stringify(entry, null, 2)}\n`);
+  }
+  return entry;
+}
+
 /** A frosted panel over this plate: 84% ink, which is what the CSS actually does. */
 export function glassCheck(entry, inkHex = "#f7efdd", panelAlpha = 0.84) {
   const worst = entry.roles
@@ -152,7 +168,11 @@ export function glassCheck(entry, inkHex = "#f7efdd", panelAlpha = 0.84) {
 
 function main() {
   const check = process.argv.includes("--check");
-  const plates = readdirSync(PAINT).filter((file) => file.endsWith(".webp")).sort();
+  // `-640` and `-1280` are the same painting at another size, so measuring them
+  // would produce three identical reports under three names.
+  const plates = readdirSync(PAINT)
+    .filter((file) => file.endsWith(".webp") && !/-\d+\.webp$/.test(file))
+    .sort();
   const results = [];
   const stale = [];
 

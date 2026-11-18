@@ -3,27 +3,27 @@
   "roles": [
     {
       "hex": "#1b1a16",
-      "weight": 59.4,
-      "chroma": 2.9,
-      "lightness": 9.4
+      "weight": 59.2,
+      "chroma": 3,
+      "lightness": 9.3
     },
     {
-      "hex": "#51564a",
-      "weight": 32.3,
-      "chroma": 6.5,
+      "hex": "#525649",
+      "weight": 32.6,
+      "chroma": 6.7,
       "lightness": 36.5
     },
     {
-      "hex": "#cbb28f",
+      "hex": "#cbb38f",
       "weight": 8.2,
-      "chroma": 26.1,
-      "lightness": 68.7
+      "chroma": 25.8,
+      "lightness": 68.9
     }
   ],
   "balance": {
     "share": [
-      59.5,
-      32.3,
+      59.2,
+      32.6,
       8.2
     ],
     "within": true,
@@ -31,13 +31,13 @@
   },
   "separation": {
     "dominantSecondary": 19.7,
-    "secondaryAccent": 38.8,
-    "dominantAccent": 59.5
+    "secondaryAccent": 38.5,
+    "dominantAccent": 59.8
   },
   "ink": {
     "light": "#ffffff",
     "dark": "#0b0907",
-    "lightWorst": 2.04,
+    "lightWorst": 2.02,
     "darkWorst": 1.14
   },
   "safe": {

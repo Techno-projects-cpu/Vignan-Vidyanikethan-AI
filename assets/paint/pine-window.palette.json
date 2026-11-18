@@ -1,0 +1,48 @@
+{
+  "plate": "pine-window",
+  "roles": [
+    {
+      "hex": "#183224",
+      "weight": 70.4,
+      "chroma": 14.9,
+      "lightness": 18.8
+    },
+    {
+      "hex": "#919e8d",
+      "weight": 17.4,
+      "chroma": 11,
+      "lightness": 64.3
+    },
+    {
+      "hex": "#f1f1ea",
+      "weight": 12.2,
+      "chroma": 3.1,
+      "lightness": 94.7
+    }
+  ],
+  "balance": {
+    "share": [
+      70.4,
+      17.4,
+      12.2
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 40.8,
+    "secondaryAccent": 23.2,
+    "dominantAccent": 71.8
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.13,
+    "darkWorst": 1.44
+  },
+  "safe": {
+    "forCream": 70.4,
+    "forInk": 29.6
+  },
+  "measured": true
+}

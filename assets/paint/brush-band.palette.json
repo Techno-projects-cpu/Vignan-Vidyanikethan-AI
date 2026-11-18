@@ -2,22 +2,22 @@
   "plate": "brush-band",
   "roles": [
     {
-      "hex": "#e7e0d5",
+      "hex": "#e7e1d6",
       "weight": 70,
       "chroma": 6.3,
       "lightness": 89.6
     },
     {
-      "hex": "#121815",
+      "hex": "#141917",
       "weight": 20.4,
-      "chroma": 3,
+      "chroma": 3.2,
       "lightness": 8.2
     },
     {
-      "hex": "#7d7b71",
+      "hex": "#7d7b72",
       "weight": 9.6,
       "chroma": 5.8,
-      "lightness": 51.3
+      "lightness": 51.4
     }
   ],
   "balance": {
@@ -30,15 +30,15 @@
     "accentLeads": false
   },
   "separation": {
-    "dominantSecondary": 81.6,
-    "secondaryAccent": 34.2,
-    "dominantAccent": 29.3
+    "dominantSecondary": 81.5,
+    "secondaryAccent": 33.8,
+    "dominantAccent": 29.4
   },
   "ink": {
     "light": "#ffffff",
     "dark": "#0b0907",
-    "lightWorst": 1.31,
-    "darkWorst": 1.1
+    "lightWorst": 1.3,
+    "darkWorst": 1.12
   },
   "safe": {
     "forCream": 20.4,

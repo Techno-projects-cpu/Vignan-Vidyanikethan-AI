@@ -2,43 +2,43 @@
   "plate": "paper-night",
   "roles": [
     {
-      "hex": "#08090c",
-      "weight": 67.8,
-      "chroma": 1.3,
+      "hex": "#080a0d",
+      "weight": 68.1,
+      "chroma": 1.2,
       "lightness": 2.6
     },
     {
-      "hex": "#232120",
-      "weight": 20.4,
-      "chroma": 1.1,
-      "lightness": 13.1
+      "hex": "#23211f",
+      "weight": 20.3,
+      "chroma": 1.2,
+      "lightness": 13.2
     },
     {
       "hex": "#42382f",
-      "weight": 11.8,
-      "chroma": 7.9,
-      "lightness": 24.2
+      "weight": 11.5,
+      "chroma": 8,
+      "lightness": 24.3
     }
   ],
   "balance": {
     "share": [
-      67.8,
-      20.4,
-      11.8
+      68.2,
+      20.3,
+      11.5
     ],
     "within": false,
     "accentLeads": true
   },
   "separation": {
-    "dominantSecondary": 6.8,
-    "secondaryAccent": 9.6,
-    "dominantAccent": 16.2
+    "dominantSecondary": 7,
+    "secondaryAccent": 9.4,
+    "dominantAccent": 16.3
   },
   "ink": {
     "light": "#ffffff",
     "dark": "#141210",
     "lightWorst": 11.42,
-    "darkWorst": 1.07
+    "darkWorst": 1.06
   },
   "safe": {
     "forCream": 100,
