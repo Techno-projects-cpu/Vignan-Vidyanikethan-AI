@@ -840,6 +840,25 @@ body.premium-ui .premium-hero::after {
   display: none;
 }
 
+/* The same brush stroke the landing page uses, under the app's greeting: the
+   one gesture that ties the painted page to the app it opens. It draws once on
+   load and stops, so nothing under a student's hands is ever moving. */
+.hero-brush {
+  display: block;
+  width: clamp(96px, 22vw, 132px);
+  height: auto;
+  margin: 10px auto 0;
+  color: var(--vn-ink);
+  opacity: .7;
+  animation: hero-brush-draw .9s cubic-bezier(.4, .1, .2, 1) .3s both;
+}
+.hero-brush path { fill: currentColor; }
+
+@keyframes hero-brush-draw {
+  from { clip-path: inset(0 100% 0 0); opacity: 0; }
+  to { clip-path: inset(0 0 0 0); opacity: .7; }
+}
+
 body.premium-ui .premium-hero h2 {
   font-size: var(--vn-display);
   margin: var(--vn-space-4) 0 var(--vn-space-4);
@@ -1125,6 +1144,35 @@ body.premium-ui .ask-continue-chip:hover .ask-continue-when,
 body.premium-ui .ask-continue-chip:focus-visible .ask-continue-when {
   color: var(--p-bg);
 }
+
+/* ------------------------------------------------------------------ */
+/* The painted opening                                                  */
+/* ------------------------------------------------------------------ */
+
+/* A strip of the library painting behind the first screen, fading out into the
+   surface below it. It drifts very slowly — 52 seconds, side to side — which is
+   the whole motion budget here: the greeting is a live region, the composer is
+   focusable, and neither of those may ever move under a student's hands.
+   Everything that carries words sits above it on the app's own background. */
+.ask-paint {
+  position: relative;
+  height: clamp(112px, 17vh, 184px);
+  margin: 0 0 14px;
+  background: url('./assets/paint/library-dusk.webp') 50% 44% / cover no-repeat;
+  -webkit-mask-image: linear-gradient(180deg, #000000 0%, #000000 46%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(180deg, #000000 0%, #000000 46%, rgba(0, 0, 0, 0) 100%);
+  pointer-events: none;
+  animation: ask-paint-drift 52s ease-in-out infinite alternate;
+}
+
+@keyframes ask-paint-drift {
+  from { background-position: 46% 42%; }
+  to { background-position: 57% 47%; }
+}
+
+/* Once the student has asked something, the conversation is the screen and the
+   painting has done its job. It goes, rather than scrolling away under the chat. */
+body.premium-ui #view-ask.has-conversation .ask-paint { display: none; }
 
 body.premium-ui .goal-head h3 {
   margin: 0;

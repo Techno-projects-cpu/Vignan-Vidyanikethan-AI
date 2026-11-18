@@ -1,6 +1,6 @@
 {
-  "version": 63,
-  "generatedAt": "2026-11-18T01:44:07.285Z",
+  "version": 64,
+  "generatedAt": "2026-11-18T02:11:59.579Z",
   "urls": [
     "./",
     "./index.html",
@@ -13,6 +13,10 @@
     "./assets/fonts/manrope-latin.woff2",
     "./assets/fonts/space-grotesk-LICENSE.txt",
     "./assets/fonts/space-grotesk-latin.woff2",
+    "./assets/paint/brush-band.webp",
+    "./assets/paint/library-dusk.webp",
+    "./assets/paint/open-book.webp",
+    "./assets/paint/paper-night.webp",
     "./blog/a-demo-that-survives-a-power-cut.html",
     "./blog/check-an-ai-answer.html",
     "./blog/explain-your-project-in-60-seconds.html",

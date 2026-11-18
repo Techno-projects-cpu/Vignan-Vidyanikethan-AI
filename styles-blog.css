@@ -17,11 +17,11 @@
 
 :root {
   color-scheme: dark;
-  --bl-bg: #000000;
-  --bl-ink: #f7f7f7;
-  --bl-soft: #c9c9c9;
-  --bl-quiet: #9a9a9a;
-  --bl-line: #262626;
+  --bl-bg: #0b0907;
+  --bl-ink: #f7efdd;
+  --bl-soft: #ddcfb4;
+  --bl-quiet: #b3a487;
+  --bl-line: #3a3125;
   --bl-font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --bl-display: 'Space Grotesk', Manrope, system-ui, sans-serif;
   --bl-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

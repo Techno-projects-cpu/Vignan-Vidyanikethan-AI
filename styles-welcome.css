@@ -11,11 +11,19 @@
  * its page number in the gutter. The monospaced face is kept for exactly one job,
  * numerals — folios, list indexes, page numbers — and for nothing else.
  *
- * Rules kept from the rest of the site: true black, grey and white only; square
- * corners; blocks that share a single hairline instead of floating in shadows;
- * no gradients as decoration; no all-caps labels above content; no arrows stuck
- * on the end of links. Motion is CSS only — the page has no JavaScript at all,
- * so it cannot throw a console error and cannot fail on a school Wi-Fi.
+ * From 2.31.0 the page is a painted book. Four plates were painted for it —
+ * a library at dusk, the open book with the brush still in the gutter, a band of
+ * sumi ink, and a lantern-lit reading room at night — and the type sits on them
+ * the way a caption sits on a plate. The colours kept from the greyscale edition
+ * are paper cream, sumi ink, ochre, moss and one vermilion seal; nothing else.
+ *
+ * Rules kept from the rest of the site: square corners; blocks that share a
+ * single hairline instead of floating in shadows; no all-caps labels above
+ * content; no arrows stuck on the end of links; motion is CSS only — the page
+ * has no JavaScript at all, so it cannot throw a console error and cannot fail
+ * on a school Wi-Fi. Ambient motion (the painting drifting, dust rising) is
+ * allowed now and is always switched off under reduced motion; nothing that
+ * carries words ever moves on its own.
  */
 
 @font-face { font-family: Manrope; src: url('./assets/fonts/manrope-latin.woff2') format('woff2'); font-style: normal; font-weight: 200 800; font-display: swap; }
@@ -23,14 +31,38 @@
 
 :root {
   color-scheme: dark;
-  /* One black, four greys, and one raised surface used only by the specimen. */
-  --wl-bg: #000000;
-  --wl-panel: #0c0c0c;
-  --wl-ink: #f7f7f7;
-  --wl-soft: #c9c9c9;
-  --wl-quiet: #9a9a9a;
-  --wl-line: #262626;
-  --wl-line-soft: #141414;
+  /* The painted palette, and the only colours on this page.
+   *
+   * Everything below is a pigment named once: sumi black for shadow, washi
+   * cream for paper, ochre and moss from the paintings, and a single vermilion
+   * seal. `tests/landing.test.mjs` fails on any hex outside this block that is not a
+   * `var()` or plain white, so the palette cannot drift back into a SaaS blue. */
+  --wl-bg: #0b0907;          /* warm sumi black */
+  --wl-panel: #15110c;
+  --wl-ink: #f7efdd;         /* washi cream */
+  --wl-soft: #ddcfb4;
+  --wl-quiet: #b3a487;
+  --wl-line: #3a3125;
+  --wl-line-soft: #241d15;
+  --wl-paper: #efe3c8;       /* the page itself */
+  --wl-paper-hi: #f7eeda;
+  --wl-vermilion: #b23a29;   /* the seal, used once per plate */
+  --wl-ochre: #c08a3e;
+  --wl-moss: #5c6a49;
+  /* Paper, edge to edge: the sheet, its highlight, the shade under a fold, the
+     panel a card is printed on, and the three inks used on it. */
+  --wl-paper-deep: #e7d9bb;
+  --wl-paper-panel: #f5ecd9;
+  --wl-line-paper: #cbb894;
+  --wl-line-paper-soft: #d8c8a8;
+  --wl-turns-gap: #e3d5b8;
+  --wl-paper-ink: #201c15;
+  --wl-paper-ink-soft: #3d362a;
+  --wl-paper-ink-quiet: #5c5343;
+  /* A row that inverts on hover: cream on ink in the painted half, ink on cream
+     in the paper half. One pair of tokens keeps both readable. */
+  --wl-invert-bg: #f7efdd;
+  --wl-invert-ink: #0b0907;
   --wl-font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --wl-display: 'Space Grotesk', Manrope, system-ui, sans-serif;
   --wl-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -58,7 +90,7 @@ body.wl {
   line-height: 1.6;
 }
 
-body.wl ::selection { background: #f7f7f7; color: #000000; }
+body.wl ::selection { background: var(--wl-ink); color: #000000; }
 
 a { color: inherit; text-decoration: none; }
 
@@ -84,7 +116,7 @@ img { display: block; }
   right: 0;
   z-index: 40;
   height: 1px;
-  background: #f7f7f7;
+  background: var(--wl-ink);
   transform: scaleX(0);
   transform-origin: left center;
   pointer-events: none;
@@ -132,7 +164,7 @@ img { display: block; }
   min-height: 74px;
   padding: 0 var(--wl-pad);
   border-bottom: 1px solid var(--wl-line);
-  background: rgba(0, 0, 0, .88);
+  background: rgba(11, 9, 7, .9);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
@@ -158,7 +190,7 @@ img { display: block; }
 .wl-bar-nav a:hover { color: #ffffff; }
 .wl-bar-open {
   padding: 11px 16px;
-  border: 1px solid #3d3d3d;
+  border: 1px solid var(--wl-line);
   color: #ffffff !important;
   white-space: nowrap;
   transition: background .16s ease, color .16s ease, border-color .16s ease;
@@ -179,6 +211,105 @@ img { display: block; }
   padding: clamp(48px, 7vh, 92px) var(--wl-pad) clamp(64px, 8vh, 112px);
   border-bottom: 1px solid var(--wl-line);
   background: var(--wl-bg);
+  overflow: hidden;
+}
+
+/* The room the page is set in.
+ *
+ * The painting is one plate, cropped by the viewport and pushed so the reading
+ * table sits low and the light falls from the right. It drifts, very slowly, the
+ * way a held camera drifts — 48 seconds of movement nobody is meant to watch,
+ * only to notice if they sit still. It is not the only thing moving (the mist
+ * drifts, dust rises, the title is being set), which is what keeps it from
+ * reading as a slideshow about a photograph. */
+.wl-hero-paint {
+  position: absolute;
+  inset: -3%;
+  z-index: 0;
+  background: url('./assets/paint/library-dusk.webp') 62% 46% / cover no-repeat;
+  animation: wl-sway 48s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes wl-sway {
+  from { transform: scale(1.04) translate3d(-1.2%, .8%, 0); }
+  to { transform: scale(1.1) translate3d(1.4%, -1.2%, 0); }
+}
+
+/* Warm mist: two soft washes of lamp colour that cross the room slowly. A
+ * gradient here is light, not decoration — it is the lamp the painting is lit
+ * by, and it keeps the top-left corner from going flat. */
+.wl-hero-mist {
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  background:
+    radial-gradient(38% 52% at 26% 34%, rgba(192, 138, 62, .16), transparent 70%),
+    radial-gradient(30% 44% at 76% 62%, rgba(239, 227, 200, .10), transparent 72%);
+  animation: wl-mist 34s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes wl-mist {
+  from { transform: translate3d(-1.5%, 0, 0); opacity: .8; }
+  to { transform: translate3d(2%, -1%, 0); opacity: 1; }
+}
+
+/* Dust in the beam. Fine specks rising across the plate, each on its own
+ * timing so they never pulse in unison. */
+.wl-motes {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wl-motes span {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: rgba(247, 239, 221, .55);
+  animation: wl-mote 26s linear infinite;
+}
+.wl-motes span:nth-child(1) { left: 21%; bottom: 12%; animation-duration: 27s; animation-delay: -4s; }
+.wl-motes span:nth-child(2) { left: 38%; bottom: 6%; animation-duration: 33s; animation-delay: -12s; width: 2px; height: 2px; }
+.wl-motes span:nth-child(3) { left: 57%; bottom: 18%; animation-duration: 24s; animation-delay: -19s; }
+.wl-motes span:nth-child(4) { left: 73%; bottom: 9%; animation-duration: 31s; animation-delay: -7s; width: 4px; height: 4px; }
+.wl-motes span:nth-child(5) { left: 88%; bottom: 15%; animation-duration: 29s; animation-delay: -23s; width: 2px; height: 2px; }
+
+@keyframes wl-mote {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  12% { opacity: .65; }
+  70% { opacity: .35; }
+  100% { transform: translate3d(-26px, -40vh, 0); opacity: 0; }
+}
+
+/* The plate is framed the way a print is: one hairline inset from the edge of
+ * the sheet, in the same cream as the type. It is what tells the eye this is a
+ * plate on a page rather than a photograph used as a background. */
+.wl-hero::before {
+  content: "";
+  position: absolute;
+  inset: clamp(12px, 1.6vw, 24px);
+  z-index: 3;
+  border: 1px solid rgba(247, 239, 221, .22);
+  pointer-events: none;
+}
+
+/* The scrim. The painting is warm and busy at the edges, so the left column
+ * gets a wash of ink before any type is set on it — the same thing a painter
+ * does to leave room for a caption. Legibility first: the text sits where the
+ * wash is darkest. */
+.wl-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(100deg, rgba(11, 9, 7, .93) 0%, rgba(11, 9, 7, .82) 30%, rgba(11, 9, 7, .46) 62%, rgba(11, 9, 7, .2) 100%),
+    linear-gradient(180deg, rgba(11, 9, 7, .55) 0%, rgba(11, 9, 7, 0) 30%, rgba(11, 9, 7, .58) 100%);
+  pointer-events: none;
 }
 
 @supports (min-height: 100svh) {
@@ -186,6 +317,45 @@ img { display: block; }
 }
 
 .wl-hero-copy { position: relative; z-index: 2; min-width: 0; }
+
+/* An ensō, brushed once behind the plate. Decorative, so it is `aria-hidden`
+ * in the markup and drawn in the page's own cream at low opacity. */
+.wl-enso {
+  position: absolute;
+  top: 4%;
+  right: -6%;
+  z-index: 2;
+  width: clamp(220px, 30vw, 430px);
+  height: auto;
+  color: rgba(247, 239, 221, .18);
+  pointer-events: none;
+  animation: wl-enso-in 1.6s var(--wl-ease) .1s both;
+}
+.wl-enso path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 9;
+}
+.wl-enso path:nth-child(2) { stroke-width: 4; opacity: .8; }
+.wl-enso path:nth-child(3) { stroke-width: 3; opacity: .6; }
+
+@keyframes wl-enso-in {
+  from { opacity: 0; transform: rotate(-14deg) scale(.94); }
+  to { opacity: 1; transform: rotate(0) scale(1); }
+}
+
+/* The brush stroke under the title: a real sweep, ragged at the edges, drawn on
+ * like a hand moving from left to right. */
+.wl-stroke {
+  display: block;
+  width: clamp(170px, 26vw, 340px);
+  height: auto;
+  margin: 22px 0 0;
+  color: var(--wl-paper);
+  animation: wl-brush-draw 1.1s cubic-bezier(.4, .1, .2, 1) 1.05s both;
+}
+.wl-stroke path { fill: currentColor; }
 
 .wl-title {
   margin: 0 0 28px;
@@ -205,7 +375,7 @@ img { display: block; }
 @supports ((-webkit-text-stroke: 1px #fff)) {
   .wl-title-outline {
     color: transparent;
-    -webkit-text-stroke: 1.4px #efefef;
+    -webkit-text-stroke: 1.4px var(--wl-ink);
     text-shadow: none;
   }
 }
@@ -245,10 +415,10 @@ img { display: block; }
   letter-spacing: -.005em;
   transition: background .16s ease, color .16s ease, border-color .16s ease;
 }
-.wl-button-solid { background: #f7f7f7; color: #000000; }
+.wl-button-solid { background: var(--wl-paper-hi); color: var(--wl-paper-ink); }
 .wl-button-solid:hover { background: #ffffff; }
-.wl-button-ghost { border-color: #3d3d3d; color: #f7f7f7; }
-.wl-button-ghost:hover { background: #f7f7f7; color: #000000; border-color: #f7f7f7; }
+.wl-button-ghost { border-color: var(--wl-quiet); color: var(--wl-ink); }
+.wl-button-ghost:hover { background: var(--wl-paper-hi); color: var(--wl-paper-ink); border-color: var(--wl-paper-hi); }
 
 /* The cost of the thing, said once, in a sentence rather than four stat cells. */
 .wl-cost {
@@ -296,21 +466,42 @@ img { display: block; }
 }
 
 @keyframes wl-turn {
-  from { opacity: 0; transform: translateX(46px) rotateY(-9deg); }
-  to { opacity: 1; transform: translateX(0) rotateY(0deg); }
+  from { opacity: 0; transform: translateX(46px) rotateY(-11deg) rotate(-2.4deg); }
+  to { opacity: 1; transform: translateX(0) rotateY(0deg) rotate(-1.1deg); }
 }
 
 /* ------------------------------------------------------------------ */
 /* The specimen: one cited answer, presented as a plate                */
 /* ------------------------------------------------------------------ */
 
+/* A page of paper, not a card.
+ *
+ * Cream stock, ink type, a hairline where the fold would be, and a vermilion
+ * seal stamped in the corner. The paper sits a degree off square on the table,
+ * because nothing laid on a desk is ever square, and it casts a soft neutral
+ * shadow on the wood — the one place on this page where depth is light rather
+ * than a line, because the page is physically on the painting. */
 .wl-specimen {
   position: relative;
   z-index: 2;
   margin: 0;
-  border: 1px solid var(--wl-line);
-  background: var(--wl-panel);
-  transform-style: preserve-3d;
+  border: 1px solid var(--wl-line-paper);
+  background: var(--wl-paper-hi);
+  color: var(--wl-paper-ink);
+  filter: drop-shadow(0 22px 40px rgba(0, 0, 0, .45));
+}
+
+/* The gutter: a soft crease down the middle of the page. */
+.wl-specimen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 26px;
+  margin-left: -13px;
+  background: linear-gradient(90deg, transparent, rgba(32, 28, 21, .07), transparent);
+  pointer-events: none;
 }
 
 /* The binding: one hairline down the left edge of the plate that draws itself
@@ -322,7 +513,7 @@ img { display: block; }
   bottom: 0;
   left: -1px;
   width: 1px;
-  background: #4a4a4a;
+  background: var(--wl-ochre);
   transform-origin: top;
   animation: wl-bind .8s var(--wl-ease) 1.15s both;
 }
@@ -339,17 +530,17 @@ img { display: block; }
   gap: 12px;
   margin: 0;
   padding: 14px 16px;
-  border-bottom: 1px solid var(--wl-line);
+  border-bottom: 1px solid var(--wl-line-paper-soft);
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--wl-soft);
+  color: var(--wl-paper-ink-soft);
 }
 .wl-badge {
   font-family: var(--wl-mono);
   font-size: 11px;
   font-weight: 400;
   letter-spacing: .04em;
-  color: var(--wl-quiet);
+  color: var(--wl-paper-ink-quiet);
 }
 
 .wl-turns {
@@ -358,12 +549,12 @@ img { display: block; }
   margin: 0;
   padding: 0;
   list-style: none;
-  background: var(--wl-line-soft);
+  background: var(--wl-turns-gap);
 }
 
 .wl-turn {
   padding: 17px 16px 19px;
-  background: var(--wl-panel);
+  background: var(--wl-paper-hi);
   animation: wl-turn-in .6s var(--wl-ease) both;
 }
 .wl-turn-1 { animation-delay: .7s; }
@@ -380,7 +571,7 @@ img { display: block; }
   margin: 5px 0 0;
   font-size: 14.5px;
   line-height: 1.6;
-  color: #e8e8e8;
+  color: var(--wl-paper-ink);
   overflow-wrap: anywhere;
 }
 
@@ -390,25 +581,25 @@ img { display: block; }
   font-size: 12px;
   font-weight: 650;
   letter-spacing: .01em;
-  color: var(--wl-quiet);
+  color: var(--wl-paper-ink-quiet);
 }
-.wl-turn-2 .wl-who, .wl-turn-4 .wl-who { color: #ffffff; }
+.wl-turn-2 .wl-who, .wl-turn-4 .wl-who { color: var(--wl-vermilion); }
 
 .wl-cite {
   display: inline-block;
   margin-top: 11px;
   padding: 5px 9px;
-  border: 1px solid #333333;
+  border: 1px solid var(--wl-line-paper);
   font-size: 12.5px;
-  color: #dedede;
+  color: var(--wl-paper-ink-soft);
 }
 
 .wl-chip {
   display: inline-block;
   margin-top: 9px;
   padding: 5px 9px;
-  background: #ededed;
-  color: #000000;
+  background: var(--wl-paper-deep);
+  color: var(--wl-paper-ink-soft);
   font-size: 12px;
   font-weight: 600;
 }
@@ -416,10 +607,83 @@ img { display: block; }
 .wl-specimen-foot {
   margin: 0;
   padding: 14px 16px 15px;
-  border-top: 1px solid var(--wl-line);
+  border-top: 1px solid var(--wl-line-paper-soft);
   font-size: 12.5px;
   line-height: 1.65;
-  color: var(--wl-quiet);
+  color: var(--wl-paper-ink-quiet);
+}
+
+/* The seal: vermilion, one per plate, pressed into the painting's paper. It
+ * stamps itself as the plate arrives, so the page is signed after it is painted
+ * rather than at the same instant. */
+.wl-seal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1;
+  width: clamp(38px, 4vw, 54px);
+  height: auto;
+  color: var(--wl-vermilion);
+  opacity: .92;
+  transform: rotate(-2deg);
+  transform-origin: 60% 60%;
+}
+
+@supports (animation-timeline: view()) {
+  .wl-seal {
+    animation: wl-seal linear both;
+    animation-timeline: view();
+    animation-range: entry 46% entry 72%;
+  }
+}
+.wl-seal rect { fill: currentColor; }
+.wl-seal path { fill: none; stroke: var(--wl-paper-hi); stroke-width: 3; stroke-linecap: square; }
+
+@keyframes wl-seal {
+  from { opacity: 0; transform: scale(1.45) rotate(-8deg); }
+  to { opacity: .92; transform: scale(1) rotate(-2deg); }
+}
+
+/* ------------------------------------------------------------------ */
+/* The band, and the paper the second half of the page is printed on    */
+/* ------------------------------------------------------------------ */
+
+/* A real brush stroke, scanned as a plate, carrying the eye from the painted
+ * dark into daylight. The image is the transition, so nothing has to fade. */
+.wl-band {
+  height: clamp(96px, 13vw, 188px);
+  border-bottom: 1px solid var(--wl-line-paper-soft);
+  background: var(--wl-paper) url('./assets/paint/brush-band.webp') center 46% / cover no-repeat;
+}
+
+/* Paper sections are the same components printed on stock instead of on black:
+ * every child reads its colour from these five tokens, so no selector below has
+ * to know it is on paper. Ink is warm near-black; the quiet grey is 6.4:1. */
+.wl-paper {
+  --wl-ink: #201c15;
+  --wl-soft: #3d362a;
+  --wl-quiet: #5c5343;
+  --wl-line: var(--wl-line-paper);
+  --wl-line-soft: #ddcfae;
+  --wl-panel: var(--wl-paper-panel);
+  background: var(--wl-paper);
+  color: var(--wl-ink);
+}
+
+/* The lantern room the page closes in. The plate sits behind a wash of ink so
+ * the closing line stays readable; the wash is the same trick as the hero. */
+.wl-night {
+  position: relative;
+  background: var(--wl-bg) url('./assets/paint/paper-night.webp') center 40% / cover no-repeat;
+}
+.wl-night > * { position: relative; z-index: 1; }
+.wl-night::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(180deg, rgba(11, 9, 7, .72) 0%, rgba(11, 9, 7, .34) 40%, rgba(11, 9, 7, .86) 100%);
+  pointer-events: none;
 }
 
 /* ------------------------------------------------------------------ */
@@ -432,7 +696,7 @@ img { display: block; }
 
 .wl-langs-board {
   border-bottom: 1px solid var(--wl-line);
-  background: var(--wl-bg);
+  background: var(--wl-paper);
 }
 
 .wl-langs-title {
@@ -461,11 +725,13 @@ img { display: block; }
   align-items: center;
   min-height: 54px;
   padding: 0 18px;
-  background: var(--wl-bg);
+  background: var(--wl-paper-hi);
   font-size: 15px;
   color: var(--wl-soft);
   letter-spacing: 0.01em;
+  transition: background .18s ease, color .18s ease;
 }
+.wl-langs li:hover { background: var(--wl-paper-deep); color: var(--wl-paper-ink); }
 
 @media (max-width: 560px) {
   .wl-langs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -593,7 +859,7 @@ img { display: block; }
   display: block;
   width: 100%;
   height: auto;
-  color: #c9c9c9;
+  color: var(--wl-quiet);
 }
 
 .wl-ink path {
@@ -609,8 +875,8 @@ img { display: block; }
 .wl-ink-line-1 { stroke-width: 1; opacity: .8; }
 .wl-ink-line-2 { stroke-width: 1; opacity: .66; }
 .wl-ink-line-3 { stroke-width: 1; opacity: .5; }
-.wl-ink-cited { stroke-width: 2.5; stroke: #f7f7f7; }
-.wl-ink-bracket { stroke-width: 1.5; stroke: #f7f7f7; }
+.wl-ink-cited { stroke-width: 2.5; stroke: var(--wl-ink); }
+.wl-ink-bracket { stroke-width: 1.5; stroke: var(--wl-ink); }
 .wl-ink-hatch { stroke-width: .9; opacity: .55; }
 
 /* `pathLength="1"` on every path in the markup normalises them to a length of
@@ -667,6 +933,108 @@ img { display: block; }
 /* Section headings                                                    */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/* The painted plate: the open book, with a caption beside it           */
+/* ------------------------------------------------------------------ */
+
+.wl-plate-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, .6fr);
+  gap: clamp(24px, 4vw, 64px);
+  align-items: center;
+  padding: clamp(48px, 7vh, 92px) var(--wl-pad);
+  border-bottom: 1px solid var(--wl-line);
+  background: var(--wl-bg);
+}
+
+.wl-paint-plate {
+  position: relative;
+  margin: 0;
+  border: 1px solid var(--wl-line);
+  overflow: hidden;
+}
+
+.wl-paint {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The wash: the painting arrives the way paint does, from the left, driven by
+ * the reader's own scroll. In a browser without scroll timelines it is simply
+ * there — no flash of empty frame. */
+@supports (animation-timeline: view()) {
+  .wl-paint {
+    animation: wl-wash linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 34%;
+  }
+}
+
+@keyframes wl-wash {
+  from { clip-path: inset(0 0 0 100%); filter: saturate(.55) brightness(.8); }
+  to { clip-path: inset(0 0 0 0); filter: saturate(1) brightness(1); }
+}
+
+.wl-paint-note {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--wl-quiet);
+}
+
+.wl-plate-copy { min-width: 0; }
+.wl-plate-copy h2 {
+  margin: 0 0 18px;
+  font-family: var(--wl-display);
+  font-weight: 500;
+  font-size: clamp(30px, 4.2vw, 56px);
+  line-height: .95;
+  letter-spacing: -.045em;
+  text-transform: uppercase;
+}
+.wl-plate-copy p:last-child {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: var(--wl-soft);
+}
+
+@media (max-width: 860px) {
+  .wl-plate-band { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ------------------------------------------------------------------ */
+/* The brush under a section heading                                    */
+/* ------------------------------------------------------------------ */
+
+/* One sweep, in the section's own ink: ochre on black, vermilion on paper. It
+ * draws from the left as the heading comes up, and stops. */
+.wl-brush {
+  display: block;
+  width: clamp(130px, 17vw, 240px);
+  height: auto;
+  margin: 16px 0 0;
+  color: var(--wl-ochre);
+}
+.wl-brush path { fill: currentColor; }
+
+.wl-paper .wl-brush { color: var(--wl-vermilion); }
+
+@supports (animation-timeline: view()) {
+  .wl-brush {
+    animation: wl-brush-draw linear both;
+    animation-timeline: view();
+    animation-range: entry 12% entry 46%;
+  }
+}
+
+@keyframes wl-brush-draw {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
 .wl-screens, .wl-proof, .wl-how, .wl-writing {
   padding: clamp(60px, 9vh, 112px) var(--wl-pad);
   border-bottom: 1px solid var(--wl-line);
@@ -719,7 +1087,7 @@ img { display: block; }
 .wl-cell-article { grid-template-columns: 66px minmax(0, 1.25fr) minmax(0, 1.2fr); }
 
 .wl-cell:last-child { border-bottom: 0; }
-.wl-cell:hover, .wl-cell:focus-visible { background: #f2f2f2; color: #000000; }
+.wl-cell:hover, .wl-cell:focus-visible { background: var(--wl-invert-bg); color: var(--wl-invert-ink); }
 
 .wl-index {
   font-family: var(--wl-mono);
@@ -727,7 +1095,7 @@ img { display: block; }
   letter-spacing: .06em;
   color: var(--wl-quiet);
 }
-.wl-cell:hover .wl-index { color: #6d6d6d; }
+.wl-cell:hover .wl-index { color: var(--wl-invert-ink); opacity: .62; }
 
 .wl-cell-title {
   font-family: var(--wl-display);
@@ -741,7 +1109,7 @@ img { display: block; }
   text-underline-offset: 5px;
 }
 .wl-cell-body { max-width: 62ch; font-size: 14px; line-height: 1.65; color: var(--wl-soft); }
-.wl-cell:hover .wl-cell-body { color: #2b2b2b; }
+.wl-cell:hover .wl-cell-body { color: var(--wl-invert-ink); opacity: .82; }
 
 /* ------------------------------------------------------------------ */
 /* Numbers                                                             */
@@ -785,11 +1153,15 @@ img { display: block; }
   font-family: var(--wl-display);
   font-size: clamp(19px, 2vw, 25px);
   letter-spacing: -.03em;
-  border-bottom: 1px solid #4a4a4a;
+  border-bottom: 1px solid var(--wl-ochre);
   padding-bottom: 6px;
   transition: border-color .16s ease, color .16s ease;
 }
-.wl-number-link a:hover { border-color: #ffffff; color: #ffffff; }
+.wl-number-link a:hover {
+  background: var(--wl-vermilion);
+  border-color: var(--wl-vermilion);
+  color: var(--wl-paper-hi);
+}
 
 .wl-proof-note {
   max-width: 68ch;
@@ -884,13 +1256,13 @@ img { display: block; }
   line-height: 1.66;
   color: var(--wl-quiet);
 }
-.wl-foot-fine { max-width: 44ch; margin-top: 16px !important; color: #8a8a8a !important; }
+.wl-foot-fine { max-width: 44ch; margin-top: 16px !important; color: var(--wl-quiet) !important; }
 
 .wl-foot-nav { display: flex; flex-wrap: wrap; gap: 10px 20px; }
 .wl-foot-nav a {
   font-size: 13px;
   font-weight: 600;
-  color: #d6d6d6;
+  color: var(--wl-soft);
   border-bottom: 1px solid transparent;
 }
 .wl-foot-nav a:hover { color: #ffffff; border-bottom-color: #ffffff; }
@@ -923,7 +1295,7 @@ img { display: block; }
   letter-spacing: .06em;
   color: var(--wl-quiet);
 }
-.wl-foot-stamp em { font-style: normal; color: #8a8a8a; }
+.wl-foot-stamp em { font-style: normal; color: var(--wl-quiet); }
 
 /* ------------------------------------------------------------------ */
 /* Narrow screens                                                      */
@@ -1003,6 +1375,23 @@ img { display: block; }
   .wl-ink-line-2 { opacity: .66 !important; }
   .wl-ink-line-3 { opacity: .5 !important; }
   .wl-ink-hatch { opacity: .55 !important; }
+  /* Everything the painted edition moves: the room drifting, the mist crossing
+     it, the dust, the ensō, the two brush strokes, the seal landing and the wash
+     over the plate. All of it is decoration and all of it stops. Nothing that
+     carries words was ever in this list, which is the rule the whole motion
+     budget is built on. */
+  .wl-hero-paint, .wl-hero-mist, .wl-enso, .wl-stroke, .wl-seal,
+  .wl-brush, .wl-paint {
+    animation: none !important;
+    transform: none !important;
+    clip-path: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+  .wl-hero-paint { animation: none !important; transform: scale(1.04) !important; }
+  .wl-seal { opacity: .9 !important; transform: rotate(-2deg) !important; }
+  .wl-motes span { animation: none !important; }
+  .wl-motes { display: none !important; }
   /* The scroll indicator is decoration, so a reader who dislikes motion loses
      nothing by it going away entirely rather than sliding under their thumb. */
   .wl-progress { animation: none !important; transform: none !important; display: none !important; }

@@ -202,23 +202,45 @@ test("the hero moves as an object, not as four things fading up", () => {
 test("motion can be switched off, and nothing is stuck invisible when it is", () => {
   const reduced = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
   assert.ok(reduced, "there is a reduced-motion block");
-  // The marquee drift and the bobbing arrow went with the marquee. What is left
-  // is one movement per element and nothing that loops.
-  for (const animation of ["wl-ink-in", "wl-print", "wl-settle", "wl-turn", "wl-bind", "wl-draw", "wl-turn-in"]) {
-    assert.ok(css.includes(`@keyframes ${animation}`), `${animation} is defined`);
+
+  // 2.31.0 changed this law on purpose, at the user's request: the page is a
+  // painted book, and a painted room is allowed to breathe — the plate drifts,
+  // the mist crosses it, dust rises. What did not change is who is allowed to
+  // loop. Only these three decorative layers may, none of them carries a word,
+  // and every one of them is switched off below. Type still never moves on its
+  // own: an entrance is an entrance and finishes.
+  const AMBIENT = [".wl-hero-paint", ".wl-hero-mist", ".wl-motes span"];
+  const loops = new Set();
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const rule of withoutComments.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const body = rule[2];
+    if (!/animation[^;]*\binfinite\b/.test(body)) continue;
+    if (rule[1].includes("prefers-reduced-motion")) continue;
+    for (const selector of rule[1].split(",")) loops.add(selector.trim());
   }
-  assert.doesNotMatch(css, /animation-iteration-count:\s*infinite|animation:\s*[^;]*\binfinite\b/, "nothing loops on its own");
-  for (const gone of ["wl-drift", "wl-bob", "wl-marquee-track"]) {
-    assert.ok(!css.includes(gone), `${gone} is gone, not merely switched off`);
+  assert.ok(loops.size >= 2, `the painted layers do loop (${[...loops].join(", ")})`);
+  assert.deepEqual(
+    [...loops].filter((selector) => !AMBIENT.includes(selector)),
+    [],
+    "nothing outside the ambient decoration loops",
+  );
+  for (const selector of AMBIENT) {
+    assert.ok(reduced.includes(selector), `${selector} loops, so the reduced block must stop it`);
   }
   assert.match(reduced, /animation: none !important;/);
   assert.match(reduced, /opacity: 1 !important;/);
-  // Every element that starts hidden through `animation-fill-mode: both` has to be
-  // restored in the reduced-motion block, or a reader who dislikes motion is left
-  // with a blank hero. Read the list out of the stylesheet rather than keeping a
-  // second copy of it here: a selector added above cannot be forgotten below.
+
+  // Every animation a rule names has to exist, or the page silently does nothing.
+  for (const [, name] of css.matchAll(/animation:\s*([a-z-]+)/g)) {
+    if (name === "none") continue;
+    assert.ok(css.includes(`@keyframes ${name}`), `${name} is defined`);
+  }
+
+  // The entrances must not be the only motion left when the ambient layers are
+  // off: each element that starts hidden through `animation-fill-mode: both` is
+  // restored by the reduced block, which is read out of the stylesheet rather
+  // than kept as a second copy here.
   const animated = [];
-  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, "");
   for (const rule of withoutComments.matchAll(/([^{}]+)\{([^{}]*animation:[^{}]*\bboth\b[^{}]*)\}/g)) {
     if (rule[1].includes("prefers-reduced-motion")) continue;
     for (const selector of rule[1].split(",")) {
@@ -226,10 +248,17 @@ test("motion can be switched off, and nothing is stuck invisible when it is", ()
       if (name && !animated.includes(name)) animated.push(name);
     }
   }
-  assert.ok(animated.length >= 3, `the entrances are found (${animated.length})`);
+  assert.ok(animated.length >= 8, `the movements are found (${animated.length})`);
   for (const selector of animated) {
     assert.ok(reduced.includes(selector), `${selector} starts hidden, so it must be restored`);
   }
+
+  // Motion that only a modern browser can drive is a bonus, never the way the
+  // content arrives: every scroll-driven reveal sits behind @supports.
+  const scrollDriven = [...css.matchAll(/animation-timeline:\s*(?:scroll|view)/g)].length;
+  assert.ok(scrollDriven >= 4, `the page uses the reader's scroll as its clock (${scrollDriven})`);
+  const supports = (css.match(/@supports \(animation-timeline:/g) || []).length;
+  assert.ok(supports >= 3, "each scroll-driven rule is inside a feature query");
 });
 
 test("the page speaks like a person, not like a template", () => {
@@ -256,7 +285,7 @@ test("the page speaks like a person, not like a template", () => {
   assert.ok(upper.length > 0, "the display voice is still set in caps");
   for (const selector of upper) {
     assert.ok(
-      /\.wl-(title|section-head h2|close-title)$/.test(selector),
+      /\.wl-(title|section-head h2|close-title|plate-copy h2)$/.test(selector),
       `${selector} is not a display headline, so it should not be set in caps`,
     );
   }
@@ -271,22 +300,47 @@ test("the page speaks like a person, not like a template", () => {
   }
 });
 
-test("the design stays black, grey and white, with square corners", () => {
-  const colours = [...new Set([...css.matchAll(/#([0-9a-f]{6})\b/gi)].map((match) => match[1].toLowerCase()))];
-  assert.ok(colours.length > 8, "the palette is real");
-  for (const hex of colours) {
-    const [r, g, b] = hex.match(/.{2}/g).map((pair) => parseInt(pair, 16));
-    assert.ok(r === g && g === b, `#${hex} is a grey, not a colour`);
+test("the palette is the paintings' palette, and nothing else", () => {
+  // This test used to forbid colour outright. From 2.31.0 the page is built on
+  // four painted plates, so colour is allowed — but only the pigments named once
+  // in `:root`, plus plain white and black. Every hex outside those definitions
+  // has to be a `var()`, which is what keeps a repaint from turning the page
+  // into a dozen slightly different creams.
+  const declared = [...css.matchAll(/(--wl-[a-z-]+):\s*(#[0-9a-f]{3,6});/gi)].map((m) => [m[1], m[2].toLowerCase()]);
+  const names = new Set(declared.map(([name]) => name));
+  const hexes = new Set(declared.map(([, hex]) => hex));
+  assert.ok(names.size >= 18, `the pigments are named (${names.size})`);
+  for (const pigment of ["--wl-vermilion", "--wl-ochre", "--wl-paper", "--wl-paper-ink", "--wl-bg", "--wl-moss"]) {
+    assert.ok(names.has(pigment), `${pigment} is one of them`);
   }
-  const rgba = [...css.matchAll(/rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g)];
-  for (const [, r, g, b] of rgba) {
-    assert.ok(r === g && g === b, `rgba(${r},${g},${b}) is a grey too`);
+  // A literal colour is only allowed where a pigment is being declared —
+  // `:root` for the palette, and the few blocks that print the page on paper and
+  // reassign the ink tokens. Anywhere else it has to be a `var()`.
+  const outside = css.replace(/(--wl-[a-z-]+):\s*#[0-9a-f]{3,6};/gi, "");
+  const strays = [...outside.matchAll(/#([0-9a-f]{3,6})\b/gi)]
+    .map((m) => m[0].toLowerCase())
+    .filter((hex) => !["#ffffff", "#000000", "#fff", "#000"].includes(hex) && !hexes.has(hex));
+  assert.deepEqual(strays, [], "a colour outside a pigment declaration has to be a token");
+
+  // Translucent washes (the scrims over a painting) may be a pigment at low
+  // opacity or a neutral black/cream; no other hue gets in.
+  const pigments = [...hexes].map((hex) => {
+    const full = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+    return [1, 3, 5].map((i) => parseInt(full.slice(i, i + 2), 16));
+  });
+  for (const [, r, g, b] of outside.matchAll(/rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g)) {
+    const rgb = [r, g, b].map(Number);
+    const neutral = Math.max(...rgb) - Math.min(...rgb) <= 6;
+    const named = pigments.some((pigment) => pigment.every((value, i) => Math.abs(value - rgb[i]) <= 3));
+    assert.ok(neutral || named, `rgba(${rgb.join(", ")}) is neither neutral nor a named pigment`);
   }
-  // Square, like the rest of the site. No rounded corners, no soft shadows.
+
+  // Square, like the rest of the site. No rounded corners, no box shadows: the
+  // one depth cue on the page is the drop shadow under the paper specimen, which
+  // is a page lying on a table rather than a card floating in a dashboard.
   assert.doesNotMatch(css, /border-radius:\s*(?!0)/, "no rounded corners");
-  assert.doesNotMatch(css, /box-shadow:/, "no shadows: the cards share borders instead");
-  // And the boxes stick together: the stack is one bordered block with cells
-  // divided by a single hairline, the way zero-vast stacks them.
+  assert.doesNotMatch(css, /box-shadow:/, "no shadows: depth is a line, except the paper");
+  assert.match(css, /filter: drop-shadow\(/, "the specimen is a page on a table");
   assert.match(css, /\.wl-stack \{ border: 1px solid var\(--wl-line\); \}/);
   assert.match(css, /\.wl-cell \{[\s\S]*?border-bottom: 1px solid var\(--wl-line\)/);
   assert.match(css, /\.wl-cell:last-child \{ border-bottom: 0; \}/);

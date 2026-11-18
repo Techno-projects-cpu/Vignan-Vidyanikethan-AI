@@ -248,13 +248,20 @@ test("the sitemap and the feed agree with the files", () => {
 });
 
 test("the reading page is designed, not default", () => {
-  // The same design language as the rest of the site: greys only, square, no
-  // shadows, and one measure for the text so a long line never runs 120
-  // characters across a laptop.
+  // The same design language as the rest of the site: square, no shadows, and
+  // one measure for the text so a long line never runs 120 characters across a
+  // laptop. The palette is neutral greys plus the five pigments the reading page
+  // shares with the landing page — the cross-check below is what keeps the two
+  // halves of the project from drifting apart one release at a time.
+  const shared = new Set(
+    [...landingCss.matchAll(/--wl-(?:bg|ink|soft|quiet|line):\s*(#[0-9a-f]{6});/gi)].map((match) =>
+      match[1].toLowerCase(),
+    ),
+  );
   const colours = [...new Set([...css.matchAll(/#([0-9a-f]{6})\b/gi)].map((match) => match[1].toLowerCase()))];
   for (const hex of colours) {
     const [r, g, b] = hex.match(/.{2}/g).map((pair) => parseInt(pair, 16));
-    assert.ok(r === g && g === b, `#${hex} is a colour, not a grey`);
+    assert.ok(r === g && g === b || shared.has(`#${hex}`), `#${hex} is a grey or a shared pigment`);
   }
   assert.doesNotMatch(css, /border-radius:\s*(?!0)/);
   assert.doesNotMatch(css, /box-shadow:/);
@@ -262,9 +269,16 @@ test("the reading page is designed, not default", () => {
   assert.match(css, /\.bl-body h2 \{[\s\S]*?grid-template-columns: 52px/, "numbered section headings, like the rest of the site");
   // The palette must be the landing page's palette, or the two halves of the
   // project drift apart one release at a time.
-  const tokens = (sheet) => Object.fromEntries(
-    [...sheet.matchAll(/--(?:wl|bl)-([a-z-]+):\s*(#[0-9a-f]{6});/gi)].map((match) => [match[1], match[2].toLowerCase()]),
-  );
+  // The first declaration wins: `:root` states the palette, and the paper
+  // sections later restate `--wl-ink` to print on cream. The blog matches the
+  // palette, not the page it is currently printed on.
+  const tokens = (sheet) => {
+    const found = {};
+    for (const [, key, hex] of sheet.matchAll(/--(?:wl|bl)-([a-z-]+):\s*(#[0-9a-f]{6});/gi)) {
+      if (!(key in found)) found[key] = hex.toLowerCase();
+    }
+    return found;
+  };
   const blog = tokens(css);
   const page = tokens(landingCss);
   for (const key of ["bg", "ink", "soft", "quiet", "line"]) {
