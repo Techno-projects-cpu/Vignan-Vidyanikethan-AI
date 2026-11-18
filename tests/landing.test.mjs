@@ -378,7 +378,7 @@ test("the palette is the paintings' palette, and nothing else", () => {
     assert.ok(neutral || named, `rgba(${rgb.join(", ")}) is neither neutral nor a named pigment`);
   }
 
-  // 2.36.0 changed the visual language on the user's instruction: the page is
+  // 2.37.0 changed the visual language on the user's instruction: the page is
   // daylight glass now, so corners are round and every sheet carries a rim. What
   // has not changed is the discipline behind it — a radius is one of five named
   // steps and a shadow is one of three named rims. The old page could be checked

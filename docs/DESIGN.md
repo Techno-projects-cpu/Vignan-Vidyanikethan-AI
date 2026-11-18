@@ -166,21 +166,39 @@ through the sheet, over the darkest pixel of each room:
 
 | room | ink | muted | accent | ink straight on the painting |
 | --- | --- | --- | --- | --- |
-| blush hall | 12.1:1 | 5.7:1 | 6.3:1 | 6.8:1 |
-| mint class | 10.4:1 | 4.9:1 | 5.4:1 | **1.9:1** |
-| sand desk | 10.8:1 | 5.1:1 | 5.7:1 | **2.8:1** |
+| blush hall | 12.2:1 | 5.8:1 | 5.7:1 | 6.8:1 |
+| mint class | 10.3:1 | 4.8:1 | 5.1:1 | **1.9:1** |
+| sand desk | 10.5:1 | 5.0:1 | 4.7:1 | **2.8:1** |
+
+Each room is its **own** painting, washed with **that painting's** measured colours
+(`assets/paint/<plate>.palette.json`), and accented with a colour taken from the
+same pigment. So choosing a room changes the light, the accent and the picture
+together — the first version only swapped the photograph behind the same pink
+wash, which looked like nothing happening.
+
+| room | plate | wash (the plate's own roles) | accent |
+| --- | --- | --- | --- |
+| Blush hall | `blush-hall` | `#fae2d5` `#faf1e6` `#a7d6cd` | `#17635a` |
+| Mint class | `mint-class` | `#c6eddf` `#d9b383` `#faf4d9` | `#6f4f22` |
+| Sand desk | `sand-desk` | `#f1e8da` `#dfc4a5` `#af9b84` | `#725729` |
+| Fields only | none | the theme's four pastels | `#075c56` |
+
+**Edge to edge, on every screen.** The plate is a fixed, full-viewport layer
+(`inset: -7%` for the drift's bleed, `min-height: 100dvh`), and every surface
+between it and the reader is transparent: `.app-shell`, `.workspace`, `.main`,
+`.view`, `.auth-gate`. That last list used to live inside the desktop media
+query, which is why a phone showed a cream box with the painting only in the
+margins. On a phone the plate is framed `center 34%` — the plate is 1280×714 and
+`cover` on a tall screen crops hard — and the drift is off.
 
 The last column is why the Ask hero and the numbered page head became sheets: on
 the mint wall, dark ink straight on the painting is 1.9:1. Nothing readable is
 allowed to sit on the page itself.
 
-Two decisions follow from those numbers:
-
-- **The accent moved from `#0b726b` to `#075c56`.** The old one cleared 4.5:1 over
-  a flat gradient (4.9:1) and managed only 3.96:1 over the mint painting. The
-  deeper teal clears 5.4:1 there and 7.85:1 for white text on a filled button.
-  The landing page keeps `#0b726b`, because it is a paper document on a flat
-  sheet, not glass over a photograph.
+The accent is per room, and every one of them clears the floor through the sheet
+as well as for white text on a filled button (6.75:1–7.85:1). The landing page
+keeps `#0b726b`: it is a paper document on a flat sheet, not glass over a
+photograph.
 - **`plain` still exists.** The four fields with no painting is one of the four
   choices in the room control, so the old look was kept rather than deleted.
 

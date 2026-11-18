@@ -92,17 +92,62 @@ export const GLASS_THEME = {
   glassColour: "#fffaf6",
 
   /**
-   * The room behind the glass: one of the project's own paintings, plus the four
-   * pastel fields washed over it at 30%. Chosen with the control in the glass kit
-   * and remembered per device. `plain` is the four fields with no painting —
-   * this theme as it was before the paintings were put behind it.
+   * The rooms behind the glass. One of the project's own paintings, plus the
+   * **painting's own three colours** washed over it at 30%, plus an accent taken
+   * from that painting. The fields are the plate's measured palette roles, so
+   * switching room changes the light in the room, not just the photograph: the
+   * blush hall washes pink and accents teal, the sand desk washes sand and
+   * accents brown, the mint class washes mint and accents tan.
+   *
+   * `plain` is the four-field version of this theme with no painting at all.
+   */
+  rooms: [
+    {
+      id: "blush-hall",
+      name: "Blush hall",
+      note: "pink plaster, one turquoise door",
+      fields: ["#fae2d5", "#faf1e6", "#a7d6cd"],
+      accent: "#17635a",
+    },
+    {
+      id: "mint-class",
+      name: "Mint class",
+      note: "a bright mint wall, warm beige desks",
+      fields: ["#c6eddf", "#d9b383", "#faf4d9"],
+      accent: "#6f4f22",
+    },
+    {
+      id: "sand-desk",
+      name: "Sand desk",
+      note: "warm sand paper, cream books",
+      fields: ["#f1e8da", "#dfc4a5", "#af9b84"],
+      accent: "#725729",
+    },
+    {
+      id: "plain",
+      name: "Fields only",
+      note: "no painting, four pastel fields",
+      fields: null,
+      accent: "#075c56",
+    },
+  ],
+  /**
+   * The veil between painting and glass, and the alpha the fields are washed on
+   * at. Both are measured, not chosen: `tools/backdrop-report.mjs` composites
+   * painting → fields → veil → sheet for every pixel of every room and keeps the
+   * worst, and the room's accent has to clear 4.5:1 through it.
    */
   room: {
     default: "blush-hall",
-    plates: ["blush-hall", "mint-class", "sand-desk"],
     veil: 0.36,
+    fieldAlpha: 0.3,
   },
 };
+
+/** One room by id, falling back to the default. */
+export function roomById(id) {
+  return GLASS_THEME.rooms.find((room) => room.id === id) || GLASS_THEME.rooms[0];
+}
 
 /** The tint as a CSS colour, from the same numbers the test measures. */
 export function glassTint(alpha = GLASS_THEME.glass) {

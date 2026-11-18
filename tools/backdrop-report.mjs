@@ -43,8 +43,8 @@ const PAINT = path.join(REPO, "assets", "paint");
 export const STACK = {
   /** `--tg-veil`: the warm wash that turns a photograph into a room. */
   veil: { hex: GLASS_THEME.bg, alpha: GLASS_THEME.room.veil },
-  /** The four fields, at the alpha the stylesheet paints them over the plate. */
-  fieldAlpha: 0.3,
+  /** The room's own colours, washed over its plate at this alpha. */
+  fieldAlpha: GLASS_THEME.room.fieldAlpha,
   /** The sheet (`--tg-tint`), which is the value the theme already exports. */
   sheetAlpha: GLASS_THEME.glass,
 };
@@ -60,14 +60,21 @@ function sample(file, width = 96, height = 54) {
 }
 
 const alpha8 = (alpha) => Math.round(alpha * 255).toString(16).padStart(2, "0");
-const fieldHexes = GLASS_THEME.aurora.map((field) => `${field.hex}${alpha8(STACK.fieldAlpha)}`);
 const veilHex = `${STACK.veil.hex.replace("#", "")}${alpha8(STACK.veil.alpha)}`;
 
-/** The four inks the theme promises, and the floor each one has to clear. */
+/** A room's fields: its own measured colours, or the theme's four for `plain`. */
+function fieldHexes(room) {
+  const hexes = room.fields || GLASS_THEME.aurora.map((field) => field.hex);
+  return hexes.map((hex) => `${hex}${alpha8(STACK.fieldAlpha)}`);
+}
+
+/**
+ * The inks the theme promises, and the floor each one has to clear. The accent is
+ * per room — it is taken from that room's painting — so it is added in `measure`.
+ */
 const INKS = [
   ["ink", GLASS_THEME.ink, 7],
   ["muted", GLASS_THEME.muted, 4.5],
-  ["accent", GLASS_THEME.accent, 4.5],
 ];
 
 /** The worst a painting pixel can be, once every translucent layer is over it. */
@@ -81,12 +88,14 @@ function worstOver(pixels, under) {
 }
 
 /** Paint the stack, then measure each ink against the result. */
-function measure(pixels) {
+function measure(pixels, room) {
   const measured = { withSheet: {}, raw: {}, field: {} };
-  for (const [name, ink] of INKS) {
+  const fields = fieldHexes(room);
+  const inks = [...INKS, ["accent", room.accent, 4.5]];
+  for (const [name, ink] of inks) {
     // (1) through the sheet: the way a card, a panel or the drawer is read.
     measured.withSheet[name] = worstOver(pixels, (pixel) => {
-      const worstField = fieldHexes
+      const worstField = fields
         .map((field) => composite(field, pixel))
         .sort((a, b) => luminance(a) - luminance(b))[0];
       const veil = composite(veilHex, worstField);
@@ -96,7 +105,7 @@ function measure(pixels) {
     measured.raw[name] = worstOver(pixels, (pixel) => contrast(ink, pixel));
     // (3) and over the fields with no sheet, for the caption under a picture.
     measured.field[name] = worstOver(pixels, (pixel) => {
-      const worstField = fieldHexes
+      const worstField = fields
         .map((field) => composite(field, pixel))
         .sort((a, b) => luminance(a) - luminance(b))[0];
       return contrast(ink, composite(veilHex, worstField));
@@ -105,26 +114,29 @@ function measure(pixels) {
   return measured;
 }
 
-/** Which plates the stylesheet paints behind the app. */
-const BACKDROPS = ["blush-hall", "mint-class", "sand-desk"];
+/** The rooms, from the theme itself, so the tool cannot measure a stale list. */
+const ROOMS = GLASS_THEME.rooms.filter((room) => room.fields);
 
 function run() {
   const check = process.argv.includes("--check");
-  const plates = existsSync(PAINT) ? BACKDROPS.filter((name) => existsSync(path.join(PAINT, `${name}.webp`))) : [];
+  const plates = existsSync(PAINT) ? ROOMS.filter((room) => existsSync(path.join(PAINT, `${room.id}.webp`))) : [];
   if (!plates.length) {
     console.error("No backdrop plates found. Expected assets/paint/{blush-hall,mint-class,sand-desk}.webp");
     process.exit(1);
   }
   const generated = [];
   let failed = 0;
-  for (const name of plates) {
+  for (const room of plates) {
+    const name = room.id;
     const pixels = sample(path.join(PAINT, `${name}.webp`));
-    const measured = measure(pixels);
+    const measured = measure(pixels, room);
     const report = {
       plate: name,
+      accent: room.accent,
+      fields: room.fields,
       stack: {
         veil: `${STACK.veil.hex}${alpha8(STACK.veil.alpha)}`,
-        fields: fieldHexes,
+        fields: fieldHexes(room),
         sheet: tintHex8(),
       },
       sheet: {
@@ -141,7 +153,7 @@ function run() {
     };
     const file = path.join(PAINT, `${name}.backdrop.json`);
     const text = `${JSON.stringify(report, null, 2)}\n`;
-    for (const [ink, , floor] of INKS) {
+    for (const [ink, , floor] of [...INKS, ["accent", room.accent, 4.5]]) {
       const value = report.sheet[ink];
       if (value < floor) {
         failed += 1;
