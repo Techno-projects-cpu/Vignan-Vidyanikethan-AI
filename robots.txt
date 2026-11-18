@@ -4,4 +4,4 @@ Disallow: /setup
 Allow: /
 Disallow: /api/
 
-Sitemap: https://vignanvidyanikethanai.onrender.com/sitemap.xml
+Sitemap: https://vignan-vidyanikethan-ai-1.onrender.com/sitemap.xml

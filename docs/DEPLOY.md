@@ -72,6 +72,20 @@ than the repository's default branch, and nothing about the code is wrong.
 branch left on the remote is a future deployment pointed at a dead end. (This
 session cannot delete them; the repository owner can, from the branches page.)
 
+## 2b. Moving the public address
+
+Render gives a new service a new hostname, and the repository has to follow it in one place or 26. Every absolute URL — canonical links, `og:url`, preview images, `sitemap.xml`, `blog/feed.xml`, `robots.txt`, `.well-known/security.txt`, the JSON-LD blocks, the README and `tools/check-deployed.mjs` — is rewritten by one command:
+
+```bash
+npm run set-origin -- https://your-service.onrender.com   # rewrite
+npm run set-origin -- https://your-service.onrender.com --dry-run   # look first
+npm run check                                              # prove it
+```
+
+The address itself lives in the canonical link in `index.html`, and `tests/origin.test.mjs` reads it from there rather than restating it. That test fails if any page, sitemap entry, feed item, structured-data block or documentation file names a different host for this project — so a half-finished move cannot be merged. Older hostnames such as `vignanvidyanikethanai.onrender.com` are rewritten; placeholders like `<your-service>.onrender.com` are not, because they are instructions, not addresses.
+
+After moving, re-verify the Google Search Console property against the new address (see the README) — a verification token is tied to the host it was issued for.
+
 ## 2. Create the Render web service
 
 1. Push this branch to GitHub.

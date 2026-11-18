@@ -3,7 +3,9 @@
  * Is the live site the site in this repository?
  *
  *   npm run deployed
- *   npm run deployed -- https://vignanvidyanikethanai.onrender.com
+ *   npm run deployed -- https://vignan-vidyanikethan-ai-1.onrender.com
+ *
+ * With no argument it checks the address in index.html's canonical link.
  *
  * This exists because of a specific, expensive afternoon: a host was pointed at
  * a pull-request branch, that branch stopped moving when the pull request was
@@ -23,9 +25,12 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { canonicalOrigin } from "../tests/canonical.mjs";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const DEFAULT_HOST = "https://vignanvidyanikethanai.onrender.com";
+// The address the site claims for itself, read from index.html. Restating it
+// here is how the checker ends up questioning a host nobody publishes to.
+const DEFAULT_HOST = canonicalOrigin(REPO);
 
 /** The version and cache name this checkout would deploy, read from the files. */
 export function localRelease(root = REPO) {
