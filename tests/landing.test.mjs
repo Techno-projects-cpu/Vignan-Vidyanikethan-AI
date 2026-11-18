@@ -21,6 +21,7 @@ import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { contrast } from "../js/colour.js";
+import { THEMES } from "../js/themes.js";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const read = (file) => readFileSync(`${root}/${file}`, "utf8");
@@ -31,6 +32,7 @@ const judge = read("judge.html");
 const index = read("index.html");
 const worker = read("sw.js");
 const server = read("serve.mjs");
+const PLATES_COUNT = JSON.parse(read("assets/paint/manifest.json")).plates.length;
 const body = page.slice(page.indexOf("<body"));
 const visible = body
   .replace(/<script[\s\S]*?<\/script>/g, " ")
@@ -432,4 +434,23 @@ test("the app links to the page, and the page links back", () => {
   const judgeLink = /<a href="\.\/judge\.html">Judge mode<\/a>/.test(page);
   assert.ok(judgeLink, "the page can be checked, not just admired");
   assert.match(judge, /welcome\.html/, "and the judge page can reach the landing page");
+});
+
+test("the page counts the looks and the paintings it actually ships", () => {
+  // The landing page is the claim sheet, and a claim sheet that miscounts the
+  // product is the first thing a judge catches. Every "N looks" and
+  // "N paintings" on the page is compared with the arrays the app is built from.
+  const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
+    "nineteen", "twenty", "twenty-one", "twenty-two", "twenty-three", "twenty-four"];
+  const word = (n) => WORDS[n];
+  const looks = [...page.matchAll(/>([A-Za-z-]+) looks\b/g)].map((match) => match[1].toLowerCase());
+  assert.ok(looks.length >= 1, "the page states how many looks there are");
+  for (const claim of looks) assert.equal(claim, word(THEMES.length), `the page says ${claim} looks; the app ships ${THEMES.length}`);
+  const paintings = [...page.matchAll(/([A-Za-z-]+) paintings\b/g)].map((match) => match[1].toLowerCase());
+  assert.ok(paintings.length >= 1, "and how many paintings");
+  for (const claim of paintings) assert.equal(claim, word(PLATES_COUNT), `the page says ${claim} paintings; the repository has ${PLATES_COUNT}`);
+  // A number the theme change made stale: the cheap mode no longer halves the
+  // blur, it removes it. The page has to describe the thing that shipped.
+  assert.doesNotMatch(page, /halves the blur/, "the cheap mode is described as it is");
 });
