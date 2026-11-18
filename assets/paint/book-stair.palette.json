@@ -2,47 +2,47 @@
   "plate": "book-stair",
   "roles": [
     {
-      "hex": "#17130d",
-      "weight": 67.3,
-      "chroma": 4,
+      "hex": "#17130c",
+      "weight": 67.1,
+      "chroma": 4.1,
       "lightness": 6.3
     },
     {
-      "hex": "#433323",
+      "hex": "#423424",
       "weight": 24.4,
-      "chroma": 13.4,
-      "lightness": 22.5
+      "chroma": 13.2,
+      "lightness": 22.4
     },
     {
-      "hex": "#97805c",
-      "weight": 8.3,
-      "chroma": 22,
-      "lightness": 53.7
+      "hex": "#917856",
+      "weight": 8.4,
+      "chroma": 21.8,
+      "lightness": 53.5
     }
   ],
   "balance": {
     "share": [
-      67.3,
+      67.2,
       24.4,
-      8.3
+      8.4
     ],
     "within": true,
     "accentLeads": true
   },
   "separation": {
-    "dominantSecondary": 13.3,
-    "secondaryAccent": 28.6,
-    "dominantAccent": 39.8
+    "dominantSecondary": 12.9,
+    "secondaryAccent": 25.4,
+    "dominantAccent": 37
   },
   "ink": {
     "light": "#ffffff",
     "dark": "#201c15",
-    "lightWorst": 3.78,
+    "lightWorst": 4.18,
     "darkWorst": 1.09
   },
   "safe": {
-    "forCream": 91.7,
-    "forInk": 8.3
+    "forCream": 91.6,
+    "forInk": 0
   },
   "measured": true
 }

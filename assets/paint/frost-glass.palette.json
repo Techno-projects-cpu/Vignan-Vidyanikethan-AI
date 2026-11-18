@@ -2,47 +2,47 @@
   "plate": "frost-glass",
   "roles": [
     {
-      "hex": "#676156",
-      "weight": 46.4,
-      "chroma": 7.4,
-      "lightness": 41.4
+      "hex": "#676155",
+      "weight": 46.8,
+      "chroma": 7.6,
+      "lightness": 41.6
     },
     {
-      "hex": "#474339",
-      "weight": 35.9,
-      "chroma": 6.9,
+      "hex": "#484439",
+      "weight": 35.8,
+      "chroma": 7.2,
       "lightness": 28.7
     },
     {
       "hex": "#8b8474",
-      "weight": 17.8,
-      "chroma": 9.3,
-      "lightness": 55.3
+      "weight": 17.4,
+      "chroma": 9.4,
+      "lightness": 55.6
     }
   ],
   "balance": {
     "share": [
-      46.4,
-      35.9,
-      17.8
+      46.8,
+      35.8,
+      17.4
     ],
     "within": false,
     "accentLeads": true
   },
   "separation": {
-    "dominantSecondary": 10.6,
-    "secondaryAccent": 24.3,
-    "dominantAccent": 14
+    "dominantSecondary": 10.3,
+    "secondaryAccent": 24,
+    "dominantAccent": 13.9
   },
   "ink": {
     "light": "#ffffff",
     "dark": "#0b0907",
     "lightWorst": 3.72,
-    "darkWorst": 2.02
+    "darkWorst": 2.05
   },
   "safe": {
-    "forCream": 82.2,
-    "forInk": 17.8
+    "forCream": 82.6,
+    "forInk": 17.4
   },
   "measured": true
 }

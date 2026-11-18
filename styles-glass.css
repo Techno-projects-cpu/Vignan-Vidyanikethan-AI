@@ -1,0 +1,414 @@
+/*
+ * Glass Morphism — the default appearance.
+ *
+ * Hand-written, unlike `styles-painted.css`, for one reason: a painted theme is
+ * generated from a painting, but glass is generated from light. There is no plate
+ * to measure, so there is nothing to generate — only four colour fields, one tint
+ * and the geometry of the sheets. The numbers in this file are the same numbers
+ * `js/theme-glass.js` exports, and `tests/glass.test.mjs` fails if they drift.
+ *
+ * How it is built, bottom to top:
+ *
+ *   1. the base            a deep teal-black, which is the 60% of the palette
+ *   2. the aurora          four large soft fields, drifting, the 30%
+ *   3. the scrim           a vignette so the corners of the screen stay quiet
+ *   4. the sheets          panels: tint + blur + a 1px lit edge
+ *   5. the specular        one band of light crossing a sheet on hover
+ *   6. the grain           1.5KB of SVG noise, so a frosted sheet has a tooth
+ *
+ * Everything that moves is a compositor transform on one layer. Nothing that
+ * carries words moves, and `prefers-reduced-motion` freezes the fields.
+ */
+
+/* ------------------------------------------------------------------ */
+/* 1. The tokens                                                       */
+/* ------------------------------------------------------------------ */
+
+html[data-style="glass"] body.premium-ui {
+  color-scheme: dark;
+  --p-bg: #071113;
+  --p-surface: #16282e;
+  --p-surface-2: #16282e;
+  --p-surface-3: #0b1a20;
+  --p-ink: #eef6f3;
+  --p-ink-2: #eef6f3;
+  --p-muted: #a7c4bf;
+  --p-line: rgba(238, 246, 243, .14);
+  --p-line-strong: rgba(238, 246, 243, .26);
+  /* Glass is the one style in the set where a corner is round: a square sheet of
+     glass is a window, and this is meant to read as a lens. */
+  --p-radius: 18px;
+  --brand: #5fd6b4;
+  --brand-2: #8ee7cd;
+  --brand-ink: #04110d;
+  --brand-soft: rgba(95, 214, 180, .16);
+  --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow: 0 28px 64px -30px rgba(0, 0, 0, .82);
+  --shadow-soft: 0 16px 40px -24px rgba(0, 0, 0, .7);
+
+  /* This theme's own scale, used by the rules below. */
+  --tg-base: #071113;
+  --tg-tint: rgba(22, 40, 46, .36);
+  --tg-tint-strong: rgba(22, 40, 46, .52);
+  --tg-edge: rgba(255, 255, 255, .16);
+  --tg-edge-lit: rgba(255, 255, 255, .34);
+  --tg-ink: #eef6f3;
+  --tg-muted: #a7c4bf;
+  --tg-mint: #5fd6b4;
+  --tg-amber: #d69648;
+  --tg-rose: #be5858;
+  --tg-blur: 26px;
+  --tg-saturate: 160%;
+  --tg-sheet: linear-gradient(158deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .028) 42%, rgba(255, 255, 255, 0) 68%);
+  --tg-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+
+  background-color: var(--tg-base);
+  color: var(--tg-ink);
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. The aurora behind everything                                     */
+/* ------------------------------------------------------------------ */
+
+html[data-style="glass"] body.premium-ui {
+  position: relative;
+  isolation: isolate;
+}
+
+html[data-style="glass"] body.premium-ui::before {
+  content: "";
+  position: fixed;
+  /* Bleed so the drift never exposes an edge. */
+  inset: -18%;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(42% 38% at 16% 24%, rgba(38, 138, 120, .58), transparent 70%),
+    radial-gradient(38% 34% at 84% 16%, rgba(214, 150, 72, .42), transparent 72%),
+    radial-gradient(46% 40% at 68% 92%, rgba(190, 88, 88, .36), transparent 74%),
+    radial-gradient(34% 36% at 12% 84%, rgba(120, 190, 200, .30), transparent 76%);
+  transform: translate3d(0, 0, 0) scale(1);
+  animation: tg-aurora 54s cubic-bezier(.45, .05, .55, .95) infinite alternate;
+  will-change: transform;
+}
+
+/* A slow second drift at a different speed: the fields never move as one plate,
+   which is what stops the background reading as a loop. */
+html[data-style="glass"] body.premium-ui::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(255, 255, 255, .07), transparent 60%),
+    radial-gradient(130% 110% at 50% 120%, rgba(0, 0, 0, .55), transparent 62%),
+    var(--tg-grain);
+  background-repeat: no-repeat, no-repeat, repeat;
+}
+
+@keyframes tg-aurora {
+  from { transform: translate3d(-1.5%, -1%, 0) scale(1.02) rotate(-.6deg); }
+  to   { transform: translate3d(2%, 1.5%, 0) scale(1.08) rotate(.8deg); }
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. The sheets                                                       */
+/* ------------------------------------------------------------------ */
+
+/* One list, so a new panel cannot be added to the app and forgotten here. Every
+   surface that holds content is a sheet; every sheet gets the same three layers
+   (lit top edge, tint, blur) plus the specular band below. */
+html[data-style="glass"] body.premium-ui .card,
+html[data-style="glass"] body.premium-ui .panel,
+html[data-style="glass"] body.premium-ui .command-panel,
+html[data-style="glass"] body.premium-ui .app-menu-panel,
+html[data-style="glass"] body.premium-ui .sheet-panel,
+html[data-style="glass"] body.premium-ui .exam-panel,
+html[data-style="glass"] body.premium-ui .friends-panel,
+html[data-style="glass"] body.premium-ui .play-panel,
+html[data-style="glass"] body.premium-ui .shortcuts-panel,
+html[data-style="glass"] body.premium-ui .auth-gate-panel,
+html[data-style="glass"] body.premium-ui .sidebar,
+html[data-style="glass"] body.premium-ui .composer {
+  position: relative;
+  border: 1px solid var(--tg-edge);
+  border-radius: var(--p-radius);
+  background-color: var(--tg-tint);
+  background-image: var(--tg-sheet);
+  -webkit-backdrop-filter: blur(var(--tg-blur)) saturate(var(--tg-saturate));
+  backdrop-filter: blur(var(--tg-blur)) saturate(var(--tg-saturate));
+  box-shadow:
+    inset 0 1px 0 var(--tg-edge-lit),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    var(--shadow);
+  transition: border-color 240ms var(--vn-ease, ease), box-shadow 260ms var(--vn-ease, ease), transform 260ms var(--vn-ease, ease);
+}
+
+/* The refraction edge: the left edge of a sheet catches the field behind it and
+   splits it, so a two-pixel gradient of mint into amber sits inside the border. */
+html[data-style="glass"] body.premium-ui .card::after,
+html[data-style="glass"] body.premium-ui .panel::after,
+html[data-style="glass"] body.premium-ui .command-panel::after,
+html[data-style="glass"] body.premium-ui .sidebar::after,
+html[data-style="glass"] body.premium-ui .composer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .16), transparent 18%, transparent 82%, rgba(255, 255, 255, .05));
+  mix-blend-mode: screen;
+}
+
+html[data-style="glass"] body.premium-ui .card:hover,
+html[data-style="glass"] body.premium-ui .panel:hover,
+html[data-style="glass"] body.premium-ui .card:focus-within,
+html[data-style="glass"] body.premium-ui .panel:focus-within {
+  border-color: rgba(95, 214, 180, .42);
+  box-shadow:
+    inset 0 1px 0 var(--tg-edge-lit),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    0 30px 70px -32px rgba(0, 0, 0, .85),
+    0 0 0 1px rgba(95, 214, 180, .12);
+}
+
+html[data-style="glass"] body.premium-ui .card > *,
+html[data-style="glass"] body.premium-ui .panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. The specular                                                     */
+/* ------------------------------------------------------------------ */
+
+/* One band of light crossing a sheet, once, on hover or keyboard focus. This is
+   the whole interaction language of the theme: glass reflects, it does not
+   bounce. It is a transform on a compositor layer, so it costs one animation. */
+html[data-style="glass"] body.premium-ui .card::before,
+html[data-style="glass"] body.premium-ui .panel::before {
+  content: "";
+  position: absolute;
+  inset: -40% -70%;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(112deg, transparent 40%, rgba(255, 255, 255, .16) 48%, rgba(255, 255, 255, .05) 54%, transparent 62%);
+  transform: translate3d(-72%, 0, 0);
+  transition: transform 960ms cubic-bezier(.22, .61, .36, 1);
+}
+
+html[data-style="glass"] body.premium-ui .card:hover::before,
+html[data-style="glass"] body.premium-ui .panel:hover::before,
+html[data-style="glass"] body.premium-ui .card:focus-within::before,
+html[data-style="glass"] body.premium-ui .panel:focus-within::before {
+  transform: translate3d(72%, 0, 0);
+}
+
+/* A slow sheen on the two largest sheets, so the interface is never completely
+   still even when the pointer is not moving. 18s, one band, very low contrast. */
+html[data-style="glass"] body.premium-ui .sidebar::before,
+html[data-style="glass"] body.premium-ui .composer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .07) 46%, transparent 62%);
+  background-size: 260% 100%;
+  animation: tg-sheen 18s linear infinite;
+}
+
+@keyframes tg-sheen {
+  from { background-position: 130% 0; }
+  to   { background-position: -60% 0; }
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. Controls                                                         */
+/* ------------------------------------------------------------------ */
+
+html[data-style="glass"] body.premium-ui .button,
+html[data-style="glass"] body.premium-ui .premium-button,
+html[data-style="glass"] body.premium-ui .chip,
+html[data-style="glass"] body.premium-ui .tabs button {
+  border: 1px solid var(--tg-edge);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .06);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22);
+  color: var(--tg-ink);
+  transition: transform 140ms var(--vn-ease, ease), background 180ms var(--vn-ease, ease), border-color 180ms var(--vn-ease, ease);
+}
+
+html[data-style="glass"] body.premium-ui .button:hover,
+html[data-style="glass"] body.premium-ui .premium-button:hover {
+  background: rgba(255, 255, 255, .11);
+  border-color: rgba(95, 214, 180, .4);
+}
+
+html[data-style="glass"] body.premium-ui .button:active,
+html[data-style="glass"] body.premium-ui .premium-button:active {
+  transform: translateY(1px) scale(.99);
+}
+
+/* The one filled thing on the screen is the action that means "send". */
+html[data-style="glass"] body.premium-ui .button-primary,
+html[data-style="glass"] body.premium-ui .premium-button.primary,
+html[data-style="glass"] body.premium-ui .send-button {
+  border-color: rgba(95, 214, 180, .55);
+  background: linear-gradient(180deg, #7ee4c6, #4bc9a5);
+  color: #04110d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 10px 26px -12px rgba(95, 214, 180, .6);
+}
+
+html[data-style="glass"] body.premium-ui .composer textarea,
+html[data-style="glass"] body.premium-ui input[type="text"],
+html[data-style="glass"] body.premium-ui input[type="search"],
+html[data-style="glass"] body.premium-ui input[type="password"] {
+  background: rgba(4, 17, 19, .34);
+  border: 1px solid var(--tg-edge);
+  border-radius: 14px;
+  color: var(--tg-ink);
+}
+
+html[data-style="glass"] body.premium-ui ::placeholder {
+  color: rgba(167, 196, 191, .78);
+}
+
+html[data-style="glass"] body.premium-ui :focus-visible {
+  outline: 2px solid var(--tg-mint);
+  outline-offset: 3px;
+}
+
+/* The scrollbar is a thin sheet of glass too; a grey system bar breaks the idea. */
+html[data-style="glass"] body.premium-ui * {
+  scrollbar-color: rgba(95, 214, 180, .5) transparent;
+  scrollbar-width: thin;
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. Ornaments: what makes the page look finished                     */
+/* ------------------------------------------------------------------ */
+
+/* The top bar is a strip of glass lying on the aurora. */
+html[data-style="glass"] body.premium-ui .premium-topbar,
+html[data-style="glass"] body.premium-ui .topbar {
+  background: rgba(7, 17, 19, .42);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+}
+
+/* Dividing rules are lit from the left, the way the fields are. */
+html[data-style="glass"] body.premium-ui hr,
+html[data-style="glass"] body.premium-ui .section-toolbar {
+  border-color: rgba(255, 255, 255, .12);
+}
+
+/* A single prism flare in the corner of the screen: three thin bands of the three
+   field colours, at low opacity, rotated. It is the only decoration that is not
+   attached to a control, and it is what stops the aurora reading as a blur. */
+html[data-style="glass"] body.premium-ui .app-shell::before {
+  content: "";
+  position: fixed;
+  top: -12vmax;
+  right: -12vmax;
+  width: 42vmax;
+  height: 42vmax;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  background: conic-gradient(from 210deg, rgba(95, 214, 180, .22), rgba(214, 150, 72, .16) 33%, rgba(190, 88, 88, .14) 62%, transparent 78%);
+  filter: blur(28px);
+  opacity: .9;
+  animation: tg-flare 68s linear infinite;
+}
+
+@keyframes tg-flare {
+  from { transform: rotate(0deg) scale(1); }
+  to   { transform: rotate(360deg) scale(1.06); }
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. Cheap mode, for the devices that need it                         */
+/* ------------------------------------------------------------------ */
+
+/* `data-lite` is set by js/app.js from the device itself: few cores, little
+ * memory, or a browser that says the connection is metered. Blur is the expensive
+ * part of this theme (it is a per-panel GPU pass), so it drops to 8px, the grain
+ * and the flare go, and nothing animates. The tint is raised so the sheets stay
+ * legible without the blur doing the work. */
+html[data-style="glass"][data-lite="1"] body.premium-ui {
+  --tg-blur: 8px;
+  --tg-tint: rgba(22, 40, 46, .62);
+  --tg-sheet: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .02));
+}
+
+html[data-lite="1"] body.premium-ui .card,
+html[data-lite="1"] body.premium-ui .panel,
+html[data-lite="1"] body.premium-ui .command-panel,
+html[data-lite="1"] body.premium-ui .sidebar,
+html[data-lite="1"] body.premium-ui .composer,
+html[data-lite="1"] body.premium-ui .button,
+html[data-lite="1"] body.premium-ui .premium-button {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+html[data-lite="1"] body.premium-ui::after {
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(255, 255, 255, .06), transparent 60%),
+    radial-gradient(130% 110% at 50% 120%, rgba(0, 0, 0, .5), transparent 62%);
+}
+
+html[data-lite="1"] .app-shell::before,
+html[data-lite="1"] .card::before,
+html[data-lite="1"] .panel::before,
+html[data-lite="1"] .sidebar::before,
+html[data-lite="1"] .composer::before {
+  animation: none;
+  display: none;
+}
+
+/* Belt and braces: a card's sweep is the one effect that costs a repaint on every
+   hover, so lite mode removes the pseudo-element outright rather than pausing it. */
+html[data-lite="1"] .card::before,
+html[data-lite="1"] .panel::before { display: none; }
+
+html[data-lite="1"][data-style="glass"] body.premium-ui::before,
+html[data-lite="1"] body.premium-ui::before {
+  animation: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. Motion, honestly                                                 */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-style="glass"] body.premium-ui::before,
+  html[data-style="glass"] body.premium-ui .app-shell::before,
+  html[data-style="glass"] body.premium-ui .sidebar::before,
+  html[data-style="glass"] body.premium-ui .composer::before {
+    animation: none;
+  }
+  html[data-style="glass"] body.premium-ui .card::before,
+  html[data-style="glass"] body.premium-ui .panel::before {
+    display: none;
+  }
+  html[data-style="glass"] body.premium-ui .card:hover,
+  html[data-style="glass"] body.premium-ui .panel:hover {
+    transform: none;
+  }
+}
+
+/* A phone has no spare GPU for a full-screen blur under a scrolling list. */
+@media (max-width: 640px) {
+  html[data-style="glass"] body.premium-ui {
+    --tg-blur: 14px;
+    --tg-tint: rgba(22, 40, 46, .5);
+  }
+}

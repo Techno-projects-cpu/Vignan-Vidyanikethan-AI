@@ -1,0 +1,48 @@
+{
+  "plate": "copper-desk",
+  "roles": [
+    {
+      "hex": "#f3e3c6",
+      "weight": 44.4,
+      "chroma": 15.8,
+      "lightness": 90.7
+    },
+    {
+      "hex": "#c98752",
+      "weight": 29.1,
+      "chroma": 44,
+      "lightness": 61.4
+    },
+    {
+      "hex": "#955a3b",
+      "weight": 26.6,
+      "chroma": 34.9,
+      "lightness": 42.9
+    }
+  ],
+  "balance": {
+    "share": [
+      44.4,
+      29.1,
+      26.6
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 25.6,
+    "secondaryAccent": 18.2,
+    "dominantAccent": 40.3
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.26,
+    "darkWorst": 3.6
+  },
+  "safe": {
+    "forCream": 26.6,
+    "forInk": 73.4
+  },
+  "measured": true
+}

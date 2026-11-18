@@ -2,47 +2,47 @@
   "plate": "dawn-desk",
   "roles": [
     {
-      "hex": "#f1e4c6",
-      "weight": 51.4,
-      "chroma": 15.9,
-      "lightness": 91.5
+      "hex": "#f3e6c8",
+      "weight": 51.2,
+      "chroma": 16,
+      "lightness": 91.6
     },
     {
-      "hex": "#bb996e",
-      "weight": 27.2,
-      "chroma": 27,
-      "lightness": 65.8
+      "hex": "#ba986e",
+      "weight": 27.3,
+      "chroma": 26.8,
+      "lightness": 66
     },
     {
-      "hex": "#714d31",
-      "weight": 21.4,
+      "hex": "#704e31",
+      "weight": 21.5,
       "chroma": 24.3,
-      "lightness": 36.3
+      "lightness": 36.4
     }
   ],
   "balance": {
     "share": [
-      51.4,
-      27.2,
-      21.4
+      51.2,
+      27.3,
+      21.5
     ],
     "within": false,
     "accentLeads": false
   },
   "separation": {
-    "dominantSecondary": 19.9,
-    "secondaryAccent": 29.8,
+    "dominantSecondary": 20.6,
+    "secondaryAccent": 29.1,
     "dominantAccent": 47.5
   },
   "ink": {
     "light": "#ffffff",
     "dark": "#0b0907",
-    "lightWorst": 1.26,
-    "darkWorst": 2.66
+    "lightWorst": 1.24,
+    "darkWorst": 2.67
   },
   "safe": {
-    "forCream": 21.4,
-    "forInk": 78.6
+    "forCream": 21.5,
+    "forInk": 78.5
   },
   "measured": true
 }

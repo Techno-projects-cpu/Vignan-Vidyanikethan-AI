@@ -158,6 +158,34 @@ prose. `js/colour.js` (compositing, CIEDE2000, circular hue, 60-30-10 balance) i
 the instrument, and `tests/colour.test.mjs` pins it to published reference values
 (including the Sharma/Wu/Dalal ΔE pairs) so the instrument itself is calibrated.
 
+### The glass round (2.33.0) — light instead of a painting
+
+The correction was precise: the paintings were good, but the *default* was still
+the one theme with no paint in it, and the images were too heavy for a low-end
+phone. So this round is about a look that can be a default, and about weight.
+
+- **Bangtutorial/bang-motion** — the rule that the background is never static is
+  what the aurora obeys: two layers drifting at 54s and 18s, at different speeds,
+  so the screen never reads as a loop. Its text-pocket luminance rule became the
+  36% tint: the thinnest sheet at which text still clears 7:1 over the brightest
+  field.
+- **Cloveric/claude-drawing-skill** — its "one light, three glazes" discipline was
+  reused for the six new plates, and its note that white objects are warm off-white
+  is why the new chalk and copper plates are cream and umber rather than grey.
+- **Alchaincyf/huashu-art-motion** — the style lock (one style, six pigments, no
+  people) is what lets eighteen paintings read as one book; the ban on blue-purple
+  is why the glass theme's four fields are emerald, amber, rose and cool teal, with
+  no violet anywhere.
+- **Alisa0808/vox-director** — storyboard discipline again: the mock screen on the
+  landing page is a finished frame drawn in CSS, and it is honest about being an
+  illustration.
+
+**What changed in the method:** the picture budget became a test. `node
+tools/optimise-paint.mjs` writes two widths and two formats per plate and records
+the bytes in `assets/paint/manifest.json`; the suite fails if the set grows past
+its budget, if a tile is not meaningfully smaller than its plate, or if a plate has
+no 640 variant. Weight is now something a commit can get wrong loudly.
+
 ## The skills the site itself carries
 
 Separately from the four above, the design work is checked by

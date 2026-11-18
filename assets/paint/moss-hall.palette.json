@@ -4,19 +4,19 @@
     {
       "hex": "#1a1e14",
       "weight": 74.2,
-      "chroma": 7.5,
-      "lightness": 10.6
+      "chroma": 7.7,
+      "lightness": 10.7
     },
     {
-      "hex": "#444c36",
+      "hex": "#464c33",
       "weight": 16.4,
-      "chroma": 14.9,
+      "chroma": 14.7,
       "lightness": 31.9
     },
     {
-      "hex": "#dee1d7",
+      "hex": "#e1e3db",
       "weight": 9.4,
-      "chroma": 4.9,
+      "chroma": 5.1,
       "lightness": 89.7
     }
   ],
@@ -30,14 +30,14 @@
     "accentLeads": false
   },
   "separation": {
-    "dominantSecondary": 15.1,
-    "secondaryAccent": 51.5,
-    "dominantAccent": 78.5
+    "dominantSecondary": 15.5,
+    "secondaryAccent": 52,
+    "dominantAccent": 79.4
   },
   "ink": {
     "light": "#ffffff",
     "dark": "#0b0907",
-    "lightWorst": 1.32,
+    "lightWorst": 1.3,
     "darkWorst": 1.17
   },
   "safe": {

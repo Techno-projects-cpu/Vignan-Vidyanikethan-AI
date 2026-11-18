@@ -175,14 +175,42 @@ test("the app switches the painted treatment on with one attribute", () => {
   assert.match(read("js/themes.js"), /\.\.\.PAINTED_THEMES\.map\(asTheme\)/, "one list, not two");
 });
 
+test("every painting is shipped small enough for a phone", () => {
+  // The gallery used to download a 1376px picture to paint a 280px box. The
+  // manifest is the contract: each plate has a canonical plate, a 640 tile in two
+  // formats, and a placeholder colour, all inside a budget that a test enforces.
+  const manifest = JSON.parse(readFileSync(new URL("../assets/paint/manifest.json", import.meta.url), "utf8"));
+  assert.ok(manifest.plates.length >= 18, `expected the full set, found ${manifest.plates.length}`);
+  for (const plate of manifest.plates) {
+    for (const variant of [`${plate.name}.webp`, `${plate.name}-640.webp`, `${plate.name}-640.avif`, `${plate.name}-1280.avif`]) {
+      assert.ok(existsSync(new URL(`../assets/paint/${variant}`, import.meta.url)), `${variant} exists`);
+    }
+    assert.match(plate.placeholder, /^#[0-9a-f]{6}$/i, `${plate.name} has a placeholder colour`);
+    assert.ok(plate.bytes.canonical <= manifest.budget.canonicalEach, `${plate.name} canonical is inside its budget`);
+    assert.ok(plate.bytes.tileAvif <= manifest.budget.tileEach, `${plate.name} tile is inside its budget`);
+    // A tile must be a fraction of the canonical, or nothing was gained.
+    assert.ok(plate.bytes.tileAvif < plate.bytes.canonical * 0.6, `${plate.name}: the tile is meaningfully smaller`);
+  }
+  assert.ok(manifest.totals.canonical <= manifest.budget.canonicalTotal, "the canonical set is inside the total budget");
+  assert.ok(manifest.totals.tileAvif <= manifest.budget.tileTotal, "the gallery's whole cost is inside its budget");
+  // Phones get AVIF and the 640 width, and neither is downloaded until it is seen.
+  const landing = readFileSync(new URL("../welcome.html", import.meta.url), "utf8");
+  assert.match(landing, /<source type="image\/avif"/);
+  assert.match(landing, /-640\.webp\?v=\d+ 640w/);
+  assert.match(landing, /loading="lazy" decoding="async"/);
+  assert.doesNotMatch(landing, /width="1600"/, "the old, wrong dimensions are gone");
+});
+
 test("no painting is shipped without a place on the site", () => {
   // Twelve plates were painted for this release. A plate that no page shows and no
   // theme uses is 100KB of the offline cache spent on nothing, and it is exactly
   // what happens when a set grows quickly. Every plate must be either a theme's
   // ground (through js/theme-paint.js) or hung as a framed picture on the landing
   // page; the accent plates are the framed ones, and they say so on the page.
+  // Only the canonical files: `-640` and `-1280` are the same painting at another
+  // size, not another painting.
   const plates = readdirSync(new URL("../assets/paint/", import.meta.url))
-    .filter((name) => name.endsWith(".webp"))
+    .filter((name) => name.endsWith(".webp") && !/-\d+\.webp$/.test(name))
     .map((name) => name.replace(/\.webp$/, ""));
   assert.ok(plates.length >= 12, `expected the twelve painted plates, found ${plates.length}`);
 
@@ -203,7 +231,7 @@ test("no painting is shipped without a place on the site", () => {
   assert.match(app, /style-preview\$\{theme\.painted \? " painted" : ""\}/);
   assert.match(app, /preview\.style\.backgroundImage/);
 
-  // The two roles the page describes: seven grounds, five pictures.
-  assert.equal((landing.match(/class="wl-room"/g) || []).length, 7, "seven rooms are shown");
-  assert.equal((landing.match(/class="wl-picture"/g) || []).length, 5, "five plates are framed");
+  // The page shows every theme (glass included) and frames the rest.
+  assert.equal((landing.match(/class="wl-room[ "]/g) || []).length, 8, "eight rooms are shown, glass among them");
+  assert.equal((landing.match(/class="wl-picture"/g) || []).length, 11, "eleven plates are framed");
 });

@@ -106,6 +106,63 @@ The app got the same opening and nothing more: a strip of the library fades into
 the first screen and leaves as soon as a conversation starts. A student opening
 the app to ask a question is not watching a film.
 
+## Glass Morphism, the default (2.33.0)
+
+Twelve paintings shipped and the app still looked the same on a school tablet,
+because the default was the one theme that is *not* painted. The correction was not
+to pick a painting as the default — it was to give the site a look that could be
+the default: **Glass Morphism**, which is made of light, not of a photograph.
+
+### Why it is built from gradients
+
+A glass interface needs something colourful behind it to be frosted *over*. That
+could have been a photograph, but a photograph is the one thing a low-end phone
+cannot afford on its first screen: 40-120KB before a single word is legible. The
+fields are painted by the browser instead — four `radial-gradient`s on one fixed
+layer, drifting with a compositor transform. The default screen makes **no image
+request at all**, and the whole theme is 9KB of CSS.
+
+### The numbers, and why they are numbers
+
+- **60%** the base, `#071113`; **30%** the four fields at 20–58%; **10%** the mint
+  accent, which only ever marks something live — the send button, the active tab.
+- **The tint is 36%.** Not a mood: it is the thinnest sheet at which the ink still
+  clears **7:1** composited over the *brightest* field (emerald at 58%), and the
+  accent still clears 4.5:1 there. `tests/glass.test.mjs` recomposites all four
+  fields and fails if a thinner sheet reads worse without saying so.
+- **Blur 26px, saturation 160%.** Saturation is what makes frosted glass read as
+  glass rather than as fog: it concentrates the colour behind it.
+
+### The four layers a sheet is made of
+
+1. the tint, at 36%;
+2. `backdrop-filter: blur(26px) saturate(160%)`, which is the glass itself;
+3. `inset 0 1px 0 rgba(255,255,255,.34)` — the lit top edge, the single line that
+   stops a translucent box reading as a flat rectangle;
+4. a specular band that crosses the sheet once on hover **or keyboard focus**, and
+   a slow 18s sheen on the sidebar and composer so the screen is never frozen.
+
+### The cheap mode is part of the design
+
+Blur is a per-panel GPU pass, and that is the whole cost of this theme. `data-lite`
+is set from the device (≤4 cores, ≤4GB, or a metered connection) and it halves the
+blur to 8px, raises the tint to 62% so the sheets stay legible without the blur
+carrying them, and stops every animation. A phone in Guntur gets the idea of glass
+without the bill for it.
+
+### The paintings stay, and they got faster
+
+Twenty-eight encodings of eighteen paintings: a canonical 1280px WebP for a
+full-bleed theme, a 640px AVIF/WebP pair for a gallery tile, and a placeholder
+colour per plate so a tile never flashes an empty box. AVIF is served first —
+roughly 40% smaller than WebP at the same quality — and the whole set is inside a
+measured budget, so "add a painting" cannot quietly make the site slower. The
+gallery went from downloading 1376px files to paint 280px boxes, to about 13KB per
+tile on a phone.
+
+**Minimal** is still a style, and so is **Legacy**; neither was removed. Glass is
+simply what a device that has never chosen now opens on.
+
 ## The painted edition, twelve plates (2.32.0)
 
 2.31.0 proved the idea with four plates. 2.32.0 makes it the system: **twelve**

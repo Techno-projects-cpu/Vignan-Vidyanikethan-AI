@@ -2,19 +2,19 @@
   "plate": "ember-rose",
   "roles": [
     {
-      "hex": "#261717",
+      "hex": "#251717",
       "weight": 73,
-      "chroma": 8,
-      "lightness": 9.5
+      "chroma": 7.9,
+      "lightness": 9.6
     },
     {
       "hex": "#8b5848",
-      "weight": 15.5,
-      "chroma": 22.6,
-      "lightness": 45.2
+      "weight": 15.4,
+      "chroma": 22.5,
+      "lightness": 45.3
     },
     {
-      "hex": "#eeebe7",
+      "hex": "#ebe8e4",
       "weight": 11.6,
       "chroma": 2.5,
       "lightness": 92.7
@@ -22,22 +22,22 @@
   ],
   "balance": {
     "share": [
-      72.9,
-      15.5,
+      73,
+      15.4,
       11.6
     ],
     "within": false,
     "accentLeads": false
   },
   "separation": {
-    "dominantSecondary": 27,
-    "secondaryAccent": 43.9,
-    "dominantAccent": 83.4
+    "dominantSecondary": 27.3,
+    "secondaryAccent": 43.4,
+    "dominantAccent": 82.8
   },
   "ink": {
     "light": "#ffffff",
     "dark": "#0b0907",
-    "lightWorst": 1.19,
+    "lightWorst": 1.22,
     "darkWorst": 1.15
   },
   "safe": {

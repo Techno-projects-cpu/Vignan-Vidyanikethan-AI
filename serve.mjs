@@ -78,6 +78,7 @@ const SEARCH_URL = env("SEARCH_URL");
 // Every style the app ships, including the seven painted rooms. A school may set
 // any of them; a value outside this list is ignored rather than trusted.
 const STYLE_IDS = [
+  "glass",
   "minimal", "soft", "editorial", "luxury", "terminal", "brutal",
   "legacy", "rain", "stair", "aurora", "ember", "moss", "indigo",
 ];
@@ -86,7 +87,7 @@ const SCHOOL_DEFAULT_STYLE = STYLE_IDS.includes(String(process.env.SCHOOL_DEFAUL
   // The school default is only a starting point for a device that has never
   // chosen, and it has to agree with the app's own default or a fresh tablet
   // paints one room and then restyles itself into another.
-  : "rain";
+  : "glass";
 const WIKIPEDIA_SEARCH = String(env("WIKIPEDIA_SEARCH", "true")).toLowerCase() !== "false";
 const searchCache = new Map();
 const searchRequestTimes = [];
@@ -1070,7 +1071,7 @@ function buildInfo() {
 function health() {
   return {
     ok: true,
-    version: "2.32.2",
+    version: "2.33.0",
     // `version` is what the code says; `build` is what the host says it built.
     // When those two disagree with the repository, the deploy target is wrong,
     // not the code.
@@ -1302,7 +1303,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.32.2</strong></div>
+      <div><span>release</span><strong>2.33.0</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1416,7 +1417,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.32.2",
+    release: "2.33.0",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);

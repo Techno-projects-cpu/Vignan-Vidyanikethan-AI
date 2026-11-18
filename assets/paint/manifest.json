@@ -1,0 +1,341 @@
+{
+  "generatedAt": "2026-11-18T03:05:55.762Z",
+  "budget": {
+    "canonicalTotal": 1200000,
+    "canonicalEach": 110000,
+    "tileEach": 46000,
+    "tileTotal": 620000
+  },
+  "plates": [
+    {
+      "name": "aurora-teal",
+      "width": 1280,
+      "height": 714,
+      "bytes": {
+        "canonical": 15348,
+        "tileWebp": 6572,
+        "canonicalAvif": 7998,
+        "tileAvif": 3917
+      },
+      "placeholder": "#162d2a",
+      "balance": [
+        71.3,
+        20.2,
+        8.5
+      ],
+      "ground": false
+    },
+    {
+      "name": "book-stair",
+      "width": 1280,
+      "height": 714,
+      "bytes": {
+        "canonical": 52052,
+        "tileWebp": 19102,
+        "canonicalAvif": 30306,
+        "tileAvif": 13504
+      },
+      "placeholder": "#17130c",
+      "balance": [
+        67.2,
+        24.4,
+        8.4
+      ],
+      "ground": true
+    },
+    {
+      "name": "brush-band",
+      "width": 1280,
+      "height": 543,
+      "bytes": {
+        "canonical": 52320,
+        "tileWebp": 16732,
+        "canonicalAvif": 37592,
+        "tileAvif": 13284
+      },
+      "placeholder": "#e7e1d6",
+      "balance": [
+        70,
+        20.4,
+        9.6
+      ],
+      "ground": false
+    },
+    {
+      "name": "chalk-light",
+      "width": 1280,
+      "height": 698,
+      "bytes": {
+        "canonical": 70886,
+        "tileWebp": 25370,
+        "canonicalAvif": 50064,
+        "tileAvif": 19499
+      },
+      "placeholder": "#2d4038",
+      "balance": [
+        57.1,
+        25.5,
+        17.4
+      ],
+      "ground": false
+    },
+    {
+      "name": "copper-desk",
+      "width": 1280,
+      "height": 698,
+      "bytes": {
+        "canonical": 54982,
+        "tileWebp": 19950,
+        "canonicalAvif": 35394,
+        "tileAvif": 13701
+      },
+      "placeholder": "#f3e3c6",
+      "balance": [
+        44.4,
+        29.1,
+        26.6
+      ],
+      "ground": false
+    },
+    {
+      "name": "dawn-desk",
+      "width": 1280,
+      "height": 714,
+      "bytes": {
+        "canonical": 59768,
+        "tileWebp": 22412,
+        "canonicalAvif": 39853,
+        "tileAvif": 16673
+      },
+      "placeholder": "#f3e6c8",
+      "balance": [
+        51.2,
+        27.3,
+        21.5
+      ],
+      "ground": false
+    },
+    {
+      "name": "ember-rose",
+      "width": 1280,
+      "height": 714,
+      "bytes": {
+        "canonical": 16832,
+        "tileWebp": 6966,
+        "canonicalAvif": 9769,
+        "tileAvif": 4682
+      },
+      "placeholder": "#251717",
+      "balance": [
+        73,
+        15.4,
+        11.6
+      ],
+      "ground": false
+    },
+    {
+      "name": "frost-glass",
+      "width": 1080,
+      "height": 602,
+      "bytes": {
+        "canonical": 75016,
+        "tileWebp": 33970,
+        "canonicalAvif": 50795,
+        "tileAvif": 22066
+      },
+      "placeholder": "#676155",
+      "balance": [
+        46.8,
+        35.8,
+        17.4
+      ],
+      "ground": false
+    },
+    {
+      "name": "indigo-shelf",
+      "width": 1280,
+      "height": 714,
+      "bytes": {
+        "canonical": 33328,
+        "tileWebp": 12338,
+        "canonicalAvif": 20568,
+        "tileAvif": 8959
+      },
+      "placeholder": "#12171d",
+      "balance": [
+        64.9,
+        19.7,
+        15.4
+      ],
+      "ground": false
+    },
+    {
+      "name": "lantern-aisle",
+      "width": 1280,
+      "height": 698,
+      "bytes": {
+        "canonical": 56980,
+        "tileWebp": 23004,
+        "canonicalAvif": 34584,
+        "tileAvif": 16685
+      },
+      "placeholder": "#241f1a",
+      "balance": [
+        48.2,
+        34.7,
+        17.1
+      ],
+      "ground": false
+    },
+    {
+      "name": "library-dusk",
+      "width": 1280,
+      "height": 714,
+      "bytes": {
+        "canonical": 60936,
+        "tileWebp": 23602,
+        "canonicalAvif": 39304,
+        "tileAvif": 17522
+      },
+      "placeholder": "#392f22",
+      "balance": [
+        46.5,
+        28,
+        25.4
+      ],
+      "ground": false
+    },
+    {
+      "name": "moss-hall",
+      "width": 1280,
+      "height": 714,
+      "bytes": {
+        "canonical": 36012,
+        "tileWebp": 14682,
+        "canonicalAvif": 21931,
+        "tileAvif": 10620
+      },
+      "placeholder": "#1a1e14",
+      "balance": [
+        74.2,
+        16.4,
+        9.4
+      ],
+      "ground": false
+    },
+    {
+      "name": "open-book",
+      "width": 1280,
+      "height": 714,
+      "bytes": {
+        "canonical": 70428,
+        "tileWebp": 29050,
+        "canonicalAvif": 49556,
+        "tileAvif": 22213
+      },
+      "placeholder": "#f5f0e0",
+      "balance": [
+        44.1,
+        43.3,
+        12.5
+      ],
+      "ground": false
+    },
+    {
+      "name": "paper-night",
+      "width": 1280,
+      "height": 714,
+      "bytes": {
+        "canonical": 20002,
+        "tileWebp": 6982,
+        "canonicalAvif": 10018,
+        "tileAvif": 4665
+      },
+      "placeholder": "#080a0d",
+      "balance": [
+        68.2,
+        20.3,
+        11.5
+      ],
+      "ground": false
+    },
+    {
+      "name": "pine-window",
+      "width": 1280,
+      "height": 698,
+      "bytes": {
+        "canonical": 50402,
+        "tileWebp": 14582,
+        "canonicalAvif": 25199,
+        "tileAvif": 9679
+      },
+      "placeholder": "#183224",
+      "balance": [
+        70.4,
+        17.4,
+        12.2
+      ],
+      "ground": false
+    },
+    {
+      "name": "rain-window",
+      "width": 1280,
+      "height": 714,
+      "bytes": {
+        "canonical": 44868,
+        "tileWebp": 16778,
+        "canonicalAvif": 30038,
+        "tileAvif": 12848
+      },
+      "placeholder": "#1b1a16",
+      "balance": [
+        59.2,
+        32.6,
+        8.2
+      ],
+      "ground": true
+    },
+    {
+      "name": "river-page",
+      "width": 1280,
+      "height": 698,
+      "bytes": {
+        "canonical": 37586,
+        "tileWebp": 11344,
+        "canonicalAvif": 18972,
+        "tileAvif": 7977
+      },
+      "placeholder": "#e5dfd0",
+      "balance": [
+        69.2,
+        19.3,
+        11.5
+      ],
+      "ground": false
+    },
+    {
+      "name": "saffron-arch",
+      "width": 1280,
+      "height": 698,
+      "bytes": {
+        "canonical": 59350,
+        "tileWebp": 18658,
+        "canonicalAvif": 37744,
+        "tileAvif": 13593
+      },
+      "placeholder": "#c49278",
+      "balance": [
+        55.4,
+        24,
+        20.6
+      ],
+      "ground": false
+    }
+  ],
+  "totals": {
+    "canonical": 867096,
+    "tileWebp": 322094,
+    "tileAvif": 232087,
+    "canonicalAvif": 549685
+  }
+}

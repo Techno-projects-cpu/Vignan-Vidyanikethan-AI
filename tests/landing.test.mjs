@@ -209,7 +209,7 @@ test("motion can be switched off, and nothing is stuck invisible when it is", ()
   // loop. Only these three decorative layers may, none of them carries a word,
   // and every one of them is switched off below. Type still never moves on its
   // own: an entrance is an entrance and finishes.
-  const AMBIENT = [".wl-hero-paint", ".wl-hero-mist", ".wl-motes span"];
+  const AMBIENT = [".wl-hero-paint", ".wl-hero-mist", ".wl-motes span", ".wl-glass-tile span:nth-child(1)", ".wl-glass-tile span:nth-child(2)"];
   const loops = new Set();
   const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, "");
   for (const rule of withoutComments.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {

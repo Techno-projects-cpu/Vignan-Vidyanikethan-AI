@@ -1,0 +1,48 @@
+{
+  "plate": "river-page",
+  "roles": [
+    {
+      "hex": "#e5dfd0",
+      "weight": 69.3,
+      "chroma": 8.2,
+      "lightness": 89.1
+    },
+    {
+      "hex": "#aba293",
+      "weight": 19.3,
+      "chroma": 9,
+      "lightness": 67.1
+    },
+    {
+      "hex": "#5c564e",
+      "weight": 11.5,
+      "chroma": 5.5,
+      "lightness": 37
+    }
+  ],
+  "balance": {
+    "share": [
+      69.2,
+      19.3,
+      11.5
+    ],
+    "within": false,
+    "accentLeads": false
+  },
+  "separation": {
+    "dominantSecondary": 15.6,
+    "secondaryAccent": 29.9,
+    "dominantAccent": 44.1
+  },
+  "ink": {
+    "light": "#ffffff",
+    "dark": "#0b0907",
+    "lightWorst": 1.33,
+    "darkWorst": 2.74
+  },
+  "safe": {
+    "forCream": 11.5,
+    "forInk": 88.5
+  },
+  "measured": true
+}
