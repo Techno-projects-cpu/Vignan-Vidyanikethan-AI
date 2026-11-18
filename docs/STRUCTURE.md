@@ -18,6 +18,7 @@ is somebody else's.
 ├── LICENSES/               third-party licence texts for vendored code (glasswork)
 ├── styles*.css             13 stylesheets, one per surface (see below)
 ├── assets/                 two bundled fonts, brand marks, twenty-four painted plates (WebP + AVIF, two widths each)
+│                           and walls/ — the full-screen classroom painting, two framings, AVIF + WebP
 ├── icons/                  app icons, 48 → 512, plus the maskable pair
 ├── vendor/pdfjs/           the PDF reader, vendored so it works offline
 │
@@ -32,7 +33,7 @@ is somebody else's.
 ├── tools/                  precache generator, offline simulator, secret scan,
 │                           the live-deploy check, the address rewriter, and the
 │                           two colour reporters (palette of a plate, and the
-│                           contrast of the glass stack over a plate)
+│                           contrast of the glass stack over the wall) and the wall encoder
 ├── docs/                   this folder: design, deploy, credits, checklist
 └── .github/                CI and the two issue templates
 ```

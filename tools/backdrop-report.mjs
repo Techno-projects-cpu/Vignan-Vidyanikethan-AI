@@ -6,10 +6,10 @@
  *   node tools/backdrop-report.mjs --check    # fail if a committed report is stale
  *
  * The glass theme no longer floats over four soft radial fields: it floats over a
- * **painting** (`assets/paint/<plate>.webp`), with a warm veil and four pastel
- * fields washed over it, and a sheet of glass on top of that. Which means the
- * worst case for a label is no longer "the strongest field" — it is the darkest
- * pixel of a photograph seen through everything else.
+ * **full-screen painting** (`assets/walls/<room>-wide.webp`), with a warm veil and
+ * four pastel fields washed over it, and a sheet of glass on top of that. Which
+ * means the worst case for a label is no longer "the strongest field" — it is the
+ * darkest pixel of an illustration seen through everything else.
  *
  * So this tool composites the real stack, pixel by pixel, and takes the *minimum*
  * contrast over the sampled painting:
@@ -37,14 +37,14 @@ import { composite, contrast, luminance, toHex } from "../js/colour.js";
 import { GLASS_THEME, auroraHex8, tintHex8 } from "../js/theme-glass.js";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const PAINT = path.join(REPO, "assets", "paint");
+const WALLS = path.join(REPO, "assets", "walls");
 
 /** The veil and the fields, as declared in `styles-glass.css` §2. */
 export const STACK = {
   /** `--tg-veil`: the warm wash that turns a photograph into a room. */
-  veil: { hex: GLASS_THEME.bg, alpha: GLASS_THEME.room.veil },
-  /** The room's own colours, washed over its plate at this alpha. */
-  fieldAlpha: GLASS_THEME.room.fieldAlpha,
+  veil: { hex: GLASS_THEME.bg, alpha: GLASS_THEME.wall.veil },
+  /** The four pastel fields, washed over the wall at this alpha. */
+  fieldAlpha: GLASS_THEME.wall.fieldAlpha,
   /** The sheet (`--tg-tint`), which is the value the theme already exports. */
   sheetAlpha: GLASS_THEME.glass,
 };
@@ -62,19 +62,14 @@ function sample(file, width = 96, height = 54) {
 const alpha8 = (alpha) => Math.round(alpha * 255).toString(16).padStart(2, "0");
 const veilHex = `${STACK.veil.hex.replace("#", "")}${alpha8(STACK.veil.alpha)}`;
 
-/** A room's fields: its own measured colours, or the theme's four for `plain`. */
-function fieldHexes(room) {
-  const hexes = room.fields || GLASS_THEME.aurora.map((field) => field.hex);
-  return hexes.map((hex) => `${hex}${alpha8(STACK.fieldAlpha)}`);
-}
+/** The four fields, as painted by `styles-glass.css` §2. */
+const FIELD_HEXES = GLASS_THEME.aurora.map((field) => `${field.hex}${alpha8(STACK.fieldAlpha)}`);
 
-/**
- * The inks the theme promises, and the floor each one has to clear. The accent is
- * per room — it is taken from that room's painting — so it is added in `measure`.
- */
+/** The three inks the theme promises, and the floor each one has to clear. */
 const INKS = [
   ["ink", GLASS_THEME.ink, 7],
   ["muted", GLASS_THEME.muted, 4.5],
+  ["accent", GLASS_THEME.accent, 4.5],
 ];
 
 /** The worst a painting pixel can be, once every translucent layer is over it. */
@@ -88,11 +83,10 @@ function worstOver(pixels, under) {
 }
 
 /** Paint the stack, then measure each ink against the result. */
-function measure(pixels, room) {
+function measure(pixels) {
   const measured = { withSheet: {}, raw: {}, field: {} };
-  const fields = fieldHexes(room);
-  const inks = [...INKS, ["accent", room.accent, 4.5]];
-  for (const [name, ink] of inks) {
+  const fields = FIELD_HEXES;
+  for (const [name, ink] of INKS) {
     // (1) through the sheet: the way a card, a panel or the drawer is read.
     measured.withSheet[name] = worstOver(pixels, (pixel) => {
       const worstField = fields
@@ -114,29 +108,27 @@ function measure(pixels, room) {
   return measured;
 }
 
-/** The rooms, from the theme itself, so the tool cannot measure a stale list. */
-const ROOMS = GLASS_THEME.rooms.filter((room) => room.fields);
+/** The wall, from the theme itself, so the tool cannot measure a stale file. */
+const ROOMS = [GLASS_THEME.wall.room];
 
 function run() {
   const check = process.argv.includes("--check");
-  const plates = existsSync(PAINT) ? ROOMS.filter((room) => existsSync(path.join(PAINT, `${room.id}.webp`))) : [];
+  const plates = existsSync(WALLS) ? ROOMS.filter((room) => existsSync(path.join(WALLS, `${room}-wide.webp`))) : [];
   if (!plates.length) {
-    console.error("No backdrop plates found. Expected assets/paint/{blush-hall,mint-class,sand-desk}.webp");
+    console.error("No wall found. Expected assets/walls/<room>-wide.webp — run node tools/optimise-walls.mjs");
     process.exit(1);
   }
   const generated = [];
   let failed = 0;
-  for (const room of plates) {
-    const name = room.id;
-    const pixels = sample(path.join(PAINT, `${name}.webp`));
-    const measured = measure(pixels, room);
+  for (const name of plates) {
+    const pixels = sample(path.join(WALLS, `${name}-wide.webp`));
+    const measured = measure(pixels);
     const report = {
       plate: name,
-      accent: room.accent,
-      fields: room.fields,
+      accent: GLASS_THEME.accent,
       stack: {
         veil: `${STACK.veil.hex}${alpha8(STACK.veil.alpha)}`,
-        fields: fieldHexes(room),
+        fields: FIELD_HEXES,
         sheet: tintHex8(),
       },
       sheet: {
@@ -151,9 +143,9 @@ function run() {
       },
       measured: true,
     };
-    const file = path.join(PAINT, `${name}.backdrop.json`);
+    const file = path.join(WALLS, `${name}.backdrop.json`);
     const text = `${JSON.stringify(report, null, 2)}\n`;
-    for (const [ink, , floor] of [...INKS, ["accent", room.accent, 4.5]]) {
+    for (const [ink, , floor] of INKS) {
       const value = report.sheet[ink];
       if (value < floor) {
         failed += 1;
@@ -164,7 +156,7 @@ function run() {
       const committed = existsSync(file) ? readFileSync(file, "utf8") : "";
       if (committed !== text) {
         failed += 1;
-        console.error(`  ${name}: assets/paint/${name}.backdrop.json is stale — run node tools/backdrop-report.mjs`);
+        console.error(`  ${name}: assets/walls/${name}.backdrop.json is stale — run node tools/backdrop-report.mjs`);
       }
     } else {
       writeFileSync(file, text);
@@ -182,6 +174,6 @@ function run() {
   console.log(`\nBACKDROP ${check ? "OK" : "WRITTEN"} — ${generated.length} plates, ${PLATES_NOTE}`);
 }
 
-const PLATES_NOTE = "each one clears 7:1 for ink through the sheet";
+const PLATES_NOTE = "ink clears 7:1 through the sheet over the darkest pixel of the wall";
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) run();

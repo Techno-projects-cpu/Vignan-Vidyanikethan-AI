@@ -1,0 +1,27 @@
+{
+  "generated": true,
+  "budget": {
+    "each": 220000,
+    "room": 380000
+  },
+  "note": "Encoded from the PNG masters by tools/optimise-walls.mjs. The app reads this file for sizes; tests fail if a wall is missing, stale or over budget.",
+  "rooms": [
+    {
+      "room": "study-afternoon",
+      "frames": {
+        "tall": {
+          "width": 1080,
+          "height": 1920,
+          "avif": 105447,
+          "webp": 185634
+        },
+        "wide": {
+          "width": 1920,
+          "height": 1080,
+          "avif": 91884,
+          "webp": 166290
+        }
+      }
+    }
+  ]
+}

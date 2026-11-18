@@ -147,67 +147,64 @@ request at all**, and the whole theme is 9KB of CSS.
   **5.78:1**; the first candidate, `#0f8b83`, was 3.92:1 on the page and was
   rejected by the test, not by taste.
 
-### The room: a painting behind the glass
+### The wall: one painted classroom, full screen
 
 The theme used to draw its own background — four radial fields on a cream page —
-and that was the mistake. A gradient has no detail to bend, so a panel over it
-reads as frosted plastic no matter how good the rim is. The room is now **one of
-the project's own paintings**, hung full-bleed and fixed:
+and then stood in front of a set of 1280×714 *plates*: pictures made to sit behind
+a panel, with a cream paper margin. Both were the same mistake. A gradient has no
+detail to bend, and a plate stretched across a screen is a blank wall with a
+margin, so the glass had nothing to work with and the theme read as frosted
+plastic. **The wall is now one illustration, painted for this project** — a
+sunlit classroom with tall windows, a blackboard, wooden desks, a monstera and
+dust in the light — and everything above it is thin enough to see it through:
 
-    painting (assets/paint/blush-hall.webp, 11.7 KB, precached)
-      → four pastel fields at 30%          (the theme's colours, as a wash)
-      → the veil, 36% warm white           (--tg-veil)
-      → a light from above, and the grain  (never anything darker)
-      → the sheet                          (--tg-tint, 58%)
+    wall      assets/walls/study-afternoon-{wide,tall}.{avif,webp}
+    wash      four pastel fields at 26%          (--tg-wash-1..4)
+    veil      20% warm white                     (--tg-veil)
+    light     a soft source from above, and the grain
+    sheet     --tg-tint at 34%, blur 8px, saturate 180%, plus the rim lens
 
-Every layer above the painting is measured by `tools/backdrop-report.mjs`, which
-composites the stack **pixel by pixel** and keeps the worst result. Measured
-through the sheet, over the darkest pixel of each room:
+`tools/optimise-walls.mjs` encodes two framings from the masters — 1920×1080 for a
+desktop, 1080×1920 for a phone — because `cover` on a 16:9 painting crops a tall
+screen down to its middle third and throws the composition away. The page carries
+the wall as a `<picture>` with media-query sources, so only one file is fetched
+(90 KB AVIF wide, 103 KB AVIF tall; 162 KB and 181 KB WebP). Both are inside a
+220 KB wall budget and the 555-file offline cache.
 
-| room | ink | muted | accent | ink straight on the painting |
-| --- | --- | --- | --- | --- |
-| blush hall | 12.2:1 | 5.8:1 | 5.7:1 | 6.8:1 |
-| mint class | 10.3:1 | 4.8:1 | 5.1:1 | **1.9:1** |
-| sand desk | 10.5:1 | 5.0:1 | 4.7:1 | **2.8:1** |
+**It fills the viewport on every screen.** The layer is `position: fixed;
+inset: 0; width: 100%; height: 100%; min-height: 100dvh` with `object-fit:
+cover`. The previous version used `inset: -7%; width: 100%; height: 100%`, which
+looks like a full-screen layer and is not one: with `width` and `height` set,
+`right` and `bottom` are ignored, so it covered only the top-left 93% and left a
+cream band down the right and the bottom — worst on a phone, where that band was
+most of the screen.
 
-Each room is its **own** painting, washed with **that painting's** measured colours
-(`assets/paint/<plate>.palette.json`), and accented with a colour taken from the
-same pigment. So choosing a room changes the light, the accent and the picture
-together — the first version only swapped the photograph behind the same pink
-wash, which looked like nothing happening.
+`tools/backdrop-report.mjs` composites the whole stack **pixel by pixel** over the
+wall's darkest pixel and writes `assets/walls/study-afternoon.backdrop.json`:
 
-| room | plate | wash (the plate's own roles) | accent |
-| --- | --- | --- | --- |
-| Blush hall | `blush-hall` | `#fae2d5` `#faf1e6` `#a7d6cd` | `#17635a` |
-| Mint class | `mint-class` | `#c6eddf` `#d9b383` `#faf4d9` | `#6f4f22` |
-| Sand desk | `sand-desk` | `#f1e8da` `#dfc4a5` `#af9b84` | `#725729` |
-| Fields only | none | the theme's four pastels | `#075c56` |
+| | through the sheet | floor |
+| --- | --- | --- |
+| ink | **7.2:1** | 7:1 |
+| muted ink | **5.3:1** | 4.5:1 |
+| accent | **5.4:1** | 4.5:1 |
+| ink straight on the wall | **1.3:1** | — |
 
-**Edge to edge, on every screen.** The plate is a fixed, full-viewport layer
-(`inset: -7%` for the drift's bleed, `min-height: 100dvh`), and every surface
-between it and the reader is transparent: `.app-shell`, `.workspace`, `.main`,
-`.view`, `.auth-gate`. That last list used to live inside the desktop media
-query, which is why a phone showed a cream box with the painting only in the
-margins. On a phone the plate is framed `center 34%` — the plate is 1280×714 and
-`cover` on a tall screen crops hard — and the drift is off.
+That last row is why every screen of text sits on a sheet: nothing readable is
+placed directly on a painting this detailed.
 
-The last column is why the Ask hero and the numbered page head became sheets: on
-the mint wall, dark ink straight on the painting is 1.9:1. Nothing readable is
-allowed to sit on the page itself.
+**The sheet is white at 34%, not 58%.** A 58% tint over a light painting renders
+a panel about 85% white — opaque paper, with the room visible only in the margins,
+which is exactly how the theme read before this pass. 34% (plus a 30%-to-2%
+highlight gradient, which used to peak at 78% and was a second coat of white) lets
+the blackboard, the plant and the window frames be read *through* the pane. The
+inks pay for the thinner sheet: ink `#221b28`, secondary `#3a323f`, and an accent
+`#063a35` taken from the blackboard shadows — one step above pure black, so white
+on a filled button is 12.6:1.
 
-The accent is per room, and every one of them clears the floor through the sheet
-as well as for white text on a filled button (6.75:1–7.85:1). The landing page
-keeps `#0b726b`: it is a paper document on a flat sheet, not glass over a
-photograph.
-- **`plain` still exists.** The four fields with no painting is one of the four
-  choices in the room control, so the old look was kept rather than deleted.
-
-The room is chosen with the swatch control in the glass kit (the swatch *is* the
-painting, at 2.1 KB), stored as `vignan.room`, applied as `data-room` on `<html>`,
-and read before the first frame by the inline script in `index.html` so a reload
-never flashes the wrong wall. Cheap mode keeps the painting — it is 12 KB and it
-is the room — and drops the filter and the drift, which is what a slow GPU pays
-for.
+**There is one wall, not a picker.** An earlier version offered four room
+swatches; they were nearly identical pastels under the same veil, so tapping one
+changed almost nothing on screen — a control that does nothing is worse than no
+control. The room is the design.
 
 ### The drawer
 

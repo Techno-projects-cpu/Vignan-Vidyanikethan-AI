@@ -44,16 +44,16 @@ html[data-style="glass"] body.premium-ui {
   --p-surface: #fffaf6;
   --p-surface-2: #fffcf9;
   --p-surface-3: #f8efe7;
-  --p-ink: #2b2430;
+  --p-ink: #221b28;
   --p-ink-2: #3b3340;
-  --p-muted: #5f5560;
-  --p-line: rgba(43, 36, 48, .13);
-  --p-line-strong: rgba(43, 36, 48, .24);
+  --p-muted: #3a323f;
+  --p-line: rgba(34, 27, 40, .13);
+  --p-line-strong: rgba(34, 27, 40, .24);
   /* The one style in the set where a corner is round: a square sheet of glass is
      a window, and this is meant to read as a lens. */
   --p-radius: 18px;
-  --brand: #075c56;
-  --brand-2: #0a6f68;
+  --brand: #063a35;
+  --brand-2: #084a44;
   --brand-ink: #ffffff;
   --brand-soft: rgba(11, 114, 107, .12);
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -62,13 +62,13 @@ html[data-style="glass"] body.premium-ui {
 
   /* This theme's own scale. */
   --tg-base: #fdf7f2;
-  --tg-tint: rgba(255, 250, 246, .58);
-  --tg-tint-strong: rgba(255, 250, 246, .74);
+  --tg-tint: rgba(255, 250, 246, .34);
+  --tg-tint-strong: rgba(255, 250, 246, .62);
   --tg-edge: rgba(255, 255, 255, .82);
   --tg-edge-dark: rgba(96, 68, 74, .13);
-  --tg-ink: #2b2430;
-  --tg-muted: #5f5560;
-  --tg-accent: #075c56;
+  --tg-ink: #221b28;
+  --tg-muted: #3a323f;
+  --tg-accent: #063a35;
   --tg-blush: #f4b9c5;
   --tg-sand: #f0d9b6;
   --tg-lagoon: #8fd9d0;
@@ -77,33 +77,24 @@ html[data-style="glass"] body.premium-ui {
   --tg-saturate: 180%;
   --tg-bright: 1.06;
 
-  /* THE BACKDROP IS A PAINTING.
-     Four soft radial fields over a cream page are a *gradient*, and a gradient
-     behind frosted glass is why the first attempt read as milky plastic: there
-     was nothing in particular behind a panel for the glass to bend. So the room
-     is one of the project's own paintings — 11.7 KB, WebP, already in the
-     offline cache — and the fields become a wash of the theme's four colours
-     over it. Every sheet then has real detail under it: the arch, the shelf,
-     the shaft of light, sliding and splitting at the rim.
+  /* THE WALL IS A PAINTING, FULL SCREEN.
+     The room behind this theme is one illustrated classroom — windows, a
+     blackboard, desks, a monstera, warm light — painted for the project and
+     encoded at two framings (1920x1080 and 1080x1920). It is an `<img>` in the
+     page, not a `background-image`, because art direction on a phone needs
+     `<picture>`: `cover` on a 16:9 painting crops a tall screen to its middle
+     third and throws the composition away, so the portrait file is chosen by
+     media query instead.
 
-     `--tg-plate` is set per room below; `plain` sets it to `none` and the old
-     fields-only page is still available. */
-  --tg-plate: url("./assets/paint/blush-hall.webp");
-  --tg-plate-tone: saturate(1.06) contrast(1.03) brightness(1.04);
-  /* The wash: the room's own three colours plus one more, at 30%. Overridden per
-     room below, so choosing a room changes the light as well as the picture. */
-  --tg-wash-1: rgba(250, 226, 213, .30);
-  --tg-wash-2: rgba(250, 241, 230, .30);
-  --tg-wash-3: rgba(167, 214, 205, .30);
-  --tg-wash-4: rgba(250, 244, 217, .30);
-  /* The warm veil between painting and glass. 36%, and measured by
-     `tools/backdrop-report.mjs`: with the fields at 30% and the sheet at 58%, the
-     ink clears 10:1 and the accent 5.4:1 over the *darkest pixel* of the darkest
-     plate. Thinner and it stops being readable; thicker and the painting greys. */
-  --tg-veil: rgba(253, 247, 242, .36);
+     What sits on top of the painting is deliberately thin — a 20% warm veil and
+     four pastel fields at 26% — because the whole point is to see the picture
+     through the glass. The accent is a deep teal taken from the blackboard, which
+     is what keeps the type readable over a painting with this much detail. */
+  --tg-plate-tone: saturate(1.05) contrast(1.02) brightness(1.02);
+  --tg-veil: rgba(253, 247, 242, .26);
   /* What the app dims to behind the menu. */
-  --tg-scrim: rgba(43, 36, 48, .26);
-  --tg-sheet: linear-gradient(150deg, rgba(255, 255, 255, .78), rgba(255, 255, 255, .34) 46%, rgba(255, 255, 255, .16) 74%);
+  --tg-scrim: rgba(34, 27, 40, .26);
+  --tg-sheet: linear-gradient(150deg, rgba(255, 255, 255, .30), rgba(255, 255, 255, .10) 46%, rgba(255, 255, 255, .02) 74%);
   --tg-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
 
   /* Geometry. One radius for a sheet, one for a slab, one for a control. */
@@ -157,62 +148,11 @@ html[data-style="glass"] body.premium-ui {
 /* 2. The room behind everything: a painting, a wash, a sheet            */
 /* ------------------------------------------------------------------ */
 
-/* The rooms. Each one is a painting, that painting's own measured colours as a
-   wash, and an accent taken from the same pigment — so the room changes the
-   light, the accent and the picture together, and the change is obvious rather
-   than a slightly different shade of pale. `plain` keeps the four pastel fields
-   with no painting. */
-html[data-style="glass"][data-room="blush-hall"] body.premium-ui {
-  --tg-plate: url("./assets/paint/blush-hall.webp");
-  --tg-wash-1: rgba(250, 226, 213, .34);
-  --tg-wash-2: rgba(250, 241, 230, .30);
-  --tg-wash-3: rgba(167, 214, 205, .34);
-  --tg-wash-4: rgba(244, 185, 197, .26);
-  --tg-accent: #17635a;
-  --brand: #17635a;
-  --brand-2: #1d766b;
-}
-
-html[data-style="glass"][data-room="mint-class"] body.premium-ui {
-  --tg-plate: url("./assets/paint/mint-class.webp");
-  --tg-wash-1: rgba(198, 237, 223, .36);
-  --tg-wash-2: rgba(217, 179, 131, .30);
-  --tg-wash-3: rgba(250, 244, 217, .26);
-  --tg-wash-4: rgba(198, 237, 223, .22);
-  --tg-accent: #6f4f22;
-  --brand: #6f4f22;
-  --brand-2: #87642f;
-}
-
-html[data-style="glass"][data-room="sand-desk"] body.premium-ui {
-  --tg-plate: url("./assets/paint/sand-desk.webp");
-  --tg-wash-1: rgba(241, 232, 218, .34);
-  --tg-wash-2: rgba(223, 196, 165, .32);
-  --tg-wash-3: rgba(175, 155, 132, .22);
-  --tg-wash-4: rgba(250, 241, 230, .26);
-  --tg-accent: #725729;
-  --brand: #725729;
-  --brand-2: #8a6c37;
-}
-
-html[data-style="glass"][data-room="plain"] body.premium-ui {
-  --tg-plate: none;
-  --tg-wash-1: rgba(244, 185, 197, .30);
-  --tg-wash-2: rgba(240, 217, 182, .30);
-  --tg-wash-3: rgba(143, 217, 208, .30);
-  --tg-wash-4: rgba(248, 201, 174, .30);
-  --tg-accent: #075c56;
-  --brand: #075c56;
-  --brand-2: #0a6f68;
-}
-
-/* The accent is a token on the same element the app paints from, so the filled
-   button, the tick under the segmented control and a citation rule all follow the
-   room without a second rule for each. */
-html[data-style="glass"] body.premium-ui .button-primary,
-html[data-style="glass"] body.premium-ui .premium-button.primary,
-html[data-style="glass"] body.premium-ui .send-button {
-  background: linear-gradient(180deg, var(--brand-2, #0a6f68), var(--tg-accent));
+/* There is one wall, so the accent follows it and nothing else varies. */
+html[data-style="glass"] body.premium-ui {
+  --tg-accent: #063a35;
+  --brand: #063a35;
+  --brand-2: #084a44;
 }
 
 html[data-style="glass"] body.premium-ui {
@@ -220,39 +160,58 @@ html[data-style="glass"] body.premium-ui {
   isolation: isolate;
 }
 
-/* The painting itself, fixed, bled past the edges so the drift never shows one. */
-html[data-style="glass"] body.premium-ui::before {
-  content: "";
+/* The wall: a real image element, fixed, edge to edge, object-fit cover.
+   This replaced `body.premium-ui::before` with a `background-image`, and the
+   reason matters: `inset: -7%; width: 100%; height: 100%` looks like a
+   full-screen layer and is not one — with width and height set, `right` and
+   `bottom` are ignored, so the layer covers only the top-left 93% and leaves a
+   cream band down the right and the bottom. That was the "not full screen" bug.
+   `inset: 0` with `width/height: 100%` is the only form that is always the
+   viewport, and `object-fit: cover` does the cropping the browser is best at. */
+.wall-art {
+  display: none;
+}
+
+html[data-style="glass"] body.premium-ui .wall-art {
+  display: block;
   position: fixed;
-  /* Full viewport on every engine. `inset: -7%` is the bleed the drift needs so
-     no edge is ever exposed; the explicit height is what makes the layer a
-     viewport rather than whatever the body happens to be. */
-  inset: -7%;
+  inset: 0;
   width: 100%;
   height: 100%;
   min-height: 100vh;
   min-height: 100dvh;
   z-index: -2;
+  margin: 0;
   pointer-events: none;
-  background-image: var(--tg-plate);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: var(--tg-plate-tone);
-  transform: translate3d(0, 0, 0) scale(1);
-  animation: tg-aurora 76s cubic-bezier(.45, .05, .55, .95) infinite alternate;
-  will-change: transform;
+  user-select: none;
 }
 
-/* The wash: four pastel fields at 30%, the veil, a light from above, the paper
+html[data-style="glass"] body.premium-ui .wall-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  filter: var(--tg-plate-tone);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* The slow drift lives on the wash, not on the painting: moving the picture
+   itself re-rasterises a 1920px layer every frame, and the light in a room moves
+   far less than the room does. */
+/* The wash: four pastel fields at 26%, the 20% veil, a light from above, the paper
    tooth. Nothing here darkens the painting — a vignette under text is a contrast
    leak, and this theme measures its contrast. */
 html[data-style="glass"] body.premium-ui::after {
   content: "";
   position: fixed;
-  inset: 0;
+  inset: -4%;
   z-index: -1;
   pointer-events: none;
+  transform: translate3d(0, 0, 0) scale(1);
+  animation: tg-aurora 80s cubic-bezier(.45, .05, .55, .95) infinite alternate;
+  will-change: transform;
   background:
     radial-gradient(52% 46% at 12% 18%, var(--tg-wash-1), transparent 72%),
     radial-gradient(44% 40% at 88% 12%, var(--tg-wash-2), transparent 74%),
@@ -265,11 +224,12 @@ html[data-style="glass"] body.premium-ui::after {
   background-blend-mode: normal, normal, normal, normal, normal, normal, overlay;
 }
 
-/* A slow drift, because a still photograph behind glass reads as a screenshot.
-   76s and under 3% of travel: you should notice it only when you stop looking. */
+/* A slow drift on the *light*, not on the picture: the wash breathes across the
+   wall over 80 seconds so a still painting behind glass still feels alive, and
+   nothing re-rasterises a 1920px image to do it. */
 @keyframes tg-aurora {
-  from { transform: translate3d(-1.2%, -.8%, 0) scale(1.02); }
-  to   { transform: translate3d(1.4%, 1.1%, 0) scale(1.06); }
+  from { transform: translate3d(-1.1%, -.7%, 0) scale(1.03); }
+  to   { transform: translate3d(1.3%, 1%, 0) scale(1.07); }
 }
 
 /* ------------------------------------------------------------------ */
@@ -335,7 +295,7 @@ html[data-style="glass"] body.premium-ui .panel > * {
 /* The one slab in the app that is thicker than a sheet: the composer. It is the
    thing a student touches, so it sits above the page and is a shade denser. */
 html[data-style="glass"] body.premium-ui .composer {
-  --tg-tint: rgba(255, 250, 246, .74);
+  --tg-tint: rgba(255, 250, 246, .52);
   border-radius: var(--tg-r-slab);
   background-image: none;
 }
@@ -451,7 +411,7 @@ html[data-style="glass"] body.premium-ui input[type="password"]:focus {
 }
 
 html[data-style="glass"] body.premium-ui ::placeholder {
-  color: rgba(95, 85, 96, .72);
+  color: rgba(58, 50, 63, .76);
 }
 
 html[data-style="glass"] body.premium-ui :focus-visible {
@@ -694,9 +654,11 @@ html[data-lite="1"] .composer::before {
 html[data-lite="1"] .card::before,
 html[data-lite="1"] .panel::before { display: none; }
 
-html[data-lite="1"][data-style="glass"] body.premium-ui::before,
-html[data-lite="1"] body.premium-ui::before {
+html[data-lite="1"] body.premium-ui::after {
   animation: none;
+}
+
+html[data-lite="1"] body.premium-ui .wall-art img {
   /* The tone filter is a full-screen colour pass: the first thing to go. */
   filter: none;
 }
@@ -723,90 +685,11 @@ html[data-lite="1"] body.premium-ui::before {
 
 html[data-style="glass"] body.premium-ui .gg-kit {
   display: grid;
-  grid-template-columns: minmax(0, auto) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px 18px;
   margin: 20px 0 4px;
 }
-
-/* --- the room control ----------------------------------------------------- */
-
-/* Four rooms. The swatch is the painting itself — a 2 KB tile of the actual
-   plate, not a colour chip — and the name is under it, so the control says what
-   it does instead of being four anonymous blocks. The selected one is lifted and
-   ringed in the room's own accent, which is also the accent the app is now
-   using: the swatch is a preview of the result. */
-.gg-rooms {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px;
-  border-radius: 20px;
-  background-color: var(--tg-tint);
-  -webkit-backdrop-filter: var(--tg-filter);
-  backdrop-filter: var(--tg-filter) var(--glass-lens,);
-  box-shadow: var(--tg-rim-small);
-}
-
-.gg-room {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 5px;
-  width: 62px;
-  padding: 3px 2px 5px;
-  border: 0;
-  border-radius: 14px;
-  background: transparent;
-  color: var(--tg-muted);
-  font: inherit;
-  font-size: 11px;
-  line-height: 1.1;
-  letter-spacing: .01em;
-  cursor: pointer;
-  transition: background-color 160ms var(--vn-ease, ease), transform 160ms var(--vn-ease, ease), color 160ms var(--vn-ease, ease);
-}
-
-.gg-room img,
-.gg-room-swatch {
-  display: block;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  object-fit: cover;
-  box-shadow: inset 0 0 0 1px rgba(96, 68, 74, .2), 0 1px 2px rgba(96, 68, 74, .18);
-  transition: transform 160ms var(--vn-ease, ease), box-shadow 160ms var(--vn-ease, ease);
-}
-
-.gg-room-swatch {
-  background: linear-gradient(140deg, #f4b9c5, #f0d9b6 42%, #8fd9d0 78%, #f8c9ae);
-}
-
-.gg-room-label {
-  white-space: nowrap;
-  font-weight: 550;
-}
-
-.gg-room:hover { color: var(--tg-ink); background-color: rgba(255, 255, 255, .38); }
-.gg-room:hover img { transform: scale(1.04); }
-
-.gg-room.active {
-  color: var(--tg-ink);
-  background-color: rgba(255, 255, 255, .72);
-  box-shadow: var(--tg-rim-small);
-}
-
-.gg-room.active img,
-.gg-room.active .gg-room-swatch {
-  box-shadow:
-    0 0 0 2px #ffffff,
-    0 0 0 4px var(--tg-accent),
-    0 4px 10px -5px rgba(96, 68, 74, .6);
-}
-
-.gg-room.active .gg-room-label { font-weight: 700; }
-
-.gg-room:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: 2px; }
 
 /* --- the segmented control ------------------------------------------------ */
 
@@ -939,14 +822,13 @@ html[data-style="glass"][data-lite="1"] body.premium-ui .gg-stat {
 /* Between a phone and a desktop the three controls do not fit on one line, so the
    tiles take their own row instead of pushing the page sideways. */
 @media (max-width: 1080px) {
-  html[data-style="glass"] body.premium-ui .gg-kit { grid-template-columns: minmax(0, 1fr) auto; }
+  html[data-style="glass"] body.premium-ui .gg-kit { grid-template-columns: minmax(0, 1fr); }
   .gg-stats { grid-column: 1 / -1; }
 }
 
 /* A phone stacks the rail under the control and keeps the tiles equal. */
 @media (max-width: 720px) {
   html[data-style="glass"] body.premium-ui .gg-kit { grid-template-columns: minmax(0, 1fr); }
-  .gg-rooms { justify-self: start; }
   .gg-seg { width: 100%; justify-content: space-between; }
   .gg-seg-item { padding: 8px 11px; }
   .gg-stats { width: 100%; }
@@ -1032,7 +914,7 @@ html[data-style="glass"] body.premium-ui .app-menu-account-actions button {
 }
 
 html[data-style="glass"] body.premium-ui .app-menu-account-actions button.primary {
-  background: linear-gradient(180deg, #0a6f68, var(--tg-accent));
+  background: linear-gradient(180deg, #084a44, var(--tg-accent));
   color: #ffffff;
 }
 
@@ -1127,7 +1009,7 @@ html[data-style="glass"][data-lite="1"] body.premium-ui .app-menu-panel {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-style="glass"] body.premium-ui::before,
+  html[data-style="glass"] body.premium-ui::after,
   html[data-style="glass"] body.premium-ui .app-shell::before,
   html[data-style="glass"] body.premium-ui .sidebar::before,
   html[data-style="glass"] body.premium-ui .composer::before {
@@ -1164,38 +1046,28 @@ html[data-style="glass"][data-lite="1"] body.premium-ui .app-menu-panel {
   }
 }
 
-/* The painting stays in cheap mode — it is 11.7 KB and it is the room — but it
-   stops being filtered and it stops drifting, which are the two things a slow
-   GPU actually pays for. */
-html[data-lite="1"] body.premium-ui::before {
-  animation: none;
-  filter: none;
-}
+/* The painting stays in cheap mode — it is the room — but it stops being
+   filtered and it stops drifting, which are the two things a slow GPU pays for. */
 
-/* A phone: the plate is 1280 x 714, so `cover` on a tall screen crops hard. Framing
-   it a third of the way down keeps the arch and the light in shot instead of a
-   strip of empty wall at the top. The drift is off — a moving full-screen image
-   on a phone is a battery cost with nothing to show for it — and the plate is
-   pinned with `background-attachment: scroll` on the fixed element, which is the
-   one value iOS honours. */
+/* A phone: the portrait file is 1080 x 1920, so `cover` no longer crops the
+   composition — but the wash still gets more body, because a phone screen is
+   where a busy painting sits closest to the type. The drift is off: a moving
+   full-screen layer on a phone is a battery cost with nothing to show for it. */
 @media (max-width: 720px) {
-  html[data-style="glass"] body.premium-ui::before {
-    inset: 0;
-    background-position: center 34%;
-    background-size: cover;
-    animation: none;
+  html[data-style="glass"] body.premium-ui .wall-art img {
+    object-position: center 38%;
   }
 
   html[data-style="glass"] body.premium-ui::after {
-    /* On a phone the veil does the work the blur does on a desktop: a little more
-       of it over the busiest part of the picture, none at the edges. */
+    inset: 0;
+    animation: none;
     background:
-      radial-gradient(60% 46% at 16% 16%, var(--tg-wash-1), transparent 74%),
-      radial-gradient(52% 42% at 86% 10%, var(--tg-wash-2), transparent 76%),
-      radial-gradient(64% 48% at 78% 94%, var(--tg-wash-3), transparent 78%),
-      radial-gradient(48% 44% at 6% 90%, var(--tg-wash-4), transparent 80%),
-      linear-gradient(180deg, rgba(253, 247, 242, .30), rgba(253, 247, 242, .46) 52%, rgba(253, 247, 242, .34)),
-      radial-gradient(120% 60% at 50% -10%, rgba(255, 255, 255, .4), transparent 60%),
+      radial-gradient(60% 40% at 16% 14%, var(--tg-wash-1), transparent 74%),
+      radial-gradient(52% 36% at 86% 8%, var(--tg-wash-2), transparent 76%),
+      radial-gradient(64% 42% at 78% 96%, var(--tg-wash-3), transparent 78%),
+      radial-gradient(48% 38% at 6% 92%, var(--tg-wash-4), transparent 80%),
+      linear-gradient(180deg, rgba(253, 247, 242, .22), rgba(253, 247, 242, .38) 54%, rgba(253, 247, 242, .26)),
+      radial-gradient(120% 60% at 50% -10%, rgba(255, 255, 255, .38), transparent 60%),
       var(--tg-grain);
     background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
     background-blend-mode: normal, normal, normal, normal, normal, normal, overlay;

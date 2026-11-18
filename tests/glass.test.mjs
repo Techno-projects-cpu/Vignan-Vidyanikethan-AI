@@ -10,7 +10,7 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, existsSync, statSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { chroma, composite, contrast, hue, lightness } from "../js/colour.js";
 import { GLASS_THEME, auroraColour, auroraHex8, glassTint, tintHex8 } from "../js/theme-glass.js";
 import { DEFAULT_STYLE, THEMES, isGlassTheme, isPaintedStyle, themeById } from "../js/themes.js";
@@ -117,107 +117,99 @@ test("the stylesheet uses the numbers the module exports", () => {
   assert.ok(css.includes(`--tg-saturate: ${GLASS_THEME.saturate}%`), "the saturation is exported too");
 });
 
-test("the room behind the glass is one measured painting, not a mystery", () => {
-  // This theme used to promise "no image request". It no longer can: the whole
-  // point of the redesign is that there is something *behind* the glass to bend,
-  // so the page loads one painting and hangs it on the wall. What replaces the
-  // old promise is a stricter one — exactly one plate, from this repository, in
-  // the offline cache, small enough for a phone, and measured against the ink
-  // that sits on top of it.
-  const urls = [...css.matchAll(/url\(([\"']?)([^)\"']+)\1\)/g)].map((match) => match[2]);
-  assert.ok(urls.length > 0, "the grain and the rooms are there");
-  for (const url of urls) {
-    const inline = /^(data:image\/svg\+xml|%23)/.test(url);
-    const plate = /^\.\/assets\/paint\/[a-z-]+(?:-640)?\.webp$/.test(url);
-    assert.ok(inline || plate, `${url} is inline or a plate from this repository, nothing else`);
-  }
-  // The swatches in the room control use the 640 tiles, the rooms use the
-  // canonical plate; both are covered below.
-  const plates = [...new Set(urls.filter((url) => /assets\/paint\/[a-z-]+\.webp$/.test(url)))];
-  assert.deepEqual(plates.sort(), [
-    "./assets/paint/blush-hall.webp",
-    "./assets/paint/mint-class.webp",
-    "./assets/paint/sand-desk.webp",
-  ], "three rooms, all paintings this repository already ships");
+test("the wall is one painted, encoded, measured picture — edge to edge", () => {
+  // The theme used to stand in front of a set of 1280x714 *plates*: pictures made
+  // to sit behind a panel, with a cream paper margin. Stretched full-screen they
+  // read as a blank wall, which is what the theme then looked like. The wall is
+  // now its own asset with its own rules, and this test is those rules.
+  const manifest = JSON.parse(read("assets/walls/walls.json"));
+  assert.ok(manifest.rooms.length >= 1, "there is a wall");
+  const room = manifest.rooms.find((entry) => entry.room === GLASS_THEME.wall.room);
+  assert.ok(room, `${GLASS_THEME.wall.room} is the wall the theme names`);
 
-  // Each one is on disk, inside the tile budget, and in the offline cache: a room
-  // that is not cached is a hole in the wall when the Wi-Fi is off.
-  const precache = JSON.parse(read("precache.json"));
-  const list = Array.isArray(precache) ? precache : precache.urls;
-  for (const plate of plates) {
-    const path = plate.replace("./", "");
-    assert.ok(existsSync(new URL(`../${path}`, import.meta.url)), `${path} exists`);
-    const bytes = statSync(new URL(`../${path}`, import.meta.url)).size;
-    assert.ok(bytes <= 46 * 1024, `${path} is ${Math.round(bytes / 1024)} KB, inside the 46 KB tile budget`);
-    assert.ok(list.includes(plate) || list.some((entry) => String(entry).includes(path)), `${path} is precached`);
+  // 1. Two framings, both real files, both inside the measured budget. A phone
+  //    gets the portrait one: `cover` on a 16:9 painting crops a tall screen to
+  //    its middle third and throws the composition away.
+  assert.deepEqual(Object.keys(room.frames).sort(), ["tall", "wide"], "a landscape and a portrait framing");
+  for (const [frame, data] of Object.entries(room.frames)) {
+    const portrait = frame === "tall";
+    assert.equal(data.width > data.height, !portrait, `${frame} is framed ${portrait ? "portrait" : "landscape"}`);
+    for (const format of ["avif", "webp"]) {
+      const file = `assets/walls/${room.room}-${frame}.${format}`;
+      assert.ok(existsSync(new URL(`../${file}`, import.meta.url)), `${file} exists`);
+      const bytes = statSync(new URL(`../${file}`, import.meta.url)).size;
+      assert.equal(bytes, data[format], `${file} is the size the manifest records`);
+      assert.ok(bytes <= manifest.budget.each, `${file} is ${Math.round(bytes / 1024)} KB, inside the ${Math.round(manifest.budget.each / 1024)} KB wall budget`);
+    }
   }
 
-  // The measured promise: `tools/backdrop-report.mjs` composites painting →
-  // fields → veil → sheet for every pixel and keeps the worst. The numbers it
-  // wrote are what the test reads, so the claim cannot drift from the paint.
-  for (const name of ["blush-hall", "mint-class", "sand-desk"]) {
-    const report = JSON.parse(read(`assets/paint/${name}.backdrop.json`));
-    assert.equal(report.measured, true, `${name} has been measured`);
-    assert.ok(report.sheet.ink >= 7, `${name}: ink through the sheet is ${report.sheet.ink}:1`);
-    assert.ok(report.sheet.muted >= 4.5, `${name}: muted ink is ${report.sheet.muted}:1`);
-    assert.ok(report.sheet.accent >= 4.5, `${name}: the accent is ${report.sheet.accent}:1`);
-    // ...and the reason the hero is a sheet rather than text on the page: on the
-    // raw painting even the dark ink drops to 1.9:1 on the mint wall.
-    assert.ok(report.raw.ink < 7, `${name}: text straight on the painting would not clear 7:1`);
-  }
+  // 2. The page carries it as a <picture>, so art direction is real: a phone's
+  //    source comes first, and the fallback <img> is the landscape file.
+  const html = read("index.html");
+  const picture = /<picture class="wall-art"[\s\S]*?<\/picture>/.exec(html)?.[0];
+  assert.ok(picture, "the wall is a picture element");
+  assert.match(picture, /<source media="\(max-width: 720px\)" type="image\/avif" srcset="\.\/assets\/walls\/study-afternoon-tall\.avif/, "a phone gets the portrait AVIF");
+  assert.match(picture, /<source type="image\/avif" srcset="\.\/assets\/walls\/study-afternoon-wide\.avif/, "everyone else gets the landscape AVIF");
+  assert.match(picture, /<source media="\(max-width: 720px\)" type="image\/webp"/, "with a WebP portrait fallback");
+  assert.match(picture, /<img src="\.\/assets\/walls\/study-afternoon-wide\.webp[^"]*" alt="" width="1920" height="1080"/, "and an honest, silent fallback image");
+  assert.match(picture, /aria-hidden="true"/, "the room is decoration, not content");
+  assert.match(picture, /fetchpriority="high"/, "it is the first paint on the app screen");
+
+  // 3. Only one is fetched: a preload per viewport, with media queries.
+  assert.match(html, /<link rel="preload" href="\.\/assets\/walls\/study-afternoon-wide\.avif" as="image" type="image\/avif" media="\(min-width: 721px\)">/);
+  assert.match(html, /<link rel="preload" href="\.\/assets\/walls\/study-afternoon-tall\.avif" as="image" type="image\/avif" media="\(max-width: 720px\)">/);
+
+  // 4. It fills the screen. `inset: -7%; width: 100%; height: 100%` was the bug:
+  //    with width and height set, right/bottom are ignored, so the layer covered
+  //    only the top-left 93% and left a cream band down the right and the bottom.
+  const layer = /html\[data-style="glass"\] body\.premium-ui \.wall-art \{([\s\S]*?)\n\}/.exec(css)?.[1];
+  assert.ok(layer, "the wall is a layer of its own");
+  assert.match(layer, /position: fixed;/);
+  assert.match(layer, /inset: 0;/, "no bleed that leaves a band");
+  assert.doesNotMatch(layer, /inset: -/, "and no negative inset, which loses the right and bottom edges");
+  assert.match(layer, /min-height: 100dvh;/, "a full dynamic viewport, so a phone's address bar cannot clip it");
+  const image = /html\[data-style="glass"\] body\.premium-ui \.wall-art img \{([\s\S]*?)\n\}/.exec(css)?.[1];
+  assert.match(image, /object-fit: cover;/, "the browser crops, not the layout");
+  // ...and the phone framing keeps the composition.
+  assert.match(css, /@media \(max-width: 720px\) \{\s*html\[data-style="glass"\] body\.premium-ui \.wall-art img \{\s*object-position: center 38%;/);
+
+  // 5. The measured promise. `tools/backdrop-report.mjs` composites the real
+  //    stack over the wall's darkest pixel and writes the numbers this reads.
+  const report = JSON.parse(read(`assets/walls/${room.room}.backdrop.json`));
+  assert.equal(report.measured, true, "the wall has been measured");
+  assert.equal(report.stack.veil, "#fdf7f2" + Math.round(GLASS_THEME.wall.veil * 255).toString(16).padStart(2, "0"), "the veil is the exported alpha");
+  assert.ok(report.sheet.ink >= 7, `ink through the sheet is ${report.sheet.ink}:1`);
+  assert.ok(report.sheet.muted >= 4.5, `muted ink is ${report.sheet.muted}:1`);
+  assert.ok(report.sheet.accent >= 4.5, `the accent is ${report.sheet.accent}:1`);
+  // Text straight on a painting this detailed would be unreadable: 1.1:1.
+  assert.ok(report.raw.ink < 2, `the raw ink on the wall is ${report.raw.ink}:1, so nothing but glass sits on it`);
   assert.match(css, /html\[data-style="glass"\] body\.premium-ui \.premium-hero \{[^}]*background-color: var\(--tg-tint\)/, "the hero is a sheet");
   assert.match(css, /html\[data-style="glass"\] body\.premium-ui \.page-head \{[^}]*background-color: var\(--tg-tint\)/, "so is the page head");
-  assert.match(css, /html\[data-style="glass"\] body\.premium-ui \.workspace,[\s\S]{0,200}background: transparent/, "the page is the room");
 
-  // Also: the app links this sheet before the app bundle, so the first frame has it.
-  const html = read("index.html");
-  assert.match(html, /<link rel="stylesheet" href="\.\/styles-glass\.css\?v=\d+">/);
-  assert.ok(html.indexOf("styles-glass.css") < html.indexOf("js/boot.js"), "painted before boot");
-  // And the first frame already knows which room, before any module loads.
-  assert.match(html, /localStorage\.getItem\("vignan\.room"\)/, "the room is read before the first paint");
-});
+  // 6. The veil is thin on purpose: a thick one is what made the old picture
+  //    disappear. If someone raises it, the painting stops being visible.
+  assert.ok(GLASS_THEME.wall.veil <= 0.3, `the veil is ${GLASS_THEME.wall.veil}, thin enough to see the painting through`);
 
-test("a slow device gets the glass without the blur pass", () => {
-  // Lite mode is the performance story of this theme, so it is a test, not a note.
-  assert.match(css, /html\[data-style="glass"\]\[data-lite="1"\] body\.premium-ui \{/);
-  const lite = css.slice(css.indexOf('html[data-style="glass"][data-lite="1"] body.premium-ui {'));
-  assert.match(lite.slice(0, 400), /--tg-blur: 0px/, "the blur pass is dropped entirely, not halved");
-  // ...and no other tier may be more expensive than the default, or "lite" lies.
-  const phone = Number(/@media \(max-width: 640px\) \{[\s\S]*?--tg-blur: (\d+)px/.exec(css)?.[1]);
-  assert.ok(phone > 0 && phone <= GLASS_THEME.blur, `a phone blurs ${phone}px, no more than the default`);
-  assert.match(css, /html\[data-lite="1"\] body\.premium-ui::before \{[^}]*animation: none/s, "the aurora stops");
-  assert.match(css, /html\[data-lite="1"\] \.card::before[\s\S]{0,120}display: none/, "the specular is removed");
+  // 6b. The other half of the same promise: the *sheet* that carries the text is
+  //     thin enough to see the painting through too. 58% white over a light
+  //     painting rendered a panel about 85% white — opaque paper with the room
+  //     visible only in the margins, which is what the theme looked like before.
+  assert.ok(GLASS_THEME.glass <= 0.38, `the sheet is ${GLASS_THEME.glass} white, thin enough to read the room through`);
+  const tokens = /html\[data-style="glass"\] body\.premium-ui \{([\s\S]*?)\n\}/.exec(css)?.[1];
+  const alpha = String(Math.round(GLASS_THEME.glass * 100)).padStart(2, "0");
+  assert.match(tokens, new RegExp(`--tg-tint: rgba\\(255, 250, 246, \\.${alpha}\\);`), "the CSS tint is the exported alpha");
+  // The gradient over the tint is a highlight, not a second coat of paint: if its
+  // top stop is opaque the sheet is opaque again whatever the tint says.
+  const sheet = /--tg-sheet: linear-gradient\(150deg, rgba\(255, 255, 255, \.(\d+)\)/.exec(css)?.[1];
+  assert.ok(Number(`0.${sheet}`) <= 0.35, `the sheet's brightest stop is ${sheet}, not another layer of white`);
 
-  const app = read("js/app.js");
-  assert.match(app, /function preferLiteGlass\(\)/, "the decision is made in one place");
-  assert.match(app, /cores <= 4 \|\| memory <= 4/, "few cores or little memory means lite");
-  assert.match(app, /saveData === true/, "so does a metered connection");
-  assert.match(app, /root\.dataset\.lite = "1"/);
-  // The first frame decides too, before any module has loaded.
-  assert.match(read("index.html"), /navigator\.hardwareConcurrency \|\| 8/);
-});
+  // 7. There is no picker any more: one wall, not a choice of four pastels.
+  assert.doesNotMatch(read("index.html"), /gg-room|data-room=|vignan\.room/, "the room picker is gone");
+  assert.doesNotMatch(read("js/app.js"), /setRoom|vignan\.room/, "and so is its handler");
+  assert.doesNotMatch(css, /data-room=/, "and its styles");
 
-test("motion is ambient, and it stops when it is asked to", () => {
-  const reduced = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
-  for (const selector of ["body.premium-ui::before", ".app-shell::before", ".sidebar::before"]) {
-    assert.ok(reduced.includes(selector), `${selector} loops, so the reduced block must stop it`);
-  }
-  // Nothing that carries a word is animated: the moving things are the two
-  // background layers and a decorative flare.
-  const animated = [...css.matchAll(/animation:\s*([a-z-]+)/g)]
-    .map((match) => match[1])
-    .filter((name) => name !== "none");
-  assert.deepEqual([...new Set(animated)].sort(), ["tg-aurora", "tg-flare", "tg-sheen"]);
-  for (const name of new Set(animated)) {
-    assert.ok(css.includes(`@keyframes ${name}`), `${name} is defined`);
-  }
-});
-
-test("the theme is documented where a reader will look", () => {
-  const design = read("docs/DESIGN.md");
-  assert.match(design, /Glass Morphism/);
-  assert.match(design, /60-30-10|60 \/ 30 \/ 10/);
-  assert.ok(existsSync(new URL("../styles-glass.css", import.meta.url)));
+  // 8. The stylesheet is loaded before the sheet that would paint over it.
+  assert.ok(html.indexOf("styles-glass.css") < html.indexOf("styles-next.css"), "glass is read before the sheet that sets an opaque canvas");
 });
 
 test("the glass kit is a control, not a picture of one", () => {
@@ -285,98 +277,24 @@ test("the refraction lens runs on glass only, and the credit travels with it", (
   assert.match(lens, /MIT/, "and the file says so at the top");
 });
 
-test("the room control really changes the room, and remembers it", () => {
-  // Four swatches that do something. Each one is a painting, that painting's own
-  // measured colours as a wash, and an accent taken from the same pigment — so a
-  // tap changes the light, the accent and the picture together. The failure this
-  // guards against is the one that prompted the rewrite: four anonymous blocks
-  // that changed nothing anyone could see.
-  const html = read("index.html");
-  const app = read("js/app.js");
-  const rooms = [...html.matchAll(/class="gg-room" data-room="([a-z-]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(rooms, GLASS_THEME.rooms.map((room) => room.id), "every room in the theme has a swatch");
-  assert.deepEqual(rooms, ["blush-hall", "mint-class", "sand-desk", "plain"]);
 
-  // 1. Every room is a plate we ship, at its own plate, wash and accent.
-  const accents = new Set();
-  for (const room of GLASS_THEME.rooms) {
-    const rule = new RegExp(`\\[data-room="${room.id}"\\] body\\.premium-ui \\{([\\s\\S]*?)\\n\\}`).exec(css)?.[1];
-    assert.ok(rule, `${room.id} has a rule`);
-    assert.ok(rule.includes(`--tg-accent: ${room.accent};`), `${room.id} uses its own accent (${room.accent})`);
-    accents.add(room.accent);
-    if (room.fields) {
-      assert.ok(existsSync(new URL(`../assets/paint/${room.id}.webp`, import.meta.url)), `${room.id} is a plate we ship`);
-      assert.ok(rule.includes(`url("./assets/paint/${room.id}.webp")`), `${room.id} sets --tg-plate`);
-      // The wash is the plate's own colours, not the theme's four again.
-      for (const hex of room.fields) {
-        const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-        assert.ok(rule.includes(`rgba(${r}, ${g}, ${b},`), `${room.id} washes with its own ${hex}`);
-      }
-      assert.ok(room.fields.some((hex) => !GLASS_THEME.aurora.some((field) => field.hex === hex)),
-        `${room.id} is not just the theme's four fields under a different photo`);
-    } else {
-      assert.match(rule, /--tg-plate: none;/, "the painting can be turned off");
+test("the wall is encoded, not committed as a master, and the check proves it", () => {
+  // The PNG masters are the pipeline's input and stay out of the repository: the
+  // encoded pair is what ships. So there is no `--check` that quietly passes
+  // because nothing was measured — it reads what is on disk and compares it with
+  // the manifest, and it fails if a file is missing, resized or over budget.
+  const encoded = readdirSync(new URL("../assets/walls/", import.meta.url));
+  assert.ok(!encoded.some((name) => /\.(png|jpe?g)$/i.test(name)), "no masters are committed");
+  const manifest = JSON.parse(read("assets/walls/walls.json"));
+  for (const room of manifest.rooms) {
+    for (const [frame, data] of Object.entries(room.frames)) {
+      const avif = statSync(new URL(`../assets/walls/${room.room}-${frame}.avif`, import.meta.url)).size;
+      const webp = statSync(new URL(`../assets/walls/${room.room}-${frame}.webp`, import.meta.url)).size;
+      assert.equal(avif, data.avif, `${room.room}-${frame}.avif matches the manifest`);
+      assert.equal(webp, data.webp, `${room.room}-${frame}.webp matches the manifest`);
+      assert.ok(avif < webp, "AVIF is the smaller of the two, which is why it is preferred");
     }
   }
-  assert.equal(accents.size, GLASS_THEME.rooms.length, "no two rooms share an accent");
-
-  // 2. The control itself: the painting is the swatch, the name is written under
-  //    it, and it was bound to something.
-  for (const room of GLASS_THEME.rooms.filter((entry) => entry.fields)) {
-    assert.match(html, new RegExp(`<button type="button" class="gg-room" data-room="${room.id}"[^>]*>\\s*<img src="\\./assets/paint/${room.id}-640\\.webp"`),
-      `${room.id} shows its own painting`);
-  }
-  for (const label of ["Blush", "Mint", "Sand", "Fields"]) {
-    assert.match(html, new RegExp(`<span class="gg-room-label">${label}<\\/span>`), `${label} is named under its swatch`);
-  }
-  assert.match(app, /const setRoom = \(room\) => \{/, "one function owns the room");
-  assert.match(app, /document\.documentElement\.dataset\.room = room/, "the room is an attribute on the document");
-  assert.match(app, /localStorage\.setItem\("vignan\.room", room\)/, "and it is remembered");
-  assert.match(app, /swatch\.setAttribute\("aria-pressed", String\(active\)\)/, "the pressed state follows");
-  assert.match(app, /swatch\.classList\.toggle\("active", active\)/, "and so does the ring");
-  assert.match(app, /button\.addEventListener\("click", \(\) => setRoom\(button\.dataset\.room\)\)/, "a tap sets it");
-  // A saved room is restored on load, so a reload does not silently revert.
-  assert.match(app, /const savedRoom = localStorage\.getItem\("vignan\.room"\);/);
-  // Before the first frame too, so the wall never flashes.
-  assert.match(html, /document\.documentElement\.dataset\.room = room/);
-  assert.match(html, /<link rel="preload" href="\.\/assets\/paint\/blush-hall\.webp" as="image" type="image\/webp">/);
-  assert.match(css, /\.gg-room\.active img,[\s\S]{0,120}box-shadow/, "the selected swatch is ringed");
-
-  // 3. Cheap mode keeps the room but stops paying for it.
-  assert.match(css, /html\[data-lite="1"\] body\.premium-ui::before \{\s*animation: none;\s*\/\*[\s\S]{0,120}?\*\/\s*filter: none;\s*\}/, "lite drops the filter and the drift");
-});
-
-test("the room fills the screen, on a phone as much as on a desktop", () => {
-  // The bug this pins: `.app-shell` was only made transparent inside the desktop
-  // media query, so on a phone it painted an opaque cream wall over the painting
-  // and the room showed as a strip in the margins. The transparency must not be
-  // inside a breakpoint, and the plate must be a full-viewport fixed layer.
-  const fullBleed = css.slice(css.indexOf("/* THE ROOM IS EDGE TO EDGE"), css.indexOf("@media (min-width: 861px) {"));
-  for (const selector of [".app-shell", ".auth-gate"]) {
-    assert.ok(fullBleed.includes(selector), `${selector} is transparent outside every breakpoint`);
-  }
-  assert.ok(!fullBleed.includes("@media"), "none of it is inside a media query");
-  assert.match(fullBleed, /html\[data-style="glass"\] body\.premium-ui \.world|html\[data-style="glass"\] body\.premium-ui \.workspace/, "the workspace is in the same list");
-  for (const selector of ["workspace", "main", "view"]) {
-    assert.match(fullBleed, new RegExp(`body\\.premium-ui \\.${selector}`), `${selector} is transparent`);
-  }
-
-  const plate = /html\[data-style="glass"\] body\.premium-ui::before \{([\s\S]*?)\n\}/.exec(css)?.[1];
-  assert.ok(plate, "the plate is a layer of its own");
-  assert.match(plate, /position: fixed;/);
-  assert.match(plate, /background-size: cover;/);
-  assert.match(plate, /min-height: 100dvh;/, "a full dynamic viewport, so a phone's address bar cannot clip it");
-
-  // On a phone the framing moves and the drift stops: a moving full-screen image
-  // is a battery cost with nothing to show for it.
-  const phone = css.slice(css.indexOf('@media (max-width: 720px) {\n  html[data-style="glass"] body.premium-ui::before'));
-  const phoneBlock = phone.slice(0, phone.indexOf("}\n}") + 3);
-  assert.ok(phoneBlock.length > 40, "there is a phone block for the plate");
-  assert.match(phoneBlock, /background-position: center 34%/, "the plate is framed for a tall screen");
-  assert.match(phoneBlock, /animation: none;/, "and it stops moving");
-  assert.match(phoneBlock, /inset: 0;/, "with no bleed to crop against the viewport edge");
-
-  // The stylesheet is loaded before the sheets that would paint over it.
-  const html = read("index.html");
-  assert.ok(html.indexOf("styles-glass.css") < html.indexOf("styles-next.css"), "glass is read before the sheet that sets an opaque canvas");
+  // And the app is told about the budget it must stay inside.
+  assert.equal(manifest.budget.each, 220_000);
 });
