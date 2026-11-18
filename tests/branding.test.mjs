@@ -3,10 +3,13 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { canonicalOrigin } from "./canonical.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const read = (file) => readFileSync(path.join(root, file), "utf8");
-const domain = "https://vignanvidyanikethanai.onrender.com";
+// Read from index.html rather than restated here: when the deploy moves,
+// `npm run set-origin` rewrites the pages and this constant follows.
+const domain = canonicalOrigin();
 
 test("user-supplied AI mark is a self-contained, scalable vector", () => {
   const mark = read("assets/brand/vignan-ai-mark.svg");
@@ -20,14 +23,14 @@ test("user-supplied AI mark is a self-contained, scalable vector", () => {
 
 test("favicons and installed-app icons exist with the advertised dimensions", () => {
   const html = read("index.html");
-  assert.match(html, /rel="icon" href="\.\/icons\/icon\.svg\?v=62"/);
-  assert.match(html, /rel="icon" href="\.\/icons\/icon-48\.png\?v=62"/);
-  assert.match(html, /rel="apple-touch-icon" href="\.\/icons\/icon-192\.png\?v=62"/);
+  assert.match(html, /rel="icon" href="\.\/icons\/icon\.svg\?v=63"/);
+  assert.match(html, /rel="icon" href="\.\/icons\/icon-48\.png\?v=63"/);
+  assert.match(html, /rel="apple-touch-icon" href="\.\/icons\/icon-192\.png\?v=63"/);
   const manifest = JSON.parse(read("manifest.webmanifest"));
   const maskableSizes = manifest.icons.filter((icon) => icon.purpose === "maskable").map((icon) => icon.sizes).sort();
   assert.deepEqual(maskableSizes, ["192x192", "512x512"]);
   for (const icon of manifest.icons) {
-    assert.match(icon.src, /\?v=62$/);
+    assert.match(icon.src, /\?v=63$/);
     const file = icon.src.replace(/^\.\//, "").split("?")[0];
     assert.ok(existsSync(path.join(root, file)), `${file} exists`);
     if (icon.type === "image/png") {
@@ -49,7 +52,7 @@ test("crawlable canonical URLs, sitemap and social metadata agree", () => {
   const sitemap = read("sitemap.xml");
   assert.ok(html.includes(`<link rel="canonical" href="${domain}/">`));
   assert.ok(html.includes(`<meta property="og:url" content="${domain}/">`));
-  assert.ok(html.includes(`${domain}/icons/icon-512.png?v=62`));
+  assert.ok(html.includes(`${domain}/icons/icon-512.png?v=63`));
   assert.match(robots, /^Allow: \/$/m);
   assert.match(robots, /^Disallow: \/api\/$/m);
   assert.ok(robots.includes(`Sitemap: ${domain}/sitemap.xml`));

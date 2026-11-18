@@ -21,10 +21,13 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { canonicalOrigin } from "./canonical.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const read = (file) => readFileSync(`${root}/${file}`, "utf8");
 const BLOG = `${root}/blog`;
+// The site address lives in index.html; this reads it instead of restating it.
+const site = canonicalOrigin();
 const css = read("styles-blog.css");
 const landingCss = read("styles-welcome.css");
 const index = read("blog/index.html");
@@ -163,10 +166,13 @@ test("every link in the section goes somewhere real", () => {
     }
     assert.deepEqual(missing, [], `dead links: ${missing.join(", ")}`);
   }
-  // The only outward host is the one the project was asked to credit.
+  // Two hosts are allowed to appear absolutely: this site's own address (read
+  // from index.html, so a move does not break the test) and the project the
+  // student was asked to credit. Anything else is a leak.
+  const own = new RegExp(`${site.replace(/^https:\/\//, "").replace(/\./g, "\\.")}`);
   const remote = [...read("blog/index.html").matchAll(/href="(https?:\/\/[^"]+)"/g)].map((match) => match[1]);
   for (const url of remote) {
-    assert.ok(/zero-vast\.vercel\.app|vignanvidyanikethanai\.onrender\.com/.test(url), `unexpected outward link: ${url}`);
+    assert.ok(own.test(url) || /zero-vast\.vercel\.app/.test(url), `unexpected outward link: ${url}`);
   }
 });
 
@@ -180,14 +186,14 @@ test("every piece is a complete page a search engine can index", () => {
     const description = meta(html, "description");
     assert.ok(description.length >= 60 && description.length <= 200, `${file} description is ${description.length} characters`);
     assert.match(meta(html, "og:title"), /[A-Za-z]/);
-    assert.ok(html.includes(`<link rel="canonical" href="https://vignanvidyanikethanai.onrender.com/blog/${slug}.html">`));
+    assert.ok(html.includes(`<link rel="canonical" href="${site}/blog/${slug}.html">`));
     assert.ok(html.includes('<link rel="alternate" type="application/rss+xml"'), "the feed is discoverable");
 
     const data = jsonLd(html);
     assert.equal(data["@type"], "BlogPosting");
     assert.equal(data.headline, /<h1>([^<]+)<\/h1>/.exec(html)[1].replace(/&amp;/g, "&"));
     assert.equal(data.description, description);
-    assert.equal(data.mainEntityOfPage, `https://vignanvidyanikethanai.onrender.com/blog/${slug}.html`);
+    assert.equal(data.mainEntityOfPage, `${site}/blog/${slug}.html`);
     assert.match(data.datePublished, /^\d{4}-\d{2}-\d{2}$/);
     assert.ok(data.author?.name, "the author is named");
     assert.ok(!/AI (?:model|agent)$/.test(data.author.name), "the credit is to the student, not to a model");
@@ -231,10 +237,10 @@ test("the clean addresses are served, and the pages work offline", () => {
 
 test("the sitemap and the feed agree with the files", () => {
   for (const file of posts) {
-    assert.ok(sitemap.includes(`<loc>https://vignanvidyanikethanai.onrender.com/blog/${file}</loc>`), `${file} is in the sitemap`);
-    assert.ok(feed.includes(`https://vignanvidyanikethanai.onrender.com/blog/${file}`), `${file} is in the feed`);
+    assert.ok(sitemap.includes(`<loc>${site}/blog/${file}</loc>`), `${file} is in the sitemap`);
+    assert.ok(feed.includes(`${site}/blog/${file}`), `${file} is in the feed`);
   }
-  assert.ok(sitemap.includes("<loc>https://vignanvidyanikethanai.onrender.com/blog/</loc>"));
+  assert.ok(sitemap.includes(`<loc>${site}/blog/</loc>`));
   // The feed is valid XML with one channel and one item per post.
   assert.match(feed, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
   assert.equal((feed.match(/<channel>/g) || []).length, 1);

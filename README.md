@@ -853,7 +853,7 @@ After adding files, run `npm run precache` if you changed anything inside the ap
 npm test
 ```
 
-655 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, response compression (encoding negotiation, cache keys, and a spawned server proving a page arrives smaller and decodes back to the same bytes), the reading-position and shortcut arithmetic, the growing composer, and the server's security posture.
+662 Node tests cover page parsing, chunking, stemming, hybrid retrieval, grounded answers, quiz generation and grading, flashcard scheduling, streaks, provider adapters, prompt context, JSON extraction, web-result parsing, performance-card drawing, the permission-gated update flow, offline readiness, the service worker cache manifest, the legal pages, response compression (encoding negotiation, cache keys, and a spawned server proving a page arrives smaller and decodes back to the same bytes), the reading-position and shortcut arithmetic, the growing composer, the one-address rule for canonical links, the sitemap, the feed and the structured data, and the server's security posture.
 
 Everything at once — regenerate the cache manifest, run the suite, then prove the release works with the network off:
 
@@ -1035,7 +1035,16 @@ Other notes:
 
 The supplied AI mark has been redrawn as the reusable transparent SVG at `assets/brand/vignan-ai-mark.svg`. Browser favicons and separate mask-safe installed-app icons are in `icons/` (with a legacy `favicon.ico` at the root). All are served locally.
 
-`robots.txt`, `sitemap.xml`, canonical links and social-preview metadata point to the current Render site. To request indexing, verify `https://vignanvidyanikethanai.onrender.com/` in Google Search Console and submit `https://vignanvidyanikethanai.onrender.com/sitemap.xml`. Search engines decide whether and when to index pages or refresh a favicon; submission is not a guarantee. If you move to a different public domain, update the URLs in those files and in the page metadata first.
+`robots.txt`, `sitemap.xml`, canonical links and social-preview metadata point to the current Render site. To request indexing, verify `https://vignan-vidyanikethan-ai-1.onrender.com/` in Google Search Console and submit `https://vignan-vidyanikethan-ai-1.onrender.com/sitemap.xml`. Search engines decide whether and when to index pages or refresh a favicon; submission is not a guarantee.
+
+**Moving to a new address is one command.** Every absolute URL in the repository — canonical links, `og:url`, preview images, the sitemap, the feed, `robots.txt`, `security.txt`, the structured data, the README and the deploy checker — names one host, and that host is read from the canonical link in `index.html`. To move:
+
+```bash
+npm run set-origin -- https://your-new-service.onrender.com
+npm run check
+```
+
+The rewrite only touches `https://vignan*.onrender.com`, so documentation placeholders such as `<your-service>.onrender.com` are left alone. `tests/origin.test.mjs` fails the build if any file still names a different host, if a page's canonical disagrees with `index.html`, or if the rewriter loses a URL — which is the failure that let a retired address sit in 26 files after the move on 2026-11-17.
 
 ---
 
