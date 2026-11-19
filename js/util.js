@@ -149,3 +149,37 @@ export function wordOverlap(a, b) {
   for (const word of left) if (right.has(word)) shared += 1;
   return (2 * shared) / (left.size + right.size);
 }
+
+/** Bound a complete network operation, including reading its response body.
+ * Race as well as abort: a stalled transport must not keep the chat busy forever.
+ */
+export async function withNetworkDeadline(operation, { signal, timeoutMs = 25000 } = {}) {
+  const controller = new AbortController();
+  let timer;
+  let onAbort;
+  const stopped = new Promise((_, reject) => {
+    onAbort = () => {
+      controller.abort();
+      const error = new Error("The request was cancelled.");
+      error.name = "AbortError";
+      reject(error);
+    };
+    if (signal?.aborted) { onAbort(); return; }
+    signal?.addEventListener("abort", onAbort, { once: true });
+    timer = setTimeout(() => {
+      controller.abort();
+      const error = new Error("The online service took too long. Please retry; saved pages are still available.");
+      error.name = "TimeoutError";
+      reject(error);
+    }, timeoutMs);
+  });
+  try {
+    return await Promise.race([stopped, Promise.resolve().then(() => {
+      if (controller.signal.aborted) throw Object.assign(new Error("The request was cancelled."), { name: "AbortError" });
+      return operation(controller.signal);
+    })]);
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onAbort);
+  }
+}

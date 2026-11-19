@@ -1,7 +1,8 @@
+import { withNetworkDeadline } from "./util.js?v=81";
 /** Read public links through the bounded, same-origin server fetcher. */
-import { inspectFileBytes, MAX_REMOTE_BYTES } from "./files.js?v=80";
-import { extractPdfPages } from "./ingest.js?v=80";
-import { safeUrl } from "./util.js?v=80";
+import { inspectFileBytes, MAX_REMOTE_BYTES } from "./files.js?v=81";
+import { extractPdfPages } from "./ingest.js?v=81";
+import { safeUrl } from "./util.js?v=81";
 
 export function firstLink(text = "") {
   const match = String(text).match(/https?:\/\/[^\s<>"'`]+/i);
@@ -27,7 +28,7 @@ function safeFileName(url) {
   } catch { return "webpage"; }
 }
 
-export async function downloadPublicLink(url, { signal } = {}) {
+async function downloadPublicLinkInternal(url, { signal } = {}) {
   if (!safeUrl(url)) throw new Error("Enter a public http or https link.");
   if (hasLinkCredentials(url)) throw new Error("Please use a public link without usernames, passwords or signed credentials.");
   const response = await fetch("api/fetch", {
@@ -62,4 +63,8 @@ export async function readPublicLink(url, { signal, onProgress } = {}) {
     : [{ page: 1, text: inspected.text, heading: inspected.title || "Online source" }];
   const title = inspected.title || inspected.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ") || new URL(result.url).hostname;
   return { ...result, title: title.slice(0, 120), pages };
+}
+
+export function downloadPublicLink(url, options = {}) {
+  return withNetworkDeadline(signal => downloadPublicLinkInternal(url, { ...options, signal }), { signal: options.signal, timeoutMs: 25000 });
 }

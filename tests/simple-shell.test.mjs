@@ -95,8 +95,8 @@ test("a website can be fetched and asked about, through the guarded fetcher", ()
   // The browser never fetches the page: the request goes through the import
   // path that already blocks private addresses, scripts and archives.
   assert.match(app, /function fetchWebsiteForChat\(url\)/);
-  assert.match(app, /input\.value = url;\s*\n\s*button\.click\(\);/);
-  assert.match(app, /Explain this page in simple words, then tell me how it works: \$\{url\}/);
+  assert.match(app, /const book = await handleLinkImport\(\);/);
+  assert.match(app, /Explain this page in simple words: \$\{url\}/);
   assert.match(html, /Public pages only\. It is saved as a web source/);
 });
 

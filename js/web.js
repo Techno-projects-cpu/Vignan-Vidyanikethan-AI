@@ -1,3 +1,4 @@
+import { withNetworkDeadline } from "./util.js?v=81";
 /**
  * Optional, explicitly enabled web fallback.
  *
@@ -7,8 +8,8 @@
  * can turn it off; configured JSON search providers remain optional.
  */
 
-import { safeUrl, truncate } from "./util.js?v=80";
-import { LANGUAGE_CODES } from "./languages.js?v=80";
+import { safeUrl, truncate } from "./util.js?v=81";
+import { LANGUAGE_CODES } from "./languages.js?v=81";
 
 function firstArray(data) {
   if (Array.isArray(data)) return data;
@@ -56,7 +57,7 @@ async function responseJson(response) {
   }
 }
 
-export async function searchWeb(query, settings = {}, { signal, natural = "" } = {}) {
+async function searchWebInternal(query, settings = {}, { signal, natural = "" } = {}) {
   if (!settings.webEnabled) return { results: [], enabled: false, message: "Web fallback is off." };
   const mode = settings.webMode || "server";
   if (mode === "server") {
@@ -105,4 +106,8 @@ export function externalSearchUrl(query, provider = "duckduckgo") {
   return provider === "google"
     ? `https://www.google.com/search?q=${encoded}`
     : `https://duckduckgo.com/?q=${encoded}`;
+}
+
+export function searchWeb(query, settings = {}, options = {}) {
+  return withNetworkDeadline(signal => searchWebInternal(query, settings, { ...options, signal }), { signal: options.signal, timeoutMs: 25000 });
 }

@@ -6,6 +6,25 @@ const { default: puppeteer } = await import(process.env.PUPPETEER_MODULE || "pup
 const { default: chromium } = await import(process.env.CHROMIUM_MODULE || "@sparticuz/chromium");
 const browser = await puppeteer.launch({ executablePath: await chromium.executablePath(), args: chromium.args, headless: "shell" });
 try {
+  // Judge instructions have three grid items (number, title, explanation).
+  // Assert actual placement so prose cannot silently land in the number track.
+  const judge = await browser.newPage();
+  for (const width of [390, 768, 1024, 1366]) {
+    await judge.setViewport({ width, height: 900 });
+    await judge.goto(new URL("judge.html", process.env.CHAT_URL || "http://localhost:4173/").href, { waitUntil: "networkidle0" });
+    const rows = await judge.$$eval(".steps li", nodes => nodes.map(node => {
+      const title = node.querySelector("b").getBoundingClientRect();
+      const prose = node.querySelector("span").getBoundingClientRect();
+      return { x: title.x, proseX: prose.x, width: prose.width, top: prose.y, titleBottom: title.bottom };
+    }));
+    assert.equal(rows.length, 4);
+    for (const row of rows) {
+      assert.ok(row.width > 200 && Math.abs(row.x - row.proseX) < 1 && row.top >= row.titleBottom,
+        `${width}: Judge citation instructions are not in the prose column`);
+    }
+    console.log(`Judge steps ${width}px — PASS`);
+  }
+  await judge.close();
   for (const [width, height] of [[1024, 768], [800, 1280], [768, 1024], [390, 844], [1366, 768]]) {
     const page = await browser.newPage();
     await page.setViewport({ width, height, deviceScaleFactor: 1, isMobile: width <= 1024, hasTouch: width <= 1024 });
