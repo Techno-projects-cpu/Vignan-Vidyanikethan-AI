@@ -298,3 +298,104 @@ test("the wall is encoded, not committed as a master, and the check proves it", 
   // And the app is told about the budget it must stay inside.
   assert.equal(manifest.budget.each, 220_000);
 });
+
+test("the app has the login screen's corner: none, anywhere", () => {
+  // Round four's complaint was precise: the login screen looked right and the
+  // workspace behind it did not, and the reason was geometric. The gate's panel is
+  // squared by `styles-identity.css`, but the drawer, the sidebar, the top bar and
+  // the composer were still 12–26px round, so the first screen and the app were two
+  // products. This test is the rule that keeps them one.
+  assert.match(css, /--tg-r-sheet: 0;/);
+  assert.match(css, /--tg-r-slab: 0;/);
+  assert.match(css, /--tg-r-control: 0;/);
+  assert.doesNotMatch(css, /corner-shape:/, "a superellipse on a square is the same square");
+  assert.doesNotMatch(css, /--tg-corner/, "the corner token went with the radius");
+
+  // Every radius left in the sheet is either zero, inherited, or a circle: a dot, an
+  // avatar, a scrollbar thumb. A stray 12px is the drift this catches.
+  const radii = [...css.matchAll(/border-radius:\s*([^;]+);/g)].map((match) => match[1].trim());
+  assert.ok(radii.length > 10);
+  for (const value of radii) {
+    assert.match(
+      value,
+      /^(?:0|inherit|50%|99px|var\(--(?:tg-r-sheet|tg-r-slab|tg-r-control|tg-r-pill)\))$/,
+      `a radius is a token or a circle, found "${value}"`,
+    );
+  }
+  // The pill token survives only for genuinely round things.
+  const pillUses = radii.filter((value) => value.includes("tg-r-pill"));
+  assert.ok(pillUses.length <= 2, `the pill is for dots now, found ${pillUses.length} uses`);
+
+  // The shell is ruled rather than floated: no frame around the app, and a rule down
+  // the sidebar and under the top bar instead of a shadow.
+  const desktop = css.slice(css.indexOf("@media (min-width: 861px) {"), css.indexOf("/* THE PAGE ITSELF IS THE ROOM."));
+  assert.ok(desktop.includes("min-width: 861px"), "the desktop shell is where these rules live");
+  assert.doesNotMatch(desktop, /margin: 6px 6px 0/, "the top bar is not a floating pill in a frame");
+  const desktopRule = (selector) => {
+    const blocks = [...desktop.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
+    return blocks.filter((match) => match[1].split(",").some((part) => part.trim().endsWith(selector))).map((match) => match[2]).join("\n");
+  };
+  const side = desktopRule(".sidebar");
+  assert.match(side, /border-right: 1px solid var\(--tg-edge-dark\)/, "the sidebar is a ruled column");
+  assert.match(side, /border-radius: 0/, "and it is square");
+  const bar = desktopRule(".topbar");
+  assert.match(bar, /border-bottom: 1px solid var\(--tg-edge-dark\)/, "the top bar is a strip, not a pill");
+  assert.match(bar, /border-radius: 0/);
+  const composer = desktopRule(".composer");
+  assert.match(composer, /border-top: 1px solid var\(--tg-edge-dark\)/, "the composer ends the page instead of hovering");
+
+  // The drawer, which is the one the reader called out.
+  const drawer = /\.app-menu-panel \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
+  assert.match(drawer, /border-radius: 0/, "the menu has corners, not curves");
+  assert.match(drawer, /border-right: 1px solid/, "and a rule on the edge it opens on");
+
+  // The two ornaments that had nothing to do with the gate are gone.
+  assert.doesNotMatch(css, /tg-sheen|tg-flare/, "no looping sheen, no rotating flare");
+
+  // The filled action is ink, as it is on the gate, not a second colour system.
+  const primary = /\.premium-button\.primary,[\s\S]*?\{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
+  assert.match(primary, /background: var\(--tg-ink\)/, "the primary button is ink on porcelain");
+});
+
+test("small print sits on a sheet, never straight on the painting", () => {
+  // The complaint on the login screen was legibility, and it was measurable: muted
+  // 12.5px text on the wall is 3.3:1 (tools/backdrop-report.mjs, worst pixel), which
+  // is why "Guest progress stays in this browser" was hard to read. The fix was to
+  // stop putting small labels on the painting at all.
+  const html = read("index.html");
+  const report = JSON.parse(read("assets/walls/study-afternoon.backdrop.json"));
+  assert.ok(report.raw.muted < 4.5, `muted on the painting is ${report.raw.muted}:1 — so it may not sit there`);
+
+  // 1. The guest path moved inside the panel, so it is read through the sheet.
+  const panel = html.indexOf('class="auth-gate-panel"');
+  const guest = html.indexOf('class="auth-gate-guest"');
+  assert.ok(panel > 0 && guest > panel, "the guest block lives inside the panel");
+  assert.match(
+    html.slice(panel, guest),
+    /<form class="auth-card" id="gate-login-form"/,
+    "after the forms, not before them",
+  );
+
+  // 2. The footer, which cannot live in the panel, gets its own strip.
+  const foot = /\.auth-gate-foot \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
+  assert.match(foot, /background-color: var\(--tg-tint-strong\)/, "the footer is a tinted strip");
+  assert.match(foot, /box-shadow: none/, "a rule does the job a shadow was doing");
+
+  // 3. Small print inside a sheet is ink-2, not muted: at 12px a colour that only
+  //    just passes reads as grey.
+  const ruleFor = (selector) => {
+    const blocks = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
+    const found = blocks.filter((match) => match[1].split(",").some((part) => part.trim().endsWith(selector)));
+    return found.map((match) => match[2]).join("\n");
+  };
+  for (const selector of [".gate-form-note", ".gate-strength-label", ".auth-gate-guest p"]) {
+    const block = ruleFor(selector);
+    assert.ok(block, `${selector} has a rule in the glass layer`);
+    assert.match(block, /color: var\(--p-ink-2\)/, `${selector} is ink-2, not muted`);
+  }
+
+  // 4. And what is left on the painting — the headline, its paragraph, the feature
+  //    line — is ink, never the quiet grey.
+  const preview = /\.auth-gate-intro > p \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
+  assert.match(preview, /color: var\(--p-ink\)/, "the gate's own paragraph is ink");
+});

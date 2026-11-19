@@ -218,12 +218,64 @@ than an opaque wall in a second palette.
 
 ### The four layers a sheet is made of
 
-1. the tint, at 58% warm white (`#fffaf6`);
+1. the tint, at 34% warm white (`#fffaf6`) — thin enough to see the room through,
+   thick enough that the ink still clears 7:1 over the wall's darkest pixel;
 2. `backdrop-filter: blur(8px) saturate(180%)` plus the `--glass-lens` refraction, which is the glass itself;
 3. `inset 0 1px 0 #fff` — the lit top edge, the single line that stops a
    translucent box reading as a flat rectangle;
-4. a specular band that crosses the sheet once on hover **or keyboard focus**, and
-   a slow 18s sheen on the sidebar and composer so the screen is never frozen.
+4. a specular band that crosses the sheet once on hover **or keyboard focus**.
+
+The loops are gone: the 18-second sheen that used to cross the sidebar and the
+composer, and the 46vmax conic flare that rotated behind the drawer. On a painting
+that already has a window and a warm floor they read as a smudge on the glass, and
+the login screen — which is the reference — has neither.
+
+### The gate is the house style (2.40.0)
+
+The login screen was the only screen that looked right, and the reason turned out
+to be geometric. `styles-identity.css` squares the *controls* it enumerates
+(buttons, inputs, the gate panel, the command palette), while the glass layer
+rounded everything it did not enumerate: 18px sheets, a 26px sidebar slab, a 26px
+drawer, a pill top bar, 12–14px menu rows and fields. So the first screen and the
+app behind it were two products, and the menu the reader was looking at was curved
+while the panel above it was not.
+
+The gate won. Three rules now hold everywhere in the glass theme:
+
+1. **No radius.** `--tg-r-sheet`, `--tg-r-slab` and `--tg-r-control` are `0`, and
+   `--tg-r-pill` survives only for things that are genuinely circular — a status
+   dot, an avatar, a switch, a scrollbar thumb. `tests/glass.test.mjs` fails on any
+   other radius, and the superellipse `corner-shape` went with the radius it was
+   drawn on.
+2. **Ruled, not floating.** The 14px frame around the app is gone. The sidebar is a
+   column with a hairline down its edge, the top bar is a strip with a hairline
+   under it, the composer ends the page instead of hovering over it, and the drawer
+   is a panel with a rule on the edge it opens on. Shadows that a 1px line can do
+   better are removed.
+3. **Ink is the action.** The filled button is `#221b28` on porcelain — as it is on
+   the gate — not a second teal gradient. Teal stays the accent: links, the citation
+   rule, the tab you are on. White on ink is 15:1.
+
+The current row in the sidebar and the drawer is the *lit* one (a white sheet at
+62%, ink, bold), not a coloured bar down its side: a thick side bar is the most
+recognisable generated-UI tell, and `tests/design-rules.test.mjs` already forbids
+it.
+
+### Small print never sits on the painting
+
+Measured over the wall at the worst pixel (`tools/backdrop-report.mjs`): ink
+4.5:1, muted 3.3:1. So a 12.5px muted caption on the painting is below AA, which
+is exactly what the login screen's "Guest progress stays in this browser" was —
+and it was worse than it looked, because that block was *outside* the panel
+entirely. The fixes:
+
+- the guest path moved inside the panel, so it is read through the sheet
+  (ink 7.2:1, muted 5.3:1);
+- the footer, which cannot live in the panel, is a tinted strip with a hairline;
+- inside a sheet, small print uses `--p-ink-2` rather than `--p-muted`, because at
+  12px a colour that only just passes reads as grey;
+- what is left on the painting — the headline, its paragraph, the feature line —
+  is ink, never the quiet grey.
 
 ### The glass kit: two components, not a repaint
 
@@ -232,7 +284,7 @@ The glass theme carries one control surface of its own (`styles-glass.css` §10)
 hidden on every other theme:
 
 - **`.gg-seg`** — a segmented control on the Ask screen. The rail is a frosted,
-  lensed pill; the selected item is a white lens with a lit top edge, a shadow
+  lensed bar; the selected item is a white lens with a lit top edge, a shadow
   *under* it and a 14px accent tick, so the selection reads as a physical slider
   rather than a coloured button. It is navigation, not decoration: each item
   carries a `data-view` and the handler calls the same `setView()` the sidebar

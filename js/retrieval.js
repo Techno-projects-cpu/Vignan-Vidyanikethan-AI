@@ -6,10 +6,10 @@
  * with a light MMR pass so the model sees more than one page of context.
  */
 
-import { isStarterBookId } from "./starter-shelf.js?v=74";
-import { bigrams, chapterReference, chunkPages, parsePages, tokenize } from "./text.js?v=74";
-import { clamp } from "./util.js?v=74";
-import { computeStats, cosine, queryVector, vectorize } from "./vector.js?v=74";
+import { isStarterBookId } from "./starter-shelf.js?v=75";
+import { bigrams, chapterReference, chunkPages, parsePages, tokenize } from "./text.js?v=75";
+import { clamp } from "./util.js?v=75";
+import { computeStats, cosine, queryVector, vectorize } from "./vector.js?v=75";
 
 const K1 = 1.5;
 const B = 0.75;
