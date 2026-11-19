@@ -58,6 +58,11 @@ body.premium-ui {
      actually see — with the phone keyboard open, that is not the window. */
   --vn-viewport-height: 100dvh;
   --vn-viewport-offset: 0px;
+  /* How much of the window a keyboard is covering. Zero unless one is really on
+     screen — `viewportBox` in js/shell.js decides, and a browser toolbar does not
+     count. The Ask screen is anchored with this and the tab bar, never with a
+     measured height. */
+  --vn-keyboard: 0px;
 
   /* Motion. One curve, two durations, nothing clever. */
   --vn-ease: cubic-bezier(0.2, 0, 0, 1);
@@ -1543,7 +1548,8 @@ body.premium-ui .update-row strong {
 }
 
 @media (max-width: 860px) {
-  body.premium-ui { --vn-tabbar: calc(60px + env(safe-area-inset-bottom)); }
+  /* The simple shell hides .mobile-nav; do not reserve a phantom 60px dock. */
+  body.premium-ui { --vn-tabbar: 0px; }
 
   body.premium-ui .app-shell { grid-template-columns: minmax(0, 1fr); }
 
@@ -2024,35 +2030,20 @@ body.premium-ui .view:not(#view-ask) {
    layer has no ancestors to depend on. */
 
 body.premium-ui #view-ask.active {
+  /* Anchor both edges, rather than relying on a measured viewport height.
+     Reserve the mobile navigation and, when present, the software keyboard. */
   position: fixed;
-  top: var(--vn-viewport-offset, 0px);
+  top: 0;
   left: 0;
   right: 0;
-  /* The height of the *visible* window, not the window, minus the tab bar. On a
-     phone with the keyboard open those are three different numbers, and the
-     differences are exactly the part where the question box would otherwise be
-     hiding. js/shell.js keeps `--vn-viewport-height` up to date from
-     visualViewport; the fallback is the window. */
-  height: calc(var(--vn-viewport-height, 100dvh) - var(--vn-tabbar, 0px));
+  bottom: calc(var(--vn-tabbar, 0px) + var(--vn-keyboard, 0px));
   z-index: 1;
-  /* Three rows and no flow: the greeting, the conversation, the box. The box is
-     the third row, so it is at the bottom of the screen whatever the
+  /* A column with one flexible child: the conversation. Everything else keeps
+     its own height, so the box is the last item on the bottom edge whatever the
      conversation above it is doing — empty, one answer, or a long one being
-     written. It used to be the last child of the scrolling column, which worked
-     only while every ancestor agreed about its height. */
-  display: grid;
-  /* Five tracks, because the screen has five children — the painted band, the
-     greeting, the glass kit, the conversation and the box. Naming *every* one
-     matters: a child with no grid area is auto-placed into an implicit row, and
-     two implicit rows below the box would take height away from the row that is
-     supposed to fill the screen. */
-  grid-template-rows: minmax(0, auto) minmax(0, auto) minmax(0, auto) minmax(0, 1fr) auto;
-  grid-template-areas:
-    "paint"
-    "greeting"
-    "kit"
-    "conversation"
-    "composer";
+     written. */
+  display: flex;
+  flex-direction: column;
   max-width: none;
   margin: 0;
   padding: 0;
@@ -2060,15 +2051,60 @@ body.premium-ui #view-ask.active {
   background: var(--vn-canvas);
 }
 
-body.premium-ui #view-ask.active > .ask-paint { grid-area: paint; }
-body.premium-ui #view-ask.active > .premium-hero { grid-area: greeting; }
-body.premium-ui #view-ask.active > .gg-kit { grid-area: kit; }
-body.premium-ui #view-ask.active > .ask-layout { grid-area: conversation; }
+/* The painted band and the glass kit are the first things to go when the window
+   gets short: they are decoration next to a question and an answer. */
+body.premium-ui #view-ask.active > .ask-paint {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 184px;
+}
+
+body.premium-ui #view-ask.active > .premium-hero {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.premium-ui #view-ask.active > .gg-kit {
+  flex: 0 0 auto;
+}
+
+/* The one flexible child. `min-height: 0` is the whole trick in a column: without
+   it a flex item refuses to shrink below its content, which is how a chat log
+   ends up pushing the composer off the bottom of the screen. */
+body.premium-ui #view-ask.active > .ask-layout {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+}
+
+body.premium-ui #view-ask.active > .chat-column,
+body.premium-ui #view-ask.active .ask-layout > .chat-column {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
 body.premium-ui #view-ask.active > .composer {
-  grid-area: composer;
-  /* Above the conversation, so a long answer scrolls *under* the box rather
-     than over it. */
+  flex: 0 0 auto;
+  position: relative;
   z-index: 2;
+}
+
+/* A keyboard on screen: the greeting, the painted band and the kit would take
+   the room the answer needs, and the tab bar is behind the keyboard anyway. */
+body.premium-ui.keyboard-open {
+  --vn-tabbar: 0px;
+}
+
+body.premium-ui.keyboard-open .mobile-nav {
+  display: none;
+}
+
+body.premium-ui.keyboard-open #view-ask.active > .ask-paint,
+body.premium-ui.keyboard-open #view-ask.active > .premium-hero,
+body.premium-ui.keyboard-open #view-ask.active > .gg-kit,
+body.premium-ui.keyboard-open #view-ask.active .goal-cards {
+  display: none;
 }
 
 /* The empty chat keeps its greeting — a blank screen with a box at the bottom
@@ -3143,3 +3179,36 @@ body.sheet-open {
     top: calc(var(--vn-space-2) + env(safe-area-inset-top));
   }
 }
+
+/* Chat geometry: the old ask-layout retained `align-items: start` from its grid
+   layout. In a flex row that collapses the chat column to its contents instead
+   of stretching it to the available height. Browser measurement: a 70px log in
+   a 311px conversation area at 1024 × 768. */
+body.premium-ui #view-ask.active > .ask-layout { align-items: stretch; }
+body.premium-ui #view-ask.active .chat-log > .message { flex-shrink: 0; }
+
+/* Secondary settings must not consume half the tablet. Keep them reachable in
+   an upward-opening, scrollable panel; never add their height to the dock. */
+body.premium-ui #view-ask.active > .composer { display: block; }
+body.premium-ui #view-ask .chat-options { position: relative; margin-top: 6px; }
+body.premium-ui #view-ask .chat-options > summary {
+  cursor: pointer; font-size: 13px; line-height: 24px; color: var(--vn-ink);
+}
+body.premium-ui #view-ask .chat-options-panel {
+  position: absolute; bottom: 100%; left: 0; right: 0; z-index: 10;
+  max-height: 50vh; overflow-y: auto; overscroll-behavior: contain;
+  padding: 16px; border: 1px solid var(--vn-rule-strong);
+  border-radius: 0; background: #fffdfa; color: #221b28;
+  box-shadow: 0 -8px 24px rgba(34, 27, 40, .12);
+}
+/* The reading viewport does not need another logo-sized blank strip when the
+   navigation rail above it already reserves that room. */
+body.premium-ui #view-ask.active .chat-log { padding-top: 16px; }
+body.premium-ui #view-ask.active { animation: none; clip-path: none; transform: none; }
+body.premium-ui #view-ask.active > * { animation: none; }
+
+/* These controls used to be hidden entirely on phones during a conversation.
+   They now live in a collapsed panel, so keep every setting reachable there. */
+body.premium-ui #view-ask.has-conversation .chat-options .web-choice { display: flex; }
+body.premium-ui #view-ask.has-conversation .chat-options .composer-privacy,
+body.premium-ui #view-ask.has-conversation .chat-options .composer-meta details { display: block; }

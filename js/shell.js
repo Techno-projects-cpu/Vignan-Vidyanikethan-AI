@@ -180,8 +180,23 @@ export function bindEdgeSwipe(target, {
 export function viewportBox({ viewportHeight, viewportOffset, innerHeight } = {}) {
   const window_ = Number.isFinite(innerHeight) && innerHeight > 0 ? Math.round(innerHeight) : 0;
   const visible = Number.isFinite(viewportHeight) && viewportHeight > 120 ? Math.round(viewportHeight) : 0;
-  if (!visible) return { height: window_ ? `${window_}px` : "100dvh", top: "0px", keyboard: 0 };
   const offset = Number.isFinite(viewportOffset) && viewportOffset > 0 ? Math.round(viewportOffset) : 0;
-  const height = window_ ? Math.min(visible, window_) : visible;
-  return { height: `${height}px`, top: `${offset}px`, keyboard: Math.max(0, window_ - height) };
+  const gap = window_ && visible ? Math.max(0, window_ - visible) : 0;
+
+  // Ignore small visual-viewport differences (browser chrome). The caller also
+  // requires an editable focus and scale ≈ 1, so pinch zoom is not mistaken for
+  // a keyboard. This offset is independent of the full-window layout.
+  if (gap < KEYBOARD_MIN) {
+    return { height: window_ ? `${window_}px` : "100dvh", top: "0px", keyboard: 0 };
+  }
+  return { height: `${visible}px`, top: `${offset}px`, keyboard: gap };
 }
+
+/**
+ * How many pixels of the window have to disappear before this is a keyboard.
+ *
+ * The smallest software keyboard on the shortest phone is around 200px; a browser
+ * toolbar is 40–70px, and an iPad's floating accessory bar is about the same. 120
+ * sits between the two with room on both sides.
+ */
+export const KEYBOARD_MIN = 120;
