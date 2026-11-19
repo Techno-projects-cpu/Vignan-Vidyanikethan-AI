@@ -237,10 +237,10 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (743 checks) plus
+The quickest regression test for a UI fix is `npm test` (748 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.
 
-### Search, links and Judge instructions (2.45.1)
+### Search, links and Judge instructions (2.46.0)
 
 - [x] Chromium at 390, 768, 1024 and 1366px: all four citation-step explanations
   share the title's wide column rather than the number column (306–1118px text width).
@@ -252,7 +252,7 @@ The quickest regression test for a UI fix is `npm test` (743 checks) plus
 - [ ] Production: repeat a public webpage fetch and a real online search on the
   deployed host. This is not proven by mocked transport tests or local offline mode.
 
-### Successful public fetch, not only error paths (2.45.1)
+### Successful public fetch, not only error paths (2.46.0)
 
 - Root defect: `handleFetch` called nonexistent `securityHeaders()` after a
   successful download, so it returned 502. Use `baseSecurityHeaders(request)` and
@@ -269,3 +269,16 @@ The quickest regression test for a UI fix is `npm test` (743 checks) plus
   system CA via `NODE_EXTRA_CA_CERTS`; certificate verification was not disabled.
 - Reproduce with `node tools/check-public-links.mjs` while the server is running.
   This optional live check is separate from deterministic offline CI.
+
+### Start and presentation readiness (2.46.0)
+
+- Chromium: presentation navigation and no horizontal overflow at 390, 768, 1024
+  and 1366px; all seven story sections and the return-to-Start link are present.
+- Chromium: Start opens every study destination and submits through real Chat.
+- Chromium: 33 language tiles form eleven rows of three at those four widths.
+- Chromium with mocked cloud: ready hosted AI routes untouched defaults to
+  `/api/ai`; Nezaad switches local selection to hosted AI and exit restores local.
+- Existing Chromium chat geometry and Judge instruction checks still pass at all
+  five tested phone/tablet/desktop dimensions.
+- Real tablet keyboards, provider quota and account-backed shared activities still
+  require deployment/device verification. No new claim of a live provider test.

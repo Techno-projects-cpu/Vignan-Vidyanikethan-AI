@@ -51,6 +51,7 @@ export function playProActivation({ lines = [], title = "PRO MODE", duration = M
   const skip = doc?.getElementById("pro-skip");
   if (!overlay || !console_ || !label) return Promise.resolve(false);
 
+  const previousFocus = doc.activeElement;
   const fast = reducedMotion();
   const total = Math.max(0, lines.length);
   const pace = fast
@@ -59,6 +60,7 @@ export function playProActivation({ lines = [], title = "PRO MODE", duration = M
 
   // ---- reset ------------------------------------------------------------
   overlay.hidden = false;
+  skip?.focus({ preventScroll: true });
   overlay.classList.remove("pro-closing", "pro-locked");
   overlay.classList.add("pro-active");
   overlay.style.setProperty("--pro-total", String(total || 1));
@@ -110,10 +112,12 @@ export function playProActivation({ lines = [], title = "PRO MODE", duration = M
     doc.removeEventListener("keydown", onKey, true);
     skip?.removeEventListener("click", cleanup);
     overlay.removeEventListener("click", cleanup);
+    previousFocus?.focus?.({ preventScroll: true });
     resolve(true);
   };
 
   const onKey = (event) => {
+    if (event.key === "Tab") { event.preventDefault(); skip?.focus(); return; }
     if (event.key === "Escape" || event.key === "Enter" || event.key === " ") cleanup();
   };
 
@@ -174,7 +178,7 @@ export function playProActivation({ lines = [], title = "PRO MODE", duration = M
       if (finished) return;
       overlay.classList.add("pro-locked");
       label.classList.add("pro-title-live");
-      if (kicker) kicker.textContent = "locked on";
+      if (kicker) kicker.textContent = "ready";
       setProgress(100);
     }, fast ? Math.round(pace * (total + 1) * 0.5) : lockAt),
   );
@@ -187,6 +191,8 @@ export function playProActivation({ lines = [], title = "PRO MODE", duration = M
 
 /** Toggle the chrome that marks Pro Mode: body class and the topbar chip. */
 export function setProChrome(on) {
+  const powerdown = globalThis.document?.getElementById("pro-menu-powerdown");
+  if (powerdown) powerdown.hidden = !on;
   const body = globalThis.document?.body;
   const chip = globalThis.document?.getElementById("pro-chip");
   body?.classList.toggle("pro-mode", Boolean(on));

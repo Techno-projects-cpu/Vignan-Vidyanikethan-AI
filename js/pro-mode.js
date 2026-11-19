@@ -150,7 +150,7 @@ function plural(count, one, many = `${one}s`) {
  */
 export function proBootLines({ books = 0, pages = 0, dueCards = 0, decks = 0, streaks = 0, offline = false, model = "local engine" } = {}) {
   return [
-    `> voiceprint recognised · NEZAAD`,
+    `> Welcome back, Nezaad`,
     `> ${PRO_NAME} · ${PRO_ACRONYM.map(([, word]) => word).join(" ")}`,
     `> library: ${plural(books, "book")} · ${plural(pages, "page")}`,
     `> revision: ${plural(decks, "deck")} · ${plural(dueCards, "card")} due`,

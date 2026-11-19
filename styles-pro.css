@@ -483,3 +483,34 @@ body.pro-mode.pro-booting {
   .pro-bracket-a, .pro-bracket-c { left: 5vw; }
   .pro-bracket-b, .pro-bracket-d { right: 5vw; }
 }
+
+/* A personal welcome, not a simulated security console. The frame opens like a
+   page, the name settles once, then the student returns to the conversation. */
+.pro-overlay { background: #f7f1e8; color: #221b28; }
+.pro-overlay .pro-hud { display: none; }
+.pro-overlay .pro-boot {
+  width: min(760px, calc(100vw - 40px)); padding: clamp(24px,5vw,64px);
+  border: 1px solid #b7aaa0; background: #fffdfa; color: #221b28;
+  box-shadow: 16px 16px 0 #e5dcd0;
+  animation: pro-welcome-page 600ms cubic-bezier(.2,.7,.3,1) both;
+}
+.pro-overlay .pro-kicker { color: #32614f; letter-spacing: .14em; }
+.pro-overlay .pro-title { color: #221b28; font-size: clamp(28px, 5vw, 58px); line-height: 1.1; letter-spacing: -.04em; text-shadow: none; }
+.pro-overlay .pro-letter { color: inherit; filter: none; }
+.pro-overlay .pro-console { color: #51464c; min-height: 100px; font-size: 12px; max-height: 150px; overflow: hidden; }
+.pro-overlay .pro-line { color: #51464c; }
+.pro-overlay .pro-subtitle { color: #51464c; letter-spacing: 0; text-transform: none; }
+.pro-overlay .pro-meter { background: #e5dcd0; height: 3px; }
+.pro-overlay .pro-meter > span { background: #32614f; box-shadow: none; }
+.pro-overlay .pro-skip { color: #221b28; border-color: #b7aaa0; background: #fffdfa; min-height: 44px; }
+@keyframes pro-welcome-page { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .pro-overlay *, .pro-overlay { animation: none !important; transition: none !important; }
+}
+.pro-overlay { --pro: #254f43; --pro-dim: rgba(37,79,67,.4); --pro-line: #d4c9bd; }
+.pro-overlay.pro-locked .pro-kicker { color: #254f43; }
+.pro-overlay .pro-title .pro-letter { opacity: 1; transform: none; animation: none; filter: none; }
+.pro-overlay .pro-title { opacity: 1; white-space: normal; }
+.pro-overlay .pro-subtitle { opacity: 1; transform: none; }
+.pro-overlay .pro-line { opacity: 1; }
+.pro-overlay .pro-skip:hover { color: #254f43; }

@@ -32,9 +32,11 @@ try {
     await page.evaluate(() => document.querySelector("#startup-skip")?.click());
     await page.waitForFunction(() => !document.querySelector("#gate-guest-button")?.disabled);
     await page.click("#gate-guest-button");
-    await page.waitForFunction(() => document.querySelector("#view-ask")?.getBoundingClientRect().height > 0);
+    await page.waitForFunction(() => document.body.dataset.view === "start" || document.body.dataset.view === "ask");
     // End the optional tour; do not depend on a returning user's storage.
     await page.evaluate(() => document.querySelector("#first-run-skip")?.click());
+    await page.evaluate(() => document.querySelector('.start-tools [data-view="ask"]')?.click());
+    await page.waitForFunction(() => document.querySelector("#view-ask")?.getBoundingClientRect().height > 0);
     for (const long of [false, true]) {
       await page.evaluate((long) => {
         document.querySelector("#view-ask").classList.toggle("has-conversation", long);

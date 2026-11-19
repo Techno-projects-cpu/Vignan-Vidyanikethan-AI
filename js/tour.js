@@ -37,10 +37,10 @@
 /** @type {TourStep[]} */
 export const TOUR_STEPS = [
   {
-    view: "ask",
+    view: "start",
     title: "Ask in your own words",
-    body: "Type a question, or paste a public link. Bolt answers from the pages on this device and names the page it used, so you can check it.",
-    target: "#ask-form",
+    body: "Start with a question or choose a study tool. Your question opens Chat, where answers from saved pages point back to the material so you can check them.",
+    target: "#start-question-form",
   },
   {
     view: "library",

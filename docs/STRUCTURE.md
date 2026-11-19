@@ -7,16 +7,17 @@ is somebody else's.
 
 ```
 /
-├── index.html              the app (one document, eleven screens)
+├── index.html              the app (one document, twelve screens)
+├── presentation.html       the judges’ visual feature tour, no technical readouts
 ├── welcome.html            the landing page — no JavaScript at all
 ├── judge.html  legal.html  privacy.html  terms.html  acceptable-use.html
 │                           cookies.html  security.html  subprocessors.html
 │                           accessibility.html  disclaimer.html  copyright.html
 ├── blog/                   ten pieces + an index, hand-written HTML
 │
-├── js/                     80 modules, native ES modules, no bundler
+├── js/                     81 modules, native ES modules, no bundler
 ├── LICENSES/               third-party licence texts for vendored code (glasswork)
-├── styles*.css             13 stylesheets, one per surface (see below)
+├── styles*.css             14 stylesheets, one per surface (see below)
 ├── assets/                 two bundled fonts, brand marks, twenty-four painted plates (WebP + AVIF, two widths each)
 │                           and walls/ — the full-screen classroom painting, two framings, AVIF + WebP
 ├── icons/                  app icons, 48 → 512, plus the maskable pair

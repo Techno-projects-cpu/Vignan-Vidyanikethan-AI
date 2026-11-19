@@ -6,8 +6,8 @@
  * sync and makes retries readable.
  */
 
-import { authApiUrl } from "./auth.js?v=82";
-import { blockInOfflineMode } from "./offline-mode.js?v=82";
+import { authApiUrl } from "./auth.js?v=83";
+import { blockInOfflineMode } from "./offline-mode.js?v=83";
 
 const REQUEST_TIMEOUT = 15000;
 const CSRF_COOKIE = "vignan_csrf";
