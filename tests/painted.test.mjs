@@ -114,7 +114,7 @@ test("nothing paints offline that is not in the cache", () => {
 });
 
 test("every painting on the page carries its true size, real alt text and lazy loading", () => {
-  // 2.45.0 rebuilt the page around the gallery, so the check is no longer "the
+  // 2.45.1 rebuilt the page around the gallery, so the check is no longer "the
   // one hero plate": it is every plate the page shows, found by the path rather
   // than by a class. A picture that lies about its size is a layout shift, and a
   // page of twenty-four of them is a page that jumps while it loads.
@@ -142,7 +142,7 @@ test("every painting on the page carries its true size, real alt text and lazy l
 });
 
 test("text is never set directly on a field: the sheet under it is measured", () => {
-  // The 2.45.0 page has no photograph behind its type. It has four pastel fields
+  // The 2.45.1 page has no photograph behind its type. It has four pastel fields
   // and sheets of glass, which is a harder promise to keep honestly: the reader is
   // looking through a translucent pane at a moving colour. So the promise is
   // computed rather than asserted — take the tinted sheet at its *thinnest*

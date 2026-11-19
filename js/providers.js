@@ -1,4 +1,4 @@
-import { withNetworkDeadline } from "./util.js?v=81";
+import { withNetworkDeadline } from "./util.js?v=82";
 /**
  * Provider adapters for existing AI services.
  *
@@ -12,7 +12,7 @@ import { withNetworkDeadline } from "./util.js?v=81";
  * rotate to the next key on quota/auth/network failures.
  */
 
-import { isQuotaFailure, parseApiKeys, providerKeyVariants } from "./key-pool.js?v=81";
+import { isQuotaFailure, parseApiKeys, providerKeyVariants } from "./key-pool.js?v=82";
 
 export const PROVIDERS = {
   server: {

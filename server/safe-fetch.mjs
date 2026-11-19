@@ -218,3 +218,56 @@ export async function fetchPublicResource(input, { lookup = dns.lookup, requestI
     signal?.removeEventListener("abort", cancel);
   }
 }
+
+/** Recognise repository landing pages only. Do not rewrite arbitrary GitHub
+ * paths, private tokens, lookalike hosts or file URLs to a guessed API route. */
+export function githubReadmeTarget(input) {
+  const url = validatePublicUrl(input);
+  if (url.hostname !== "github.com" && url.hostname !== "www.github.com") return null;
+  const parts = url.pathname.split("/").filter(Boolean);
+  if (parts.length !== 2) return null;
+  const [owner, rawRepo] = parts;
+  const repo = rawRepo.replace(/\.git$/i, "");
+  if (!/^[a-z\d](?:[a-z\d-]{0,38})$/i.test(owner) || !/^[a-z\d_.-]{1,100}$/i.test(repo) || /^\.+$/.test(repo)) return null;
+  return {
+    sourceUrl: `https://github.com/${owner}/${repo}`,
+    repository: `${owner}/${repo}`,
+    apiUrl: `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`,
+  };
+}
+
+/** A repository is not a static article. Read its public README through the
+ * GitHub API instead of indexing GitHub's navigation, login prompts and chrome.
+ * Never clone, execute code, use the server's GitHub credentials or follow a
+ * download_url supplied by the API. All requests retain the guarded transport. */
+export async function fetchReadableResource(input, options = {}) {
+  const target = githubReadmeTarget(input);
+  if (!target) return fetchPublicResource(input, options);
+  let resource;
+  try {
+    resource = await fetchPublicResource(target.apiUrl, options);
+  } catch (error) {
+    if (/HTTP 404\b/.test(error.message)) throw new PublicFetchError("GitHub could not provide a public README for this repository. It may be private, missing, or have no README. Try a direct public text-file link.", 422);
+    if (/HTTP (?:403|429)\b/.test(error.message)) throw new PublicFetchError("GitHub is refusing or rate-limiting public API requests. Try again later or paste the README into Library.", 502);
+    throw error;
+  }
+  let data;
+  try { data = JSON.parse(resource.bytes.toString("utf8")); }
+  catch { throw new PublicFetchError("GitHub did not return a readable README response.", 502); }
+  if (data.encoding !== "base64" || typeof data.content !== "string") {
+    throw new PublicFetchError("GitHub did not include README text. Try a direct public text-file link.", 422);
+  }
+  const encoded = data.content.replace(/\s/g, "");
+  if (!encoded || !/^[A-Za-z0-9+/]*={0,2}$/.test(encoded) || encoded.length % 4 !== 0) {
+    throw new PublicFetchError("GitHub returned invalid README data.", 502);
+  }
+  let text;
+  try { text = new TextDecoder("utf-8", { fatal: true }).decode(Buffer.from(encoded, "base64")); }
+  catch { throw new PublicFetchError("This repository README is not readable UTF-8 text.", 422); }
+  if (!text.trim() || /[\u0000-\u0008\u000b\u000e-\u001f\u007f]/.test(text)) {
+    throw new PublicFetchError("This repository README is empty or contains binary data.", 422);
+  }
+  const bytes = Buffer.from(`# GitHub repository: ${target.repository}\n\nSource: ${target.sourceUrl}\nScope: public README only. Repository source files have not been downloaded or inspected.\n\n${text}`);
+  if (bytes.length > (options.maxBytes ?? MAX_REMOTE_BYTES)) throw new PublicFetchError("This repository README is too large to import.", 413);
+  return { bytes, contentType: "text/plain", finalUrl: target.sourceUrl, fileName: "repository-README.txt" };
+}

@@ -230,7 +230,7 @@ composer, and the 46vmax conic flare that rotated behind the drawer. On a painti
 that already has a window and a warm floor they read as a smudge on the glass, and
 the login screen — which is the reference — has neither.
 
-### The gate is the house style (2.45.0)
+### The gate is the house style (2.45.1)
 
 The login screen was the only screen that looked right, and the reason turned out
 to be geometric. `styles-identity.css` squares the *controls* it enumerates
@@ -277,7 +277,7 @@ entirely. The fixes:
 - what is left on the painting — the headline, its paragraph, the feature line —
   is ink, never the quiet grey.
 
-### The tile, and the content that was still on the wall (2.45.0)
+### The tile, and the content that was still on the wall (2.45.1)
 
 Two field reports, one cause. "The transparent things aren't refracting light" and
 "put the remaining contents on them" were describing the same gap: the panels were
@@ -324,9 +324,9 @@ one tall pane with the same rim, the rules are hairlines, and **Enter study spac
 is the gate's button: ink on porcelain, square, same arrow. Behaviour is untouched;
 `js/boot.js` still shows it, skips it and remembers the choice.
 
-### Two bugs the painting was hiding (2.45.0)
+### Two bugs the painting was hiding (2.45.1)
 
-The tile work in 2.45.0 was right and still looked wrong, because two things under
+The tile work in 2.45.1 was right and still looked wrong, because two things under
 it were broken in ways no screenshot of a panel can show.
 
 **The room had no wash.** `body.premium-ui::after` mixes four pastel fields, a warm
@@ -367,7 +367,7 @@ the menu to bring it back. Every step's screen and selector is resolved against 
 real `index.html` by `tests/tour.test.mjs`, and the copy is checked for the ghost
 features and for counts that drift.
 
-### Reading paper, and a box that cannot move (2.45.0)
+### Reading paper, and a box that cannot move (2.45.1)
 
 **"The AI answers are too hard to see."** The ink was never the problem. In
 `styles-identity.css`, the `max-width: 760px` block set
@@ -769,7 +769,7 @@ dependency, nothing it produces is served, and the site still builds and runs
 offline without it. Do not run `impeccable install` here — it writes agent hooks
 that execute outside approval. `detect` alone is read-only and local.
 
-### Tablet chat geometry (2.45.0)
+### Tablet chat geometry (2.45.1)
 
 The previous release's static CSS tests passed but did not prove that the chat was
 usable. Headless Chromium at 1024×768 measured a 394px composer and only a 70px

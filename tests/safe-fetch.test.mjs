@@ -110,3 +110,66 @@ test("size, compression, redirects and total duration are bounded", async () => 
     lookup: publicLookup, timeoutMs: 15, requestImpl: fakeRequester({ [url]: { hang: true } }),
   }), /too long/i);
 });
+
+test("repository roots map to the public README API without rewriting other URLs", async () => {
+  const { githubReadmeTarget } = await import("../server/safe-fetch.mjs");
+  assert.deepEqual(githubReadmeTarget("https://github.com/nodejs/node.git#readme"), {
+    sourceUrl: "https://github.com/nodejs/node", repository: "nodejs/node",
+    apiUrl: "https://api.github.com/repos/nodejs/node/readme",
+  });
+  for (const url of ["https://github.com.evil.example/nodejs/node", "https://example.com/nodejs/node", "https://github.com/nodejs/node/issues", "https://github.com/nodejs/node/blob/main/README.md"]) {
+    assert.equal(githubReadmeTarget(url), null);
+  }
+  assert.throws(() => githubReadmeTarget("https://github.com/nodejs/node?token=private"), /token|credentials/);
+});
+
+test("repository reading decodes README rather than GitHub chrome and preserves provenance", async () => {
+  const { fetchReadableResource } = await import("../server/safe-fetch.mjs");
+  const url = "https://api.github.com/repos/nodejs/node/readme";
+  const seen = [];
+  const result = await fetchReadableResource("https://github.com/nodejs/node", {
+    lookup: publicLookup,
+    requestImpl: fakeRequester({ [url]: { body: JSON.stringify({ encoding: "base64", content: Buffer.from("# Node.js\nA JavaScript runtime with public documentation.").toString("base64"), download_url: "http://127.0.0.1/secret" }) } }, seen),
+  });
+  assert.match(result.bytes.toString(), /# Node.js/);
+  assert.match(result.bytes.toString(), /README only/);
+  assert.equal(result.finalUrl, "https://github.com/nodejs/node");
+  assert.equal(result.contentType, "text/plain");
+  assert.equal(seen.length, 1, "never follows the API's download_url");
+  assert.equal(seen[0].url, url);
+  assert.equal(seen[0].headers.Authorization, undefined, "no sandbox/server GitHub credentials forwarded");
+});
+
+test("GitHub errors explain missing README and rate limits rather than pretending to read", async () => {
+  const { fetchReadableResource } = await import("../server/safe-fetch.mjs");
+  for (const [status, message] of [[404, /public README/], [403, /rate-limiting/], [429, /rate-limiting/]]) {
+    await assert.rejects(fetchReadableResource("https://github.com/nodejs/node", {
+      lookup: publicLookup,
+      requestImpl: fakeRequester({ "https://api.github.com/repos/nodejs/node/readme": { status } }),
+    }), message);
+  }
+});
+
+test("README API output is validated and bounded", async () => {
+  const { fetchReadableResource } = await import("../server/safe-fetch.mjs");
+  for (const payload of ["not json", JSON.stringify({ encoding: "none", content: "" }), JSON.stringify({ encoding: "base64", content: "%%%=" }), JSON.stringify({ encoding: "base64", content: "AA==" })]) {
+    await assert.rejects(fetchReadableResource("https://github.com/nodejs/node", {
+      lookup: publicLookup,
+      requestImpl: fakeRequester({ "https://api.github.com/repos/nodejs/node/readme": { body: payload } }),
+    }), /README|GitHub/);
+  }
+  await assert.rejects(fetchReadableResource("https://github.com/nodejs/node", {
+    maxBytes: 8, lookup: publicLookup,
+    requestImpl: fakeRequester({ "https://api.github.com/repos/nodejs/node/readme": { body: "123456789" } }),
+  }), /larger/);
+});
+
+test("ordinary public websites still use the guarded generic reader", async () => {
+  const { fetchReadableResource } = await import("../server/safe-fetch.mjs");
+  const result = await fetchReadableResource("https://example.com/lesson", {
+    lookup: publicLookup,
+    requestImpl: fakeRequester({ "https://example.com/lesson": { headers: { "content-type": "text/html" }, body: "<p>A lesson on plants.</p>" } }),
+  });
+  assert.equal(result.contentType, "text/html");
+  assert.equal(result.finalUrl, "https://example.com/lesson");
+});
