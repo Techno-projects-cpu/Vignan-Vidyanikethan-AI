@@ -114,6 +114,10 @@ test("the card, the menu and the T key all reach the same tour", () => {
   assert.match(initTour, /first-run-back/, "the listeners are bound every time, not only on the first run");
   assert.match(initTour, /first-run-next/);
   assert.match(initTour, /tourKey\(event\)/, "and the arrow keys work on a replay");
+  // Finishing puts the student back at the question box; skipping leaves them
+  // where they were, because they chose to stop there.
+  assert.match(app, /endFirstRun\(\{ returnToStart: true \}\)/);
+  assert.match(app, /if \(returnToStart && state\.currentView !== "ask"\) setView\("ask"\)/);
 
   // The menu row and the action behind it.
   assert.match(html, /data-action="tour"/);

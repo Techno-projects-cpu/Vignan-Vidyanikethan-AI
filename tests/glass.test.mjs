@@ -434,7 +434,7 @@ test("the content that was still on the painting now sits on a tile", () => {
 
   // The tile material itself: a static reflection, a cut edge and a thickness, so
   // the pane reads as glass whether or not the browser draws the lens.
-  const reflection = /\.composer::after \{([\s\S]*?)\n\}/.exec(css.slice(css.indexOf("§13")))?.[1] || "";
+  const reflection = /\.composer::after \{([\s\S]*?)\n\}/.exec(css.slice(css.indexOf("§13  THE TILE")))?.[1] || "";
   assert.match(reflection, /linear-gradient\(122deg/, "the pane catches a reflection at rest");
   assert.match(css, /inset 0 0 0 1px rgba\(255, 255, 255, \.44\)/, "the edge is a cut, not a fade");
   assert.match(css, /inset 0 -2px 0 rgba\(120, 90, 96, \.05\)/, "and the tile has a thickness");
@@ -450,9 +450,9 @@ test("the lens is stronger, and the Ask screen fills the window", () => {
   }
   assert.match(lens, /MAX_LENSES/, "and the count is still capped");
 
-  const hero = /#view-ask \.premium-hero \{([\s\S]*?)\n\}/.exec(css.slice(css.indexOf("§14")))?.[1] || "";
+  const hero = /#view-ask \.premium-hero \{([\s\S]*?)\n\}/.exec(css.slice(css.indexOf("§14  THE ASK")))?.[1] || "";
   assert.match(hero, /max-width: none/, "the greeting spans the window");
-  const column = /#view-ask \.chat-column \{([\s\S]*?)\n\}/.exec(css.slice(css.indexOf("§14")))?.[1] || "";
+  const column = /#view-ask \.chat-column \{([\s\S]*?)\n\}/.exec(css.slice(css.indexOf("§14  THE ASK")))?.[1] || "";
   assert.match(column, /max-width: none/, "so does the conversation");
   assert.match(css, /#view-ask \.chat-column \.message-body,[\s\S]{0,120}max-width: var\(--vn-measure/, "but the reading stays narrow");
 
@@ -471,7 +471,7 @@ test("the intro screen is the gate, not a black page from another product", () =
   // "The Enter Study Space is still the normal one." It was an opaque #080808
   // page with a white button — the last screen of the old design, one second
   // before the gate.
-  const intro = css.slice(css.indexOf("§15"));
+  const intro = css.slice(css.indexOf("§15  THE INTRO"));
   assert.match(intro, /\.startup-screen \{[\s\S]{0,120}background: transparent/, "the painting runs behind the intro");
   assert.match(intro, /\.startup-frame \{[\s\S]{0,400}background-color: var\(--tg-tint\)/, "the copy sits on one tall pane");
   assert.match(intro, /\.startup-frame \{[\s\S]{0,600}box-shadow: var\(--tg-rim\)/, "with the same rim");
@@ -529,4 +529,43 @@ test("the Ask screen has the room behind it, not a cream sheet", () => {
   const composer = /html\[data-style="glass"\] body\.premium-ui #view-ask \.composer \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
   assert.match(composer, /background-color: var\(--tg-tint\)/, "so the bar is a tile of its own");
   assert.match(composer, /backdrop-filter: var\(--tg-filter\)/, "with the lens in it");
+});
+
+test("a token is declared once, per selector", () => {
+  // `--tg-rim` used to be written twice on the same selector: the thin version in
+  // the token block and the tile's cut edge in §13. Both were valid, the later one
+  // won, and editing the first did nothing at all — a silent no-op that survived
+  // two releases. A token may be redefined per context (a phone gets a thicker
+  // tint, cheap mode gets none); it may not be redefined for the *same* selector.
+  const code = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  // Walk the braces, so a rule inside an `@media` is keyed with its context and
+  // two unrelated blocks never collapse into one.
+  const blocks = [];
+  const stack = [];
+  let start = 0;
+  for (let index = 0; index < code.length; index += 1) {
+    const char = code[index];
+    if (char === "\u007b") { // {
+      const head = code.slice(start, index).trim().replace(/\s+/g, " ");
+      stack.push(head);
+      start = index + 1;
+    } else if (char === "\u007d") { // }
+      const body = code.slice(start, index);
+      const selector = stack.at(-1) || "";
+      if (selector && body.includes("--tg-")) {
+        blocks.push({ context: stack.slice(0, -1).join(" > "), selector, body });
+      }
+      stack.pop();
+      start = index + 1;
+    }
+  }
+  const seen = new Map();
+  for (const block of blocks) {
+    for (const token of block.body.matchAll(/(--tg-[a-zA-Z0-9-]+)\s*:/g)) {
+      const key = `${block.context}|${block.selector}|${token[1]}`;
+      assert.ok(!seen.has(key), `${token[1]} is declared twice on "${block.selector}"${block.context ? ` in ${block.context}` : ""}`);
+      seen.set(key, true);
+    }
+  }
+  assert.ok(seen.size > 20, "the scan actually found the theme's tokens");
 });

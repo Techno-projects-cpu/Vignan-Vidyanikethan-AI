@@ -68,7 +68,10 @@ html[data-style="glass"] body.premium-ui {
   --tg-edge-dark: rgba(96, 68, 74, .13);
   --tg-ink: #221b28;
   --tg-muted: #3a323f;
+  /* There is one wall, so the accent follows it and nothing else varies. */
   --tg-accent: #063a35;
+  --brand: #063a35;
+  --brand-2: #084a44;
   --tg-blush: #f4b9c5;
   --tg-sand: #f0d9b6;
   --tg-lagoon: #8fd9d0;
@@ -131,20 +134,12 @@ html[data-style="glass"] body.premium-ui {
   --tg-r-control: 0;
   --tg-r-pill: 999px;
 
-  /* The rim, as one value so every surface catches the same light. It is the
-     single most important line in this sheet: two highlights on opposite
-     corners, a hairline outline, four bevel bands just inside the edge, and a
-     soft cast shadow underneath. */
-  --tg-rim:
-    inset 1.5px 1.5px 1px -1px rgba(255, 255, 255, .95),
-    inset -1.5px -1.5px 1px -1px rgba(255, 255, 255, .6),
-    inset 0 0 0 .5px rgba(255, 255, 255, .34),
-    0 0 0 .5px rgba(96, 68, 74, .12),
-    0 18px 44px -28px rgba(96, 68, 74, .5),
-    inset 0 6px 8px -6px rgba(255, 255, 255, .5),
-    inset 4px 0 8px -6px rgba(255, 255, 255, .22),
-    inset -4px 0 8px -6px rgba(255, 255, 255, .12),
-    inset 0 -6px 8px -6px rgba(96, 68, 74, .06);
+  /* The rim, as one value so every surface catches the same light.
+     It is declared ONCE, in §13, because that is where the tile's cut edge was
+     defined — the 1px inner ring and the 2px shade under the bottom edge. There
+     used to be a second copy here with thinner edges; both were on this same
+     selector, so the later one won and editing this one did nothing. A test now
+     fails if the token is declared twice. */
   --tg-rim-raised:
     inset 1.5px 1.5px 1px -1px rgba(255, 255, 255, 1),
     inset -1.5px -1.5px 1px -1px rgba(255, 255, 255, .7),
@@ -171,12 +166,6 @@ html[data-style="glass"] body.premium-ui {
 /* 2. The room behind everything: a painting, a wash, a sheet            */
 /* ------------------------------------------------------------------ */
 
-/* There is one wall, so the accent follows it and nothing else varies. */
-html[data-style="glass"] body.premium-ui {
-  --tg-accent: #063a35;
-  --brand: #063a35;
-  --brand-2: #084a44;
-}
 
 html[data-style="glass"] body.premium-ui {
   position: relative;
