@@ -1,8 +1,8 @@
-import { withNetworkDeadline } from "./util.js?v=81";
+import { withNetworkDeadline } from "./util.js?v=82";
 /** Read public links through the bounded, same-origin server fetcher. */
-import { inspectFileBytes, MAX_REMOTE_BYTES } from "./files.js?v=81";
-import { extractPdfPages } from "./ingest.js?v=81";
-import { safeUrl } from "./util.js?v=81";
+import { inspectFileBytes, MAX_REMOTE_BYTES } from "./files.js?v=82";
+import { extractPdfPages } from "./ingest.js?v=82";
+import { safeUrl } from "./util.js?v=82";
 
 export function firstLink(text = "") {
   const match = String(text).match(/https?:\/\/[^\s<>"'`]+/i);
@@ -50,7 +50,14 @@ async function downloadPublicLinkInternal(url, { signal } = {}) {
   const type = response.headers.get("X-Vignan-Content-Type") || "";
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (bytes.length > MAX_REMOTE_BYTES) throw new Error("The remote file is larger than 12 MB.");
-  const inspected = inspectFileBytes(bytes, { name: safeFileName(finalUrl), mime: type });
+  let name = safeFileName(finalUrl);
+  // A repository named e.g. "demo.js" is still a text README, not a script.
+  // The server supplies a filename only for its structured repository reader.
+  try {
+    const supplied = response.headers.get("X-Vignan-File-Name");
+    if (supplied) name = decodeURIComponent(supplied).slice(0, 140);
+  } catch { /* retain the URL-derived name */ }
+  const inspected = inspectFileBytes(bytes, { name, mime: type });
   const file = new File([bytes], inspected.name, { type: inspected.kind === "pdf" ? "application/pdf" : "text/plain" });
   return { url: finalUrl, file, inspected };
 }

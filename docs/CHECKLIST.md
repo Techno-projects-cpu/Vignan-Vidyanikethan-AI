@@ -237,10 +237,10 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (737 checks) plus
+The quickest regression test for a UI fix is `npm test` (743 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.
 
-### Search, links and Judge instructions (2.45.0)
+### Search, links and Judge instructions (2.45.1)
 
 - [x] Chromium at 390, 768, 1024 and 1366px: all four citation-step explanations
   share the title's wide column rather than the number column (306–1118px text width).
@@ -251,3 +251,21 @@ The quickest regression test for a UI fix is `npm test` (737 checks) plus
   and link APIs, web-search commands, Judge placement and presentation copy.
 - [ ] Production: repeat a public webpage fetch and a real online search on the
   deployed host. This is not proven by mocked transport tests or local offline mode.
+
+### Successful public fetch, not only error paths (2.45.1)
+
+- Root defect: `handleFetch` called nonexistent `securityHeaders()` after a
+  successful download, so it returned 502. Use `baseSecurityHeaders(request)` and
+  `Cache-Control: no-store`. A spawned-server success test now covers this path.
+- GitHub repository roots use the public README API and decode validated base64;
+  provenance explicitly says README only. No clone, code execution, authentication
+  forwarding or automatic use of the API's download URL. Private repositories,
+  missing READMEs and API throttling produce explanatory errors.
+- A safe `.txt` filename prevents repositories ending in `.js` from being mistaken
+  for executable script imports. Ordinary pages retain the existing guarded fetch.
+- Live local endpoint → actual GitHub → file validation → passage indexing:
+  `nodejs/node`: 43,193 bytes / 22 passages; this project: 113,847 bytes / 125 passages.
+  These runs used real responses, not mocks. The sandbox required its installed
+  system CA via `NODE_EXTRA_CA_CERTS`; certificate verification was not disabled.
+- Reproduce with `node tools/check-public-links.mjs` while the server is running.
+  This optional live check is separate from deterministic offline CI.
