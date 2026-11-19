@@ -230,7 +230,7 @@ composer, and the 46vmax conic flare that rotated behind the drawer. On a painti
 that already has a window and a warm floor they read as a smudge on the glass, and
 the login screen — which is the reference — has neither.
 
-### The gate is the house style (2.42.0)
+### The gate is the house style (2.42.1)
 
 The login screen was the only screen that looked right, and the reason turned out
 to be geometric. `styles-identity.css` squares the *controls* it enumerates
@@ -277,7 +277,7 @@ entirely. The fixes:
 - what is left on the painting — the headline, its paragraph, the feature line —
   is ink, never the quiet grey.
 
-### The tile, and the content that was still on the wall (2.42.0)
+### The tile, and the content that was still on the wall (2.42.1)
 
 Two field reports, one cause. "The transparent things aren't refracting light" and
 "put the remaining contents on them" were describing the same gap: the panels were
@@ -324,9 +324,9 @@ one tall pane with the same rim, the rules are hairlines, and **Enter study spac
 is the gate's button: ink on porcelain, square, same arrow. Behaviour is untouched;
 `js/boot.js` still shows it, skips it and remembers the choice.
 
-### Two bugs the painting was hiding (2.42.0)
+### Two bugs the painting was hiding (2.42.1)
 
-The tile work in 2.42.0 was right and still looked wrong, because two things under
+The tile work in 2.42.1 was right and still looked wrong, because two things under
 it were broken in ways no screenshot of a panel can show.
 
 **The room had no wash.** `body.premium-ui::after` mixes four pastel fields, a warm
