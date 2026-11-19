@@ -399,3 +399,86 @@ test("small print sits on a sheet, never straight on the painting", () => {
   const preview = /\.auth-gate-intro > p \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
   assert.match(preview, /color: var\(--p-ink\)/, "the gate's own paragraph is ink");
 });
+
+test("the content that was still on the painting now sits on a tile", () => {
+  // Field report: "just add a translucent tile and put the remaining contents on
+  // them." The remaining contents were the ten screens that opened with a
+  // `.section-toolbar` — eyebrow, screen name, one line — straight on the
+  // painting, plus the library's rights note, the code screen's footer, the
+  // settings rail and the assistant's answers.
+  const html = read("index.html");
+  const views = [...html.matchAll(/<section class="view[^"]*" id="(view-[a-z]+)"/g)].map((match) => match[1]);
+  assert.ok(views.length >= 10, `the app has ${views.length} screens`);
+  const untitled = views.filter((view) => !new RegExp(`id="${view}"[\\s\\S]*?class="section-toolbar`).test(html.slice(0, html.indexOf(`id="${view}"`) + 4000)));
+  // Ask is the exception: its greeting is a `.premium-hero`, which is a tile too.
+  assert.deepEqual(untitled.filter((view) => view !== "view-ask"), [], "every screen names itself inside a toolbar");
+
+  const tile = (selector) => {
+    const blocks = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
+    return blocks
+      .filter((match) => match[1].split(",").some((part) => part.trim().endsWith(selector)))
+      .map((match) => match[2])
+      .join("\n");
+  };
+  const toolbar = tile(".section-toolbar");
+  assert.match(toolbar, /background-color: var\(--tg-tint\)/, "the toolbar is a tinted tile");
+  assert.match(toolbar, /box-shadow: var\(--tg-rim\)/, "with the same rim as a card");
+  assert.match(toolbar, /var\(--glass-lens,\)/, "and it can refract, where the browser can");
+  assert.match(toolbar, /padding: 18px 22px 16px/, "with room inside it");
+
+  assert.match(tile(".view > p"), /background-color: var\(--tg-tint\)/, "a loose paragraph is a tile");
+  assert.match(tile(".settings-tabs"), /background-color: var\(--tg-tint\)/, "the settings rail is a bar, like the Ask rail");
+  const answer = /\.message\.assistant \.message-body \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
+  assert.match(answer, /background-color: var\(--tg-tint\)/, "an answer is glass, not an opaque block");
+  assert.match(tile(".message.user .message-body"), /background: var\(--tg-ink\)/, "the student's own words are ink");
+
+  // The tile material itself: a static reflection, a cut edge and a thickness, so
+  // the pane reads as glass whether or not the browser draws the lens.
+  const reflection = /\.composer::after \{([\s\S]*?)\n\}/.exec(css.slice(css.indexOf("§13")))?.[1] || "";
+  assert.match(reflection, /linear-gradient\(122deg/, "the pane catches a reflection at rest");
+  assert.match(css, /inset 0 0 0 1px rgba\(255, 255, 255, \.44\)/, "the edge is a cut, not a fade");
+  assert.match(css, /inset 0 -2px 0 rgba\(120, 90, 96, \.05\)/, "and the tile has a thickness");
+});
+
+test("the lens is stronger, and the Ask screen fills the window", () => {
+  // Two field reports in one: the panes did not visibly bend light, and the Ask
+  // screen sat in an 820px column with the painting down both sides.
+  const lens = read("js/glass-lens.js");
+  assert.match(lens, /rim: 38, edge: 1\.3, power: 2\.2, dispersion: 0\.26/, "the rim is wide enough to see");
+  for (const surface of [".section-toolbar", ".premium-hero", ".page-head", ".exam-panel"]) {
+    assert.ok(lens.includes(`"${surface}"`), `${surface} can carry a lens`);
+  }
+  assert.match(lens, /MAX_LENSES/, "and the count is still capped");
+
+  const hero = /#view-ask \.premium-hero \{([\s\S]*?)\n\}/.exec(css.slice(css.indexOf("§14")))?.[1] || "";
+  assert.match(hero, /max-width: none/, "the greeting spans the window");
+  const column = /#view-ask \.chat-column \{([\s\S]*?)\n\}/.exec(css.slice(css.indexOf("§14")))?.[1] || "";
+  assert.match(column, /max-width: none/, "so does the conversation");
+  assert.match(css, /#view-ask \.chat-column \.message-body,[\s\S]{0,120}max-width: var\(--vn-measure/, "but the reading stays narrow");
+
+  // The cap is still in `styles-next.css` — it is right for Minimal and Legacy,
+  // and the glass layer is loaded *before* that sheet. So the rule that removes it
+  // has to win on specificity, not on order: an attribute, a class and two elements
+  // more than the sheet that sets the cap.
+  const next = read("styles-next.css");
+  assert.match(next, /body\.premium-ui #view-ask \.premium-hero \{[\s\S]{0,200}max-width: 820px/, "the simple shell still caps its own greeting");
+  const glassHero = /html\[data-style="glass"\] body\.premium-ui #view-ask \.premium-hero \{([\s\S]*?)\n\}/.exec(css);
+  assert.ok(glassHero, "the glass layer names the same element with more weight");
+  assert.match(glassHero[0], /html\[data-style="glass"\] body\.premium-ui #view-ask/, "with the attribute that out-specifies it");
+});
+
+test("the intro screen is the gate, not a black page from another product", () => {
+  // "The Enter Study Space is still the normal one." It was an opaque #080808
+  // page with a white button — the last screen of the old design, one second
+  // before the gate.
+  const intro = css.slice(css.indexOf("§15"));
+  assert.match(intro, /\.startup-screen \{[\s\S]{0,120}background: transparent/, "the painting runs behind the intro");
+  assert.match(intro, /\.startup-frame \{[\s\S]{0,400}background-color: var\(--tg-tint\)/, "the copy sits on one tall pane");
+  assert.match(intro, /\.startup-frame \{[\s\S]{0,600}box-shadow: var\(--tg-rim\)/, "with the same rim");
+  const button = /\.startup-enter \{([\s\S]*?)\n\}/.exec(intro)?.[1] || "";
+  assert.match(button, /background: var\(--tg-ink\)/, "the button is ink on porcelain, like the gate's");
+  assert.match(button, /color: var\(--p-bg\)/);
+  assert.match(intro, /filter: none/, "the logo is no longer inverted for a black page");
+  // And the behaviour is untouched: boot still shows, skips and remembers it.
+  assert.match(read("js/boot.js"), /startup-enter|startup-skip/, "the intro still has its two controls");
+});

@@ -426,6 +426,7 @@ export function liquidGlass(el, options = {}) {
 export const GLASS_SELECTOR = [
   ".gg-seg",
   ".app-menu-panel",
+  ".auth-gate-panel",
   ".command-panel",
   ".sidebar",
   ".composer",
@@ -434,7 +435,13 @@ export const GLASS_SELECTOR = [
   ".sheet-panel",
   ".friends-panel",
   ".play-panel",
-  ".auth-gate-panel",
+  ".exam-panel",
+  // The tiles that carry a screen's own name. They were the content left lying
+  // straight on the painting, so they had no glass at all — see §13 of
+  // `styles-glass.css`, which gives them the same material as everything else.
+  ".section-toolbar",
+  ".premium-hero",
+  ".page-head",
 ].join(", ");
 
 /** How many lenses may exist at once. Each is one SVG filter and one backdrop
@@ -486,7 +493,11 @@ export function fitGlass(root = document.body, { selector = GLASS_SELECTOR, opti
       pending.delete(el);
       if (!el.isConnected || !lensesAllowed()) return;
       try {
-        lenses.set(el, liquidGlass(el, { rim: 26, edge: 1.05, power: 2.4, dispersion: 0.12, ...options }));
+        // A wider, stronger rim than the first pass: at 26px the bend sat under the
+        // panel's own lit edge and read as a soft blur. 38px of rim, sampled 1.3 rim
+        // widths in, with 26% colour split, is a band you can actually see the room
+        // travel across as you look along a pane.
+        lenses.set(el, liquidGlass(el, { rim: 38, edge: 1.3, power: 2.2, dispersion: 0.26, ...options }));
       } catch { /* a filter that cannot be built must not stop the app */ }
     });
   };

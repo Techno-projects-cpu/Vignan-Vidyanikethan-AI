@@ -145,7 +145,7 @@ html[data-style="brutal"] body.premium-ui .mobile-nav { border-bottom: 3px solid
 html[data-style="brutal"] body.premium-ui .eyebrow { font-weight: 800; letter-spacing: .16em; }
 
 /* A style that is light must stay light even when the invert switch says dark.
-   2.40.0 made the default glass theme a daylight one, so it is pinned here too. */
+   2.41.0 made the default glass theme a daylight one, so it is pinned here too. */
 html[data-style="soft"] body.premium-ui,
 html[data-style="editorial"] body.premium-ui,
 html[data-style="luxury"] body.premium-ui,
