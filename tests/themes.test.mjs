@@ -33,8 +33,8 @@ const everySheet = `${css}\n${glassCss}\n${paintedCss}`;
 const app = read("js/app.js");
 
 test("seventeen styles — glass, six classic and ten painted — complete and distinct", () => {
-  // 2.32.0 added the painted edition; 2.40.0 put Glass Morphism in front of it and
-  // made it the default; 2.40.0 added three daylight rooms (blush, sand, mint) so
+  // 2.32.0 added the painted edition; 2.41.0 put Glass Morphism in front of it and
+  // made it the default; 2.41.0 added three daylight rooms (blush, sand, mint) so
   // the painted set is not a set of night rooms with a light default in front of
   // it. Glass has no painting (it is made of light), so it is the one theme that
   // is neither classic nor plate-backed.

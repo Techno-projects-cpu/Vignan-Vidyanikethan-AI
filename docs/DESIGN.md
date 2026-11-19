@@ -230,7 +230,7 @@ composer, and the 46vmax conic flare that rotated behind the drawer. On a painti
 that already has a window and a warm floor they read as a smudge on the glass, and
 the login screen — which is the reference — has neither.
 
-### The gate is the house style (2.40.0)
+### The gate is the house style (2.41.0)
 
 The login screen was the only screen that looked right, and the reason turned out
 to be geometric. `styles-identity.css` squares the *controls* it enumerates
@@ -276,6 +276,53 @@ entirely. The fixes:
   12px a colour that only just passes reads as grey;
 - what is left on the painting — the headline, its paragraph, the feature line —
   is ink, never the quiet grey.
+
+### The tile, and the content that was still on the wall (2.41.0)
+
+Two field reports, one cause. "The transparent things aren't refracting light" and
+"put the remaining contents on them" were describing the same gap: the panels were
+relying on a Chromium-only SVG lens to look like glass, and ten of the eleven
+screens still opened with their own name sitting straight on the painting.
+
+**The tile is now the material, and the lens is the enhancement.** A pane carries
+three static parts, so it reads as glass in every browser and in cheap mode:
+
+1. a diagonal reflection across the top-left at 34% falling to nothing by 42% —
+   the light a window catches whether or not anything moves behind it;
+2. a full 1px inner ring, so the edge is a *cut* edge rather than a fade;
+3. a 2px inner shade along the bottom edge, which is what gives a translucent
+   rectangle a thickness.
+
+The lens is still there and is now much stronger: a 38px rim (was 26), sampled
+1.3 rim widths in (was 1.05), with a 26% colour split (was 12%). It is applied to
+`.section-toolbar`, `.premium-hero`, `.page-head` and `.exam-panel` as well as the
+sheets, so the surfaces that carry a screen's own name can bend light too.
+
+**What moved onto a tile:** every `.section-toolbar` (the eyebrow, the screen name
+and its one line of explanation — the single largest piece of loose text in the
+app), a screen's own paragraphs (`.view > p`: the library rights note, the code
+screen's footer), the settings rail, and the assistant's answers. The student's
+own message stays solid ink — it is a person's words, not a surface — and the
+answer is glass, because it is something the app wrote on top of the room.
+
+### The Ask screen fills the window
+
+The greeting and the conversation were both capped at 820px in `styles-next.css`,
+so on a laptop the Ask screen was a column with 300px of painting down each side.
+The glass layer lifts both caps (it out-specifies that sheet with the
+`data-style` attribute, because it is loaded *before* it). What stays narrow is the
+reading: `.message-body` keeps `--vn-measure`, because a 1400px line of prose is a
+worse failure than a narrow one. The question box is a docked bar on the bottom
+edge, not a floating slab.
+
+### The intro is the gate
+
+The last screen of the old design was the first one anybody saw: an opaque
+`#080808` page with a white button, drawn before the glass theme existed. It is now
+the same page as the login screen — the painting runs behind it, the copy sits on
+one tall pane with the same rim, the rules are hairlines, and **Enter study space**
+is the gate's button: ink on porcelain, square, same arrow. Behaviour is untouched;
+`js/boot.js` still shows it, skips it and remembers the choice.
 
 ### The glass kit: two components, not a repaint
 
