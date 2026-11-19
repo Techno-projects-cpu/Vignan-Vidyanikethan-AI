@@ -230,7 +230,7 @@ composer, and the 46vmax conic flare that rotated behind the drawer. On a painti
 that already has a window and a warm floor they read as a smudge on the glass, and
 the login screen — which is the reference — has neither.
 
-### The gate is the house style (2.41.0)
+### The gate is the house style (2.42.0)
 
 The login screen was the only screen that looked right, and the reason turned out
 to be geometric. `styles-identity.css` squares the *controls* it enumerates
@@ -277,7 +277,7 @@ entirely. The fixes:
 - what is left on the painting — the headline, its paragraph, the feature line —
   is ink, never the quiet grey.
 
-### The tile, and the content that was still on the wall (2.41.0)
+### The tile, and the content that was still on the wall (2.42.0)
 
 Two field reports, one cause. "The transparent things aren't refracting light" and
 "put the remaining contents on them" were describing the same gap: the panels were
@@ -323,6 +323,49 @@ the same page as the login screen — the painting runs behind it, the copy sits
 one tall pane with the same rim, the rules are hairlines, and **Enter study space**
 is the gate's button: ink on porcelain, square, same arrow. Behaviour is untouched;
 `js/boot.js` still shows it, skips it and remembers the choice.
+
+### Two bugs the painting was hiding (2.42.0)
+
+The tile work in 2.42.0 was right and still looked wrong, because two things under
+it were broken in ways no screenshot of a panel can show.
+
+**The room had no wash.** `body.premium-ui::after` mixes four pastel fields, a warm
+veil, a light from above and the paper grain into one `background`. It referred to
+`--tg-wash-1…4` and no sheet in the project ever defined them. A custom property
+with no fallback inside `var()` does not degrade to "no colour": it makes the whole
+declaration **invalid at computed-value time**, so the browser dropped the entire
+layer. The room was the raw painting — no fields, no veil, no grain — which is what
+"the transparent things aren't refracting light" was looking at. The four values
+are now declared from `GLASS_THEME.aurora` at the theme's own 26%, and
+`tests/glass.test.mjs` fails if this sheet ever reads a token no sheet defines.
+
+**The Ask screen painted over the room.** `styles-next.css` pins that view with
+`position: fixed` and gives it `background: var(--vn-canvas)` — the opaque cream.
+The `.view { background: transparent }` rule in this layer could never win, because
+an id out-specifies a class. So the app's home screen was a solid slab in front of
+the painting and every tile on it was glass in front of a flat wall. The id is named
+here now, at the same weight, and the question box — which ended the page with a
+gradient to the same cream — is a tile too.
+
+The lesson is in the ordering: a lens, a rim and a dispersion are worth nothing
+without something behind them to bend.
+
+### The tour goes to the screen it describes
+
+The first-run card had rotted into fiction: it promised "five blocks: explain a
+concept, quiz me, my viva is coming up…" on a screen whose goal blocks had been
+removed, and offered six named styles the picker no longer had. A tour that
+describes a different product is worse than no tour, because it is the first thing
+somebody reads.
+
+It is eight steps now, one per screen, and each one *navigates* — "look at the
+Library" while the app shows something else is the other half of the same mistake.
+The card stays a card: square, on a tile, outlined target in the accent, no scrim,
+`aria-modal="false"`, a square per step, a Back that starts disabled, Enter on the
+focused button to advance, arrow keys to walk, Escape to put it away, and **T** or
+the menu to bring it back. Every step's screen and selector is resolved against the
+real `index.html` by `tests/tour.test.mjs`, and the copy is checked for the ghost
+features and for counts that drift.
 
 ### The glass kit: two components, not a repaint
 

@@ -92,6 +92,23 @@ html[data-style="glass"] body.premium-ui {
      is what keeps the type readable over a painting with this much detail. */
   --tg-plate-tone: saturate(1.05) contrast(1.02) brightness(1.02);
   --tg-veil: rgba(253, 247, 242, .26);
+  /* THE FOUR FIELDS THE WASH IS MADE OF.
+     §2's wash mixes these four pastels over the painting, and for several releases
+     it referred to them without ever defining one. An undefined custom property
+     inside a `var()` with no fallback makes the *whole declaration* invalid at
+     computed-value time, so the browser threw away the entire `background` — no
+     fields, no veil, no light from above, no paper grain. The room was the raw
+     painting and nothing else, which is exactly what "the transparent things
+     aren't refracting light" was looking at: there was no glass and no light in
+     the wall for it to bend.
+     The hexes and the 26% are the theme module's own numbers
+     (`GLASS_THEME.aurora`, `wall.fieldAlpha`), which `tools/backdrop-report.mjs`
+     already composites — the stylesheet was the only place out of step. */
+  --tg-wash-1: rgba(244, 185, 197, .26);
+  --tg-wash-2: rgba(240, 217, 182, .26);
+  --tg-wash-3: rgba(143, 217, 208, .26);
+  --tg-wash-4: rgba(248, 201, 174, .26);
+  --tg-space: 16px;
   /* What the app dims to behind the menu. */
   --tg-scrim: rgba(34, 27, 40, .26);
   --tg-sheet: linear-gradient(150deg, rgba(255, 255, 255, .30), rgba(255, 255, 255, .10) 46%, rgba(255, 255, 255, .02) 74%);
@@ -1349,6 +1366,21 @@ html[data-style="glass"] body.premium-ui #view-ask .premium-hero {
    worse failure than a narrow one.
    ------------------------------------------------------------------------ */
 
+/* THE ASK SCREEN HAD NO ROOM BEHIND IT.
+   `styles-next.css` pins this view with `position: fixed` and gives it
+   `background: var(--vn-canvas)`. In this theme `--vn-canvas` resolves to
+   `--p-bg`, which is the opaque cream `#fdf7f2` — so the app's home screen was a
+   solid sheet over the painting, and every tile on it was glass in front of a
+   flat wall. Nothing to refract, nothing to see through, no matter how strong the
+   lens or how bright the rim.
+   The `.view { background: transparent }` rule earlier in this file cannot win:
+   `#view-ask.active` carries an id and `.view` does not. The id has to be named
+   here, at the same weight, and this file loads after `styles-next.css`. */
+html[data-style="glass"] body.premium-ui #view-ask.active {
+  background: transparent;
+  background-image: none;
+}
+
 html[data-style="glass"] body.premium-ui #view-ask .premium-hero {
   width: 100%;
   max-width: none;
@@ -1376,12 +1408,20 @@ html[data-style="glass"] body.premium-ui #view-ask .message-content {
 
 /* The question box is the one control on this screen, so it spans the window too
    and sits on the bottom edge like a docked bar. */
+/* `body.premium-ui .composer` in `styles-next.css` ends the page with a gradient
+   from transparent to `--vn-canvas` — opaque cream by 18% of its height. With the
+   room back behind the screen, that gradient was the last flat wall left on it, so
+   the bar is a tile too: tint, lens, rim, and a hairline where it stops. */
 html[data-style="glass"] body.premium-ui #view-ask .composer {
   margin: 0;
   border: 0;
   border-top: 1px solid var(--tg-edge-dark);
   border-radius: 0;
-  box-shadow: none;
+  background-color: var(--tg-tint);
+  background-image: var(--tg-sheet);
+  -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
 }
 
 html[data-style="glass"] body.premium-ui #view-ask .chat-log {
@@ -1566,4 +1606,88 @@ html[data-style="glass"] body.premium-ui .code-language.active {
   background: rgba(255, 255, 255, .78);
   box-shadow: inset 0 1px 0 #fff, 0 0 0 1px var(--tg-edge-dark);
   color: var(--tg-ink);
+}
+
+/* ========================================================================
+   §16  THE TOUR IS A TILE TOO
+   ------------------------------------------------------------------------
+   The first-run card was the last surface in the app drawn by another
+   designer: a rounded black shadow and a solid panel, sitting in the corner
+   over the room. It is a sheet of glass like everything else now, and the
+   thing it points at gets an outline in the theme's accent so a room full of
+   people can see what the sentence is about.
+
+   The card keeps `aria-modal="false"` and no scrim: it explains, it does not
+   interrupt. The only thing that changes while it is open is the outline.
+   ------------------------------------------------------------------------ */
+
+html[data-style="glass"] body.premium-ui .first-run {
+  border: 0;
+  border-radius: var(--tg-r-slab);
+  padding: 18px 20px 16px;
+  background-color: var(--tg-tint-strong);
+  background-image: var(--tg-sheet);
+  -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow: var(--tg-rim);
+}
+
+html[data-style="glass"] body.premium-ui .first-run-step {
+  font-family: var(--display);
+  letter-spacing: .18em;
+  color: var(--tg-accent);
+}
+
+html[data-style="glass"] body.premium-ui .first-run h2 {
+  font-family: var(--display);
+  font-size: 21px;
+  line-height: 1.15;
+  letter-spacing: -.01em;
+  color: var(--tg-ink);
+}
+
+html[data-style="glass"] body.premium-ui .first-run p {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--p-ink-2);
+}
+
+html[data-style="glass"] body.premium-ui .first-run-dots { color: var(--tg-ink); }
+
+html[data-style="glass"] body.premium-ui .first-run-actions .button.ghost {
+  border: 1px solid var(--tg-edge-dark);
+  border-radius: var(--tg-r-control);
+  background: rgba(255, 255, 255, .42);
+  color: var(--tg-ink);
+}
+
+html[data-style="glass"] body.premium-ui .first-run-actions .button.ghost:hover { background: rgba(255, 255, 255, .72); }
+
+html[data-style="glass"] body.premium-ui .first-run-actions .button.primary {
+  border-radius: var(--tg-r-control);
+  background: var(--tg-ink);
+  color: var(--p-bg);
+}
+
+html[data-style="glass"] body.premium-ui .tour-target {
+  outline-color: var(--tg-accent);
+  /* Two rings: the accent says "this one", the pale inner line keeps the edge
+     visible where the accent lands on something teal already. */
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, .34);
+}
+
+@media (max-width: 480px) {
+  html[data-style="glass"] body.premium-ui .first-run h2 { font-size: 18px; }
+  html[data-style="glass"] body.premium-ui .first-run p { font-size: 12.5px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-style="glass"] body.premium-ui .tour-target {
+    animation: tg-tour-pulse 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes tg-tour-pulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(255, 255, 255, .30); }
+  50% { box-shadow: 0 0 0 10px rgba(255, 255, 255, .16); }
 }

@@ -78,6 +78,7 @@ export const SHORTCUTS = [
   { keys: ["⌘", "K"], label: "Open the menu — every screen and action", id: "menu" },
   { keys: ["/"], label: "Jump to the question box", id: "focus-ask" },
   { keys: ["?"], label: "Show this list", id: "help" },
+  { keys: ["T"], label: "Take the tour again", id: "tour" },
   { keys: ["Esc"], label: "Close a menu, dialog or the sources drawer", id: "escape" },
   { keys: ["Enter"], label: "Send the question (Shift + Enter for a new line)", id: "send" },
 ];
@@ -101,7 +102,7 @@ export function isTypingTarget(element) {
 /**
  * Decide what a keydown means, without touching the page.
  *
- * @returns {"menu"|"focus-ask"|"help"|"escape"|null}
+ * @returns {"menu"|"focus-ask"|"help"|"tour"|"escape"|null}
  */
 export function shortcutForKey(event = {}) {
   const key = String(event.key || "");
@@ -116,6 +117,9 @@ export function shortcutForKey(event = {}) {
   }
   if (key === "/") return "focus-ask";
   if (key === "?") return "help";
+  // One letter, and only one, is a shortcut: T for the tour. It is the key a
+  // presenter reaches for on a stage, and it does nothing while typing.
+  if (key === "t" || key === "T") return "tour";
   if (key === "Escape") return "escape";
   return null;
 }

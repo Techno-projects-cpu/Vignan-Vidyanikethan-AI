@@ -6,14 +6,14 @@
  * is the guaranteed fallback. No model is trained in this repository.
  */
 
-import * as db from "./db.js?v=76";
-import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=76";
-import { ingestPdf, ingestText } from "./ingest.js?v=76";
-import { splitSentences } from "./text.js?v=76";
-import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=76";
-import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=76";
-import { asksAboutCreator, casualReply, consecutiveCasualTurns, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=76";
-import { carryOverHits, contextChipLabel, conversationBrief, resolveQuery } from "./memory.js?v=76";
+import * as db from "./db.js?v=77";
+import { buildBookIndex, retrieveChapter, retrievePreferBooks } from "./retrieval.js?v=77";
+import { ingestPdf, ingestText } from "./ingest.js?v=77";
+import { splitSentences } from "./text.js?v=77";
+import { checkFileName, inspectFile, MAX_PDF_BYTES, MAX_TEXT_BYTES } from "./files.js?v=77";
+import { downloadPublicLink, firstLink, hasLinkCredentials, readPublicLink } from "./link-reader.js?v=77";
+import { asksAboutCreator, casualReply, consecutiveCasualTurns, conversationReply, creatorAnswer, isFollowUp, safetyReply, searchTopic } from "./conversation.js?v=77";
+import { carryOverHits, contextChipLabel, conversationBrief, resolveQuery } from "./memory.js?v=77";
 import {
   LANGUAGES as CODE_LANGUAGES,
   checkPrediction,
@@ -29,21 +29,22 @@ import {
   predictOutput,
   requestedCodeLesson,
   unpredictableReason,
-} from "./code-mode.js?v=76";
-import { answerOutOfView, isFollowing, readChatBox, scrollForAnswer, scrollForLatest } from "./chat-scroll.js?v=76";
-import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=76";
-import { fitGlass, stopGlass } from "./glass-lens.js?v=76";
-import { buildModelPaper, modelPaperText } from "./model-paper.js?v=76";
-import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=76";
-import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=76";
-import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=76";
+} from "./code-mode.js?v=77";
+import { answerOutOfView, isFollowing, readChatBox, scrollForAnswer, scrollForLatest } from "./chat-scroll.js?v=77";
+import { lastCitedStudyContext, parseChatIntent, requestedChatMode } from "./chat-intents.js?v=77";
+import { fitGlass, stopGlass } from "./glass-lens.js?v=77";
+import { TOUR_LENGTH, TOUR_STEPS, tourAtStart, tourKey, tourNextLabel, tourStepAt, tourStepLabel } from "./tour.js?v=77";
+import { buildModelPaper, modelPaperText } from "./model-paper.js?v=77";
+import { composeLinkAnswer, composeOutsideAnswer, composeWebAnswer } from "./external-answer.js?v=77";
+import { asksForStudySheet, buildStudySheet, studySheetMarkdown, studySheetTopic } from "./study-sheet.js?v=77";
+import { buildRevisionPlan, revisionPlanText } from "./revision-plan.js?v=77";
 import {
   PRO_META, PRO_NAME, PRO_TYPING, matchesActivation, matchesPowerDown, matchesStatusQuery, splitActivation,
   proBootLines, proBriefing, proGreeting, proStatusReport,
-} from "./pro-mode.js?v=76";
-import { playProActivation, setProChrome } from "./pro-ui.js?v=76";
-import { RELEASE, startUpdateWatch } from "./updates.js?v=76";
-import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=76";
+} from "./pro-mode.js?v=77";
+import { playProActivation, setProChrome } from "./pro-ui.js?v=77";
+import { RELEASE, startUpdateWatch } from "./updates.js?v=77";
+import { CRITICAL_FILES, runOfflineCheck } from "./offline-check.js?v=77";
 import {
   SHORTCUTS,
   fitComposerHeight,
@@ -55,18 +56,18 @@ import {
   shouldShowToTop,
   shortcutForKey,
   windowScrollState,
-} from "./viewport.js?v=76";
+} from "./viewport.js?v=77";
 import {
   OFFLINE_MODE_LABEL,
   OFFLINE_MODE_NOTE,
   isOfflineMode,
   networkAllowed,
   setOfflineMode,
-} from "./offline-mode.js?v=76";
-import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=76";
-import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=76";
-import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=76";
-import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=76";
+} from "./offline-mode.js?v=77";
+import { DEFAULT_DEPTH, citationAudit, citationSummary, citationWarning, followUpsFor, looksUncited, matchedTerms, normalizeDepth, ungroundedNumbers } from "./answer-quality.js?v=77";
+import { avatarInitials, decorateAvatar, renderAvatarSwatches } from "./avatars.js?v=77";
+import { knowledgeFactAnswer, knowledgeTopicAnswer } from "./knowledge.js?v=77";
+import { composeGroundedAnswer, confidenceLabel, sourcesFromHits } from "./answer.js?v=77";
 import {
   answerOutsideWithModel,
   answerWithModel,
@@ -74,8 +75,8 @@ import {
   generateQuizWithModel,
   gradeShortWithModel,
   testModel,
-} from "./llm.js?v=76";
-import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=76";
+} from "./llm.js?v=77";
+import { FREE_API_PROVIDERS, FREE_API_WARNING } from "./free-apis.js?v=77";
 import {
   DEFAULT_LOCAL_MODEL_ID,
   LOCAL_MODELS,
@@ -87,7 +88,7 @@ import {
   refreshLocalAIStatus,
   subscribeLocalAI,
   testLocalAI,
-} from "./local-ai.js?v=76";
+} from "./local-ai.js?v=77";
 import {
   EXAMS,
   MODES,
@@ -102,12 +103,12 @@ import {
   scoreExam,
   syllabusCoverage,
   nextUp,
-} from "./exam-packs.js?v=76";
-import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=76";
-import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=76";
-import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=76";
-import { TASKS } from "./model-router.js?v=76";
-import { PROVIDERS, providerList } from "./providers.js?v=76";
+} from "./exam-packs.js?v=77";
+import { isStarterBookId, shelfBooks, shelfMarkdown, shelfSummary } from "./starter-shelf.js?v=77";
+import { availableVoices, insideFrame, listenMessage, listenOnce, microphoneProblem, speakText, speechLanguage, stopSpeaking, voiceSupport } from "./voice.js?v=77";
+import { examinerLine, probeFor, vivaQuestionsFromSentences, vivaReport } from "./viva.js?v=77";
+import { TASKS } from "./model-router.js?v=77";
+import { PROVIDERS, providerList } from "./providers.js?v=77";
 import {
   DEFAULT_SETTINGS,
   engineLabel,
@@ -116,30 +117,30 @@ import {
   privacyLabel,
   providerConfig,
   serverHealth,
-} from "./settings.js?v=76";
-import { parseApiKeys } from "./key-pool.js?v=76";
+} from "./settings.js?v=77";
+import { parseApiKeys } from "./key-pool.js?v=77";
 import {
   STUDENT_KEY_PROVIDERS,
   cleanStudentEndpoint,
   cleanStudentKeyVault,
   studentKeySummary,
-} from "./student-keys.js?v=76";
+} from "./student-keys.js?v=77";
 import {
   generateQuiz,
   gradeQuiz,
   makeQuiz,
   recomputeResult,
-} from "./quiz.js?v=76";
+} from "./quiz.js?v=77";
 import {
   buildFlashcards,
   deckStats,
   dueCards,
   writeProgress as writeFlashProgress,
-} from "./flashcards.js?v=76";
+} from "./flashcards.js?v=77";
 import {
   STUDY_DECKS_KEY, activeDeck, addDeck, cardsFromMistakes, emptyDeckCollection, makeStudyDeck,
   nextReviewIndex, nextStudyStep, normalizeDeckCollection, removeDeck, reviewDeck, selectDeck,
-} from "./study-decks.js?v=76";
+} from "./study-decks.js?v=77";
 import {
   accuracy,
   currentStreak,
@@ -150,17 +151,17 @@ import {
   streakMessage,
   topicMastery,
   writeProgress as writeStudyProgress,
-} from "./progress.js?v=76";
-import { externalSearchUrl, searchWeb } from "./web.js?v=76";
-import { openEditStudio } from "./edit-studio.js?v=76";
-import { openReader } from "./reader.js?v=76";
-import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=76";
-import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=76";
-import { CLASSIC_STYLE, DEFAULT_STYLE, THEMES, isKnownStyle, isPaintedStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=76";
-import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=76";
-import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=76";
-import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=76";
-import * as ui from "./ui.js?v=76";
+} from "./progress.js?v=77";
+import { externalSearchUrl, searchWeb } from "./web.js?v=77";
+import { openEditStudio } from "./edit-studio.js?v=77";
+import { openReader } from "./reader.js?v=77";
+import { applyTranslations, languageName, setLanguage, t } from "./i18n.js?v=77";
+import { LANGUAGE_CATALOGUE, languageGlyphFor, languageLabel, languageGroups, languageMeta, matchesLanguageQuery } from "./languages.js?v=77";
+import { CLASSIC_STYLE, DEFAULT_STYLE, THEMES, isKnownStyle, isPaintedStyle, normalizeStyle, resolveStyle, switchLockedReason, themeById, themeSupportsSwitch } from "./themes.js?v=77";
+import { askFromUrl, cardIndex, goalCards } from "./goal-cards.js?v=77";
+import { badgeText, bindEdgeSwipe, chatStarters, edgeSwipeIntent, hasConversation, historyItems, viewportBox } from "./shell.js?v=77";
+import { clamp, downloadBlob, formatDate, localDay, truncate, uid } from "./util.js?v=77";
+import * as ui from "./ui.js?v=77";
 import {
   clearReferral,
   getLeaderboard,
@@ -170,8 +171,8 @@ import {
   openAuthModal,
   readReferral,
   syncProgress,
-} from "./auth.js?v=76";
-import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=76";
+} from "./auth.js?v=77";
+import { aiOptionLabel, aiProfile } from "./ai-nicknames.js?v=77";
 import {
   closeCommandMenu,
   initPremiumUI,
@@ -179,14 +180,14 @@ import {
   setPremiumAI,
   setPremiumView,
   toggleSources,
-} from "./premium-ui.js?v=76";
-import { initMotion, revealVisible } from "./motion.js?v=76";
-import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=76";
-import { recentQuestions, todaySummary, whenText } from "./ask-recent.js?v=76";
-import { buildStudyCard, cardTitle } from "./study-card.js?v=76";
-import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=76";
-import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=76";
-import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=76";
+} from "./premium-ui.js?v=77";
+import { initMotion, revealVisible } from "./motion.js?v=77";
+import { focusFriendsTab, initFriendsUI, renderFriends as renderSocialFriends, updateSocialBadges } from "./friends-ui.js?v=77";
+import { recentQuestions, todaySummary, whenText } from "./ask-recent.js?v=77";
+import { buildStudyCard, cardTitle } from "./study-card.js?v=77";
+import { initChatUI as initSocialChatUI, renderChat as renderSocialChat } from "./chat-ui.js?v=77";
+import { initPlayUI as initSocialPlayUI, renderPlay as renderSocialPlay } from "./play-ui.js?v=77";
+import { resetSocial, socialState, startSocialPolling, stopSocialPolling, syncSocial } from "./social.js?v=77";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -317,7 +318,6 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     // visit to Settings.
     renderOfflineMode();
     applyLinkedQuestion();
-    maybeStartFirstRun();
     subscribeLocalAI((snapshot) => {
       state.localAI = snapshot;
       renderLocalAIStatus(snapshot);
@@ -351,6 +351,9 @@ async function init({ initialUser = null, guest = false, sessionKnown = false } 
     initSocialScreens();
     const requestedView = new URL(location.href).searchParams.get("view");
     setView(VIEW_META[requestedView] ? requestedView : "ask", { skipHistory: true });
+    // The tour starts last, so its first step cannot be contradicted a moment
+    // later by the view in the address bar.
+    initTour();
     registerServiceWorker();
     if (state.storageMode === "memory") {
       ui.showToast("This browser blocked storage. Your work will last only until this tab closes.", "warning", 9000);
@@ -722,6 +725,7 @@ function initShortcuts() {
       return;
     }
     if (action === "help") { event.preventDefault(); openShortcuts(); return; }
+    if (action === "tour") { event.preventDefault(); startTour(); return; }
     if (action === "focus-ask") {
       event.preventDefault();
       if (state.currentView !== "ask") setView("ask");
@@ -1692,7 +1696,7 @@ function renderStyleTiles() {
       // underneath it, which is what the interface will look like over it. The
       // tile is 176px wide, so it asks for the 640px twin — seventeen full plates
       // would be a megabyte spent on thumbnails.
-      preview.style.backgroundImage = `url("${theme.plate}-640.webp?v=76")`;
+      preview.style.backgroundImage = `url("${theme.plate}-640.webp?v=77")`;
     }
     const strips = ui.element("span", "style-swatches");
     for (const colour of theme.swatches) {
@@ -1762,63 +1766,133 @@ function wireSettingsTabs() {
 }
 
 /**
- * The three-step first-run tour.
+ * The guided tour.
  *
- * It appears once per device, in the corner, and never blocks the app: there is no
- * overlay behind it, so a student can ignore it and start typing. Finishing or
- * skipping writes a flag so nobody sees it twice.
+ * Eight steps, one screen each, in the order somebody showing the app would go:
+ * ask, then the library behind the answer, then the three ways to practise,
+ * then the progress, then the settings. The steps themselves live in
+ * `js/tour.js` — as data, with the test suite resolving every selector against
+ * the real markup — because the version that used to live here described a
+ * product the app had stopped being (five goal blocks that no longer rendered,
+ * six styles that no longer existed).
+ *
+ * It appears once per device, in the corner, and never blocks the app: there is
+ * no overlay behind it, so a student can ignore it and start typing. It can be
+ * replayed at any time from the menu or with T, which is what matters when the
+ * thing is being demonstrated to a room.
  */
-const FIRST_RUN_KEY = "vignan.firstRun.v2";
-const FIRST_RUN_STEPS = [
-  {
-    title: "Your books, your pages",
-    body: "Add a PDF or your notes in Library — or use the starter pages written for this project. Every answer names the page it came from.",
-  },
-  {
-    title: "Start from a sentence",
-    body: "The Ask screen opens with five blocks: explain a concept, quiz me, my viva is coming up, revise, exam answer. Tap one and it is asked straight away.",
-  },
-  {
-    title: "Make it yours",
-    body: "Settings → Look & language has six styles — Minimal, Soft, Editorial, Luxury, Terminal and Neo-brutalism — plus 33 languages.",
-  },
-];
+const FIRST_RUN_KEY = "vignan.firstRun.v3";
+let tourTarget = null;
+
+/** Ring the control a step is talking about, and bring it into view. */
+function highlightTourTarget(selector) {
+  tourTarget?.classList.remove("tour-target");
+  tourTarget = null;
+  if (!selector) return;
+  const element = $(selector);
+  if (!element) return;
+  tourTarget = element;
+  element.classList.add("tour-target");
+  try {
+    element.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+  } catch {
+    // An element inside a `display: none` panel has nothing to scroll to yet.
+  }
+}
+
+function paintTourDots(index) {
+  const dots = $("#first-run-dots");
+  if (!dots) return;
+  if (dots.children.length !== TOUR_LENGTH) {
+    dots.replaceChildren(...TOUR_STEPS.map(() => ui.element("span")));
+  }
+  [...dots.children].forEach((dot, at) => dot.classList.toggle("on", at === index));
+}
 
 function firstRunStep(index) {
-  const tour = $("#first-run");
-  if (!tour) return;
-  const step = FIRST_RUN_STEPS[index];
-  if (!step) {
-    endFirstRun();
-    return;
-  }
-  tour.dataset.step = String(index + 1);
-  $("#first-run-step").textContent = `STEP ${index + 1} OF ${FIRST_RUN_STEPS.length}`;
+  const card = $("#first-run");
+  if (!card) return;
+  const step = tourStepAt(TOUR_STEPS, index);
+  const at = TOUR_STEPS.indexOf(step);
+  card.dataset.step = String(at);
+  $("#first-run-step").textContent = tourStepLabel(at);
   $("#first-run-title").textContent = step.title;
   $("#first-run-body").textContent = step.body;
-  $("#first-run-next").textContent = index === FIRST_RUN_STEPS.length - 1 ? "Start studying" : "Next";
-  tour.hidden = false;
+  const back = $("#first-run-back");
+  if (back) back.disabled = tourAtStart(at);
+  $("#first-run-next").textContent = tourNextLabel(at);
+  paintTourDots(at);
+  card.hidden = false;
+  // The step goes to its own screen: "look at the Library" while the app shows
+  // something else is half a tour.
+  if (VIEW_META[step.view] && state.currentView !== step.view) setView(step.view);
+  highlightTourTarget(step.target);
+  // Focus lands on the forward button, so Enter advances a step on a stage
+  // without anyone reaching for the mouse.
+  requestAnimationFrame(() => $("#first-run-next")?.focus({ preventScroll: true }));
 }
 
 function endFirstRun() {
-  const tour = $("#first-run");
-  if (tour) tour.hidden = true;
+  const card = $("#first-run");
+  if (card) card.hidden = true;
+  highlightTourTarget(null);
   try { localStorage.setItem(FIRST_RUN_KEY, "done"); } catch { /* private mode */ }
 }
 
+/** Start (or replay) the tour. Replaying does not need the once-only flag. */
+function startTour() {
+  const card = $("#first-run");
+  if (!card) return;
+  firstRunStep(0);
+}
+
+function tourOpen() {
+  const card = $("#first-run");
+  return Boolean(card && !card.hidden);
+}
+
+/**
+ * Wire the card once, and decide once whether to show it.
+ *
+ * The listeners used to be bound inside the "show it" branch, which was fine
+ * while the tour could only be seen on the first run. Now that it can be
+ * replayed from the menu, the binding has to be unconditional — otherwise the
+ * replay shows a card whose buttons do nothing, which is exactly what a
+ * demonstration cannot afford.
+ */
+function initTour() {
+  const card = $("#first-run");
+  if (!card) return;
+  const stepFrom = (delta) => firstRunStep((Number(card.dataset.step) || 0) + delta);
+  $("#first-run-skip")?.addEventListener("click", endFirstRun);
+  $("#first-run-back")?.addEventListener("click", () => stepFrom(-1));
+  $("#first-run-next")?.addEventListener("click", () => {
+    const at = Number(card.dataset.step) || 0;
+    if (at >= TOUR_LENGTH - 1) endFirstRun();
+    else firstRunStep(at + 1);
+  });
+  // Arrows walk the tour, Escape puts it away. Enter is left alone: the step may
+  // be pointing at the question box, and Enter in there sends a question.
+  document.addEventListener("keydown", (event) => {
+    if (!tourOpen()) return;
+    const action = tourKey(event);
+    if (!action) return;
+    event.preventDefault();
+    if (action === "close") { endFirstRun(); return; }
+    firstRunStep((Number(card.dataset.step) || 0) + (action === "next" ? 1 : -1));
+  });
+  maybeStartFirstRun();
+}
+
 function maybeStartFirstRun() {
-  const tour = $("#first-run");
-  if (!tour) return;
+  const card = $("#first-run");
+  if (!card) return;
   try {
     if (localStorage.getItem(FIRST_RUN_KEY)) return;
   } catch {
     return;
   }
   firstRunStep(0);
-  $("#first-run-skip")?.addEventListener("click", endFirstRun);
-  $("#first-run-next")?.addEventListener("click", () => {
-    firstRunStep(Number(tour.dataset.step || 1));
-  });
 }
 
 function updateOfflineChip() {
@@ -6381,7 +6455,7 @@ function renderAvatarSettings() {
         // Signed-in students also update the avatar their classmates see.
         if (state.account) {
           try {
-            const { social } = await import("./social.js?v=76");
+            const { social } = await import("./social.js?v=77");
             await social.setAvatar(seed);
             globalThis.__vignanSocialSeed = seed;
             window.dispatchEvent(new CustomEvent("vignan:avatar", { detail: { seed } }));
@@ -6653,6 +6727,9 @@ async function handlePremiumAction(action) {
   switch (action) {
     case "menu":
       openCommandMenu();
+      return;
+    case "tour":
+      startTour();
       return;
     case "upload-pdf":
       setView("library");

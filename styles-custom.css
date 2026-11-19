@@ -145,7 +145,7 @@ html[data-style="brutal"] body.premium-ui .mobile-nav { border-bottom: 3px solid
 html[data-style="brutal"] body.premium-ui .eyebrow { font-weight: 800; letter-spacing: .16em; }
 
 /* A style that is light must stay light even when the invert switch says dark.
-   2.41.0 made the default glass theme a daylight one, so it is pinned here too. */
+   2.42.0 made the default glass theme a daylight one, so it is pinned here too. */
 html[data-style="soft"] body.premium-ui,
 html[data-style="editorial"] body.premium-ui,
 html[data-style="luxury"] body.premium-ui,
@@ -232,7 +232,13 @@ html[data-style="brutal"] body.premium-ui { color-scheme: light; }
 /* ========================================================================== */
 
 .first-run {
-  position: fixed; inset: auto 16px 16px auto; z-index: 60; width: min(420px, calc(100vw - 32px));
+  /* Top right, under the bar. It used to sit on the bottom edge, which was fine
+     while the question box floated in the middle of the page — but the box is
+     docked to the bottom edge now, and the card covered its Send button on the
+     very first step, the one that says "type a question". A guide that sits on
+     the control it is pointing at is worse than no guide. */
+  position: fixed; inset: 84px 16px auto auto; z-index: 60; width: min(420px, calc(100vw - 32px));
+  max-height: calc(100dvh - 108px); overflow: auto;
   border: 1px solid var(--line-strong); background: var(--surface); padding: 18px 18px 16px;
   box-shadow: 0 18px 50px rgba(0, 0, 0, .45);
 }
@@ -242,6 +248,23 @@ html[data-style="brutal"] body.premium-ui { color-scheme: light; }
 .first-run p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
 .first-run-actions { display: flex; gap: 8px; margin-top: 14px; }
 .first-run-actions .grow { margin-left: auto; }
+/* The tour's step counter, with one square per screen: the card says where you
+   are without a number you have to count. Squares, because the house style has
+   no round corners — a row of dots would be the one circle on the page. */
+.first-run-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.first-run-dots { display: flex; align-items: center; gap: 4px; }
+.first-run-dots span { width: 7px; height: 3px; background: currentColor; opacity: .22; }
+.first-run-dots span.on { opacity: .9; width: 14px; }
+.first-run-back[disabled] { opacity: .4; cursor: default; }
+/* What the tour is pointing at. An outline, not a ring: an outline sits outside
+   the box, so it cannot hide the thing it is pointing at, and it cannot be
+   clipped by the panel's own overflow. */
+.first-run-target,
+.tour-target {
+  outline: 2px solid var(--ink);
+  outline-offset: 6px;
+  scroll-margin-block: 40vh;
+}
 
 /* ========================================================================== */
 /* 5. RESPONSIVE CORRECTIONS                                                  */
@@ -277,7 +300,7 @@ body.premium-ui .section-copy h2 { font-size: clamp(20px, 2.4vw, 28px); }
   .goal-head { padding: 11px 14px; }
   .goal-card { min-height: 74px; padding: 12px 14px; }
   .goal-card::after { font-size: 30px; right: 44px; }
-  .first-run { inset: auto 8px 8px 8px; width: auto; }
+  .first-run { inset: 72px 8px auto 8px; width: auto; max-height: calc(100dvh - 92px); }
 }
 
 /* ---- Phone --------------------------------------------------------------- */
