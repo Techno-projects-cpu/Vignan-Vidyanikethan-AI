@@ -154,16 +154,11 @@ test("the question box sits on the bottom edge, in the middle, like a messaging 
   assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*position: fixed;/);
   // The view is exactly the visible window, minus the phone tab bar — which is
   // fixed at 60px + the safe area and would otherwise cover the send button.
-  assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*height: calc\(var\(--vn-viewport-height, 100dvh\) - var\(--vn-tabbar, 0px\)\);/);
+  assert.match(css, /bottom: calc\(var\(--vn-tabbar, 0px\) \+ var\(--vn-keyboard, 0px\)\);/);
   assert.match(css, /--vn-tabbar: 0px;/);
-  assert.match(css, /@media \(max-width: 860px\) \{\s*body\.premium-ui \{ --vn-tabbar: calc\(60px \+ env\(safe-area-inset-bottom\)\); \}/);
-  // Three rows: greeting, conversation, box. The box is a *row*, so it is on the
-  // bottom edge whatever the conversation above it is doing. It used to be the
-  // last child of the scrolling column, which held only while every ancestor
-  // agreed about its height.
-  assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*display: grid;[^}]*grid-template-rows: minmax\(0, auto\) minmax\(0, auto\) minmax\(0, auto\) minmax\(0, 1fr\) auto;/);
-  assert.match(css, /body\.premium-ui #view-ask\.active > \.composer \{[^}]*grid-area: composer;/);
-  assert.match(css, /body\.premium-ui #view-ask\.active > \.ask-layout \{ grid-area: conversation; \}/);
+  assert.doesNotMatch(css, /--vn-tabbar: calc\(60px/, "no space for the hidden mobile nav");
+  assert.match(css, /#view-ask\.active > \.composer \{[^}]*flex: 0 0 auto;/);
+  assert.match(css, /#view-ask\.active > \.ask-layout \{[^}]*flex: 1 1 0;/);
   // With no messages there is nothing to stretch, so the column itself has to
   // pack its children to the bottom.
   assert.match(css, /body\.premium-ui #view-ask \.chat-column \{[^}]*justify-content: flex-end;/);

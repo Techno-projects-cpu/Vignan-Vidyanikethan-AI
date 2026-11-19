@@ -229,16 +229,17 @@ test("the glass kit is a control, not a picture of one", () => {
   assert.match(app, /addEventListener\("click", \(\) => setView\(button\.dataset\.view\)\)/, "and it navigates");
   assert.match(app, /\$\$\("\.nav-item, \.mobile-nav-item, \.gg-seg-item"\)/, "the open screen is named in the kit too");
 
-  // The three tiles: paintings, languages, trackers — each from its own source.
-  const plates = JSON.parse(read("assets/paint/manifest.json")).plates.length;
-  const tiles = [...kit.matchAll(/<li class="gg-stat"><strong>(\d+)<\/strong><span>([a-z]+)<\/span>/g)]
-    .map((match) => [Number(match[1]), match[2]]);
-  assert.deepEqual(tiles, [[plates, "paintings"], [SUPPORTED_LANGUAGES.length, "languages"], [0, "trackers"]]);
+  // NO COUNTERS. The kit used to carry "24 paintings / 33 languages / 0
+  // trackers" across the middle of the home screen. The student's question was
+  // the review: why is there a counter for paintings in my chat? A number about
+  // the decoration is not information, so the tiles are gone and the rail of
+  // screens is the whole kit.
+  assert.doesNotMatch(html, /gg-stats|gg-stat\b/, "no counter on the Ask screen");
+  assert.doesNotMatch(css, /gg-stat/, "and no styles left over for one");
+  assert.doesNotMatch(kit.split("</div>")[0], /<li|<strong>\d/, "the kit is a rail, not a dashboard");
 
-  // Hidden unless the glass theme is on, and the sheet that shows it is the glass
-  // one — Minimal and Legacy keep their own screens.
   assert.match(css, /\.gg-kit \{ display: none; \}/, "the kit is off by default");
-  assert.match(css, /html\[data-style="glass"\] body\.premium-ui \.gg-kit \{[\s\S]{0,200}display: grid/, "glass turns it on");
+  assert.match(css, /html\[data-style="glass"\] body\.premium-ui \.gg-kit \{[\s\S]{0,120}display: block/, "glass turns it on");
   assert.match(css, /\.gg-seg \{[\s\S]{0,600}backdrop-filter: var\(--tg-filter\) var\(--glass-lens,\)/, "the rail is a lensed surface");
   assert.match(css, /\.gg-seg-item\.active \{[\s\S]{0,400}box-shadow:/, "the selection is lifted, not just tinted");
   assert.match(css, /@media \(max-width: 720px\)[\s\S]{0,200}\.gg-seg \{ width: 100%/, "a phone gets the full-width row");
@@ -601,7 +602,8 @@ test("an answer is read on paper, on a phone too", () => {
   // The guarantee is arithmetic and independent of the painting: white at α over
   // the darkest possible pixel is the worst case there can be. Ink and muted both
   // have to clear their floors there, or an answer is only readable on some rooms.
-  const alpha = Number((/--tg-read: rgba\(255, 253, 250, \.(\d+)\)/.exec(css) || [])[1]) / 100;
+  const alphaText = (/--tg-read: rgba\(255, 253, 250, \.(\d+)\)/.exec(css) || [])[1] || "";
+  const alpha = Number(alphaText) / 10 ** alphaText.length;
   assert.ok(alpha >= 0.8, `reading paper is ${Math.round(alpha * 100)}% — at least 80%`);
   const alphaHex = Math.round(alpha * 255).toString(16).padStart(2, "0");
   const onBlack = composite(`#fffdfa${alphaHex}`, "#000000");
@@ -612,36 +614,56 @@ test("an answer is read on paper, on a phone too", () => {
   assert.match(css, /#view-ask \.chat-column \.message-body,[\s\S]{0,120}max-width: var\(--vn-measure/, "and still keep a reading measure");
 });
 
-test("the question box is a row of the screen, not the tail of a column", () => {
+test("the question box is anchored to the window, not sized by a number", async () => {
   const next = read("styles-next.css");
-  // The tab bar is fixed at 60px + the safe area with z-index 60; the Ask view is
-  // z-index 1. Before this, the box's last 60px — send button included — were
-  // behind the bar on every phone.
-  assert.match(next, /--vn-tabbar: 0px;/);
-  assert.match(next, /@media \(max-width: 860px\) \{\s*body\.premium-ui \{ --vn-tabbar: calc\(60px \+ env\(safe-area-inset-bottom\)\); \}/);
-  assert.match(next, /#view-ask\.active \{[^}]*height: calc\(var\(--vn-viewport-height, 100dvh\) - var\(--vn-tabbar, 0px\)\)/);
-  // Three rows, and the box is the third one.
-  assert.match(next, /#view-ask\.active \{[^}]*grid-template-rows: minmax\(0, auto\) minmax\(0, auto\) minmax\(0, auto\) minmax\(0, 1fr\) auto;/);
-  assert.match(next, /#view-ask\.active \{[^}]*grid-template-areas:\s*"paint"\s*"greeting"\s*"kit"\s*"conversation"\s*"composer";/);
-  assert.match(next, /#view-ask\.active > \.composer \{\n\s+grid-area: composer;/, "the box has its own row");
 
-  // Every child of the screen is placed. A child with no area is auto-placed into
-  // an *implicit* row, and an implicit row below the composer takes height away
-  // from the conversation — the layout would look almost right, which is worse
-  // than looking wrong.
-  const markup = read("index.html").slice(read("index.html").indexOf('id="view-ask"'), read("index.html").indexOf("<!-- LIBRARY -->"));
-  const children = [...markup.matchAll(/^\s{10}<(?:div|section|form) class="([^"]+)"/gm)].map((match) => match[1].split(" ")[0]);
-  assert.ok(children.length >= 5, `the screen has ${children.length} children`);
-  for (const child of children) {
-    assert.match(next, new RegExp(`#view-ask\\.active > \\.${child} \\{(?: grid-area: [a-z]+; |\\s+grid-area: [a-z]+;)`), `${child} is placed on the grid`);
+  // Both edges are anchored; no measured height or dynamic viewport unit is
+  // required to lay out the screen. Rendered geometry is checked separately by
+  // tools/check-chat-layout.mjs, because regexes cannot prove usable space.
+  const clean = next.replace(/\/\*[\s\S]*?\*\//g, "");
+  const view = /body\.premium-ui #view-ask\.active \{([\s\S]*?)\n\}/.exec(clean)?.[1] || "";
+  assert.doesNotMatch(view, /height:\s*calc/, "the screen is not sized by a measurement");
+  assert.doesNotMatch(view, /dvh/, "and not by a unit some browsers do not have");
+  assert.match(view, /position: fixed;/);
+  assert.match(view, /top: 0;/, "anchored to the top of the window");
+  assert.match(view, /bottom: calc\(var\(--vn-tabbar, 0px\) \+ var\(--vn-keyboard, 0px\)\);/, "and to the bottom, minus only the tab bar and a real keyboard");
+  assert.match(view, /display: flex;[\s\S]*flex-direction: column;/, "a column with one flexible child");
+
+  // The column: the conversation is the only thing that flexes, so the box is the
+  // last item on the bottom edge whatever is above it. `min-height: 0` is what
+  // lets the log shrink instead of pushing the box down.
+  assert.match(next, /#view-ask\.active > \.ask-layout \{\n\s+flex: 1 1 0;\n\s+min-height: 0;/, "the conversation flexes");
+  assert.match(next, /#view-ask\.active > \.composer \{\n\s+flex: 0 0 auto;/, "the box does not shrink and is not pushed");
+  assert.match(next, /#view-ask\.active > \.chat-column,[\s\S]{0,120}\{\n\s+flex: 1 1 0;\n\s+min-height: 0;/, "and the column inside it can shrink");
+
+  // A keyboard hides the decoration instead of squeezing the answer.
+  assert.match(next, /--vn-keyboard: 0px;/, "the offset has a default");
+  assert.match(next, /body\.premium-ui\.keyboard-open #view-ask\.active > \.premium-hero,/, "the greeting goes when a keyboard is up");
+  assert.match(next, /body\.premium-ui\.keyboard-open \.mobile-nav \{\n\s+display: none;/, "and the tab bar is behind the keyboard anyway");
+
+  // A gap in the visual viewport is only a keyboard when it is big enough to be one.
+  const { viewportBox } = await import("../js/shell.js");
+  assert.deepEqual(viewportBox({ viewportHeight: 740, viewportOffset: 0, innerHeight: 768 }),
+    { height: "768px", top: "0px", keyboard: 0 }, "a tablet toolbar is not a keyboard");
+  assert.deepEqual(viewportBox({ viewportHeight: 640, viewportOffset: 0, innerHeight: 844 }),
+    { height: "640px", top: "0px", keyboard: 204 }, "a keyboard is");
+  // The controller publishes it, and the class with it.
+  const app = read("js/app.js");
+  assert.match(app, /root\.setProperty\("--vn-keyboard", `\$\{keyboard\}px`\)/);
+  assert.match(app, /document\.body\.classList\.toggle\("keyboard-open", keyboard > 0\)/);
+});
+
+test("the chat stretches and secondary settings do not consume its viewport", () => {
+  const next = read("styles-next.css");
+  const html = read("index.html");
+  assert.match(next, /#view-ask\.active > \.ask-layout \{ align-items: stretch; \}/);
+  assert.match(next, /#view-ask\.active \.chat-log > \.message \{ flex-shrink: 0; \}/);
+  assert.doesNotMatch(next, /--vn-tabbar: calc\(60px/, "the mobile nav is hidden; do not reserve space for it");
+  assert.match(html, /<details class="chat-options" id="chat-options">/);
+  const panel = html.slice(html.indexOf('class="chat-options"'), html.indexOf('<!-- LIBRARY -->'));
+  for (const id of ["ask-web-fallback", "ask-book-scope", "mode-row", "depth-row", "ask-sources-toggle", "clear-chat"]) {
+    assert.ok(panel.includes(`id="${id}"`), `${id} stays accessible in options`);
   }
-  // In the document it is a child of the screen, after the conversation.
-  const index = read("index.html");
-  const view = index.slice(index.indexOf('id="view-ask"'), index.indexOf("<!-- LIBRARY -->"));
-  assert.equal((view.match(/<form class="composer"/g) || []).length, 1);
-  assert.ok(view.indexOf('<form class="composer"') > view.indexOf("</aside>"), "after the conversation and its sources panel");
-  // And the bar is docked: square, one hairline on top, paper behind it.
-  const bar = /#view-ask\.active > \.composer \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
-  assert.match(bar, /border-radius: 0/);
-  assert.match(bar, /padding: 12px clamp\(16px, 3vw, 34px\) calc\(12px \+ env\(safe-area-inset-bottom\)\)/);
+  assert.match(next, /\.chat-options-panel \{[^}]*position: absolute; bottom: 100%/);
+  assert.match(next, /\.chat-options-panel \{[^}]*max-height: 50vh; overflow-y: auto;/);
 });
