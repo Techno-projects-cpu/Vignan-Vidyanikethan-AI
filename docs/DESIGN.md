@@ -230,7 +230,7 @@ composer, and the 46vmax conic flare that rotated behind the drawer. On a painti
 that already has a window and a warm floor they read as a smudge on the glass, and
 the login screen — which is the reference — has neither.
 
-### The gate is the house style (2.42.1)
+### The gate is the house style (2.43.0)
 
 The login screen was the only screen that looked right, and the reason turned out
 to be geometric. `styles-identity.css` squares the *controls* it enumerates
@@ -277,7 +277,7 @@ entirely. The fixes:
 - what is left on the painting — the headline, its paragraph, the feature line —
   is ink, never the quiet grey.
 
-### The tile, and the content that was still on the wall (2.42.1)
+### The tile, and the content that was still on the wall (2.43.0)
 
 Two field reports, one cause. "The transparent things aren't refracting light" and
 "put the remaining contents on them" were describing the same gap: the panels were
@@ -324,9 +324,9 @@ one tall pane with the same rim, the rules are hairlines, and **Enter study spac
 is the gate's button: ink on porcelain, square, same arrow. Behaviour is untouched;
 `js/boot.js` still shows it, skips it and remembers the choice.
 
-### Two bugs the painting was hiding (2.42.1)
+### Two bugs the painting was hiding (2.43.0)
 
-The tile work in 2.42.1 was right and still looked wrong, because two things under
+The tile work in 2.43.0 was right and still looked wrong, because two things under
 it were broken in ways no screenshot of a panel can show.
 
 **The room had no wash.** `body.premium-ui::after` mixes four pastel fields, a warm
@@ -366,6 +366,44 @@ focused button to advance, arrow keys to walk, Escape to put it away, and **T** 
 the menu to bring it back. Every step's screen and selector is resolved against the
 real `index.html` by `tests/tour.test.mjs`, and the copy is checked for the ghost
 features and for counts that drift.
+
+### Reading paper, and a box that cannot move (2.43.0)
+
+**"The AI answers are too hard to see."** The ink was never the problem. In
+`styles-identity.css`, the `max-width: 760px` block set
+`.message.assistant .message-body { background: transparent }` — so on every
+phone, and on any laptop window dragged narrower than 760px, the answer had **no
+tile at all** and its type sat straight on the painting. That is the 1.26:1 worst
+case in `assets/walls/study-afternoon.backdrop.json`, which is why the complaint
+was "hard to see" and not "I don't like that colour".
+
+An answer is now **reading paper** (84%), not a chrome pane (34%): warm white, a
+hairline edge, the same lens, and one step up in type (16px / 1.75, 15.5 on a
+phone) with the measure kept. The guarantee is arithmetic and independent of the
+painting — white at 84% over the darkest possible pixel (pure black) still leaves
+ink at 11:1 and muted at 8:1, so an answer is readable in *any* room, not just
+this one. The phone override is answered with the `data-style` attribute on the
+same chain, so load order can never decide it again. The question stays solid ink:
+a person's words are not a surface.
+
+**"Pin the type box on the bottom."** It was docked — to the bottom of a view that
+was 60px taller than the visible screen. The phone tab bar is `position: fixed;
+bottom: 0; z-index: 60`; the Ask view is `z-index: 1`. So the composer's last 60px,
+send button included, sat *behind* the bar on every phone.
+
+The Ask screen is now a **grid of five named rows** — painted band, greeting, glass
+kit, conversation, box — and the box is a row of its own, a direct child of the
+screen rather than the tail of a scrolling column. A row is at the bottom whatever
+the conversation above it is doing: empty, one answer, or a long one being written.
+The view's height is `--vn-viewport-height` minus `--vn-tabbar` (60px plus the
+phone's safe area), so "the bottom" is the visible bottom edge and not the window's.
+Every child is placed by name, because a child with no area is auto-placed into an
+implicit row — which would have looked almost right, and taken its height out of
+the conversation.
+
+The bar itself is on the same paper as the answers, with one hairline where it
+stops and the field as a field inside it rather than a translucent button floating
+in a translucent bar.
 
 ### The glass kit: two components, not a repaint
 

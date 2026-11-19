@@ -522,13 +522,14 @@ test("the Ask screen has the room behind it, not a cream sheet", () => {
   // solid slab over the painting. This is the assertion that would have caught
   // "the transparent things aren't refracting light" the first time.
   const next = read("styles-next.css");
-  assert.match(next, /#view-ask\.active \{[\s\S]{0,900}background: var\(--vn-canvas\)/, "the shell still paints the view opaque");
+  assert.match(next, /#view-ask\.active \{[^}]*background: var\(--vn-canvas\)/, "the shell still paints the view opaque");
   assert.match(css, /#view-ask\.active \{[\s\S]{0,160}background: transparent/, "and glass takes it back at the same weight");
   // The question box had the same problem: a gradient to `--vn-canvas` behind it.
   assert.match(next, /\.composer \{[\s\S]{0,260}linear-gradient\(to bottom, transparent, var\(--vn-canvas\)/, "the shell fades the composer into the page");
-  const composer = /html\[data-style="glass"\] body\.premium-ui #view-ask \.composer \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
-  assert.match(composer, /background-color: var\(--tg-tint\)/, "so the bar is a tile of its own");
+  const composer = /#view-ask\.active > \.composer \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
+  assert.match(composer, /background-color: var\(--tg-read\)/, "so the bar is on paper of its own");
   assert.match(composer, /backdrop-filter: var\(--tg-filter\)/, "with the lens in it");
+  assert.match(composer, /border-top: 1px solid var\(--tg-read-edge\)/, "and one hairline where it stops");
 });
 
 test("a token is declared once, per selector", () => {
@@ -568,4 +569,79 @@ test("a token is declared once, per selector", () => {
     }
   }
   assert.ok(seen.size > 20, "the scan actually found the theme's tokens");
+});
+
+test("an answer is read on paper, on a phone too", () => {
+  // "The AI answers are too hard to see." The cause was not the ink: the identity
+  // layer's 760px block sets `.message.assistant .message-body { background:
+  // transparent }`, so on every phone the answer had no tile and its type sat
+  // straight on the painting — the 1.26:1 worst case in the wall's report.
+  const identity = read("styles-identity.css");
+  assert.match(
+    identity,
+    /@media \(max-width: 760px\) \{[\s\S]*?#view-ask \.message\.assistant \.message-body \{ padding: 8px 0; background: transparent; \}/,
+    "the shell really does strip the tile on a phone",
+  );
+
+  const section = css.slice(css.indexOf("§17  READING PAPER"));
+  const paper = /#view-ask \.message\.assistant \.message-body \{([\s\S]*?)\n\}/.exec(section)?.[1] || "";
+  assert.match(paper, /background-color: var\(--tg-read\)/, "the answer sits on reading paper");
+  assert.match(paper, /border: 1px solid var\(--tg-read-edge\)/, "with an edge, so it is a tile and not a wash");
+  assert.match(paper, /backdrop-filter: var\(--tg-filter\)/, "and the lens still runs through it");
+  assert.match(paper, /color: var\(--p-ink\)/, "full ink, not the quiet one");
+
+  // The rule that answers the 760px override carries the `data-style` attribute and
+  // the same chain, so it out-specifies it instead of hoping on load order.
+  assert.match(
+    css,
+    /html\[data-style="glass"\] body\.premium-ui #view-ask \.message\.assistant \.message-body \{\n\s+padding: 14px 16px;/,
+    "a phone keeps the tile, with less padding",
+  );
+
+  // The guarantee is arithmetic and independent of the painting: white at α over
+  // the darkest possible pixel is the worst case there can be. Ink and muted both
+  // have to clear their floors there, or an answer is only readable on some rooms.
+  const alpha = Number((/--tg-read: rgba\(255, 253, 250, \.(\d+)\)/.exec(css) || [])[1]) / 100;
+  assert.ok(alpha >= 0.8, `reading paper is ${Math.round(alpha * 100)}% — at least 80%`);
+  const alphaHex = Math.round(alpha * 255).toString(16).padStart(2, "0");
+  const onBlack = composite(`#fffdfa${alphaHex}`, "#000000");
+  assert.ok(contrast(GLASS_THEME.ink, onBlack) >= 10, `ink ${contrast(GLASS_THEME.ink, onBlack).toFixed(1)}:1 over black`);
+  assert.ok(contrast(GLASS_THEME.muted, onBlack) >= 7, `muted ${contrast(GLASS_THEME.muted, onBlack).toFixed(1)}:1 over black`);
+  // Reading type is bigger than chrome type, and the measure is kept.
+  assert.match(section, /font-size: 16px;\n\s+line-height: 1\.75;/, "answers are set for reading");
+  assert.match(css, /#view-ask \.chat-column \.message-body,[\s\S]{0,120}max-width: var\(--vn-measure/, "and still keep a reading measure");
+});
+
+test("the question box is a row of the screen, not the tail of a column", () => {
+  const next = read("styles-next.css");
+  // The tab bar is fixed at 60px + the safe area with z-index 60; the Ask view is
+  // z-index 1. Before this, the box's last 60px — send button included — were
+  // behind the bar on every phone.
+  assert.match(next, /--vn-tabbar: 0px;/);
+  assert.match(next, /@media \(max-width: 860px\) \{\s*body\.premium-ui \{ --vn-tabbar: calc\(60px \+ env\(safe-area-inset-bottom\)\); \}/);
+  assert.match(next, /#view-ask\.active \{[^}]*height: calc\(var\(--vn-viewport-height, 100dvh\) - var\(--vn-tabbar, 0px\)\)/);
+  // Three rows, and the box is the third one.
+  assert.match(next, /#view-ask\.active \{[^}]*grid-template-rows: minmax\(0, auto\) minmax\(0, auto\) minmax\(0, auto\) minmax\(0, 1fr\) auto;/);
+  assert.match(next, /#view-ask\.active \{[^}]*grid-template-areas:\s*"paint"\s*"greeting"\s*"kit"\s*"conversation"\s*"composer";/);
+  assert.match(next, /#view-ask\.active > \.composer \{\n\s+grid-area: composer;/, "the box has its own row");
+
+  // Every child of the screen is placed. A child with no area is auto-placed into
+  // an *implicit* row, and an implicit row below the composer takes height away
+  // from the conversation — the layout would look almost right, which is worse
+  // than looking wrong.
+  const markup = read("index.html").slice(read("index.html").indexOf('id="view-ask"'), read("index.html").indexOf("<!-- LIBRARY -->"));
+  const children = [...markup.matchAll(/^\s{10}<(?:div|section|form) class="([^"]+)"/gm)].map((match) => match[1].split(" ")[0]);
+  assert.ok(children.length >= 5, `the screen has ${children.length} children`);
+  for (const child of children) {
+    assert.match(next, new RegExp(`#view-ask\\.active > \\.${child} \\{(?: grid-area: [a-z]+; |\\s+grid-area: [a-z]+;)`), `${child} is placed on the grid`);
+  }
+  // In the document it is a child of the screen, after the conversation.
+  const index = read("index.html");
+  const view = index.slice(index.indexOf('id="view-ask"'), index.indexOf("<!-- LIBRARY -->"));
+  assert.equal((view.match(/<form class="composer"/g) || []).length, 1);
+  assert.ok(view.indexOf('<form class="composer"') > view.indexOf("</aside>"), "after the conversation and its sources panel");
+  // And the bar is docked: square, one hairline on top, paper behind it.
+  const bar = /#view-ask\.active > \.composer \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
+  assert.match(bar, /border-radius: 0/);
+  assert.match(bar, /padding: 12px clamp\(16px, 3vw, 34px\) calc\(12px \+ env\(safe-area-inset-bottom\)\)/);
 });

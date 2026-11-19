@@ -66,6 +66,13 @@ body.premium-ui {
 
   /* Surfaces are derived from the theme, never hard-coded here. */
   --vn-canvas: var(--bg);
+  /* How much of the window the phone tab bar takes. Zero until the breakpoint
+     that shows the bar sets it; `#view-ask` subtracts it from its own height so
+     the question box docks to the *visible* bottom edge instead of underneath a
+     fixed bar. That bar is `z-index: 60` and the Ask view is `z-index: 1`, so
+     before this the composer's last 60px — the send button included — were
+     behind it on every phone. */
+  --vn-tabbar: 0px;
   --vn-panel: var(--surface);
   --vn-raise: var(--surface-2);
   --vn-ink: var(--ink);
@@ -1536,6 +1543,8 @@ body.premium-ui .update-row strong {
 }
 
 @media (max-width: 860px) {
+  body.premium-ui { --vn-tabbar: calc(60px + env(safe-area-inset-bottom)); }
+
   body.premium-ui .app-shell { grid-template-columns: minmax(0, 1fr); }
 
   body.premium-ui .sidebar {
@@ -2019,19 +2028,47 @@ body.premium-ui #view-ask.active {
   top: var(--vn-viewport-offset, 0px);
   left: 0;
   right: 0;
-  /* The height of the *visible* window, not the window. On a phone with the
-     keyboard open those are different, and the difference is exactly the part
-     where the question box would otherwise be hiding. js/shell.js keeps this
-     variable up to date from visualViewport; the fallback is the window. */
-  height: var(--vn-viewport-height, 100dvh);
+  /* The height of the *visible* window, not the window, minus the tab bar. On a
+     phone with the keyboard open those are three different numbers, and the
+     differences are exactly the part where the question box would otherwise be
+     hiding. js/shell.js keeps `--vn-viewport-height` up to date from
+     visualViewport; the fallback is the window. */
+  height: calc(var(--vn-viewport-height, 100dvh) - var(--vn-tabbar, 0px));
   z-index: 1;
-  display: flex;
-  flex-direction: column;
+  /* Three rows and no flow: the greeting, the conversation, the box. The box is
+     the third row, so it is at the bottom of the screen whatever the
+     conversation above it is doing — empty, one answer, or a long one being
+     written. It used to be the last child of the scrolling column, which worked
+     only while every ancestor agreed about its height. */
+  display: grid;
+  /* Five tracks, because the screen has five children — the painted band, the
+     greeting, the glass kit, the conversation and the box. Naming *every* one
+     matters: a child with no grid area is auto-placed into an implicit row, and
+     two implicit rows below the box would take height away from the row that is
+     supposed to fill the screen. */
+  grid-template-rows: minmax(0, auto) minmax(0, auto) minmax(0, auto) minmax(0, 1fr) auto;
+  grid-template-areas:
+    "paint"
+    "greeting"
+    "kit"
+    "conversation"
+    "composer";
   max-width: none;
   margin: 0;
   padding: 0;
   overflow: hidden;
   background: var(--vn-canvas);
+}
+
+body.premium-ui #view-ask.active > .ask-paint { grid-area: paint; }
+body.premium-ui #view-ask.active > .premium-hero { grid-area: greeting; }
+body.premium-ui #view-ask.active > .gg-kit { grid-area: kit; }
+body.premium-ui #view-ask.active > .ask-layout { grid-area: conversation; }
+body.premium-ui #view-ask.active > .composer {
+  grid-area: composer;
+  /* Above the conversation, so a long answer scrolls *under* the box rather
+     than over it. */
+  z-index: 2;
 }
 
 /* The empty chat keeps its greeting — a blank screen with a box at the bottom
