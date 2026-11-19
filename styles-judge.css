@@ -20,7 +20,7 @@
 .judge-section p strong { color: #fff; }
 
 .steps { display: grid; gap: 0; margin: 22px 0 0; padding: 0; list-style: none; counter-reset: step; border-top: 1px solid #303030; }
-.steps li { display: grid; grid-template-columns: 46px 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid #262626; counter-increment: step; }
+.steps li { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 16px; padding: 16px 0; border-bottom: 1px solid #262626; counter-increment: step; }
 .steps li::before { content: counter(step, decimal-leading-zero); color: #7a7a7a; font-family: ui-monospace, monospace; font-size: 11px; font-weight: 700; letter-spacing: .08em; padding-top: 3px; }
 .steps b { display: block; color: #fff; font-size: 14px; font-weight: 750; }
 .steps span { display: block; margin-top: 4px; color: #b6b6b6; font-size: 13px; line-height: 1.7; }
@@ -47,5 +47,11 @@ pre.term b { color: #fff; font-weight: 700; }
 @media (max-width: 700px) {
   .judge-main { padding: 44px 0 64px; }
   .judge-facts strong { font-size: 24px; }
-  .steps li { grid-template-columns: 34px 1fr; gap: 10px; }
+  .steps li { grid-template-columns: 34px minmax(0, 1fr); gap: 10px; }
 }
+
+/* Number, title and explanation: never auto-place prose in the number column. */
+.steps li::before { grid-column: 1; grid-row: 1 / span 2; }
+.steps li > b, .steps li > span { grid-column: 2; min-width: 0; overflow-wrap: anywhere; }
+.steps li > b { grid-row: 1; }
+.steps li > span { grid-row: 2; }

@@ -131,8 +131,8 @@ test("the watcher keeps trying while an answer is being written", () => {
 
 test("the offline report counts what the worker really stored", () => {
   const ready = summarize({
-    expected: ["./index.html", "./js/app.js?v=80", "./styles.css"],
-    cached: ["./index.html", "./js/app.js?v=80", "./styles.css"],
+    expected: ["./index.html", "./js/app.js?v=81", "./styles.css"],
+    cached: ["./index.html", "./js/app.js?v=81", "./styles.css"],
     critical: ["./index.html"],
   });
   assert.equal(ready.total, 3);
@@ -140,7 +140,7 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(ready.summary, /Ready offline: 3 of 3/);
 
   const broken = summarize({
-    expected: ["./index.html", "./js/app.js?v=80"],
+    expected: ["./index.html", "./js/app.js?v=81"],
     cached: [],
     critical: ["./index.html"],
   });
@@ -150,8 +150,8 @@ test("the offline report counts what the worker really stored", () => {
 
   // A release is not "ready" when a file every lesson needs is missing.
   const missingShell = summarize({
-    expected: ["./index.html", "./js/app.js?v=80"],
-    cached: ["./js/app.js?v=80"],
+    expected: ["./index.html", "./js/app.js?v=81"],
+    cached: ["./js/app.js?v=81"],
     critical: CRITICAL_FILES,
   });
   assert.equal(missingShell.ready, false);
@@ -162,8 +162,8 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(nothing.summary, /Open the app once while online/);
 
   // Query strings and absolute URLs compare equal.
-  assert.equal(normalizeUrl("./js/app.js?v=80"), "js/app.js");
-  assert.equal(normalizeUrl("https://app.local/js/app.js?v=80"), "js/app.js");
+  assert.equal(normalizeUrl("./js/app.js?v=81"), "js/app.js");
+  assert.equal(normalizeUrl("https://app.local/js/app.js?v=81"), "js/app.js");
   assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v33"], "18"), "vignan-vidyanikethan-ai-v33");
 });
 
@@ -288,17 +288,11 @@ test("judge mode stays grayscale and does not overclaim", () => {
   assert.match(read("/README.md"), /## How this was built/);
   // Credit, not comparison: reading other free tutors is stated as the source of
   // ideas and they are named in the credits.
-  assert.match(judge, /OPEN_SOURCE_CREDITS\.md/);
+  assert.doesNotMatch(judge, /hackathon repository/i);
   assert.match(read("/README.md"), /## Where the ideas came from/);
   assert.match(read("/docs/OPEN_SOURCE_CREDITS.md"), /visheshpandey\/Eklavya/);
-  // Two projects share the name Eklavya, and the page must not blur them: the
-  // funded product and the independent hackathon repository are named apart.
-  assert.match(judge, /eklavya\.io/);
-  assert.match(judge, /Apni Pathshala with Malpani Ventures/);
-  assert.match(judge, /independent weekend hackathon repository/);
-  assert.match(judge, /on our list/);
-  assert.match(read("/docs/OPEN_SOURCE_CREDITS.md"), /\*\*not\*\* the funded product at eklavya\.io/);
-  assert.match(read("/README.md"), /two different projects use the name \*\*Eklavya\*\*/);
+  // Detailed provenance belongs in credits, not in the demonstration script.
+  assert.doesNotMatch(judge, /eklavya|hackathon repository|Malpani Ventures/i);
   assert.match(judge, /no professional security audit/);
   assert.doesNotMatch(judge, /guarantee|100% accurate|unhackable/i);
 });

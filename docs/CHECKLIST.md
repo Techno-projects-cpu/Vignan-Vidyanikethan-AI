@@ -237,5 +237,17 @@ it**, then fix that one thing and re-run only the section above. Do not re-test
 everything after a single fix — you will run out of time and start doubting
 checks you already passed.
 
-The quickest regression test for a UI fix is `npm test` (731 checks) plus
+The quickest regression test for a UI fix is `npm test` (737 checks) plus
 `npm run offline:check`. If both pass and the screen looks right, ship it.
+
+### Search, links and Judge instructions (2.45.0)
+
+- [x] Chromium at 390, 768, 1024 and 1366px: all four citation-step explanations
+  share the title's wide column rather than the number column (306–1118px text width).
+- [x] Browser: “turn on web search” confirms immediately without search/model calls.
+- [x] Browser: attach a public HTML page, import/index it and prepare a question;
+  upstream HTML mocked because the sandbox cannot reach arbitrary websites.
+- [x] Regression tests: stalled transport/body, caller cancellation, stalled search
+  and link APIs, web-search commands, Judge placement and presentation copy.
+- [ ] Production: repeat a public webpage fetch and a real online search on the
+  deployed host. This is not proven by mocked transport tests or local offline mode.

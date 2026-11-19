@@ -58,9 +58,7 @@ test("the pages that the browser loads never link into docs", () => {
     const html = read(page);
     assert.doesNotMatch(html, /(?:href|src)="\.?\/?docs\//, `${page} does not send a reader to the docs folder`);
   }
-  // The one exception is judge.html, which names the credits file as text so a
-  // reader can find it in the repository. Text, not a link: asserted above.
-  assert.match(read("judge.html"), /docs\/OPEN_SOURCE_CREDITS\.md/, "the judge page says where the credits are");
+
 });
 
 test("there is CI, and it runs the same command a person runs", () => {

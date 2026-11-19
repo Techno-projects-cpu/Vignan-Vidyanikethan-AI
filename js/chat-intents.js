@@ -1,6 +1,6 @@
 /** Deterministic, bounded chat commands. No model or network is used here. */
-import { asksAboutCreator, casualReply, conversationReply, isFollowUp, safetyReply } from "./conversation.js?v=80";
-import { chapterReference } from "./text.js?v=80";
+import { asksAboutCreator, casualReply, conversationReply, isFollowUp, safetyReply } from "./conversation.js?v=81";
+import { chapterReference } from "./text.js?v=81";
 
 const CONTEXT_REFERENCE = /\b(?:this|that|it|these|those|above|previous|last answer)\b|(?:^|\s)(?:इस|इसे|इसके|इसका|उस|उसे|उसके|उसी)(?=\s|$)|(?:దీని|దాని|ఇది|అది|ఈ అంశం|ఆ అంశం)/iu;
 
@@ -31,6 +31,8 @@ export function parseChatIntent(input = "") {
   const original = String(input).trim().slice(0, 600);
   if (!original || /https?:\/\//i.test(original)) return null;
   const text = asciiDigits(original.toLowerCase());
+  const web = text.match(/^(?:please\s+)?(?:(?:can|could|would) you\s+)?(?:turn\s+(on|off)\s+(?:the\s+)?web\s+search|(?:enable|activate)\s+(?:the\s+)?web\s+search|(disable)\s+(?:the\s+)?web\s+search|turn\s+(?:the\s+)?web\s+search\s+(on|off))[.!?]*$/i);
+  if (web) return { action: "web-search", enabled: !(web[1] === "off" || web[2] || web[3] === "off"), topic: "", contextual: false };
   const navigation = text.match(/^(?:please\s+)?(?:open|show)(?:\s+me)?(?:\s+my|\s+the)?\s+(library|progress|settings|flashcards|quiz)\s*[?.!]*$/iu);
   if (navigation) return { action: "navigate", view: navigation[1].toLowerCase(), topic: "", contextual: false };
   const actionWords = /\b(?:make|create|generate|start|prepare|build|write|give|take|test)\b|\bquiz\s+(?:me|us)\b|(?:बनाओ|बनाइए|बनाएं|बनाएँ|बना|तैयार|कीजिए|करो|करें|करिए|चाहिए|दीजिए)|(?:తయారు|చేయండి|చేయి|చేయు|చెయ్యి|చెయ్యండి|ఇవ్వండి|ఇవ్వు|ఇవ్వవా|కావాలి)/iu;

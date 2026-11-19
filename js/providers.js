@@ -1,3 +1,4 @@
+import { withNetworkDeadline } from "./util.js?v=81";
 /**
  * Provider adapters for existing AI services.
  *
@@ -11,7 +12,7 @@
  * rotate to the next key on quota/auth/network failures.
  */
 
-import { isQuotaFailure, parseApiKeys, providerKeyVariants } from "./key-pool.js?v=80";
+import { isQuotaFailure, parseApiKeys, providerKeyVariants } from "./key-pool.js?v=81";
 
 export const PROVIDERS = {
   server: {
@@ -384,7 +385,7 @@ function modelRequestError(data, status) {
 }
 
 /** Try each configured key in order; quota/auth/network failures roll over. */
-export async function postModelRequest(provider, messages, options = {}) {
+async function postModelRequestInternal(provider, messages, options = {}) {
   const variants = providerKeyVariants(provider);
   if (!variants.length) throw new Error("Add at least one API key for this provider in Settings.");
   let lastError = null;
@@ -449,4 +450,8 @@ export async function postModelRequest(provider, messages, options = {}) {
     throw lastError;
   }
   throw new Error("No usable API key or endpoint is configured for this provider.");
+}
+
+export function postModelRequest(provider, messages, options = {}) {
+  return withNetworkDeadline(signal => postModelRequestInternal(provider, messages, { ...options, signal }), { signal: options.signal, timeoutMs: 35000 });
 }
