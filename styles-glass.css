@@ -97,9 +97,21 @@ html[data-style="glass"] body.premium-ui {
   --tg-sheet: linear-gradient(150deg, rgba(255, 255, 255, .30), rgba(255, 255, 255, .10) 46%, rgba(255, 255, 255, .02) 74%);
   --tg-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
 
-  /* Geometry. One radius for a sheet, one for a slab, one for a control. */
-  --tg-r-sheet: 18px;
-  --tg-r-slab: 26px;
+  /* GEOMETRY: NO RADIUS.
+     The login screen is the house style, and the login screen is square — a
+     sheet of glass is a pane, and a pane has corners. Rounded panels belong to
+     the dashboard this theme used to be, and the mismatch showed: the gate was
+     sharp (its panel squares off in `styles-identity.css`) while the drawer, the
+     sidebar, the composer and the controls around it were 12–26px round, so the
+     first screen and the app behind it looked like two different products.
+
+     Every surface now takes the same corner, and it is none: sheets, slabs,
+     controls, fields, menu rows, the drawer. The one token still round is
+     `--tg-r-pill`, and it is now used only for things that are genuinely
+     circular — a status dot, an avatar, a switch, a scrollbar thumb. */
+  --tg-r-sheet: 0;
+  --tg-r-slab: 0;
+  --tg-r-control: 0;
   --tg-r-pill: 999px;
 
   /* The rim, as one value so every surface catches the same light. It is the
@@ -135,14 +147,8 @@ html[data-style="glass"] body.premium-ui {
   color: var(--tg-ink);
 }
 
-/* Continuous corners, where the browser draws them (Chromium 139+). A
-   superellipse is why the panels in the reference material look moulded rather
-   than cut; everywhere else the plain radius above stays. */
-@supports (corner-shape: superellipse(1.6)) {
-  html[data-style="glass"] body.premium-ui {
-    --tg-corner: superellipse(1.6);
-  }
-}
+/* Continuous corners (a superellipse drawn by the browser) are gone with the radius
+   they were drawn on: a superellipse on a square is the same square. */
 
 /* ------------------------------------------------------------------ */
 /* 2. The room behind everything: a painting, a wash, a sheet            */
@@ -251,7 +257,6 @@ html[data-style="glass"] body.premium-ui .composer {
   position: relative;
   border: 0;
   border-radius: var(--tg-r-sheet);
-  corner-shape: var(--tg-corner, round);
   background-color: var(--tg-tint);
   background-image: var(--tg-sheet);
   -webkit-backdrop-filter: var(--tg-filter);
@@ -274,7 +279,6 @@ html[data-style="glass"] body.premium-ui .composer::after {
   inset: 0;
   z-index: 0;
   border-radius: inherit;
-  corner-shape: inherit;
   pointer-events: none;
   background: linear-gradient(180deg, rgba(255, 255, 255, .9), transparent 16%, transparent 84%, rgba(120, 90, 96, .07));
 }
@@ -324,24 +328,11 @@ html[data-style="glass"] body.premium-ui .panel:focus-within::before {
   transform: translate3d(72%, 0, 0);
 }
 
-html[data-style="glass"] body.premium-ui .sidebar::before,
-html[data-style="glass"] body.premium-ui .composer::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, .8) 48%, transparent 64%);
-  background-size: 260% 100%;
-  opacity: .55;
-  animation: tg-sheen 20s linear infinite;
-}
-
-@keyframes tg-sheen {
-  from { background-position: 130% 0; }
-  to   { background-position: -60% 0; }
-}
+/* THE SHEEN IS GONE.
+   A highlight sliding across the sidebar and the composer, on a loop, forever.
+   The gate has no such ornament and no such movement: its glass is still, because
+   a room does not sweep a light across itself every twenty seconds. Removing it is
+   also one less painted layer per frame on a phone. */
 
 /* ------------------------------------------------------------------ */
 /* 5. Controls                                                         */
@@ -354,7 +345,7 @@ html[data-style="glass"] body.premium-ui .mode-chip,
 html[data-style="glass"] body.premium-ui .tabs button,
 html[data-style="glass"] body.premium-ui .icon-button {
   border: 0;
-  border-radius: var(--tg-r-pill);
+  border-radius: var(--tg-r-control);
   background: rgba(255, 255, 255, .72);
   -webkit-backdrop-filter: blur(10px) saturate(130%);
   backdrop-filter: blur(10px) saturate(130%);
@@ -375,17 +366,28 @@ html[data-style="glass"] body.premium-ui .premium-button:active {
   transform: translateY(1px) scale(.99);
 }
 
-/* The one dark thing on the screen is the action that means "send". */
+/* The filled action is INK, not teal.
+   The login screen's "Log in" is ink on porcelain — that is the one saturated-dark
+   surface in the whole product. The theme's teal is an *accent*: a link, a citation
+   rule, the tab you are on. Having the app's primary button be a teal gradient while
+   the gate's is ink meant the two screens disagreed about what "press this" looks
+   like, so the app follows the gate. White on `#221b28` is 15:1. */
 html[data-style="glass"] body.premium-ui .button-primary,
 html[data-style="glass"] body.premium-ui .premium-button.primary,
 html[data-style="glass"] body.premium-ui .send-button {
-  background: linear-gradient(180deg, #0f8880, #0b726b);
-  color: #ffffff;
+  background: var(--tg-ink);
+  color: var(--p-bg);
   box-shadow:
-    inset 1px 1px .5px -.5px rgba(255, 255, 255, .55),
-    inset -1px -1px .5px -.5px rgba(0, 0, 0, .18),
-    0 0 0 .5px rgba(11, 114, 107, .9),
-    0 12px 26px -16px rgba(11, 114, 107, .8);
+    inset 1px 1px .5px -.5px rgba(255, 255, 255, .28),
+    0 0 0 .5px rgba(34, 27, 40, .9),
+    0 12px 26px -18px rgba(34, 27, 40, .8);
+}
+
+html[data-style="glass"] body.premium-ui .button-primary:hover,
+html[data-style="glass"] body.premium-ui .premium-button.primary:hover,
+html[data-style="glass"] body.premium-ui .send-button:hover {
+  background: var(--tg-accent);
+  color: var(--p-bg);
 }
 
 html[data-style="glass"] body.premium-ui .composer textarea,
@@ -394,7 +396,7 @@ html[data-style="glass"] body.premium-ui input[type="search"],
 html[data-style="glass"] body.premium-ui input[type="password"] {
   background: rgba(255, 255, 255, .66);
   border: 1px solid rgba(96, 68, 74, .16);
-  border-radius: 14px;
+  border-radius: var(--tg-r-control);
   color: var(--tg-ink);
   box-shadow: inset 0 1px 2px rgba(96, 68, 74, .06);
 }
@@ -424,22 +426,35 @@ html[data-style="glass"] body.premium-ui * {
   scrollbar-width: thin;
 }
 
-/* A row of the app — a menu item, a nav item, a command — is a sheet at rest and
-   a sheet caught by the light when it is under the pointer. */
+/* A row of the app — a menu item, a nav item, a command — is a row, not a pill.
+   It used to lift off the surface as a white lozenge with a rim shadow when it was
+   hovered or current; the gate marks the tab you are on with a 2px line under it
+   and nothing else, so the workspace marks the screen you are on the same way: a
+   2px rule on the leading edge, ink for the label, a wash at 20% for the pointer. */
 html[data-style="glass"] body.premium-ui .nav-item,
 html[data-style="glass"] body.premium-ui .app-menu-item,
 html[data-style="glass"] body.premium-ui .command-item {
-  border-radius: 12px;
+  border-radius: var(--tg-r-control);
   transition: background-color 160ms var(--vn-ease, ease), box-shadow 160ms var(--vn-ease, ease);
 }
 
 html[data-style="glass"] body.premium-ui .nav-item:hover,
 html[data-style="glass"] body.premium-ui .app-menu-item:hover,
-html[data-style="glass"] body.premium-ui .command-item:hover,
+html[data-style="glass"] body.premium-ui .command-item:hover {
+  background: rgba(255, 255, 255, .32);
+  box-shadow: none;
+}
+
+/* The current screen is a lighter sheet and ink, not a coloured tab down one side:
+   the repo's own design rule (tests/design-rules.test.mjs) is right that a thick
+   side bar is the most recognisable generated-UI tell, and the gate already has a
+   vocabulary for "this one" — the tab you are on is simply the lit one. */
 html[data-style="glass"] body.premium-ui .nav-item.active,
 html[data-style="glass"] body.premium-ui .nav-item[aria-current="page"] {
   background: rgba(255, 255, 255, .62);
-  box-shadow: var(--tg-rim-small);
+  box-shadow: none;
+  color: var(--tg-ink);
+  font-weight: 700;
 }
 
 /* ------------------------------------------------------------------ */
@@ -459,29 +474,10 @@ html[data-style="glass"] body.premium-ui .section-toolbar {
   border-color: rgba(96, 68, 74, .14);
 }
 
-/* Two soft flares in opposite corners: the pink one behind the drawer, the
-   turquoise one behind the composer. This is the decoration that stops the
-   fields reading as one flat wash. */
-html[data-style="glass"] body.premium-ui .app-shell::before {
-  content: "";
-  position: fixed;
-  top: -18vmax;
-  right: -16vmax;
-  width: 46vmax;
-  height: 46vmax;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: 50%;
-  background: conic-gradient(from 200deg, rgba(244, 185, 197, .55), rgba(248, 201, 174, .4) 30%, rgba(143, 217, 208, .34) 62%, transparent 80%);
-  filter: blur(34px);
-  opacity: .8;
-  animation: tg-flare 72s linear infinite;
-}
-
-@keyframes tg-flare {
-  from { transform: rotate(0deg) scale(1); }
-  to   { transform: rotate(360deg) scale(1.05); }
-}
+/* The rotating corner flare is gone too. It was 46vmax of blurred conic gradient
+   turning behind the drawer, and on a painting that already has a window and a
+   warm floor it read as a smudge on the glass rather than as light. What is left
+   in the room is the painting, the wash over it, and the sheets. */
 
 /* The citation rule and the answer card: the two places where the accent earns
    its job as the 10%. */
@@ -536,39 +532,53 @@ html[data-style="glass"] body.premium-ui .mobile-nav {
   background-color: var(--tg-tint-strong);
   -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
   backdrop-filter: var(--tg-filter) var(--glass-lens,);
-  border-top: 0;
+  border-top: 1px solid var(--tg-edge-dark);
+  border-radius: 0;
   box-shadow: 0 -10px 30px -22px rgba(96, 68, 74, .5), inset 0 1px 0 rgba(255, 255, 255, .8);
 }
 
+/* THE SHELL IS RULED, NOT FLOATING.
+   This block used to lift the app off the page: a 14px frame around everything, a
+   sidebar and a top bar hovering inside it as separate rounded slabs, and a pill
+   where the top bar should be. It was the most obvious reason the workspace did not
+   look like the login screen, which is one edge-to-edge page divided by hairlines.
+
+   So the frame is gone. The sidebar is a column with a rule down its edge, the top
+   bar is a strip with a rule under it, the composer ends the page instead of
+   hovering over it — the same three lines the gate draws around its header, its
+   panel and its footer. Nothing casts a shadow that a rule can do instead. */
 @media (min-width: 861px) {
   html[data-style="glass"] body.premium-ui .app-shell {
-    gap: 14px;
-    padding: 14px;
+    gap: 0;
+    padding: 0;
   }
 
   html[data-style="glass"] body.premium-ui .sidebar {
-    top: 14px;
-    height: calc(100vh - 28px);
-    border: 0;
-    border-radius: var(--tg-r-slab);
-    corner-shape: var(--tg-corner, round);
+    top: 0;
+    height: 100vh;
     margin: 0;
+    border: 0;
+    border-right: 1px solid var(--tg-edge-dark);
+    border-radius: 0;
+    box-shadow: none;
   }
 
-  /* The top bar is a floating pill rather than a strip pinned to the window. */
   html[data-style="glass"] body.premium-ui .premium-topbar,
   html[data-style="glass"] body.premium-ui .topbar {
-    margin: 6px 6px 0;
+    margin: 0;
     border: 0;
-    border-radius: var(--tg-r-pill);
-    background: rgba(255, 250, 246, .6);
-    box-shadow: var(--tg-rim-small);
+    border-bottom: 1px solid var(--tg-edge-dark);
+    border-radius: 0;
+    background: rgba(255, 250, 246, .34);
+    box-shadow: none;
   }
 
-  /* The composer floats over the conversation instead of ending it. */
+  /* The composer ends the page: one rule across, no floating slab. */
   html[data-style="glass"] body.premium-ui .composer {
-    margin: 0 6px 10px;
-    border-top: 0;
+    margin: 0;
+    border-top: 1px solid var(--tg-edge-dark);
+    border-radius: 0;
+    box-shadow: none;
   }
 }
 
@@ -601,7 +611,6 @@ html[data-style="glass"] body.premium-ui .page-head {
 html[data-style="glass"] body.premium-ui .premium-hero {
   margin: 0 0 18px;
   border-radius: var(--tg-r-slab);
-  corner-shape: var(--tg-corner, round);
   background-color: var(--tg-tint);
   background-image: var(--tg-sheet);
   -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
@@ -702,8 +711,7 @@ html[data-style="glass"] body.premium-ui .gg-kit {
   max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
-  border-radius: var(--tg-r-pill);
-  corner-shape: round;
+  border-radius: var(--tg-r-sheet);
   background-color: var(--tg-tint);
   background-image: var(--tg-sheet);
   -webkit-backdrop-filter: var(--tg-filter);
@@ -721,7 +729,7 @@ html[data-style="glass"] body.premium-ui .gg-kit {
   flex: 0 0 auto;
   padding: 8px 15px;
   border: 0;
-  border-radius: var(--tg-r-pill);
+  border-radius: var(--tg-r-control);
   background: transparent;
   color: var(--tg-muted);
   font: inherit;
@@ -858,10 +866,14 @@ html[data-style="glass"] body.premium-ui .app-menu-overlay {
   backdrop-filter: blur(2px) saturate(120%);
 }
 
+/* The drawer is a panel of glass with a rule down the edge it opens on — not a
+   rounded card hanging in the corner. The 26px right-hand corners were the single
+   most visible "this is a different product" tell between the menu and the login
+   screen, and they are gone. */
 html[data-style="glass"] body.premium-ui .app-menu-panel {
   border: 0;
-  border-radius: 0 var(--tg-r-slab) var(--tg-r-slab) 0;
-  corner-shape: round;
+  border-right: 1px solid var(--tg-edge-dark);
+  border-radius: 0;
   background-color: var(--tg-tint-strong);
   background-image: var(--tg-sheet);
   -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
@@ -907,7 +919,7 @@ html[data-style="glass"] body.premium-ui .app-menu-avatar {
 html[data-style="glass"] body.premium-ui .app-menu-account-actions button {
   min-height: 34px;
   border: 0;
-  border-radius: var(--tg-r-pill);
+  border-radius: var(--tg-r-control);
   background: rgba(255, 255, 255, .7);
   box-shadow: var(--tg-rim-small);
   font-weight: 600;
@@ -951,7 +963,7 @@ html[data-style="glass"] body.premium-ui .app-menu-item {
   min-height: 42px;
   gap: 11px;
   padding: 0 12px;
-  border-radius: 13px;
+  border-radius: var(--tg-r-control);
   color: var(--tg-ink);
   font-weight: 550;
 }
@@ -971,16 +983,8 @@ html[data-style="glass"] body.premium-ui .app-menu-item[aria-current="page"] {
   font-weight: 650;
 }
 
-html[data-style="glass"] body.premium-ui .app-menu-item[aria-current="page"]::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 11px;
-  bottom: 11px;
-  width: 2px;
-  border-radius: 2px;
-  background: var(--tg-accent);
-}
+/* No accent tick down the side of the current menu row any more: it was the same
+   side-bar idiom the nav had, one pixel thinner. The row is lit instead. */
 
 html[data-style="glass"] body.premium-ui .app-menu-item { position: relative; }
 
@@ -1080,6 +1084,132 @@ html[data-style="glass"][data-lite="1"] body.premium-ui .app-menu-panel {
   html[data-style="glass"] body.premium-ui {
     --tg-blur: 4px;
     --tg-tint: rgba(255, 250, 246, .72);
-    --tg-r-slab: 20px;
   }
+}
+
+/* ========================================================================
+   §12  THE GATE — the screen the rest of the app now copies
+   ------------------------------------------------------------------------
+   Two things were wrong on the login screen, and both were the same mistake: text
+   that is *small* was sitting straight on the painting with no sheet under it.
+
+     · the note under the Create account button, 12.5px in `--p-muted`
+     · "Guest progress stays in this browser", same size, same colour — and it was
+       outside the panel entirely, which is why it was the worst of the two
+
+   Measured over the painting (`tools/backdrop-report.mjs`, darkest pixel, veil
+   applied): ink 4.5:1, muted 3.3:1. So the muted small print was below AA, and it
+   looked it. The fix is not a darker grey on the same nothing — it is to stop asking
+   a 12.5px label to survive a detailed illustration on its own:
+
+     1. the guest path moved *inside* the panel, so it is read through the sheet
+        (ink 7.2:1, muted 5.3:1 — the numbers the theme already promises);
+     2. the footer is a strip with the same tint, not loose text on the wall;
+     3. small print inside a sheet uses `--p-ink-2`, not `--p-muted`, because at
+        12px a colour that only just passes is a colour that reads as grey.
+   ------------------------------------------------------------------------ */
+
+html[data-style="glass"] body.premium-ui .auth-gate-guest {
+  margin-top: 18px;
+  padding-top: 4px;
+  border-top: 1px solid var(--p-line);
+  text-align: center;
+}
+
+html[data-style="glass"] body.premium-ui .auth-gate-guest p {
+  margin: 9px 0 0;
+  color: var(--p-ink-2);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+html[data-style="glass"] body.premium-ui .gate-form-note,
+html[data-style="glass"] body.premium-ui .gate-strength-label {
+  color: var(--p-ink-2);
+}
+
+html[data-style="glass"] body.premium-ui .gate-status,
+html[data-style="glass"] body.premium-ui .auth-gate-badge,
+html[data-style="glass"] body.premium-ui .auth-card-head p {
+  color: var(--p-ink-2);
+}
+
+/* The footer is the one part of the gate that is not in the panel, so it gets a
+   strip of its own. Same tint as the phone tab bar — a bar, not a sheet, because
+   it spans the window. */
+html[data-style="glass"] body.premium-ui .auth-gate-foot {
+  margin-top: 20px;
+  padding: 13px 16px;
+  border-top: 1px solid var(--tg-edge-dark);
+  border-radius: 0;
+  background-color: var(--tg-tint-strong);
+  background-image: var(--tg-sheet);
+  -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow: none;
+  color: var(--p-ink-2);
+}
+
+html[data-style="glass"] body.premium-ui .auth-gate-foot a {
+  color: var(--p-ink-2);
+  text-decoration-color: var(--p-line-strong);
+}
+
+html[data-style="glass"] body.premium-ui .auth-gate-foot a:hover {
+  color: var(--p-ink);
+}
+
+/* The heading, the paragraph and the feature list carry the left column on the
+   painting itself — deliberately, because a sheet behind the display type would
+   put a box around the one thing that should be open. They are ink, not muted:
+   measured on the wall, ink is 4.5:1 at the worst pixel and about 7:1 typically,
+   which is the margin this type needs. Nothing in the gate is smaller than 12px
+   unless it is inside a sheet. */
+html[data-style="glass"] body.premium-ui .auth-gate-intro > p {
+  color: var(--p-ink);
+}
+
+/* `!important` only because the identity layer sets this line's colour that way;
+   without it the attribution stays muted on the painting. */
+html[data-style="glass"] body.premium-ui .auth-gate-intro .project-attribution {
+  color: var(--p-ink) !important;
+}
+
+html[data-style="glass"] body.premium-ui .auth-gate-features {
+  color: var(--p-ink);
+}
+
+/* --- the last rounded surfaces ------------------------------------------------
+   `styles-premium.css` still rounds a dozen containers — an answer bubble at 16px,
+   a flashcard at 22px, the studio dialog at 22px, the consent box on the register
+   tab at 12px. The identity layer squares the controls it enumerates and the theme
+   token squares every sheet; these are the ones that fall between the two lists.
+   They take the same corner as everything else, because a page where the panels are
+   square and the answer bubbles inside them are round is the mismatch this round
+   exists to remove. */
+html[data-style="glass"] body.premium-ui :is(
+  .message-body,
+  .message.assistant .message-body,
+  .flashcard,
+  .deck-create,
+  .deck-create[open] > summary,
+  .deck-setup,
+  .settings-card,
+  .edit-studio-dialog,
+  .studio-canvas-frame,
+  .studio-actions .button,
+  .gate-check,
+  .gate-error,
+  .gate-global-error,
+  .app-menu-account,
+  .engine-card,
+  .library-item,
+  .web-choice,
+  .paper-source-choice,
+  .suggestion-chip,
+  .mode-chip,
+  .ai-option-tag,
+  .count-badge
+) {
+  border-radius: 0;
 }
