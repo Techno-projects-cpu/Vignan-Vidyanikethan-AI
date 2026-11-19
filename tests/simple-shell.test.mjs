@@ -152,15 +152,30 @@ test("the question box sits on the bottom edge, in the middle, like a messaging 
   // what was broken when the box floated up over the suggestion chips on an
   // empty chat.
   assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*position: fixed;/);
-  assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*height: var\(--vn-viewport-height, 100dvh\);/);
-  assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*display: flex;[^}]*flex-direction: column;/);
+  // The view is exactly the visible window, minus the phone tab bar — which is
+  // fixed at 60px + the safe area and would otherwise cover the send button.
+  assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*height: calc\(var\(--vn-viewport-height, 100dvh\) - var\(--vn-tabbar, 0px\)\);/);
+  assert.match(css, /--vn-tabbar: 0px;/);
+  assert.match(css, /@media \(max-width: 860px\) \{\s*body\.premium-ui \{ --vn-tabbar: calc\(60px \+ env\(safe-area-inset-bottom\)\); \}/);
+  // Three rows: greeting, conversation, box. The box is a *row*, so it is on the
+  // bottom edge whatever the conversation above it is doing. It used to be the
+  // last child of the scrolling column, which held only while every ancestor
+  // agreed about its height.
+  assert.match(css, /body\.premium-ui #view-ask\.active \{[^}]*display: grid;[^}]*grid-template-rows: minmax\(0, auto\) minmax\(0, auto\) minmax\(0, auto\) minmax\(0, 1fr\) auto;/);
+  assert.match(css, /body\.premium-ui #view-ask\.active > \.composer \{[^}]*grid-area: composer;/);
+  assert.match(css, /body\.premium-ui #view-ask\.active > \.ask-layout \{ grid-area: conversation; \}/);
   // With no messages there is nothing to stretch, so the column itself has to
   // pack its children to the bottom.
   assert.match(css, /body\.premium-ui #view-ask \.chat-column \{[^}]*justify-content: flex-end;/);
   // Only the messages scroll.
   assert.match(css, /body\.premium-ui #view-ask \.chat-log \{[^}]*flex: 1 1 0;[^}]*overflow-y: auto;/);
-  // The order on screen puts the box last, whatever order the markup is in.
-  assert.match(css, /body\.premium-ui #view-ask \.composer \{ order: 5; flex-shrink: 0; \}/);
+  // The box is the form itself, a child of the view and not of the column.
+  const index = read("/index.html");
+  // The form is a direct child of the Ask section: after the closing tag of the
+  // layout that holds the conversation and the sources panel.
+  const section = index.slice(index.indexOf('id="view-ask"'), index.indexOf('<!-- LIBRARY -->'));
+  assert.match(section, /<\/div>\s*<form class="composer" id="ask-form">[\s\S]*?<\/form>\s*<\/section>/, "the form is a sibling of the conversation, not a child of it");
+  assert.ok(section.indexOf('<form class="composer"') > section.indexOf("</aside>"), "and after the sources panel that closes the layout");
   assert.match(css, /body\.premium-ui \.composer \{[^}]*padding: var\(--vn-space-2\) 0 calc\(var\(--vn-space-4\) \+ env\(safe-area-inset-bottom\)\)/);
   // The old phone workaround — a box lifted 56px to clear a bottom-left logo —
   // is gone, because there is no longer a logo down there.

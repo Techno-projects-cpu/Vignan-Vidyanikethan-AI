@@ -1399,19 +1399,10 @@ html[data-style="glass"] body.premium-ui #view-ask .message-content {
    and sits on the bottom edge like a docked bar. */
 /* `body.premium-ui .composer` in `styles-next.css` ends the page with a gradient
    from transparent to `--vn-canvas` — opaque cream by 18% of its height. With the
-   room back behind the screen, that gradient was the last flat wall left on it, so
-   the bar is a tile too: tint, lens, rim, and a hairline where it stops. */
-html[data-style="glass"] body.premium-ui #view-ask .composer {
-  margin: 0;
-  border: 0;
-  border-top: 1px solid var(--tg-edge-dark);
-  border-radius: 0;
-  background-color: var(--tg-tint);
-  background-image: var(--tg-sheet);
-  -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
-  backdrop-filter: var(--tg-filter) var(--glass-lens,);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
-}
+   room back behind the screen, that gradient was the last flat wall left on it.
+   The docked bar is defined once, in §17, where the reading paper is: it shares
+   that material, and having two rules for one control is how the composer ended
+   up with three different backgrounds across the media queries. */
 
 html[data-style="glass"] body.premium-ui #view-ask .chat-log {
   padding-inline: 0;
@@ -1679,4 +1670,168 @@ html[data-style="glass"] body.premium-ui .tour-target {
 @keyframes tg-tour-pulse {
   0%, 100% { box-shadow: 0 0 0 6px rgba(255, 255, 255, .30); }
   50% { box-shadow: 0 0 0 10px rgba(255, 255, 255, .16); }
+}
+
+/* ========================================================================
+   §17  READING PAPER, AND A BOX THAT CANNOT MOVE
+   ------------------------------------------------------------------------
+   "The AI answers are too hard to see." Two causes, and neither was the ink.
+
+   1. `styles-identity.css`, in its `max-width: 760px` block, sets
+      `.message.assistant .message-body { background: transparent; padding: 8px 0 }`.
+      On every phone — and on any laptop window dragged narrower than 760px —
+      the answer had **no tile at all** and its type sat directly on the
+      painting. That is the 1.26:1 worst case in
+      `assets/walls/study-afternoon.backdrop.json`, which is why it read as
+      "hard to see" rather than as a colour preference.
+
+   2. Even with the 34% chrome tile, an answer is *reading*, not chrome. A pane
+      you read a paragraph on needs more body than a bar you glance at.
+
+   So the answer gets its own material: reading paper at 84% — warm white, a
+   hairline edge, the same lens — over the room. The guarantee is arithmetic and
+   does not depend on the painting: white at 84% over the darkest possible pixel
+   (pure black) still leaves ink at **11.0:1** and muted at **8.0:1**. Measured
+   through the real wall it is 13.4:1 and 9.8:1. `tools/backdrop-report.mjs`
+   prints the chrome numbers; `tests/glass.test.mjs` holds this one to the
+   over-black bound, because an answer must be readable on *any* room.
+
+   The 760px override is answered at the same weight plus the `data-style`
+   attribute, so it cannot be the one that wins on a phone.
+   ------------------------------------------------------------------------ */
+
+html[data-style="glass"] body.premium-ui {
+  /* Reading paper. Denser than a sheet, thinner than a page: the room is still
+     visible in the margin and through the paper's own edge. */
+  --tg-read: rgba(255, 253, 250, .84);
+  /* The box's own edge: an answer and the question box share one hairline. */
+  --tg-read-edge: rgba(96, 68, 74, .16);
+}
+
+html[data-style="glass"] body.premium-ui .message.assistant .message-body,
+html[data-style="glass"] body.premium-ui #view-ask .message.assistant .message-body {
+  padding: 18px 22px;
+  border: 1px solid var(--tg-read-edge);
+  border-radius: var(--tg-r-sheet);
+  background-color: var(--tg-read);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 60%);
+  -webkit-backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow: 0 18px 44px -30px rgba(96, 68, 74, .5), inset 0 1px 0 rgba(255, 255, 255, .9);
+  color: var(--p-ink);
+}
+
+/* The words themselves: full ink, one step up from the shell's body size, and
+   the measure kept. A 15px paragraph over a painting is legible but tiring; this
+   is the one surface in the app somebody reads for a minute at a time. */
+html[data-style="glass"] body.premium-ui .message.assistant .message-body .message-content,
+html[data-style="glass"] body.premium-ui .message.assistant .message-body p,
+html[data-style="glass"] body.premium-ui .message.assistant .message-body li {
+  color: var(--p-ink);
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+html[data-style="glass"] body.premium-ui .message.assistant .message-body strong,
+html[data-style="glass"] body.premium-ui .message.assistant .message-body b,
+html[data-style="glass"] body.premium-ui .message.assistant .message-body .rich-heading {
+  color: var(--tg-ink);
+  font-weight: 700;
+}
+
+/* Inside paper, everything that was "quiet" becomes the second ink: still
+   clearly quieter than the sentence, still readable at 11px. */
+html[data-style="glass"] body.premium-ui .message.assistant .message-body .hint,
+html[data-style="glass"] body.premium-ui .message.assistant .message-body small,
+html[data-style="glass"] body.premium-ui .message.assistant .message-body .message-meta,
+html[data-style="glass"] body.premium-ui .message.assistant .message-body .citation,
+html[data-style="glass"] body.premium-ui .message.assistant .message-actions button {
+  color: var(--p-ink-2);
+}
+
+html[data-style="glass"] body.premium-ui .message.assistant .message-body .citation {
+  border-bottom-color: var(--p-line-strong);
+}
+
+/* The question is still ink — one solid block, so the eye can find where the
+   student's words end and the app's begin. */
+html[data-style="glass"] body.premium-ui .message.user .message-body {
+  padding: 14px 18px;
+  border: 1px solid transparent;
+  box-shadow: 0 16px 34px -26px rgba(34, 27, 40, .7);
+}
+
+/* ---------------------------------------------------------------- the box */
+
+/* Docked, on paper of its own, with one hairline where it stops. It is the third
+   row of the Ask screen's grid (see §14 and `styles-next.css`), so it does not
+   depend on the conversation above it being any particular height. */
+html[data-style="glass"] body.premium-ui #view-ask.active > .composer {
+  margin: 0;
+  padding: 12px clamp(16px, 3vw, 34px) calc(12px + env(safe-area-inset-bottom));
+  border: 0;
+  border-top: 1px solid var(--tg-read-edge);
+  border-radius: 0;
+  background-color: var(--tg-read);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .62), rgba(255, 255, 255, .24));
+  -webkit-backdrop-filter: var(--tg-filter);
+  backdrop-filter: var(--tg-filter) var(--glass-lens,);
+  box-shadow: 0 -18px 40px -30px rgba(96, 68, 74, .55);
+}
+
+/* The field inside the bar is a field, not a second pane: hairline, square, warm
+   white. It was a translucent button floating in a translucent bar. */
+html[data-style="glass"] body.premium-ui #view-ask.active > .composer .composer-input-row {
+  border: 1px solid var(--tg-read-edge);
+  border-radius: var(--tg-r-control);
+  background: rgba(255, 255, 255, .78);
+  padding: 6px;
+}
+
+html[data-style="glass"] body.premium-ui #view-ask.active > .composer textarea {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: var(--p-ink);
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+
+html[data-style="glass"] body.premium-ui #view-ask.active > .composer textarea::placeholder {
+  color: var(--p-muted);
+  opacity: 1;
+}
+
+html[data-style="glass"] body.premium-ui #view-ask.active > .composer .composer-input-row:focus-within {
+  border-color: rgba(11, 114, 107, .45);
+  box-shadow: 0 0 0 3px rgba(11, 114, 107, .10);
+}
+
+/* The two lines of small print under the box are read, not scanned. */
+html[data-style="glass"] body.premium-ui #view-ask.active > .composer .composer-privacy,
+html[data-style="glass"] body.premium-ui #view-ask.active > .composer .web-choice small {
+  color: var(--p-muted);
+}
+
+@media (max-width: 760px) {
+  /* Less padding, same paper: a phone gets the tile the desktop gets, because
+     this is where it was missing. */
+  html[data-style="glass"] body.premium-ui .message.assistant .message-body,
+  html[data-style="glass"] body.premium-ui #view-ask .message.assistant .message-body {
+    padding: 14px 16px;
+  }
+
+  html[data-style="glass"] body.premium-ui .message.assistant .message-body .message-content,
+  html[data-style="glass"] body.premium-ui .message.assistant .message-body p,
+  html[data-style="glass"] body.premium-ui .message.assistant .message-body li {
+    font-size: 15.5px;
+    line-height: 1.7;
+  }
+}
+
+/* The kit's row sits on the same margins as the conversation and the box, so the
+   three lines of the screen start at the same edge. It used to start at the
+   window edge, which read as a stray control rather than as part of the page. */
+html[data-style="glass"] body.premium-ui #view-ask.active > .gg-kit {
+  margin: 16px clamp(16px, 3vw, 34px) 0;
 }
