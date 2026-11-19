@@ -1072,7 +1072,7 @@ function buildInfo() {
 function health() {
   return {
     ok: true,
-    version: "2.41.0",
+    version: "2.42.0",
     // `version` is what the code says; `build` is what the host says it built.
     // When those two disagree with the repository, the deploy target is wrong,
     // not the code.
@@ -1304,7 +1304,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.41.0</strong></div>
+      <div><span>release</span><strong>2.42.0</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1418,7 +1418,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.41.0",
+    release: "2.42.0",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);
@@ -1577,7 +1577,11 @@ async function serveStatic(request, response, pathname) {
   const contentType = MIME[extension] || "application/octet-stream";
   const noCache = ["sw.js", "index.html", "precache.json", "manifest.webmanifest"].includes(path.basename(target));
   // A ?v= query is a content address for one release, so it can be cached hard.
-  // Unversioned files keep a short cache so a fix is never stuck for a year.
+  // Anything else that is part of a release has to be *revalidated*, not cached
+  // for an hour: `max-age=3600` on an unversioned stylesheet is exactly how a
+  // page ends up half one release and half another — a fresh glass layer over a
+  // month-old base sheet, with no way to tell from the outside.
+  const revalidate = [".css", ".js", ".mjs", ".html", ".json"].includes(extension);
   const versioned = new URL(request.url || "/", "http://local").searchParams.has("v");
   const buffer = await fs.readFile(target);
   // Text assets are worth compressing on every release: a phone on school Wi-Fi
@@ -1604,7 +1608,11 @@ async function serveStatic(request, response, pathname) {
     ...baseSecurityHeaders(request),
     "Content-Type": contentType,
     "Content-Length": body.length,
-    "Cache-Control": noCache ? "no-cache" : versioned ? "public, max-age=31536000, immutable" : "public, max-age=3600",
+    "Cache-Control": noCache || (revalidate && !versioned)
+      ? "no-cache"
+      : versioned
+        ? "public, max-age=31536000, immutable"
+        : "public, max-age=3600",
     "Content-Security-Policy": CONTENT_SECURITY_POLICY,
     // Caches must key on the encoding, or a gzip copy could be handed to a
     // client that cannot read it.

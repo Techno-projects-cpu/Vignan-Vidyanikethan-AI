@@ -1,6 +1,6 @@
 {
-  "version": 76,
-  "generatedAt": "2026-11-19T01:39:03.148Z",
+  "version": 77,
+  "generatedAt": "2026-11-19T02:59:57.732Z",
   "urls": [
     "./",
     "./index.html",
@@ -235,6 +235,7 @@
     "./js/theme-glass.js",
     "./js/theme-paint.js",
     "./js/themes.js",
+    "./js/tour.js",
     "./js/translations-core.js",
     "./js/ui.js",
     "./js/updates.js",

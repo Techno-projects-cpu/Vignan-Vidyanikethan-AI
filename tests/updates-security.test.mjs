@@ -131,8 +131,8 @@ test("the watcher keeps trying while an answer is being written", () => {
 
 test("the offline report counts what the worker really stored", () => {
   const ready = summarize({
-    expected: ["./index.html", "./js/app.js?v=76", "./styles.css"],
-    cached: ["./index.html", "./js/app.js?v=76", "./styles.css"],
+    expected: ["./index.html", "./js/app.js?v=77", "./styles.css"],
+    cached: ["./index.html", "./js/app.js?v=77", "./styles.css"],
     critical: ["./index.html"],
   });
   assert.equal(ready.total, 3);
@@ -140,7 +140,7 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(ready.summary, /Ready offline: 3 of 3/);
 
   const broken = summarize({
-    expected: ["./index.html", "./js/app.js?v=76"],
+    expected: ["./index.html", "./js/app.js?v=77"],
     cached: [],
     critical: ["./index.html"],
   });
@@ -150,8 +150,8 @@ test("the offline report counts what the worker really stored", () => {
 
   // A release is not "ready" when a file every lesson needs is missing.
   const missingShell = summarize({
-    expected: ["./index.html", "./js/app.js?v=76"],
-    cached: ["./js/app.js?v=76"],
+    expected: ["./index.html", "./js/app.js?v=77"],
+    cached: ["./js/app.js?v=77"],
     critical: CRITICAL_FILES,
   });
   assert.equal(missingShell.ready, false);
@@ -162,8 +162,8 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(nothing.summary, /Open the app once while online/);
 
   // Query strings and absolute URLs compare equal.
-  assert.equal(normalizeUrl("./js/app.js?v=76"), "js/app.js");
-  assert.equal(normalizeUrl("https://app.local/js/app.js?v=76"), "js/app.js");
+  assert.equal(normalizeUrl("./js/app.js?v=77"), "js/app.js");
+  assert.equal(normalizeUrl("https://app.local/js/app.js?v=77"), "js/app.js");
   assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v33"], "18"), "vignan-vidyanikethan-ai-v33");
 });
 
@@ -234,9 +234,19 @@ test("the server hardens every response", () => {
 
 test("versioned assets are cached hard, unversioned files are not", () => {
   const server = read("/serve.mjs");
-  assert.match(server, /versioned \? "public, max-age=31536000, immutable"/);
+  // A `?v=` URL is one release's content; it can be cached for a year.
+  assert.match(server, /versioned\s*\?\s*"public, max-age=31536000, immutable"/);
   assert.match(server, /"public, max-age=3600"/);
-  assert.match(server, /noCache \? "no-cache"/);
+  // The shell files are never cached.
+  assert.match(server, /noCache/);
+  // And anything that is part of a release but *not* content-addressed — an
+  // unversioned stylesheet, a script, a page — must be revalidated. A one-hour
+  // cache on those is how a page ends up mixing two releases.
+  assert.match(server, /revalidate = \["\.css", "\.js", "\.mjs", "\.html", "\.json"\]/);
+  assert.match(server, /noCache \|\| \(revalidate && !versioned\)/);
+  // The base sheet is versioned like the rest, so this is the belt as well.
+  assert.match(read("/index.html"), /href="\.\/styles\.css\?v=\d+"/);
+  assert.match(read("/sw.js"), /"\.\/styles\.css\?v=\d+"/);
 });
 
 test("the settings card says what works offline and what needs a connection", () => {

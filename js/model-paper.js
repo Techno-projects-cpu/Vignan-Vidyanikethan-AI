@@ -2,8 +2,8 @@
  * Local model-paper assembler. It analyses readable past-paper pages and
  * reuses identifiable questions; it does not predict an exam or infer keys.
  */
-import { normalizeAnswer, truncate } from "./util.js?v=76";
-import { tokenize } from "./text.js?v=76";
+import { normalizeAnswer, truncate } from "./util.js?v=77";
+import { tokenize } from "./text.js?v=77";
 
 const MAX_CHARS = 2_000_000;
 const MAX_QUESTIONS = 1500;

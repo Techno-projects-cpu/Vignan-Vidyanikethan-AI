@@ -14,7 +14,7 @@ is somebody else's.
 │                           accessibility.html  disclaimer.html  copyright.html
 ├── blog/                   ten pieces + an index, hand-written HTML
 │
-├── js/                     79 modules, native ES modules, no bundler
+├── js/                     80 modules, native ES modules, no bundler
 ├── LICENSES/               third-party licence texts for vendored code (glasswork)
 ├── styles*.css             13 stylesheets, one per surface (see below)
 ├── assets/                 two bundled fonts, brand marks, twenty-four painted plates (WebP + AVIF, two widths each)
@@ -29,7 +29,7 @@ is somebody else's.
 ├── precache.json           generated: every file the worker installs
 ├── manifest.webmanifest    the installable-app manifest
 │
-├── tests/                  81 files, `node --test`, no dependencies
+├── tests/                  82 files, `node --test`, no dependencies
 ├── tools/                  precache generator, offline simulator, secret scan,
 │                           the live-deploy check, the address rewriter, and the
 │                           two colour reporters (palette of a plate, and the
@@ -56,7 +56,7 @@ turns up in the root again.
 
 | Group | Modules | What it does |
 | --- | --- | --- |
-| The shell | `boot`, `app`, `shell`, `premium-ui`, `ui`, `motion`, `viewport`, `themes` | one document, eleven views, one drawer |
+| The shell | `boot`, `app`, `shell`, `premium-ui`, `ui`, `motion`, `viewport`, `themes`, `tour` | one document, eleven views, one drawer, one guided tour |
 | Answers | `answer`, `answer-quality`, `retrieval`, `context`, `vector`, `llm`, `providers`, `model-router`, `key-pool`, `local-ai`, `web`, `external-answer` | retrieval first, a citation or a refusal, then the model |
 | Study | `quiz`, `flashcards`, `study-decks`, `study-sheet`, `revision-plan`, `exam-packs`, `model-paper`, `code-mode`, `progress`, `notes`, `memory` | the things a student does with a chapter |
 | People | `social`, `friends-ui`, `chat-ui`, `chat-scroll`, `play-ui`, `chess`, `avatars`, `study-card` | friends, the Study Hall, games, and a cited answer that can leave the app |

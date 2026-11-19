@@ -33,8 +33,8 @@ const everySheet = `${css}\n${glassCss}\n${paintedCss}`;
 const app = read("js/app.js");
 
 test("seventeen styles — glass, six classic and ten painted — complete and distinct", () => {
-  // 2.32.0 added the painted edition; 2.41.0 put Glass Morphism in front of it and
-  // made it the default; 2.41.0 added three daylight rooms (blush, sand, mint) so
+  // 2.32.0 added the painted edition; 2.42.0 put Glass Morphism in front of it and
+  // made it the default; 2.42.0 added three daylight rooms (blush, sand, mint) so
   // the painted set is not a set of night rooms with a light default in front of
   // it. Glass has no painting (it is made of light), so it is the one theme that
   // is neither classic nor plate-backed.
@@ -204,7 +204,11 @@ test("the first-run tour shows once, and never traps the page", () => {
   assert.match(html, /aria-modal="false"/, "it does not block the app");
   assert.match(html, /id="first-run-skip"/);
   assert.match(html, /id="first-run-next"/);
-  assert.match(app, /const FIRST_RUN_KEY = "vignan\.firstRun\.v2"/);
+  // v3: the card was rewritten from eight real screens. The old key described a
+  // product that no longer existed (five goal blocks that had been removed, six
+  // styles the theme picker had dropped), so a device that saw the old one has to
+  // see the honest one.
+  assert.match(app, /const FIRST_RUN_KEY = "vignan\.firstRun\.v3"/);
   assert.equal((app.match(/firstRunStep\(/g) || []).length >= 3, true);
   assert.match(app, /localStorage\.setItem\(FIRST_RUN_KEY, "done"\)/);
   assert.match(app, /if \(localStorage\.getItem\(FIRST_RUN_KEY\)\) return;/, "it is not shown twice");

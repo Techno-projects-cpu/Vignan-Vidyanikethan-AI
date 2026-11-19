@@ -482,3 +482,51 @@ test("the intro screen is the gate, not a black page from another product", () =
   // And the behaviour is untouched: boot still shows, skips and remembers it.
   assert.match(read("js/boot.js"), /startup-enter|startup-skip/, "the intro still has its two controls");
 });
+
+test("every token this sheet reads is a token this sheet defines", () => {
+  // The wash that makes the room (`body.premium-ui::after`: four pastel fields,
+  // the warm veil, the light from above, the paper grain) mixed four
+  // `--tg-wash-*` values that were never defined anywhere in the project. A
+  // custom property with no fallback does not degrade to "no colour" — it makes
+  // the *whole* `background` declaration invalid at computed-value time, so the
+  // browser dropped the entire layer. No fields, no veil, no grain: the room was
+  // the raw painting, and every pane on it was glass in front of nothing.
+  //
+  // Reading a token that is not written here is the bug; this catches the next one.
+  // Comments talk about tokens that belong to other sheets; only declarations
+  // count, and a token may legitimately be declared by another sheet the page
+  // loads (`--display` comes from the identity layer). What is *not* allowed is a
+  // token no sheet and no inline style ever defines — that is the wash bug.
+  const code = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const defined = new Set([...code.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)].map((m) => m[1]));
+  for (const sheet of readdirSync(new URL("..", import.meta.url)).filter((name) => name.endsWith(".css"))) {
+    for (const match of read(sheet).matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) defined.add(match[1]);
+  }
+  for (const match of read("index.html").matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) defined.add(match[1]);
+  const bare = [...code.matchAll(/var\((--[a-zA-Z0-9-]+)\)/g)].map((m) => m[1]);
+  const missing = [...new Set(bare)].filter((name) => !defined.has(name));
+  assert.deepEqual(missing, [], `undefined with no fallback: ${missing.join(", ")}`);
+  // And the four fields are the theme module's own colours, not new ones.
+  for (const [index, field] of GLASS_THEME.aurora.entries()) {
+    const alpha = Math.round(GLASS_THEME.wall.fieldAlpha * 100);
+    const line = new RegExp(`--tg-wash-${index + 1}: rgba\\(${field.hex.match(/\w\w/g).map((pair) => parseInt(pair, 16)).join(", ")}, \\.${alpha}\\)`);
+    assert.match(css, line, `--tg-wash-${index + 1} is ${field.id} at ${alpha}%`);
+  }
+});
+
+test("the Ask screen has the room behind it, not a cream sheet", () => {
+  // The view is pinned with `position: fixed` and given `background:
+  // var(--vn-canvas)` in `styles-next.css`. In this theme that resolves to the
+  // opaque `--p-bg`, and it carries an id — so the `.view { background:
+  // transparent }` rule here could never win, and the app's home screen was a
+  // solid slab over the painting. This is the assertion that would have caught
+  // "the transparent things aren't refracting light" the first time.
+  const next = read("styles-next.css");
+  assert.match(next, /#view-ask\.active \{[\s\S]{0,900}background: var\(--vn-canvas\)/, "the shell still paints the view opaque");
+  assert.match(css, /#view-ask\.active \{[\s\S]{0,160}background: transparent/, "and glass takes it back at the same weight");
+  // The question box had the same problem: a gradient to `--vn-canvas` behind it.
+  assert.match(next, /\.composer \{[\s\S]{0,260}linear-gradient\(to bottom, transparent, var\(--vn-canvas\)/, "the shell fades the composer into the page");
+  const composer = /html\[data-style="glass"\] body\.premium-ui #view-ask \.composer \{([\s\S]*?)\n\}/.exec(css)?.[1] || "";
+  assert.match(composer, /background-color: var\(--tg-tint\)/, "so the bar is a tile of its own");
+  assert.match(composer, /backdrop-filter: var\(--tg-filter\)/, "with the lens in it");
+});
