@@ -1,12 +1,12 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=82";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=82";
-import { parseApiKeys } from "./key-pool.js?v=82";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=82";
-import { aiProfile } from "./ai-nicknames.js?v=82";
-import { LANGUAGE_CODES } from "./languages.js?v=82";
-import { DEFAULT_STYLE, STYLE_ERA, THEMES, migrateStyleChoice } from "./themes.js?v=82";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=83";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=83";
+import { parseApiKeys } from "./key-pool.js?v=83";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=83";
+import { aiProfile } from "./ai-nicknames.js?v=83";
+import { LANGUAGE_CODES } from "./languages.js?v=83";
+import { DEFAULT_STYLE, STYLE_ERA, THEMES, migrateStyleChoice } from "./themes.js?v=83";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -177,7 +177,7 @@ export function providerConfig(settings, providerId = settings?.activeProvider) 
   return settings?.providers?.[providerId] || defaultProviderConfig(providerId);
 }
 
-export async function serverHealth({ timeout = 1500 } = {}) {
+export async function serverHealth({ timeout = 4000 } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
   try {
@@ -198,4 +198,33 @@ export async function serverHealth({ timeout = 1500 } = {}) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+/** Prefer hosted keys for untouched offline defaults; preserve deliberate choices. */
+export function connectHostedDefaults(settings, health) {
+  if (!health?.ai || settings.offlineMode || settings.freeRouterDismissed
+    || ROUTING_TASKS.some(task => settings.routing?.[task] !== "offline")) return settings;
+  return { ...settings, routing: Object.fromEntries(ROUTING_TASKS.map(task => [task, "server"])), activeProvider: "server", fallback: "offline" };
+}
+
+/** Pro activation explicitly requests a cloud route, but never overrides Offline
+ * mode or invents a working provider. The snapshot contains route names, no keys. */
+export function proCloudRouting(settings, health) {
+  if (settings.offlineMode || settings.proRoutingBefore) return settings;
+  const current = settings.routing?.answer || "offline";
+  if (!["offline", "webllm", "ollama", "lmstudio"].includes(current)) return settings;
+  const direct = PROVIDER_IDS.find(id => PROVIDERS[id].needsKey
+    && (settings.providers?.[id]?.apiKey || settings.providers?.[id]?.apiKeys?.length));
+  const route = health?.ai ? "server" : direct;
+  if (!route) return settings;
+  return { ...settings,
+    proRoutingBefore: { routing: { ...settings.routing }, activeProvider: settings.activeProvider, fallback: settings.fallback },
+    routing: Object.fromEntries(ROUTING_TASKS.map(task => [task, route])), activeProvider: route, fallback: "offline" };
+}
+
+export function restoreProRouting(settings) {
+  const previous = settings.proRoutingBefore;
+  if (!previous) return settings;
+  const { proRoutingBefore, ...rest } = settings;
+  return { ...rest, routing: { ...previous.routing }, activeProvider: previous.activeProvider, fallback: previous.fallback };
 }

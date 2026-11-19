@@ -50,7 +50,7 @@ test("every step names a screen the document has, and points at something in it"
   // Every screen is visited once, in the order a person would show them.
   const views = TOUR_STEPS.map((step) => step.view);
   assert.equal(new Set(views).size, views.length, "no screen is shown twice");
-  assert.equal(views[0], "ask", "it starts where the student lands");
+  assert.equal(views[0], "start", "it starts where the student lands");
   assert.equal(views.at(-1), "settings", "and ends with what they can change");
 });
 
@@ -117,7 +117,7 @@ test("the card, the menu and the T key all reach the same tour", () => {
   // Finishing puts the student back at the question box; skipping leaves them
   // where they were, because they chose to stop there.
   assert.match(app, /endFirstRun\(\{ returnToStart: true \}\)/);
-  assert.match(app, /if \(returnToStart && state\.currentView !== "ask"\) setView\("ask"\)/);
+  assert.match(app, /if \(returnToStart && state\.currentView !== "start"\) setView\("start"\)/);
 
   // The menu row and the action behind it.
   assert.match(html, /data-action="tour"/);

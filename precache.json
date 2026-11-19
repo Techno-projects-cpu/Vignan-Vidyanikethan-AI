@@ -1,6 +1,6 @@
 {
-  "version": 82,
-  "generatedAt": "2026-11-19T16:20:24.488Z",
+  "version": 83,
+  "generatedAt": "2026-11-19T16:51:26.995Z",
   "urls": [
     "./",
     "./index.html",
@@ -212,6 +212,7 @@
     "./js/password-policy.js",
     "./js/play-ui.js",
     "./js/premium-ui.js",
+    "./js/presentation.js",
     "./js/pro-mode.js",
     "./js/pro-ui.js",
     "./js/progress.js",
@@ -248,6 +249,7 @@
     "./judge.html",
     "./legal.html",
     "./manifest.webmanifest",
+    "./presentation.html",
     "./privacy.html",
     "./robots.txt",
     "./security.html",
@@ -261,6 +263,7 @@
     "./styles-next.css",
     "./styles-painted.css",
     "./styles-premium.css",
+    "./styles-presentation.css",
     "./styles-pro.css",
     "./styles-social.css",
     "./styles-welcome.css",

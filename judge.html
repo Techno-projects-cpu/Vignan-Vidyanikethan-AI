@@ -7,10 +7,10 @@
   <meta name="description" content="Judge mode: what Vignan Vidyanikethan AI is, how to test its citations and its offline proof in sixty seconds, and what it honestly cannot do.">
   <title>Judge mode — Vignan AI</title>
   <link rel="canonical" href="https://vignan-vidyanikethan-ai-1.onrender.com/judge.html">
-  <link rel="icon" href="./icons/icon.svg?v=82" type="image/svg+xml">
-  <link rel="icon" href="./icons/icon-48.png?v=82" type="image/png" sizes="48x48">
-  <link rel="stylesheet" href="./styles-legal.css?v=82">
-  <link rel="stylesheet" href="./styles-judge.css?v=82">
+  <link rel="icon" href="./icons/icon.svg?v=83" type="image/svg+xml">
+  <link rel="icon" href="./icons/icon-48.png?v=83" type="image/png" sizes="48x48">
+  <link rel="stylesheet" href="./styles-legal.css?v=83">
+  <link rel="stylesheet" href="./styles-judge.css?v=83">
 </head>
 <body>
   <a class="skip" href="#content">Skip to judge mode</a>
@@ -22,8 +22,8 @@
       <p class="lede">This page exists so you can check the claims instead of taking them on trust. Sixty seconds, two tests, no account needed.</p>
       <p>Vignan Vidyanikethan AI is a study workspace built by a student of Vignan Vidyanikethan English Medium High School for INSPIRE-MANAK. It is not a new model trained from scratch. It orchestrates AI services that already exist, and it refuses to let them answer without evidence.</p>
       <div class="judge-facts" role="list">
-        <div role="listitem"><strong>743</strong><span>automated tests</span></div>
-        <div role="listitem"><strong>558</strong><span>files precached</span></div>
+        <div role="listitem"><strong>748</strong><span>automated tests</span></div>
+        <div role="listitem"><strong>563</strong><span>files precached</span></div>
         <div role="listitem"><strong>33</strong><span>languages</span></div>
         <div role="listitem"><strong>0</strong><span>console errors</span></div>
         <div role="listitem"><strong>Zero</strong><span>rupees spent</span></div>
@@ -54,8 +54,8 @@
       <p>Science fairs have unreliable Wi-Fi. A tool that fails at the moment of demonstration was never really working. This app is designed to survive that, and the survival is verified by a simulator that runs the real service worker with the network switched off.</p>
       <pre class="term">$ npm run offline:check
 
-<b>Release v82</b>
-Cached after install: 558 files in vignan-vidyanikethan-ai-v82
+<b>Release v83</b>
+Cached after install: 563 files in vignan-vidyanikethan-ai-v83
 every core file ................ ok 200
 every release module ........... ok 200
 navigation fallback ............ ok
@@ -92,7 +92,7 @@ manifest files missing ......... 0
       <h2>06 / Honest limitations</h2>
       <p><strong>Checked against ordinary questions, not chosen ones:</strong> thirty-one questions a visitor actually asks — <em>why does a body float in water</em>, <em>what is pH</em>, <em>how does a transformer work</em>, <em>explain the water cycle</em> — are asked of the built-in starter pages on every build. Each one must be answered from a page that carries the question's own topic. A page that merely shares filler words fails the build, which is how two real defects were found and fixed: a question about photosynthesis answered from a chemistry page about "matter", and a question about a transformer answered from a chapter about "work". The list is in <code>tests/answer-bench.test.mjs</code>, and it is a list of questions, so it can be added to.</p>
       <p><strong>The interface is checked like code too.</strong> A stylesheet can regress the way a function can, so the design layer has its own tests: every corner radius comes from the theme's own scale (square for the six classic looks, 18px on a glass sheet), every one of the seventeen looks passes WCAG AA on body text (the contrast is computed from the theme tokens, not eyeballed), phone targets are at least 44px with a 60px tab bar, focus is always visible, motion is optional, and the numbered section header really is in the page rather than hidden for screen readers.</p>
-      <p><strong>Checked by machine, every time:</strong> 743 automated tests; a service worker simulation that installs the real worker, turns the network off and asks for every file of the release; a scanner that fails the build if a credential appears in the repository; and a coverage test that fails if any module, script or stylesheet the app loads is missing from the offline cache.</p>
+      <p><strong>Checked by machine, every time:</strong> 748 automated tests; a service worker simulation that installs the real worker, turns the network off and asks for every file of the release; a scanner that fails the build if a credential appears in the repository; and a coverage test that fails if any module, script or stylesheet the app loads is missing from the offline cache.</p>
       <p><strong>Not proven here, and stated plainly:</strong> speech has not been tested on a real phone with a real microphone in this build, so treat the voice buttons as best-effort; there has been no professional security audit; the app has not been load-tested with a whole school; and the account backend is only known to be healthy when the <a href="/setup">/setup</a> page shows all three secrets as set. The leaderboard is practice only — scores start in the browser and a determined student could edit them.</p>
       <ul class="limits">
         <li><b>No textbook is bundled</b>No publisher has given permission, so the app never ships NCERT or SCERT text. Instead it ships a starter shelf written for this project: four subject books that work exactly like an uploaded book and can be removed in one click. Student uploads are searched first, and the real textbook is added by the student.</li>

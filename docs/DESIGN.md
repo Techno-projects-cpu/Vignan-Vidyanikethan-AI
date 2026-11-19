@@ -230,7 +230,7 @@ composer, and the 46vmax conic flare that rotated behind the drawer. On a painti
 that already has a window and a warm floor they read as a smudge on the glass, and
 the login screen — which is the reference — has neither.
 
-### The gate is the house style (2.45.1)
+### The gate is the house style (2.46.0)
 
 The login screen was the only screen that looked right, and the reason turned out
 to be geometric. `styles-identity.css` squares the *controls* it enumerates
@@ -277,7 +277,7 @@ entirely. The fixes:
 - what is left on the painting — the headline, its paragraph, the feature line —
   is ink, never the quiet grey.
 
-### The tile, and the content that was still on the wall (2.45.1)
+### The tile, and the content that was still on the wall (2.46.0)
 
 Two field reports, one cause. "The transparent things aren't refracting light" and
 "put the remaining contents on them" were describing the same gap: the panels were
@@ -324,9 +324,9 @@ one tall pane with the same rim, the rules are hairlines, and **Enter study spac
 is the gate's button: ink on porcelain, square, same arrow. Behaviour is untouched;
 `js/boot.js` still shows it, skips it and remembers the choice.
 
-### Two bugs the painting was hiding (2.45.1)
+### Two bugs the painting was hiding (2.46.0)
 
-The tile work in 2.45.1 was right and still looked wrong, because two things under
+The tile work in 2.46.0 was right and still looked wrong, because two things under
 it were broken in ways no screenshot of a panel can show.
 
 **The room had no wash.** `body.premium-ui::after` mixes four pastel fields, a warm
@@ -367,7 +367,7 @@ the menu to bring it back. Every step's screen and selector is resolved against 
 real `index.html` by `tests/tour.test.mjs`, and the copy is checked for the ghost
 features and for counts that drift.
 
-### Reading paper, and a box that cannot move (2.45.1)
+### Reading paper, and a box that cannot move (2.46.0)
 
 **"The AI answers are too hard to see."** The ink was never the problem. In
 `styles-identity.css`, the `max-width: 760px` block set
@@ -769,7 +769,7 @@ dependency, nothing it produces is served, and the site still builds and runs
 offline without it. Do not run `impeccable install` here — it writes agent hooks
 that execute outside approval. `detect` alone is read-only and local.
 
-### Tablet chat geometry (2.45.1)
+### Tablet chat geometry (2.46.0)
 
 The previous release's static CSS tests passed but did not prove that the chat was
 usable. Headless Chromium at 1024×768 measured a 394px composer and only a 70px
@@ -797,3 +797,46 @@ of the screen, readable answer sizing, scrolling, and reachable web-search optio
 Browser dependencies are optional and installed outside the repository; no CDN
 or browser runtime is added to the app. Physical tablet software keyboards still
 need device testing; desktop emulation does not prove their behaviour.
+
+### Start, present, and return to learning (2.46.0)
+
+The Start view is now the default, with a single question field, three starter
+prompts and links to every study destination. It delegates to the original Chat
+form rather than implementing a second answer path. The drawer always offers a
+way back. Deep links to an existing view continue to work, and the first-run tour
+starts and finishes on Start. A hidden-by-default `.section-toolbar !important`
+rule initially hid the new heading; its scoped override is verified in Chromium.
+Initialization also no longer announces a locked theme on every load.
+
+`presentation.html` is a separate seven-section story for an audience: understand,
+remember, prepare, discover, keep going and begin. Warm paper, dark ink and forest
+green follow the 60/30/10 visual hierarchy. A classroom painting is reserved for
+the cover. There are no code excerpts, infrastructure details, test counts or
+comparisons with other projects. Full screen is optional; scrolling, arrows and
+controls remain usable without it, and the content is readable without JavaScript.
+Reduced motion and print are supported. The older Judge page remains verification
+material and is labelled “Verification notes” in the app, not the presentation.
+
+The language picker had a tile grid applied to the *group wrappers*, each of
+which then had another grid. This produced squeezed columns and isolated rows.
+The wrappers now use `display: contents`; all 33 buttons share three columns
+(two only on very narrow screens), with natural wrapping for long native names.
+Chromium at 390, 768, 1024 and 1366px reports eleven complete rows of three.
+
+Nezaad activation uses a short paper welcome, rather than simulated identity
+scanning. Skip/Escape, a bounded timeout, focus restoration and reduced motion
+remain. A cloud route is selected only if the server advertises configured AI
+or a direct keyed provider is configured; Offline mode is never overridden.
+The previous route is retained as route names only, then restored on exit. A
+reachable drawer action now leaves the mode even though the old top-bar chip
+is hidden by the simple shell.
+
+Untouched offline defaults connect to hosted AI when health reports it ready.
+Explicit routing/local/offline choices are preserved. The deployment reported
+OpenRouter and Bytez with two server keys during this work; only counts/provider
+names were read. No values were copied into browser assets, settings or this repo.
+Actual provider availability/quota is not guaranteed by health. Browser routing
+checks used mocked cloud responses, not a real billed provider call.
+
+Reproduce the browser checks with `tools/check-study-start.mjs` and the existing
+`tools/check-chat-layout.mjs`; optional browser dependencies stay outside Git.

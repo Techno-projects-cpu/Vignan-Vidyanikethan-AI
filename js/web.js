@@ -1,4 +1,4 @@
-import { withNetworkDeadline } from "./util.js?v=82";
+import { withNetworkDeadline } from "./util.js?v=83";
 /**
  * Optional, explicitly enabled web fallback.
  *
@@ -8,8 +8,8 @@ import { withNetworkDeadline } from "./util.js?v=82";
  * can turn it off; configured JSON search providers remain optional.
  */
 
-import { safeUrl, truncate } from "./util.js?v=82";
-import { LANGUAGE_CODES } from "./languages.js?v=82";
+import { safeUrl, truncate } from "./util.js?v=83";
+import { LANGUAGE_CODES } from "./languages.js?v=83";
 
 function firstArray(data) {
   if (Array.isArray(data)) return data;

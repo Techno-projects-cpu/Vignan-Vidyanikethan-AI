@@ -11,7 +11,7 @@
 
 export const CACHE_PREFIX = "vignan-vidyanikethan-ai-v";
 
-/** Normalise "./index.html?v=82" and "index.html" so lists can be compared. */
+/** Normalise "./index.html?v=83" and "index.html" so lists can be compared. */
 export function normalizeUrl(url = "") {
   return String(url || "")
     .replace(/^https?:\/\/[^/]+/i, "")
