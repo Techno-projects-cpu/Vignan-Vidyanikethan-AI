@@ -200,3 +200,36 @@ test("server adapter forwards student keys only for an explicit BYOK test", () =
   assert.equal(request.body.studentKeys.length, 1);
   assert.deepEqual(request.body.studentKeys[0].keys, ["STUDENT-KEY"]);
 });
+
+test('offline mode blocks routed and direct provider calls even with saved cloud routes', async () => {
+  const { callProvider } = await import('../js/model-router.js');
+  const oldFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw new Error('must not send'); };
+  try {
+    const settings = normalizeSettings({ offlineMode: true, routing: { answer: 'server' } });
+    assert.equal((await callProvider({ providerId: 'server', settings, messages })).offline, true);
+    assert.equal((await callRoutedModel({ settings, messages })).offline, true);
+    assert.equal(calls, 0);
+  } finally { globalThis.fetch = oldFetch; }
+});
+
+test('cancelling a routed request does not call a fallback or return an offline answer', async () => {
+  const oldFetch = globalThis.fetch;
+  const controller = new AbortController(); let calls = 0;
+  globalThis.fetch = async () => { calls++; controller.abort(); throw Object.assign(new Error('cancelled'), { name: 'AbortError' }); };
+  try {
+    const settings = normalizeSettings({ routing: { answer: 'server' }, fallback: 'ollama' });
+    await assert.rejects(callRoutedModel({ settings, messages, signal: controller.signal }), { name: 'AbortError' });
+    assert.equal(calls, 1);
+  } finally { globalThis.fetch = oldFetch; }
+});
+
+test('an HTML success page is not accepted as an AI answer', async () => {
+  const oldFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response('<html>Sign in</html>', { status: 200 });
+  try {
+    const provider = resolveProvider(normalizeSettings(DEFAULT_SETTINGS), 'server');
+    await assert.rejects(postModelRequest(provider, messages), /invalid JSON/);
+  } finally { globalThis.fetch = oldFetch; }
+});

@@ -300,3 +300,11 @@ See `docs/SECURITY-LEGAL-REVIEW.md` for findings, validation and outstanding
 operator actions. Private-path bypass reproduced locally and regression-tested;
 all ten policy pages checked in Chromium at phone/tablet/desktop widths. Policy
 consistency is not legal certification. Deploy the server, not just PWA assets.
+
+### 2.46.3 API / WebLLM / stack regression checks
+
+See `docs/API-RUNTIME-REVIEW.md`. Cancellation, worker recovery and command
+serialization, cache-deletion errors, offline routing, invalid JSON and shared
+provider deadlines are tested. Optional `tools/check-local-runtime.mjs` imports
+the real worker in Chromium but does not prove GPU generation. Live key quota
+and actual device-model downloads still require separate verification.

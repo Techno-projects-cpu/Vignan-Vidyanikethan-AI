@@ -47,7 +47,7 @@ signing key — none of which exist on a static host. The app is already a
 self-contained static folder, so wrapping it is a short job on any machine:
 
 ```bash
-# on a machine with Node 18+, a JDK 17 and Android Studio installed
+# on a machine with Node 22+, a JDK 17 and Android Studio installed
 npm install --no-save @capacitor/cli @capacitor/core @capacitor/android
 npx cap init "Vignan Vidyanikethan AI" ai.vignan.study --web-dir=.
 npx cap add android

@@ -1,4 +1,4 @@
-import { withNetworkDeadline } from "./util.js?v=85";
+import { withNetworkDeadline } from "./util.js?v=86";
 /**
  * Provider adapters for existing AI services.
  *
@@ -12,7 +12,7 @@ import { withNetworkDeadline } from "./util.js?v=85";
  * rotate to the next key on quota/auth/network failures.
  */
 
-import { isQuotaFailure, parseApiKeys, providerKeyVariants } from "./key-pool.js?v=85";
+import { isQuotaFailure, parseApiKeys, providerKeyVariants } from "./key-pool.js?v=86";
 
 export const PROVIDERS = {
   server: {
@@ -411,7 +411,8 @@ async function postModelRequestInternal(provider, messages, options = {}) {
       try {
         data = raw ? JSON.parse(raw) : {};
       } catch {
-        data = { content: raw };
+        if (response.ok) throw new Error("The AI endpoint returned invalid JSON, not a model response. Check the endpoint URL.");
+        data = {};
       }
     } catch (error) {
       if (error?.name === "AbortError") throw error;

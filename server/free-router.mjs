@@ -348,7 +348,7 @@ export async function callFreeRouter({
   messages = [],
   temperature = 0.2,
   maxTokens = 900,
-  timeoutMs = 45_000,
+  timeoutMs = 25_000,
   fetchImpl = fetch,
   build = buildProviderRequest,
   parse = parseProviderResponse,
@@ -371,9 +371,14 @@ export async function callFreeRouter({
   const exhaustedKeys = new Set();
   let attempts = 0;
 
+  // One budget for the entire key pool, below the browser's 35s deadline.
+  const deadline = performance.now() + timeoutMs;
   for (const upstream of active) {
+    const remaining = Math.ceil(deadline - performance.now());
+    if (remaining <= 0) break;
     attempts += 1;
     const label = upstream.keyId || upstream.id;
+    const requestSignal = AbortSignal.timeout(remaining);
     try {
       const built = build(upstream, messages, { temperature, maxTokens });
       if (!built.url) throw new Error("Upstream has no endpoint.");
@@ -381,14 +386,15 @@ export async function callFreeRouter({
         method: "POST",
         headers: { "Content-Type": "application/json", ...built.headers },
         body: JSON.stringify(built.body),
-        signal: AbortSignal.timeout(timeoutMs),
+        signal: requestSignal,
       });
       const raw = await response.text();
       let data;
       try {
         data = raw ? JSON.parse(raw) : {};
       } catch {
-        data = { content: raw };
+        if (response.ok) throw new Error("The AI endpoint returned invalid JSON, not a model response. Check the endpoint URL.");
+        data = {};
       }
       if (!response.ok) {
         const message = errorMessage(response.status, data, `HTTP ${response.status}`, secrets);
@@ -426,6 +432,7 @@ export async function callFreeRouter({
         exhaustedKeys.add(upstream.keyId);
       }
       errors.push(`${label}: ${redactSecrets(message, secrets).slice(0, 200)}`);
+      if (requestSignal.aborted) break;
     }
   }
 

@@ -14,7 +14,7 @@ import {
   setLocalAICapabilities,
   setLocalAIWorkerFactory,
   testLocalAI,
-} from "../js/local-ai.js?v=85";
+} from "../js/local-ai.js?v=86";
 import { DEFAULT_SETTINGS, normalizeSettings } from "../js/settings.js";
 import { callProvider } from "../js/model-router.js";
 import {
@@ -239,4 +239,91 @@ test("official free API catalogue contains links but no key values", () => {
     assert.equal(Object.hasOwn(provider, "key"), false);
     assert.ok(provider.env || provider.local);
   }
+});
+
+test('local model cancellation settles promptly even if the worker immediately acknowledges abort', async () => {
+  resetLocalAIForTests();
+  const worker = new FakeLocalWorker();
+  const original = worker.postMessage.bind(worker);
+  worker.postMessage = message => {
+    if (message.type === 'load') { worker.posted.push(message); return; }
+    original(message);
+  };
+  setLocalAICapabilities({ webgpu: true, worker: true });
+  setLocalAIWorkerFactory(() => worker);
+  const controller = new AbortController();
+  const loading = loadLocalModel(DEFAULT_LOCAL_MODEL_ID, { signal: controller.signal });
+  controller.abort();
+  let timer;
+  try {
+    await assert.rejects(Promise.race([loading, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('cancellation hung')), 200); })]), { name: 'AbortError' });
+  } finally { clearTimeout(timer); resetLocalAIForTests(); }
+});
+
+test('replacing a local worker rejects in-flight requests rather than leaving them pending', async () => {
+  resetLocalAIForTests();
+  setLocalAICapabilities({ webgpu: true, worker: true });
+  setLocalAIWorkerFactory(() => ({ postMessage() {}, terminate() {} }));
+  const loading = loadLocalModel(DEFAULT_LOCAL_MODEL_ID);
+  setLocalAIWorkerFactory(null);
+  await assert.rejects(loading, { name: 'AbortError' });
+  resetLocalAIForTests();
+});
+
+test('real WebLLM worker protocol serializes model operations and reports failed cache deletion', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { default: vm } = await import('node:vm');
+  const source = readFileSync(new URL('../js/local-ai-worker.js', import.meta.url), 'utf8').replace(/import\s*\{[\s\S]*?\}\s*from\s*"\.\.\/vendor\/webllm\/web-llm.js";/, '');
+  const posted = [], operations = [];
+  let release;
+  const engine = {
+    setInitProgressCallback() {},
+    reload: async model => { operations.push(`reload:${model}`); },
+    unload: async () => { operations.push('unload'); },
+    chat: { completions: { create: async () => { operations.push('generate'); return { choices: [{ message: { content: 'OK' } }] }; } } },
+  };
+  const context = vm.createContext({
+    postMessage: message => posted.push(message),
+    prebuiltAppConfig: { model_list: [{ model_id: 'A' }, { model_id: 'B' }] },
+    CreateMLCEngine: async model => { operations.push(`load:${model}`); await new Promise(resolve => { release = resolve; }); return engine; },
+    hasModelInCache: async () => true,
+    deleteModelAllInfoInCache: async () => { throw new Error('cache denied'); },
+    deleteModelWasmInCache: async () => {},
+  });
+  vm.runInContext(source, context);
+  const send = (id, type, modelId) => context.onmessage({ data: { id, type, payload: { modelId } } });
+  send(1, 'load', 'A'); send(2, 'generate', 'A'); send(3, 'load', 'B');
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(operations, ['load:A']);
+  release(); await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(operations, ['load:A', 'generate', 'reload:B']);
+  assert.deepEqual(posted.map(message => message.id), [1, 2, 3]);
+  send(4, 'clear', 'B'); await new Promise(resolve => setImmediate(resolve));
+  assert.equal(posted.at(-1).type, 'error');
+  assert.match(posted.at(-1).message, /cache denied/);
+});
+
+test('all selectable local models exist in the actual vendored runtime catalogue', async () => {
+  const { prebuiltAppConfig } = await import('../vendor/webllm/web-llm.js');
+  for (const model of LOCAL_MODELS) {
+    const entry = prebuiltAppConfig.model_list.find(item => item.model_id === model.id);
+    assert.ok(entry, `${model.id} must be supported by the shipped runtime`);
+    assert.match(entry.model_lib, /^https:\/\/raw\.githubusercontent\.com\//);
+    assert.match(entry.model, /^https:\/\/huggingface\.co\//);
+  }
+});
+
+test('a crashed WebLLM worker is replaced on the next load', async () => {
+  resetLocalAIForTests();
+  setLocalAICapabilities({ webgpu: true, worker: true });
+  const dead = { postMessage() {}, terminate() {} };
+  let starts = 0;
+  setLocalAIWorkerFactory(() => ++starts === 1 ? dead : new FakeLocalWorker());
+  const loading = loadLocalModel(DEFAULT_LOCAL_MODEL_ID);
+  dead.onerror({ message: 'worker stopped unexpectedly' });
+  await assert.rejects(loading, /worker stopped unexpectedly/);
+  await loadLocalModel(DEFAULT_LOCAL_MODEL_ID);
+  assert.equal(starts, 2);
+  assert.equal(getLocalAIState().ready, true);
+  resetLocalAIForTests();
 });

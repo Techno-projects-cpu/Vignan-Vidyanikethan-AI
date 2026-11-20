@@ -12,12 +12,12 @@ import {
   extractJson,
   formatContext,
   VERIFY_SYSTEM_PROMPT,
-} from "./context.js?v=85";
-import { postModelRequest, resolveProvider } from "./providers.js?v=85";
-import { generateWithLocalAI } from "./local-ai.js?v=85";
-import { providerKeyVariants } from "./key-pool.js?v=85";
-import { studentKeyPayload } from "./student-keys.js?v=85";
-import { clamp, truncate } from "./util.js?v=85";
+} from "./context.js?v=86";
+import { postModelRequest, resolveProvider } from "./providers.js?v=86";
+import { generateWithLocalAI } from "./local-ai.js?v=86";
+import { providerKeyVariants } from "./key-pool.js?v=86";
+import { studentKeyPayload } from "./student-keys.js?v=86";
+import { clamp, truncate } from "./util.js?v=86";
 
 export const TASKS = [
   {
@@ -72,6 +72,8 @@ export async function callProvider({
   signal,
   forceStudentKeys = false,
 } = {}) {
+  if (signal?.aborted) throw Object.assign(new Error("The request was cancelled."), { name: "AbortError" });
+  if (settings.offlineMode) return offlineResult();
   const provider = resolveProvider(settings, providerId);
   if (!provider) return offlineResult();
   if (provider.kind === "webllm") {
@@ -136,6 +138,8 @@ export async function callRoutedModel({
   maxTokens = 900,
   signal,
 } = {}) {
+  if (signal?.aborted) throw Object.assign(new Error("The request was cancelled."), { name: "AbortError" });
+  if (settings.offlineMode) return offlineResult();
   const primary = taskRoute(settings, task);
   if (primary === "offline") return offlineResult();
   const fallback = settings.fallback || "offline";
@@ -148,6 +152,7 @@ export async function callRoutedModel({
       const result = await callProvider({ providerId, settings, messages, temperature, maxTokens, signal });
       return { ...result, fallbackUsed: providerId !== primary, task };
     } catch (error) {
+      if (signal?.aborted || error?.name === "AbortError") throw error;
       lastError = error;
     }
   }

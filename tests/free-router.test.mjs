@@ -265,3 +265,24 @@ test("router redacts configured and student secrets from upstream responses and 
   assert.ok(!JSON.stringify({ message: failure.message, errors: failure.errors }).includes("HEADER-PRIVATE-42"));
   assert.ok(!JSON.stringify({ message: failure.message, errors: failure.errors }).includes("STUDENT-PRIVATE-KEY-19"));
 });
+
+test('cloud router skips an HTML success page and uses a valid provider response', async () => {
+  const upstreams = buildUpstreams({ STUDY_AI_GROQ_KEYS: 'one,two' });
+  let calls = 0;
+  const result = await callFreeRouter({ upstreams, messages: [{ role: 'user', content: 'Hello' }],
+    fetchImpl: async () => ++calls === 1 ? response(true, 200, '<html>Login</html>') : response(true, 200, { choices: [{ message: { content: 'OK' } }] }),
+  });
+  assert.equal(result.content, 'OK'); assert.equal(calls, 2);
+});
+
+test('cloud key retries share a total timeout budget', async () => {
+  const upstreams = buildUpstreams({ STUDY_AI_GROQ_KEYS: 'one,two,three' });
+  let calls = 0;
+  await assert.rejects(callFreeRouter({ upstreams, messages: [{ role: 'user', content: 'Hello' }], timeoutMs: 15,
+    fetchImpl: async (_url, { signal }) => {
+      calls++;
+      await new Promise((_, reject) => { signal.addEventListener('abort', () => reject(new Error('deadline')), { once: true }); setTimeout(() => reject(new Error('test guard')), 100); });
+    },
+  }), /All AI providers failed/);
+  assert.equal(calls, 1, 'do not start another 45-second call after the client deadline');
+});
