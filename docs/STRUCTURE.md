@@ -30,7 +30,7 @@ is somebody else's.
 ├── precache.json           generated: every file the worker installs
 ├── manifest.webmanifest    the installable-app manifest
 │
-├── tests/                  83 files, `node --test`, no dependencies
+├── tests/                  84 files, `node --test`, no dependencies
 ├── tools/                  precache generator, offline simulator, secret scan,
 │                           the live-deploy check, the address rewriter, and the
 │                           two colour reporters (palette of a plate, and the

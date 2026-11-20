@@ -282,3 +282,14 @@ The quickest regression test for a UI fix is `npm test` (748 checks) plus
   five tested phone/tablet/desktop dimensions.
 - Real tablet keyboards, provider quota and account-backed shared activities still
   require deployment/device verification. No new claim of a live provider test.
+
+### 2.46.1 smoothness regression checks
+
+- Queue tests: one glass attachment per frame, duplicate suppression, stop/exit
+  cancellation, detached-node cleanup, and added-subtree-only mutation scans.
+- Reveal test: all geometry reads precede reveal class writes.
+- Chromium: Presentation/Start/33 languages at 390, 768, 1024 and 1366px;
+  all eleven Start destinations and real Chat submission; no page errors.
+- Chromium Chat geometry: empty/long answers at 1024×768, 800×1280,
+  768×1024, 390×844 and 1366×768. Hosted routing checks use mocked inference.
+- No claim of measured device FPS improvement or live provider quota validation.

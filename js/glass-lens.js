@@ -483,26 +483,31 @@ export function fitGlass(root = document.body, { selector = GLASS_SELECTOR, opti
   const lenses = new Map();
   const pending = new Set();
 
+  let active = true;
+  let frame = 0;
+  const drain = () => {
+    frame = 0;
+    if (!active || !lensesAllowed()) return;
+    const el = pending.values().next().value;
+    pending.delete(el);
+    if (el?.isConnected && el.offsetWidth && el.offsetHeight && getComputedStyle(el).visibility !== "hidden") {
+      try {
+        lenses.set(el, liquidGlass(el, { rim: 38, edge: 1.3, power: 2.2, dispersion: 0.26, ...options }));
+      } catch { /* a filter that cannot be built must not stop the app */ }
+    }
+    if (pending.size) frame = requestAnimationFrame(drain);
+  };
   const attach = (el) => {
-    if (lenses.has(el) || lenses.size + pending.size >= MAX_LENSES) return;
+    if (!active || lenses.has(el) || pending.has(el) || lenses.size + pending.size >= MAX_LENSES) return;
     if (!el.offsetWidth || !el.offsetHeight) return;
     if (getComputedStyle(el).visibility === "hidden") return;
     pending.add(el);
-    // One per frame at most: building a filter decodes eight small images.
-    requestAnimationFrame(() => {
-      pending.delete(el);
-      if (!el.isConnected || !lensesAllowed()) return;
-      try {
-        // A wider, stronger rim than the first pass: at 26px the bend sat under the
-        // panel's own lit edge and read as a soft blur. 38px of rim, sampled 1.3 rim
-        // widths in, with 26% colour split, is a band you can actually see the room
-        // travel across as you look along a pane.
-        lenses.set(el, liquidGlass(el, { rim: 38, edge: 1.3, power: 2.2, dispersion: 0.26, ...options }));
-      } catch { /* a filter that cannot be built must not stop the app */ }
-    });
+    // A single queue actually spreads filter construction across frames.
+    if (!frame) frame = requestAnimationFrame(drain);
   };
 
   const detach = (el) => {
+    pending.delete(el);
     const lens = lenses.get(el);
     if (!lens) return;
     try { lens.destroy(); } catch { /* already gone */ }
@@ -516,24 +521,41 @@ export function fitGlass(root = document.body, { selector = GLASS_SELECTOR, opti
     }
   }, { rootMargin: "240px" });
 
-  const seen = new WeakSet();
-  const scan = () => {
+  const seen = new Set();
+  const watch = (el) => {
+    if (seen.has(el)) return;
+    seen.add(el);
+    observer.observe(el);
+  };
+  const scan = (subtree = root) => {
     if (!lensesAllowed()) { stopGlass(); return; }
-    for (const el of root.querySelectorAll(selector)) {
-      if (seen.has(el)) continue;
-      seen.add(el);
-      observer.observe(el);
-    }
+    if (subtree.matches?.(selector)) watch(subtree);
+    subtree.querySelectorAll?.(selector).forEach(watch);
   };
 
   const mutations = new MutationObserver((records) => {
-    if (records.some((record) => record.addedNodes.length || record.removedNodes.length)) scan();
+    if (!active) return;
+    // Chat text and SVG filter updates should not rescan every hidden screen.
+    for (const record of records) {
+      for (const added of record.addedNodes) scan(added);
+    }
+    if (records.some(record => record.removedNodes.length)) {
+      for (const el of seen) {
+        if (root.contains(el)) continue;
+        detach(el);
+        observer.unobserve(el);
+        seen.delete(el);
+      }
+    }
   });
 
   scan();
   mutations.observe(root, { childList: true, subtree: true });
 
   controller = () => {
+    active = false;
+    cancelAnimationFrame(frame);
+    seen.clear();
     observer.disconnect();
     mutations.disconnect();
     for (const el of [...lenses.keys()]) detach(el);
