@@ -21,6 +21,9 @@ services:
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
+      # Match the Node LTS major used by CI; do not deploy an EOL runtime.
+      - key: NODE_VERSION
+        value: "22"
       - key: STUDY_AI_FREE_ROUTER
         value: "true"
       - key: STUDY_AI_FREE_ROUTER_ORDER

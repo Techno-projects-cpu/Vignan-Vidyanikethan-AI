@@ -11,7 +11,7 @@
  * engine (or Ollama / LM Studio configured as separate providers).
  */
 
-import { SYSTEM_PROMPT } from "./context.js?v=85";
+import { SYSTEM_PROMPT } from "./context.js?v=86";
 
 export const LOCAL_RUNTIME = "WebLLM 0.2.85 · Apache-2.0";
 
@@ -207,6 +207,7 @@ function emit() {
 
 /** Replace the worker factory (used by tests and non-browser hosts). */
 export function setLocalAIWorkerFactory(factory) {
+  for (const pending of [...state.pending.values()]) pending.reject(abortError());
   state.workerFactory = typeof factory === "function" ? factory : null;
   if (state.worker) {
     try {
@@ -238,7 +239,7 @@ function defaultWorkerFactory() {
   if (typeof globalThis.Worker === "undefined") {
     throw new Error("Local AI needs a browser with Web Worker support.");
   }
-  return new globalThis.Worker(new URL("./local-ai-worker.js?v=85", import.meta.url), {
+  return new globalThis.Worker(new URL("./local-ai-worker.js?v=86", import.meta.url), {
     type: "module",
     name: "vignan-local-ai",
   });
@@ -249,10 +250,15 @@ function ensureWorker() {
   const factory = state.workerFactory || defaultWorkerFactory;
   const worker = factory();
   if (!worker || typeof worker.postMessage !== "function") throw new Error("Could not start the local AI worker.");
-  const receive = (event) => handleWorkerMessage(event?.data || event);
+  const receive = (event) => {
+    if (state.worker === worker) handleWorkerMessage(event?.data || event);
+  };
   if (typeof worker.addEventListener === "function") worker.addEventListener("message", receive);
   else worker.onmessage = receive;
   worker.onerror = (event) => {
+    if (state.worker !== worker) return;
+    state.worker = null;
+    try { worker.terminate?.(); } catch { /* already stopped */ }
     const error = new Error(event?.message || "The local AI worker crashed.");
     state.error = error.message;
     state.ready = false;
@@ -312,20 +318,20 @@ function abortError() {
 }
 
 function sendWorker(type, payload = {}, { onProgress, signal } = {}) {
-  const worker = ensureWorker();
   if (signal?.aborted) return Promise.reject(abortError());
+  const worker = ensureWorker();
   const id = state.nextId++;
   return new Promise((resolve, reject) => {
     let settled = false;
     const onAbort = () => {
       if (settled) return;
-      settled = true;
+      // Reject before posting: a worker can immediately acknowledge an abort.
+      cleanupPending(id)?.reject(abortError());
       try {
         worker.postMessage({ type: "abort", id });
       } catch {
         // The worker may already be gone.
       }
-      cleanupPending(id)?.reject(abortError());
     };
     const entry = {
       resolve: (value) => {
@@ -367,7 +373,7 @@ export async function loadLocalModel(modelId = DEFAULT_LOCAL_MODEL_ID, { onProgr
   const requested = localModel(modelId) || recommendedLocalModel();
   const caps = deviceCapabilities();
   if (!caps.webgpu) {
-    throw new Error("WebGPU is not available in this browser. Use Chrome/Edge 113+, Safari 18+, or connect Ollama instead.");
+    throw new Error("WebGPU is not available in this browser. Use a browser/device with WebGPU enabled, or connect Ollama instead.");
   }
   if (!caps.worker) throw new Error("Web Workers are not available in this browser.");
 
@@ -423,9 +429,10 @@ export async function generateWithLocalAI({
   onProgress,
 } = {}) {
   const targetId = resolveModelId(modelId);
-  if (!state.ready || state.modelId !== targetId) {
-    await loadLocalModel(targetId, { onProgress, signal });
-  }
+  const loaded = (!state.ready || state.modelId !== targetId)
+    ? await loadLocalModel(targetId, { onProgress, signal })
+    : { modelId: targetId };
+  const generationModelId = loaded.modelId;
   state.status = "generating";
   state.progressText = `${localModelLabel(state.modelId)} is thinking…`;
   state.error = "";
@@ -434,7 +441,7 @@ export async function generateWithLocalAI({
     const result = await sendWorker(
       "generate",
       {
-        modelId: state.modelId,
+        modelId: generationModelId,
         messages: applyVignanRules(messages),
         temperature,
         maxTokens,
@@ -449,9 +456,9 @@ export async function generateWithLocalAI({
     emit();
     return {
       content,
-      modelId: state.modelId,
-      label: localModelLabel(state.modelId),
-      usage: state.lastUsage,
+      modelId: result.modelId || generationModelId,
+      label: localModelLabel(result.modelId || generationModelId),
+      usage: result.usage || null,
       private: true,
       offline: false,
       runtime: LOCAL_RUNTIME,

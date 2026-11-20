@@ -117,7 +117,7 @@ async function clearModel(id, payload) {
   engine = null;
   loadedModelId = "";
   loading = null;
-  await Promise.allSettled([
+  await Promise.all([
     deleteModelAllInfoInCache(modelId, prebuiltAppConfig),
     deleteModelWasmInCache(modelId, prebuiltAppConfig),
   ]);
@@ -134,8 +134,7 @@ async function unload() {
   }
 }
 
-globalThis.onmessage = async (event) => {
-  const message = event?.data || {};
+async function dispatch(message) {
   const { id, type, payload } = message;
   try {
     if (type === "load") return await loadModel(id, payload);
@@ -146,16 +145,36 @@ globalThis.onmessage = async (event) => {
       await unload();
       return post({ type: "result", id, data: { unloaded: true } });
     }
-    if (type === "abort") {
-      try {
-        await engine?.interruptGenerate?.();
-      } catch {
-        // Nothing to interrupt.
-      }
-      return post({ type: "result", id, data: { aborted: true } });
-    }
     post({ type: "error", id, message: `Unknown local AI worker command: ${type}` });
   } catch (error) {
     post({ type: "error", id, message: error?.message || String(error) });
   }
+}
+
+// WebGPU engines cannot safely reload/unload while another command generates.
+// Keep abort out of the queue so Stop can interrupt an active generation.
+let commands = Promise.resolve();
+let activeId = null;
+const queued = new Set();
+const cancelled = new Set();
+globalThis.onmessage = (event) => {
+  const message = event?.data || {};
+  if (message.type === "abort") {
+    if (queued.has(message.id)) cancelled.add(message.id);
+    if (activeId === message.id) {
+      try { engine?.interruptGenerate?.(); } catch { /* already stopped */ }
+    }
+    return;
+  }
+  queued.add(message.id);
+  commands = commands.then(async () => {
+    activeId = message.id;
+    try {
+      if (!cancelled.has(message.id)) await dispatch(message);
+    } finally {
+      queued.delete(message.id);
+      cancelled.delete(message.id);
+      activeId = null;
+    }
+  }).catch(error => post({ type: "error", id: message.id, message: error?.message || String(error) }));
 };

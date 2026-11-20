@@ -1,6 +1,6 @@
 {
   "name": "vignan-vidyanikethan-ai",
-  "version": "2.46.2",
+  "version": "2.46.3",
   "private": true,
   "type": "module",
   "description": "Vignan Vidyanikethan AI — offline-first, textbook-grounded study assistant for Vignan Vidyanikethan E.M. School.",
@@ -17,6 +17,6 @@
     "secrets": "node tools/scan-secrets.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   }
 }
