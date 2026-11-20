@@ -89,7 +89,7 @@ test("account HTTP endpoints enforce CSRF, safe cookies, rate limits and preserv
   const robots = await get("/robots.txt");
   assert.equal(robots.status, 200);
   assert.match(await robots.text(), /Sitemap: https:/);
-  const icon = await get("/icons/icon.svg?v=84");
+  const icon = await get("/icons/icon.svg?v=85");
   assert.equal(icon.status, 200);
   assert.match(icon.headers.get("content-type"), /^image\/svg\+xml/);
 
@@ -428,4 +428,24 @@ test("/setup does not call a working local store broken", async () => {
     assert.match(html, /optional in this mode/);
     assert.doesNotMatch(html, /Accounts are not connected yet/);
   });
+});
+
+test("static serving rejects encoded traversal and nested dotfiles before reading private files", async (t) => {
+  const base = await startServer(t);
+  for (const route of [
+    '/icons%2f..%2fserver/accounts.mjs',
+    '/icons%2f..%2f.env',
+    '/icons%2f..%2f.git/config',
+    '/icons%5c..%5cserver/accounts.mjs',
+    '/docs/.hidden', '/.well-known/.hidden', '/icons%00.svg',
+  ]) {
+    const response = await fetch(base + route);
+    assert.ok([400, 403].includes(response.status), `${route}: ${response.status}`);
+    assert.doesNotMatch(await response.text(), /hashPassword|repositoryformatversion/);
+  }
+  for (const route of ['/server/accounts.mjs', '/.env', '/.git/config']) {
+    assert.equal((await fetch(base + route)).status, 403);
+  }
+  assert.equal((await fetch(base + '/.well-known/security.txt')).status, 200);
+  assert.equal((await fetch(base + '/privacy.html')).status, 200);
 });

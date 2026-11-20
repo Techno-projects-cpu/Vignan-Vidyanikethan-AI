@@ -9,7 +9,9 @@ full, student-readable version of this policy lives at
 
 Report privately to the project operator — the student, the teacher in charge,
 or the school office of Vignan Vidyanikethan English Medium High School — before
-publishing anything. A useful report says:
+publishing anything. No dedicated monitored private reporting channel is currently
+configured; ask the operator for one. Do not post sensitive reports or secrets in
+public GitHub issues. A useful report says:
 
 - the page or endpoint involved,
 - what you expected and what happened,
@@ -35,7 +37,8 @@ those limits are welcome and will not be treated as attacks.
   password.
 - Missing security headers that are intentionally omitted so the Arena live
   preview can embed the page (framing is not restricted; mutations are protected
-  by CSRF tokens and same-origin checks instead).
+  against cross-site requests by CSRF tokens and same-origin checks; those do
+  not prevent clickjacking, which remains a deployment risk).
 - Social engineering of students, teachers or the operator.
 
 ## What is protected, honestly
@@ -47,8 +50,9 @@ registration, progress, search, link reading and the AI proxy, and hashed
 passwords handled by the account backend.
 
 What a free school project cannot promise: a formal audit, a guaranteed
-incident-response time, or the absence of bugs. Books, chats, decks and results
-stay in the student's browser; the app has no analytics, no advertising
+incident-response time, or the absence of bugs. The full local library and private AI-chat database are not account-synced;
+connected AI requests can include conversation context and library excerpts, and
+social messages are server-stored. the app has no analytics, no advertising
 identifiers and no data-broker integrations.
 
 ## Supported version

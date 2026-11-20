@@ -1,6 +1,6 @@
 # Threat model
 
-_Last reviewed: 27 October 2026 · release 2.32.0_
+_Last reviewed: 27 October 2026 · release 2.46.2_
 
 This is the short, honest version of what this project defends against, what it
 deliberately does not, and where each protection lives in the code. It exists
@@ -11,8 +11,8 @@ token and a test are.
 
 | Asset | Where it lives | Damage if it leaks |
 | --- | --- | --- |
-| Imported books and notes | The student's browser only | Private study material; low blast radius, high embarrassment |
-| Chats and quiz history | Browser, and the account record if signed in | Reveals what a student is struggling with |
+| Imported books and notes | Browser; relevant excerpts may go to connected AI | Private study material; low blast radius, high embarrassment |
+| Chats and quiz history | Private AI chat in browser; quiz summaries on account backend | Reveals what a student is struggling with |
 | Account record | The configured account backend (Supabase) or a local JSON store | Username, age band, progress, friends, chat |
 | Session | One `HttpOnly` cookie | Full account takeover for that session |
 | Provider API keys | The student's browser, and the server's environment for school keys | Billing abuse; a leaked school key is the worst case |
@@ -50,16 +50,16 @@ notes and any key typed into Settings, then post it anywhere.
 
 Every mutation requires a same-origin request, a JSON body and a CSRF token; the
 session cookie is `SameSite=Lax`. Cross-site form posts are rejected outright.
-This is why the preview can be framed without becoming a clickjacking hole: a
-framed page still cannot forge a token.
+This protects against cross-site request forgery, not clickjacking: a framed
+real interface can still be tricked into accepting a genuine user click.
 
 ### 2.3 Framing and clickjacking
 
 `frame-ancestors` is deliberately **not** locked to `'self'`: the live preview on
 Arena embeds this page in an iframe, and a school fair demo that cannot be shown
-is not secure, it is broken. The risk is bounded instead by the CSRF requirement,
-by `X-Frame-Options` being absent on purpose, and by the fact that no destructive
-action is a single unconfirmed click. If this ever ships outside a preview
+is not secure, it is broken. This leaves residual clickjacking risk. CSRF tokens do not stop a user clicking
+the genuine interface through a deceptive frame. Confirmation dialogs reduce
+some accidental destructive actions but do not eliminate this risk. If this ever ships outside a preview
 context, set `frame-ancestors 'self' https://<school-host>` and drop the exception.
 
 ### 2.4 Credential and key handling
@@ -109,10 +109,10 @@ modules.
 
 - `Content-Security-Policy` — as above, including `upgrade-insecure-requests`.
 - `X-Content-Type-Options: nosniff`
-- `Referrer-Policy: no-referrer`
+- `Referrer-Policy: strict-origin-when-cross-origin`
 - `Permissions-Policy` — camera, microphone, geolocation, payment, USB and the
   rest are denied; nothing here needs them.
-- `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Resource-Policy: same-origin`
+- `Cross-Origin-Opener-Policy: same-origin-allow-popups`, `Cross-Origin-Resource-Policy: same-origin`
 - `Strict-Transport-Security` on TLS only, because HSTS on plain HTTP does nothing
   and on a preview host would pin the wrong origin.
 
@@ -130,3 +130,16 @@ The policy is generated in `serve.mjs` and asserted in `tests/csp.test.mjs`; a
 change to either without a change here is caught by the last test in that file,
 which reads this page and fails if it stops naming the policy, the framing
 decision and the hash mechanism.
+
+## 7. Static paths and release review
+
+Decoded static paths reject dot segments, backslashes, null bytes and nested
+dotfiles before filesystem resolution. Private server/data directories remain
+blocked. Real-handler tests exercise encoded separators, ordinary private paths
+and the public security.txt exception. Hosting must not add symlinks from public
+assets to private files or place custom data stores in publicly served paths.
+
+Legal notices are implementation disclosures, not a compliance certification.
+Before public student use the operator must supply a monitored contact, define
+retention/deletion and grievance processes, review child-consent requirements and
+provider terms, and evaluate framing restrictions for non-preview deployments.

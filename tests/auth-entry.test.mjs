@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { newPasswordProblem } from "../js/password-policy.js";
-import { login, register } from "../js/auth.js?v=84";
+import { login, register } from "../js/auth.js?v=85";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const html = read("index.html");
@@ -28,7 +28,7 @@ test("entry screen offers login and registration before guest mode", () => {
 });
 
 test("entry boot restores signed-in sessions, offers offline guest access and initializes once", () => {
-  assert.match(html, /js\/boot\.js\?v=84/);
+  assert.match(html, /js\/boot\.js\?v=85/);
   assert.match(boot, /guestChosen\(\)/);
   assert.match(boot, /getSession\(\{ timeout: 5000 \}\)/);
   assert.match(boot, /unlock\(\{ guest: true \}\)/);
@@ -108,11 +108,11 @@ test("application module imports share the offline cache version", () => {
   for (const file of readdirSync(new URL("../js/", import.meta.url)).filter((name) => name.endsWith(".js"))) {
     const source = read(`js/${file}`);
     for (const match of source.matchAll(/(?:from\s+|import\()\s*["'](\.\/[^"']+\.js(?:\?v=\d+)?)["']/g)) {
-      assert.match(match[1], /\?v=84$/, `${file} imports ${match[1]} without the release version`);
+      assert.match(match[1], /\?v=85$/, `${file} imports ${match[1]} without the release version`);
       assert.ok(sw.includes(`"./js/${match[1].slice(2)}"`), `${match[1]} is precached`);
     }
   }
-  assert.ok(sw.includes('"./js/local-ai-worker.js?v=84"'));
+  assert.ok(sw.includes('"./js/local-ai-worker.js?v=85"'));
 });
 
 test("PDF reader is patched, lazily loaded, and available in the offline cache", () => {
@@ -125,7 +125,7 @@ test("PDF reader is patched, lazily loaded, and available in the offline cache",
   for (const url of ["./js/boot.js", "./js/password-policy.js", "./vendor/pdfjs/pdf.min.mjs", "./vendor/pdfjs/pdf.worker.min.mjs"]) {
     assert.ok(precache.urls.includes(url), `${url} is precached`);
   }
-  for (const url of ["./styles-premium.css?v=84", "./styles-identity.css?v=84", "./styles-legal.css?v=84", "./js/boot.js?v=84", "./js/app.js?v=84", "./js/auth.js?v=84", "./js/ingest.js?v=84", "./js/edit-studio.js?v=84", "./js/card.js?v=84", "./js/edit-audio.js?v=84", "./js/ui.js?v=84", "./js/reader.js?v=84", "./js/i18n.js?v=84", "./js/study-decks.js?v=84", "./js/startup.js?v=84", "./vendor/qr/qrcode.js?v=84", "./privacy.html", "./terms.html", "./assets/brand/nezaad-mark.png", "./assets/fonts/manrope-latin.woff2", "./assets/fonts/space-grotesk-latin.woff2"]) {
+  for (const url of ["./styles-premium.css?v=85", "./styles-identity.css?v=85", "./styles-legal.css?v=85", "./js/boot.js?v=85", "./js/app.js?v=85", "./js/auth.js?v=85", "./js/ingest.js?v=85", "./js/edit-studio.js?v=85", "./js/card.js?v=85", "./js/edit-audio.js?v=85", "./js/ui.js?v=85", "./js/reader.js?v=85", "./js/i18n.js?v=85", "./js/study-decks.js?v=85", "./js/startup.js?v=85", "./vendor/qr/qrcode.js?v=85", "./privacy.html", "./terms.html", "./assets/brand/nezaad-mark.png", "./assets/fonts/manrope-latin.woff2", "./assets/fonts/space-grotesk-latin.woff2"]) {
     assert.ok(sw.includes(`"${url}"`), `${url} is a core asset`);
   }
   assert.ok(precache.urls.includes("./js/edit-studio.js"));

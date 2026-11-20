@@ -86,7 +86,11 @@ test("the new documents cover the questions a school actually asks", () => {
   const cookies = at("cookies.html");
   assert.match(cookies, /no advertising cookies/);
   assert.match(cookies, /delete all local data|site-data/);
-  assert.match(cookies, /vv_session/);
+  assert.match(cookies, /vignan_session/);
+  assert.match(cookies, /vignan_csrf/);
+  assert.match(cookies, /vignan_admin/);
+  assert.match(cookies, /vignan-study-ai/);
+  assert.doesNotMatch(cookies, /vv_session|<strong>vignan-chat<\/strong>/);
 
   // Sub-processors must not claim completeness it cannot keep: the CSP is the
   // machine-checkable version of that promise, and the page says so.
@@ -120,4 +124,21 @@ test("the legal pages are not part of the app shell, and the app does not load t
     assert.doesNotMatch(html, /<script\b/, `${name} needs no script to be read`);
     assert.doesNotMatch(html, /styles-next\.css|styles-premium\.css/, `${name} does not depend on the shell`);
   }
+});
+
+test("notices disclose hosted defaults, server social messages and legal limits", () => {
+  const privacy = read('privacy.html');
+  assert.match(privacy, /automatically route/);
+  assert.match(privacy, /social features store/);
+  assert.match(privacy, /not end-to-end encrypted/);
+  assert.match(privacy, /does not implement verified parental consent/);
+  const subs = read('subprocessors.html');
+  assert.match(subs, /Bytez/);
+  assert.match(subs, /does not constrain the server/);
+  assert.match(subs, /relevant excerpts/);
+  assert.match(read('copyright.html'), /MIT licence/);
+  assert.match(read('copyright.html'), /original starter study notes/);
+  assert.doesNotMatch(read('disclaimer.html'), /Every cited line points/);
+  assert.match(read('security.html'), /CSRF protection does not prevent/);
+  assert.doesNotMatch(read('.well-known/security.txt'), /^Contact: .*\/issues$/m);
 });

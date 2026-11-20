@@ -12,12 +12,12 @@ import {
   extractJson,
   formatContext,
   VERIFY_SYSTEM_PROMPT,
-} from "./context.js?v=84";
-import { postModelRequest, resolveProvider } from "./providers.js?v=84";
-import { generateWithLocalAI } from "./local-ai.js?v=84";
-import { providerKeyVariants } from "./key-pool.js?v=84";
-import { studentKeyPayload } from "./student-keys.js?v=84";
-import { clamp, truncate } from "./util.js?v=84";
+} from "./context.js?v=85";
+import { postModelRequest, resolveProvider } from "./providers.js?v=85";
+import { generateWithLocalAI } from "./local-ai.js?v=85";
+import { providerKeyVariants } from "./key-pool.js?v=85";
+import { studentKeyPayload } from "./student-keys.js?v=85";
+import { clamp, truncate } from "./util.js?v=85";
 
 export const TASKS = [
   {
