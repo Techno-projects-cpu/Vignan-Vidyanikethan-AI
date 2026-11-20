@@ -4,6 +4,7 @@ const progress = document.querySelector("#present-progress");
 const previous = document.querySelector("#present-prev");
 const next = document.querySelector("#present-next");
 let current = 0;
+let painted = -1;
 function update() {
   const target = innerHeight * .35;
   let closest = Infinity;
@@ -11,6 +12,8 @@ function update() {
     const distance = Math.abs(section.getBoundingClientRect().top - target);
     if (distance < closest) { closest = distance; current = index; }
   });
+  if (painted === current) return;
+  painted = current;
   progress.textContent = `${String(current + 1).padStart(2, "0")} / ${String(sections.length).padStart(2, "0")}`;
   previous.disabled = current === 0;
   next.disabled = current === sections.length - 1;

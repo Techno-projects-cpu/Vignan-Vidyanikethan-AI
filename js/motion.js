@@ -16,7 +16,7 @@ function prefersReducedMotion() {
 }
 
 function markAll(root) {
-  root.querySelectorAll?.("[data-reveal]").forEach((element) => element.classList.add(REVEALED));
+  root?.querySelectorAll?.("[data-reveal]").forEach((element) => element.classList.add(REVEALED));
 }
 
 export function initMotion({ root = globalThis.document } = {}) {
@@ -53,13 +53,18 @@ export function revealVisible(root = globalThis.document) {
     return;
   }
   const height = globalThis.innerHeight || 800;
+  const visible = [];
   root.querySelectorAll?.("[data-reveal]:not(.is-revealed)").forEach((element) => {
     const rect = element.getBoundingClientRect?.();
     if (!rect || (rect.top < height * 0.92 && rect.bottom > -40)) {
-      element.classList.add(REVEALED);
-      observer?.unobserve(element);
+      visible.push(element);
     }
   });
+  // Finish layout reads before classes can invalidate geometry.
+  for (const element of visible) {
+    element.classList.add(REVEALED);
+    observer.unobserve(element);
+  }
 }
 
 /** One subtle attention pulse without colour, used after an AI switch. */

@@ -840,3 +840,12 @@ checks used mocked cloud responses, not a real billed provider call.
 
 Reproduce the browser checks with `tools/check-study-start.mjs` and the existing
 `tools/check-chat-layout.mjs`; optional browser dependencies stay outside Git.
+
+## 2.46.1 — less work, same appearance
+
+Glass filter attachment uses one cancellable queue (one surface per animation
+frame), cancels offscreen pending work, and releases removed surfaces. DOM
+mutations scan added subtrees rather than every screen. View reveals batch
+geometry reads before class writes; the presentation updates its navigation
+only when the active slide changes. No blur, colours or animation timings were
+removed. These are reductions in redundant work, not a measured FPS claim.
