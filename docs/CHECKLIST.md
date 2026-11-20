@@ -293,3 +293,10 @@ The quickest regression test for a UI fix is `npm test` (748 checks) plus
 - Chromium Chat geometry: empty/long answers at 1024×768, 800×1280,
   768×1024, 390×844 and 1366×768. Hosted routing checks use mocked inference.
 - No claim of measured device FPS improvement or live provider quota validation.
+
+### 2.46.2 security and notices
+
+See `docs/SECURITY-LEGAL-REVIEW.md` for findings, validation and outstanding
+operator actions. Private-path bypass reproduced locally and regression-tested;
+all ten policy pages checked in Chromium at phone/tablet/desktop widths. Policy
+consistency is not legal certification. Deploy the server, not just PWA assets.

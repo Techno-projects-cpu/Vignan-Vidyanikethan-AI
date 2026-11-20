@@ -14,7 +14,7 @@ import {
   setLocalAICapabilities,
   setLocalAIWorkerFactory,
   testLocalAI,
-} from "../js/local-ai.js?v=84";
+} from "../js/local-ai.js?v=85";
 import { DEFAULT_SETTINGS, normalizeSettings } from "../js/settings.js";
 import { callProvider } from "../js/model-router.js";
 import {

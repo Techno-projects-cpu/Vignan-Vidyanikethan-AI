@@ -1,7 +1,8 @@
 # Security contact for Vignan Vidyanikethan AI — a student project for INSPIRE-MANAK.
-# Report privately first; please do not probe accounts that are not yours.
+# Reporting instructions only: no monitored private mailbox is configured.
+# Never send sensitive reports to public issues or probe other people's accounts.
 
-Contact: https://github.com/Techno-projects-cpu/Vignan-Vidyanikethan-AI/issues
+Contact: https://vignan-vidyanikethan-ai-1.onrender.com/security.html#reporting
 Policy: https://vignan-vidyanikethan-ai-1.onrender.com/security.html
 Preferred-Languages: en, te, hi
 Canonical: https://vignan-vidyanikethan-ai-1.onrender.com/.well-known/security.txt

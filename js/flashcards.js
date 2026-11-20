@@ -3,9 +3,9 @@
  * Cards are derived from retrieved passages and always carry a page citation.
  */
 
-import { questionCopy } from "./question-copy.js?v=84";
-import { localDay, truncate, uid } from "./util.js?v=84";
-import { splitSentences, tokenize } from "./text.js?v=84";
+import { questionCopy } from "./question-copy.js?v=85";
+import { localDay, truncate, uid } from "./util.js?v=85";
+import { splitSentences, tokenize } from "./text.js?v=85";
 
 const PROGRESS_KEY = "vignan-study-ai.flashcards.v1";
 const INTERVALS = [0, 1, 3, 7, 16, 35];

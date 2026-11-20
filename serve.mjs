@@ -1074,7 +1074,7 @@ function buildInfo() {
 function health() {
   return {
     ok: true,
-    version: "2.46.1",
+    version: "2.46.2",
     // `version` is what the code says; `build` is what the host says it built.
     // When those two disagree with the repository, the deploy target is wrong,
     // not the code.
@@ -1306,7 +1306,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.46.1</strong></div>
+      <div><span>release</span><strong>2.46.2</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1420,7 +1420,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.46.1",
+    release: "2.46.2",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);
@@ -1520,6 +1520,16 @@ async function serveStatic(request, response, pathname) {
     decoded = decodeURIComponent(pathname);
   } catch {
     response.writeHead(400).end("Bad path");
+    return;
+  }
+  // Validate the decoded segments BEFORE resolving a filesystem path. Encoded
+  // separators must not bypass the private-directory check below.
+  const segments = decoded.split("/");
+  if (decoded.includes("\\") || decoded.includes("\0") || segments.some((segment, index) =>
+    segment === ".." || segment === "." ||
+    (segment.startsWith(".") && !(segment === ".well-known" && index === 1))
+  )) {
+    response.writeHead(403, baseSecurityHeaders(request)).end("Forbidden");
     return;
   }
   // Clean addresses that map onto a real file, without a redirect: a link in a
