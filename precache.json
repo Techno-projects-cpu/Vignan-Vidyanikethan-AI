@@ -1,6 +1,6 @@
 {
-  "version": 86,
-  "generatedAt": "2026-11-20T16:10:06.465Z",
+  "version": 87,
+  "generatedAt": "2026-11-21T14:41:39.085Z",
   "urls": [
     "./",
     "./index.html",
@@ -220,6 +220,7 @@
     "./js/question-copy.js",
     "./js/quiz.js",
     "./js/reader.js",
+    "./js/recovery.js",
     "./js/replies.js",
     "./js/retrieval.js",
     "./js/revision-plan.js",

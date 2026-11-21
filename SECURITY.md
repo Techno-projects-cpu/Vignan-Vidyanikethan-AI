@@ -57,7 +57,8 @@ identifiers and no data-broker integrations.
 
 ## Supported version
 
-Only the current release is supported. A published release is applied by the
+Only the current release is supported. Once the essential app files are cached, a published release is applied by the
 service worker on its own — there is no prompt and no way to stay on an older
-one — and the release is shown in **Settings → App & offline** and in the
+one intentionally. An incomplete update is rejected so the previous cached
+release can keep working — and the release is shown in **Settings → App & offline** and in the
 service worker cache name (`vignan-vidyanikethan-ai-v<N>`).

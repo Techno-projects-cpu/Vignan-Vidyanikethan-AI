@@ -1,8 +1,8 @@
-import { withNetworkDeadline } from "./util.js?v=86";
+import { withNetworkDeadline } from "./util.js?v=87";
 /** Read public links through the bounded, same-origin server fetcher. */
-import { inspectFileBytes, MAX_REMOTE_BYTES } from "./files.js?v=86";
-import { extractPdfPages } from "./ingest.js?v=86";
-import { safeUrl } from "./util.js?v=86";
+import { inspectFileBytes, MAX_REMOTE_BYTES } from "./files.js?v=87";
+import { extractPdfPages } from "./ingest.js?v=87";
+import { safeUrl } from "./util.js?v=87";
 
 export function firstLink(text = "") {
   const match = String(text).match(/https?:\/\/[^\s<>"'`]+/i);

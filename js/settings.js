@@ -1,12 +1,12 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=86";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=86";
-import { parseApiKeys } from "./key-pool.js?v=86";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=86";
-import { aiProfile } from "./ai-nicknames.js?v=86";
-import { LANGUAGE_CODES } from "./languages.js?v=86";
-import { DEFAULT_STYLE, STYLE_ERA, THEMES, migrateStyleChoice } from "./themes.js?v=86";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=87";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=87";
+import { parseApiKeys } from "./key-pool.js?v=87";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=87";
+import { aiProfile } from "./ai-nicknames.js?v=87";
+import { LANGUAGE_CODES } from "./languages.js?v=87";
+import { DEFAULT_STYLE, STYLE_ERA, THEMES, migrateStyleChoice } from "./themes.js?v=87";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -25,6 +25,7 @@ export const DEFAULT_SETTINGS = {
     verify: "offline",
   },
   fallback: "offline",
+  autoRecovery: true,
   providers: DEFAULT_PROVIDER_CONFIGS,
   studentKeyFallback: true,
   studentKeys: defaultStudentKeyVault(),
@@ -128,6 +129,7 @@ export function normalizeSettings(value = {}) {
   merged.styleEra = style.era;
   merged.freeRouterDismissed = Boolean(raw.freeRouterDismissed);
   merged.offlineMode = raw.offlineMode === true;
+  merged.autoRecovery = raw.autoRecovery !== false;
   merged.profile = String(merged.profile || "Student").slice(0, 32);
   // Only the eight known patterns are accepted, so a stored value can never
   // become markup or an arbitrary CSS class.

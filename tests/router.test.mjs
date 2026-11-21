@@ -233,3 +233,37 @@ test('an HTML success page is not accepted as an AI answer', async () => {
     await assert.rejects(postModelRequest(provider, messages), /invalid JSON/);
   } finally { globalThis.fetch = oldFetch; }
 });
+
+test('recovery skips repeatedly failing cloud routes until manually reset', async () => {
+  const { resetRecovery, recoverySnapshot } = await import('../js/recovery.js?v=87');
+  resetRecovery();
+  const oldFetch = globalThis.fetch; let calls = 0;
+  globalThis.fetch = async () => { calls++; return new Response('{}', { status: 503 }); };
+  try {
+    const settings = normalizeSettings({ routing: { answer: 'server' } });
+    for (let i = 0; i < 3; i++) assert.equal((await callRoutedModel({ settings, messages })).offline, true);
+    assert.equal(calls, 2);
+    assert.equal(recoverySnapshot().coolingRoutes, 1);
+    resetRecovery(); await callRoutedModel({ settings, messages });
+    assert.equal(calls, 3);
+  } finally { globalThis.fetch = oldFetch; resetRecovery(); }
+});
+
+test('automatic recovery never starts a model download and can be switched off', async () => {
+  const { resetRecovery } = await import('../js/recovery.js?v=87');
+  const { resetLocalAIForTests, setLocalAICapabilities, setLocalAIWorkerFactory } = await import('../js/local-ai.js?v=87');
+  resetRecovery(); resetLocalAIForTests();
+  setLocalAICapabilities({ webgpu: true, worker: true });
+  let workers = 0, calls = 0;
+  setLocalAIWorkerFactory(() => { workers++; throw new Error('must not download'); });
+  const oldFetch = globalThis.fetch;
+  globalThis.fetch = async () => { calls++; return new Response('{}', { status: 503 }); };
+  try {
+    const settings = normalizeSettings({ routing: { answer: 'server' }, fallback: 'webllm' });
+    assert.equal((await callRoutedModel({ settings, messages })).offline, true);
+    assert.equal(workers, 0);
+    settings.fallback = 'offline'; settings.autoRecovery = false;
+    for (let i = 0; i < 3; i++) await callRoutedModel({ settings, messages });
+    assert.equal(calls, 4, 'disabled recovery does not pause explicit routes');
+  } finally { globalThis.fetch = oldFetch; resetRecovery(); resetLocalAIForTests(); }
+});
