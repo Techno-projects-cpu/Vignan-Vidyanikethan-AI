@@ -225,7 +225,7 @@ html[data-style="${theme.id}"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px ${theme.scheme === "light" ? rgba(theme.ink, 0.14) : "rgba(0, 0, 0, .28)"};
-  background: ${theme.bg};
+  background-color: ${theme.bg};
   color: ${theme.ink};
 }
 `;

@@ -849,3 +849,27 @@ mutations scan added subtrees rather than every screen. View reveals batch
 geometry reads before class writes; the presentation updates its navigation
 only when the active slide changes. No blur, colours or animation timings were
 removed. These are reductions in redundant work, not a measured FPS claim.
+
+## 2.47.1 — make the existing artwork visible
+
+The painted CSS generator emitted a later `background: <colour>` for each theme,
+which reset the common `background-image`. Colours changed while all ten painted
+backgrounds vanished. Generate `background-color` instead, with a regression test.
+Theme previews also incorrectly appended `-640.webp` after the existing `.webp`
+extension; they now point at the real thumbnail files. Glass gets a preview of
+its existing anime classroom, not a plain swatch.
+
+Settings → Look & language now includes **Background artwork**: the anime
+classroom, ten paintings, or the unpainted Minimal look. Choosing a painting
+applies its matched readable palette; the 17 theme tiles remain available for
+colours, typography and surfaces. This deliberately avoids unmeasured arbitrary
+palette/artwork combinations. Light/dark remains available only for the two
+looks with real paired palettes, Minimal and Terminal, with the existing inline
+explanation for fixed-palette themes.
+
+Saved Minimal is no longer mistaken for an absent first-paint preference. Old
+style migration now checks the actual stored era before overriding a mirror,
+and a restored mirror choice is written back to the settings database. Early
+paint also recognises the three light painted themes. No new external assets,
+tracking, image generation or CDN were introduced; these are the existing local
+offline-cached images, finally visible through their actual rendered CSS.

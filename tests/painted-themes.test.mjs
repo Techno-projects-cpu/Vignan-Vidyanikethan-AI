@@ -258,3 +258,15 @@ test("no painting is shipped without a place on the site", () => {
     assert.ok(landing.includes(`assets/paint/${plate}.webp`), `${plate} is visible on the landing page`);
   }
 });
+
+test('generated theme token blocks preserve the full-bleed artwork layer', () => {
+  const css = stylesheet();
+  for (const theme of PAINTED_THEMES) {
+    const selector = `html[data-style="${theme.id}"] body.premium-ui {`;
+    const start = css.indexOf(selector);
+    assert.ok(start >= 0);
+    const block = css.slice(start, css.indexOf('}', start));
+    assert.match(block, /background-color:/);
+    assert.doesNotMatch(block, /\n\s*background:/, `${theme.id}: shorthand would erase background-image`);
+  }
+});

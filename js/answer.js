@@ -7,12 +7,12 @@
  * labelled as being outside the textbooks.
  */
 
-import { salientSentences, splitSentences } from "./text.js?v=87";
-import { truncate } from "./util.js?v=87";
-import { missingTerms } from "./answer-quality.js?v=87";
-import { buildFlashcards } from "./flashcards.js?v=87";
-import { buildStudySheet } from "./study-sheet.js?v=87";
-import { t } from "./i18n.js?v=87";
+import { salientSentences, splitSentences } from "./text.js?v=88";
+import { truncate } from "./util.js?v=88";
+import { missingTerms } from "./answer-quality.js?v=88";
+import { buildFlashcards } from "./flashcards.js?v=88";
+import { buildStudySheet } from "./study-sheet.js?v=88";
+import { t } from "./i18n.js?v=88";
 
 export function sourcesFromHits(hits = []) {
   return hits.map((hit, index) => ({
