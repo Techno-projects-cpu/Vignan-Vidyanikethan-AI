@@ -308,3 +308,11 @@ serialization, cache-deletion errors, offline routing, invalid JSON and shared
 provider deadlines are tested. Optional `tools/check-local-runtime.mjs` imports
 the real worker in Chromium but does not prove GPU generation. Live key quota
 and actual device-model downloads still require separate verification.
+
+### 2.47.0 recovery and cached availability
+
+See `docs/RECOVERY.md`. API → ready WebLLM → offline composition is tested,
+with no recovery downloads or cancellation retries. Cooldown/reset/opt-out and
+category-only diagnostics are covered. Hosting 5xx uses cached navigation, and
+an incomplete essential module cache cannot activate over a working worker.
+Browser recovery and five-size Chat geometry gates pass; inference is mocked.

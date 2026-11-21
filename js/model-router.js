@@ -12,12 +12,13 @@ import {
   extractJson,
   formatContext,
   VERIFY_SYSTEM_PROMPT,
-} from "./context.js?v=86";
-import { postModelRequest, resolveProvider } from "./providers.js?v=86";
-import { generateWithLocalAI } from "./local-ai.js?v=86";
-import { providerKeyVariants } from "./key-pool.js?v=86";
-import { studentKeyPayload } from "./student-keys.js?v=86";
-import { clamp, truncate } from "./util.js?v=86";
+} from "./context.js?v=87";
+import { postModelRequest, resolveProvider } from "./providers.js?v=87";
+import { generateWithLocalAI, getLocalAIState } from "./local-ai.js?v=87";
+import { providerKeyVariants } from "./key-pool.js?v=87";
+import { studentKeyPayload } from "./student-keys.js?v=87";
+import { classifyFailure, routeIdentity, routeCooling, recordRouteFailure, recordRouteSuccess, reportRecovery } from "./recovery.js?v=87";
+import { withNetworkDeadline, clamp, truncate } from "./util.js?v=87";
 
 export const TASKS = [
   {
@@ -142,21 +143,53 @@ export async function callRoutedModel({
   if (settings.offlineMode) return offlineResult();
   const primary = taskRoute(settings, task);
   if (primary === "offline") return offlineResult();
+  const recoveryEnabled = settings.autoRecovery !== false;
+  const local = getLocalAIState();
   const fallback = settings.fallback || "offline";
   const attempts = [primary];
-  if (fallback !== primary && fallback !== "offline") attempts.push(fallback);
-
+  // Recovery uses only an ALREADY LOADED model: no surprise downloads or network
+  // probes to model hosts, and no new cloud providers without saved consent.
+  if (recoveryEnabled && primary !== "webllm" && local.ready && local.webgpuReady) attempts.push("webllm");
+  if (fallback !== "offline" && !attempts.includes(fallback)) attempts.push(fallback);
+  const deadline = Date.now() + 45000;
   let lastError = null;
   for (const providerId of attempts) {
+    const provider = resolveProvider(settings, providerId);
+    if (!provider) continue;
+    const identity = routeIdentity(provider);
+    if (recoveryEnabled && providerId === "webllm" && providerId !== primary && (!local.ready || !local.webgpuReady)) continue;
+    const automaticLocal = providerId === "webllm" && providerId !== primary && recoveryEnabled && local.ready;
+    const routeSettings = automaticLocal
+      ? { ...settings, localAIModel: local.modelId, providers: { ...settings.providers, webllm: { ...settings.providers?.webllm, model: local.modelId } } }
+      : settings;
+    if (recoveryEnabled && providerId !== "webllm" && (routeCooling(identity) || globalThis.navigator?.onLine === false)) {
+      reportRecovery(globalThis.navigator?.onLine === false ? "network-offline" : "cooldown", providerId);
+      continue;
+    }
     try {
-      const result = await callProvider({ providerId, settings, messages, temperature, maxTokens, signal });
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) break;
+      const run = requestSignal => callProvider({ providerId, settings: routeSettings, messages, temperature, maxTokens, signal: requestSignal });
+      // Explicit local selection retains its intentional first-download flow.
+      const result = providerId === "webllm" && providerId === primary
+        ? await run(signal)
+        : await withNetworkDeadline(run, { signal, timeoutMs: automaticLocal ? Math.min(15000, remaining) : remaining });
+      if (result.offline) continue;
+      recordRouteSuccess(identity);
+      if (recoveryEnabled) reportRecovery(providerId !== primary ? "recovered" : "primary-success", providerId);
       return { ...result, fallbackUsed: providerId !== primary, task };
     } catch (error) {
       if (signal?.aborted || error?.name === "AbortError") throw error;
       lastError = error;
+      if (recoveryEnabled) {
+        recordRouteFailure(identity);
+        reportRecovery(classifyFailure(error), providerId);
+      }
     }
   }
+  if (recoveryEnabled) reportRecovery("offline-fallback");
   return { ...offlineResult(lastError), fallbackUsed: true, task };
+
 }
 
 export async function testProvider(settings, providerId, options = {}) {

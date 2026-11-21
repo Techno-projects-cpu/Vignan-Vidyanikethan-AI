@@ -14,9 +14,10 @@ import {
   setLocalAICapabilities,
   setLocalAIWorkerFactory,
   testLocalAI,
-} from "../js/local-ai.js?v=86";
+} from "../js/local-ai.js?v=87";
 import { DEFAULT_SETTINGS, normalizeSettings } from "../js/settings.js";
-import { callProvider } from "../js/model-router.js";
+import { callProvider, callRoutedModel } from "../js/model-router.js";
+import { resetRecovery, recoverySnapshot } from "../js/recovery.js?v=87";
 import {
   answerWithModel,
   generateFlashcardsWithModel,
@@ -326,4 +327,24 @@ test('a crashed WebLLM worker is replaced on the next load', async () => {
   assert.equal(starts, 2);
   assert.equal(getLocalAIState().ready, true);
   resetLocalAIForTests();
+});
+
+test('failed cloud requests automatically reroute to the already-loaded WebLLM model', async () => {
+  resetLocalAIForTests(); resetRecovery();
+  setLocalAICapabilities({ webgpu: true, worker: true });
+  const worker = new FakeLocalWorker();
+  setLocalAIWorkerFactory(() => worker);
+  await loadLocalModel(DEFAULT_LOCAL_MODEL_ID);
+  const oldFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({ error: 'unavailable' }), { status: 503 });
+  try {
+    const settings = normalizeSettings({ routing: { answer: 'server' }, localAIModel: 'Llama-3.2-1B-Instruct-q4f16_1-MLC' });
+    const result = await callRoutedModel({ settings, messages: [{ role: 'user', content: 'Explain' }] });
+    assert.equal(result.providerId, 'webllm');
+    assert.equal(result.model, DEFAULT_LOCAL_MODEL_ID, 'use ready model, not a new download');
+    assert.equal(result.fallbackUsed, true);
+    assert.equal(worker.posted.filter(message => message.type === 'load').length, 1);
+    assert.equal(recoverySnapshot().recent.at(-1).kind, 'recovered');
+    assert.equal(settings.routing.answer, 'server', 'saved routes are never rewritten');
+  } finally { globalThis.fetch = oldFetch; resetLocalAIForTests(); resetRecovery(); }
 });
