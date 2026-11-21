@@ -316,3 +316,12 @@ with no recovery downloads or cancellation retries. Cooldown/reset/opt-out and
 category-only diagnostics are covered. Hosting 5xx uses cached navigation, and
 an incomplete essential module cache cannot activate over a working worker.
 Browser recovery and five-size Chat geometry gates pass; inference is mocked.
+
+### 2.47.1 artwork and appearance
+
+- `tools/check-appearance.mjs`: all 17 real theme tiles, ten distinct computed
+  painted backgrounds, actual thumbnail decoding, and no artwork HTTP errors.
+- Anime/painting selector tested at 390/768/1366px with no horizontal overflow.
+- Deliberate Minimal choice and light/dark value survive a real browser reload.
+- Generated palette blocks use `background-color`, not a `background` shorthand
+  that clears the painting. Existing theme palette/contrast tests still pass.

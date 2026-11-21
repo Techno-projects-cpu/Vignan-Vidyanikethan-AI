@@ -175,7 +175,7 @@ test("the style is applied by attribute, mirrored, and rendered as tiles", () =>
   assert.match(app, /applyStyle\(bootStyle, \{ save: false, remember: false \}\)/, "the saved style is applied at boot, without becoming a fresh choice");
   // ...but the mirror loses to a migration, or a device that predates the painted
   // edition would be restored to the old default on every single load.
-  assert.match(app, /const restoredOldDefault = mirroredStyle === CLASSIC_STYLE && state\.settings\.style !== CLASSIC_STYLE/);
+  assert.match(app, /const restoredOldDefault = \(Number\(stored\?\.styleEra\) \|\| 0\) < STYLE_ERA[\s\S]{0,100}mirroredStyle === CLASSIC_STYLE/);
   assert.match(app, /const bootStyle = isKnownStyle\(mirroredStyle\) && !restoredOldDefault \? mirroredStyle : state\.settings\.style/);
   assert.match(app, /function renderStyleTiles\(/);
   assert.match(app, /tile\.setAttribute\("aria-pressed"/);

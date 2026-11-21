@@ -141,7 +141,7 @@ html[data-style="legacy"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
-  background: #08090c;
+  background-color: #08090c;
   color: #f7efdd;
 }
 
@@ -190,7 +190,7 @@ html[data-style="rain"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
-  background: #1b1a16;
+  background-color: #1b1a16;
   color: #f2ece0;
 }
 
@@ -239,7 +239,7 @@ html[data-style="stair"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
-  background: #17130d;
+  background-color: #17130d;
   color: #f4ead6;
 }
 
@@ -288,7 +288,7 @@ html[data-style="aurora"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
-  background: #152b28;
+  background-color: #152b28;
   color: #eaf6ef;
 }
 
@@ -337,7 +337,7 @@ html[data-style="ember"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
-  background: #261717;
+  background-color: #261717;
   color: #f6e9e4;
 }
 
@@ -386,7 +386,7 @@ html[data-style="moss"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
-  background: #1a1e14;
+  background-color: #1a1e14;
   color: #eef1e6;
 }
 
@@ -435,7 +435,7 @@ html[data-style="indigo"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, .28);
-  background: #0e141b;
+  background-color: #0e141b;
   color: #e8eef4;
 }
 
@@ -484,7 +484,7 @@ html[data-style="blush"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px rgba(58, 43, 46, 0.14);
-  background: #fdf4ee;
+  background-color: #fdf4ee;
   color: #3a2b2e;
 }
 
@@ -533,7 +533,7 @@ html[data-style="sand"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px rgba(58, 47, 34, 0.14);
-  background: #fdf8f1;
+  background-color: #fdf8f1;
   color: #3a2f22;
 }
 
@@ -582,6 +582,6 @@ html[data-style="mint"] body.premium-ui {
   --font: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
   --shadow: none;
   --shadow-soft: 0 18px 40px rgba(44, 58, 51, 0.14);
-  background: #f8fdfa;
+  background-color: #f8fdfa;
   color: #2c3a33;
 }
