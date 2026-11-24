@@ -900,3 +900,26 @@ readiness after reload instead of waiting for every background precache request
 to become idle. This is not a measured FPS benchmark or a full security audit;
 actual GPU inference, live provider quota and external database configuration
 remain deployment/device checks.
+
+## 2.47.3 — fresh visitors, not just returning profiles
+
+A fresh 768px Chromium screenshot showed the fixed tour card covering the Start
+heading and the Ask area. Previous appearance/navigation gates set the tour's
+dismissal flag before loading, so they missed the first impression. Each guide
+step is now inserted at the top of its actual view and occupies normal document
+flow. It remains nonmodal; highlighting, keyboard controls and skipping remain.
+The default Glass login introduction also gains a theme-backed readable sheet;
+tablet column widths prevent its heading being squeezed beside the login form.
+
+The new optional `check-first-visit.mjs` clears origin storage between four widths
+and walks every step, checking target overlap and horizontal overflow, then
+finishes and submits a question. Existing appearance/Start browser gates now wait
+for the auth lock to clear, not just the initially active section in hidden HTML.
+The Start routing mock also tolerates automatic guest entry when accounts are
+unavailable. Verification screenshots remain local in ignored `.arena/`; the
+precache generator excludes that scratch directory to avoid shipping them.
+
+779 unit/behavior tests, secret/offline checks, fresh-visit, artwork and Start /
+presentation / mocked routing browser gates pass. The live Render health endpoint
+was observed on 2.47.2/main before this release; this is not a live inference test
+or proof every possible screen/state is bug-free.

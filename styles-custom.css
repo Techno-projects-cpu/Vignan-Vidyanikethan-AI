@@ -232,13 +232,10 @@ html[data-style="brutal"] body.premium-ui { color-scheme: light; }
 /* ========================================================================== */
 
 .first-run {
-  /* Top right, under the bar. It used to sit on the bottom edge, which was fine
-     while the question box floated in the middle of the page — but the box is
-     docked to the bottom edge now, and the card covered its Send button on the
-     very first step, the one that says "type a question". A guide that sits on
-     the control it is pointing at is worse than no guide. */
-  position: fixed; inset: 84px 16px auto auto; z-index: 60; width: min(420px, calc(100vw - 32px));
-  max-height: calc(100dvh - 108px); overflow: auto;
+  /* In-flow guidance: a fixed card obscured the first question on tablets. */
+  position: relative; inset: auto; z-index: 1; width: 100%;
+  max-height: none; overflow: visible; margin: 0 0 24px;
+  scroll-margin-top: 24px;
   border: 1px solid var(--line-strong); background: var(--surface); padding: 18px 18px 16px;
   box-shadow: 0 18px 50px rgba(0, 0, 0, .45);
 }
@@ -300,7 +297,7 @@ body.premium-ui .section-copy h2 { font-size: clamp(20px, 2.4vw, 28px); }
   .goal-head { padding: 11px 14px; }
   .goal-card { min-height: 74px; padding: 12px 14px; }
   .goal-card::after { font-size: 30px; right: 44px; }
-  .first-run { inset: 72px 8px auto 8px; width: auto; max-height: calc(100dvh - 92px); }
+  .first-run { inset: auto; width: 100%; max-height: none; }
 }
 
 /* ---- Phone --------------------------------------------------------------- */

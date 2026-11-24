@@ -340,3 +340,16 @@ Browser recovery and five-size Chat geometry gates pass; inference is mocked.
   Model-cache verification uses a synthetic marker, not downloaded model weights.
 - 779 tests / offline checks pass. Appearance (17 looks), recovery, real runtime
   import and five-size Chat browser gates pass. Live inference remains unverified.
+
+### 2.47.3 fresh-visitor recheck
+
+Previous gates skipped the first-run tour. A real fresh tablet profile exposed
+its fixed card overlapping the Start heading and Ask form. The guide now sits
+in document flow on each step's screen. Login introductory copy has a readable
+glass backing, and tablet login columns leave enough width for that copy.
+
+`tools/check-first-visit.mjs` clears origin storage between 390/768/1024/1366 px
+runs, verifies login backing/no overflow, all eight tour targets unobscured,
+completion to Start and question submission. This does not test live providers.
+`check-study-start.mjs` also accepts automatic guest entry when accounts are
+unavailable, instead of clicking the already hidden login gate in that case.

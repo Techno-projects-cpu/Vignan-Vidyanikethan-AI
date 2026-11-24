@@ -10,3 +10,6 @@ npm-debug.log*
 server/data/
 supabase/.temp/
 image-search/
+
+# Local preview screenshots and inspection artifacts
+.arena/

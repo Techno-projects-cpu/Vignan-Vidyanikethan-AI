@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(REPO, "precache.json");
-const EXCLUDED_DIRS = new Set([".git", "node_modules", "server", "supabase", "tools", "tests", "__pycache__", ".cache"]);
+const EXCLUDED_DIRS = new Set([".git", ".arena", "node_modules", "server", "supabase", "tools", "tests", "__pycache__", ".cache"]);
 const EXCLUDED_FILES = new Set([
   "precache.json", ".env", ".env.local", ".env.example", ".gitignore",
   "render.yaml", "package.json", "package-lock.json", "LICENSE", "README.md", "serve.mjs",

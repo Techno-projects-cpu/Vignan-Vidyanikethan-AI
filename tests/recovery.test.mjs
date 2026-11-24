@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyFailure, routeIdentity, routeCooling, recordRouteFailure, recordRouteSuccess, resetRecovery, reportRecovery, recoverySnapshot, recoveryMessage, initRecoveryMonitoring } from '../js/recovery.js?v=89';
+import { classifyFailure, routeIdentity, routeCooling, recordRouteFailure, recordRouteSuccess, resetRecovery, reportRecovery, recoverySnapshot, recoveryMessage, initRecoveryMonitoring } from '../js/recovery.js?v=90';
 
 test('route circuit pauses after repeated failures, expires and resets after success', () => {
   resetRecovery();
