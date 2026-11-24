@@ -131,8 +131,8 @@ test("the watcher keeps trying while an answer is being written", () => {
 
 test("the offline report counts what the worker really stored", () => {
   const ready = summarize({
-    expected: ["./index.html", "./js/app.js?v=88", "./styles.css"],
-    cached: ["./index.html", "./js/app.js?v=88", "./styles.css"],
+    expected: ["./index.html", "./js/app.js?v=89", "./styles.css"],
+    cached: ["./index.html", "./js/app.js?v=89", "./styles.css"],
     critical: ["./index.html"],
   });
   assert.equal(ready.total, 3);
@@ -140,7 +140,7 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(ready.summary, /Ready offline: 3 of 3/);
 
   const broken = summarize({
-    expected: ["./index.html", "./js/app.js?v=88"],
+    expected: ["./index.html", "./js/app.js?v=89"],
     cached: [],
     critical: ["./index.html"],
   });
@@ -150,8 +150,8 @@ test("the offline report counts what the worker really stored", () => {
 
   // A release is not "ready" when a file every lesson needs is missing.
   const missingShell = summarize({
-    expected: ["./index.html", "./js/app.js?v=88"],
-    cached: ["./js/app.js?v=88"],
+    expected: ["./index.html", "./js/app.js?v=89"],
+    cached: ["./js/app.js?v=89"],
     critical: CRITICAL_FILES,
   });
   assert.equal(missingShell.ready, false);
@@ -162,8 +162,8 @@ test("the offline report counts what the worker really stored", () => {
   assert.match(nothing.summary, /Open the app once while online/);
 
   // Query strings and absolute URLs compare equal.
-  assert.equal(normalizeUrl("./js/app.js?v=88"), "js/app.js");
-  assert.equal(normalizeUrl("https://app.local/js/app.js?v=88"), "js/app.js");
+  assert.equal(normalizeUrl("./js/app.js?v=89"), "js/app.js");
+  assert.equal(normalizeUrl("https://app.local/js/app.js?v=89"), "js/app.js");
   assert.equal(pickCacheName(["other", "vignan-vidyanikethan-ai-v17", "vignan-vidyanikethan-ai-v33"], "18"), "vignan-vidyanikethan-ai-v33");
 });
 
@@ -342,4 +342,31 @@ test("the secret scanner is wired in and catches a real-shape key", async () => 
   } finally {
     await fsmod.rm(pathmod.join(root, probe), { force: true });
   }
+});
+
+test('switching tabs without an update never reloads the app or schedules work', () => {
+  const listeners = {}, timers = [], reloads = [];
+  let busy = false;
+  const container = {
+    navigator: { serviceWorker: { controller: {}, addEventListener: (name, fn) => { listeners[name] = fn; }, removeEventListener() {} } },
+    document: { visibilityState: 'hidden', addEventListener: (name, fn) => { listeners[name] = fn; }, removeEventListener() {} },
+    addEventListener() {}, removeEventListener() {}, clearTimeout() {},
+    setTimeout: fn => { timers.push(fn); return timers.length; },
+    location: { reload: () => reloads.push('reload') },
+  };
+  const stop = startUpdateWatch({}, { container, shouldWait: () => busy });
+  listeners.visibilitychange(); listeners.visibilitychange();
+  assert.equal(reloads.length, 0);
+  assert.equal(timers.length, 0);
+  busy = true;
+  listeners.controllerchange();
+  assert.equal(timers.length, 1);
+  listeners.visibilitychange();
+  assert.equal(reloads.length, 0, 'a genuine update still protects unsent work');
+  busy = false;
+  listeners.visibilitychange();
+  assert.equal(reloads.length, 1);
+  listeners.visibilitychange();
+  assert.equal(reloads.length, 1);
+  stop();
 });

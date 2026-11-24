@@ -6,8 +6,8 @@
  * sync and makes retries readable.
  */
 
-import { authApiUrl } from "./auth.js?v=88";
-import { blockInOfflineMode } from "./offline-mode.js?v=88";
+import { authApiUrl } from "./auth.js?v=89";
+import { blockInOfflineMode } from "./offline-mode.js?v=89";
 
 const REQUEST_TIMEOUT = 15000;
 const CSRF_COOKIE = "vignan_csrf";
@@ -147,6 +147,8 @@ export function resetSocial() {
   emit();
 }
 
+let pollingVisibilityHandler = null;
+
 export function startSocialPolling() {
   if (state.timer) return;
   const tick = () => {
@@ -154,13 +156,16 @@ export function startSocialPolling() {
     syncSocial().catch(() => {});
   };
   state.timer = setInterval(tick, POLL_MS);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") syncSocial().catch(() => {});
-  });
+  pollingVisibilityHandler = () => {
+    if (state.timer && document.visibilityState === "visible") syncSocial().catch(() => {});
+  };
+  document.addEventListener("visibilitychange", pollingVisibilityHandler);
   syncSocial().catch(() => {});
 }
 
 export function stopSocialPolling() {
+  if (pollingVisibilityHandler) document.removeEventListener("visibilitychange", pollingVisibilityHandler);
+  pollingVisibilityHandler = null;
   if (state.timer) clearInterval(state.timer);
   state.timer = null;
 }

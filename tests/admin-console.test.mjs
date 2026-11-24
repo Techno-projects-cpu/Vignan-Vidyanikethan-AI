@@ -330,7 +330,8 @@ test("the console is kept out of search engines and the offline cache", async ()
   assert.match(robots, /Disallow: \/admin/);
   assert.match(robots, /Disallow: \/setup/);
   const sw = await read("sw.js");
-  assert.doesNotMatch(sw, /admin/, "the console must never be precached");
+  const core = sw.slice(sw.indexOf("const CORE"), sw.indexOf('self.addEventListener("install"'));
+  assert.doesNotMatch(core, /admin/, "the console must never be precached");
   const precache = JSON.parse(await read("precache.json"));
   assert.ok(!precache.urls.some((url) => /admin/i.test(url)), "the console is not in the manifest");
 });

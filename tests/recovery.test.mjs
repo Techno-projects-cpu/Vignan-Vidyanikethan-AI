@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyFailure, routeIdentity, routeCooling, recordRouteFailure, recordRouteSuccess, resetRecovery, reportRecovery, recoverySnapshot, recoveryMessage, initRecoveryMonitoring } from '../js/recovery.js?v=88';
+import { classifyFailure, routeIdentity, routeCooling, recordRouteFailure, recordRouteSuccess, resetRecovery, reportRecovery, recoverySnapshot, recoveryMessage, initRecoveryMonitoring } from '../js/recovery.js?v=89';
 
 test('route circuit pauses after repeated failures, expires and resets after success', () => {
   resetRecovery();
@@ -73,4 +73,55 @@ test('an incomplete new app cache does not activate over a working previous rele
   handlers.get('install')({ waitUntil: promise => { installation = promise; } });
   await assert.rejects(installation, /Incomplete app cache/);
   assert.equal(activation, 0);
+});
+
+async function workerHarness(overrides = {}) {
+  const { readFileSync } = await import('node:fs');
+  const { default: vm } = await import('node:vm');
+  const handlers = new Map();
+  const context = vm.createContext({
+    self: { addEventListener: (type, fn) => handlers.set(type, fn), location: { origin: 'https://study.test' }, clients: { claim: async () => {} } },
+    caches: { open: async () => ({ match: async () => undefined, put: async () => {} }) },
+    fetch: async () => new Response('network works'), Response, URL,
+    ...overrides,
+  });
+  vm.runInContext(readFileSync(new URL('../sw.js', import.meta.url), 'utf8'), context);
+  return { handlers, run: expression => vm.runInContext(expression, context) };
+}
+
+test('updates delete only old app caches, not downloaded WebLLM models or unrelated data', async () => {
+  const deleted = [];
+  const harness = await workerHarness({ caches: {
+    keys: async () => ['vignan-vidyanikethan-ai-v1', 'vignan-vidyanikethan-ai-v999', 'webllm/model', 'webllm/wasm', 'another-app'],
+    delete: async name => { deleted.push(name); },
+  } });
+  let activation;
+  harness.handlers.get('activate')({ waitUntil: promise => { activation = promise; } });
+  await activation;
+  assert.deepEqual(deleted, ['vignan-vidyanikethan-ai-v1', 'vignan-vidyanikethan-ai-v999']);
+});
+
+test('blocked cache opening or matching does not break successful online pages or assets', async () => {
+  for (const caches of [
+    { open: async () => { throw new Error('storage blocked'); } },
+    { open: async () => ({ match: async () => { throw new Error('cache unavailable'); }, put: async () => { throw new Error('quota'); } }) },
+  ]) {
+    const harness = await workerHarness({ caches });
+    assert.equal(await (await harness.run("networkFirst('https://study.test/')")).text(), 'network works');
+    assert.equal(await (await harness.run("cacheFirst('https://study.test/styles.css')")).text(), 'network works');
+  }
+});
+
+test('operator routes bypass worker caches and private/no-store responses are never written', async () => {
+  let writes = 0, intercepted = false;
+  const harness = await workerHarness({ caches: { open: async () => ({ match: async () => undefined, put: async () => { writes++; } }) } });
+  for (const path of ['/admin', '/admin/export?format=json', '/admin/login', '/setup', '/setup.html']) {
+    harness.handlers.get('fetch')({ request: { method: 'GET', url: `https://study.test${path}`, mode: 'navigate' }, respondWith() { intercepted = true; } });
+  }
+  assert.equal(intercepted, false);
+  await harness.run("(async () => storeResponse(await availableCache(), '/', new Response('private content', { headers: { 'Cache-Control': 'private, no-store' } })))()");
+  await harness.run("(async () => storeResponse(await availableCache(), '/', new Response('private content', { headers: { 'Cache-Control': 'no-store' } })))()");
+  assert.equal(writes, 0);
+  await harness.run("(async () => storeResponse(await availableCache(), '/', new Response('public content')))()");
+  assert.equal(writes, 1, 'public content still caches');
 });

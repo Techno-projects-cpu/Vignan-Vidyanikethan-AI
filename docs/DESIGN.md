@@ -873,3 +873,30 @@ and a restored mirror choice is written back to the settings database. Early
 paint also recognises the three light painted themes. No new external assets,
 tracking, image generation or CDN were introduced; these are the existing local
 offline-cached images, finally visible through their actual rendered CSS.
+
+## 2.47.2 — remove accidental work and protect cached data
+
+No new visual layer. This pass fixes lifecycle problems that wasted work or
+interrupted use: the update watcher reloaded on tab hiding even without an update;
+activation removed every origin cache instead of only old app releases; stopped
+social polling left visibility listeners behind. Those are now guarded/cleaned up,
+so tab switching does not restart the app, model caches survive app activation,
+and login cycles do not accumulate wake-up callbacks. A stale `data-lite` flag is
+also removed correctly when the device policy no longer requires it.
+
+Private operator/setup routes are excluded from worker interception. Runtime
+cache writes also respect `private`/`no-store` response directives. Cache API
+failures degrade to a normal network response rather than breaking online pages.
+This does not recover model files already deleted by a previous release, audit
+previous operator-device caches, or establish that earlier private pages were
+actually cached on a particular device. Deploying v89 removes older app caches.
+
+Verification includes a real Chromium worker activation with an unrelated
+synthetic model-cache marker, a simulated tab-hide with an unsent Start draft,
+and inspection showing operator pages absent from the app cache. Unit/VM tests
+cover no-store/private writes, blocked-cache operation, update guards, polling
+cleanup and lite-mode removal. The appearance gate now waits for actual UI
+readiness after reload instead of waiting for every background precache request
+to become idle. This is not a measured FPS benchmark or a full security audit;
+actual GPU inference, live provider quota and external database configuration
+remain deployment/device checks.
