@@ -1,7 +1,7 @@
 /** Saved, device-local revision decks. No accounts or network are required. */
 
-import { dueCards, reviewCard } from "./flashcards.js?v=88";
-import { localDay, truncate, uid } from "./util.js?v=88";
+import { dueCards, reviewCard } from "./flashcards.js?v=89";
+import { localDay, truncate, uid } from "./util.js?v=89";
 
 export const STUDY_DECKS_KEY = "study-decks-v1";
 

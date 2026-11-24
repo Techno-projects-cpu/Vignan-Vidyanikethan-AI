@@ -61,7 +61,8 @@ try {
   await page.evaluate(() => document.querySelector('#theme-toggle').click());
   const mode = await page.evaluate(() => document.documentElement.dataset.theme);
   await new Promise(resolve => setTimeout(resolve, 400));
-  await page.reload({ waitUntil: 'networkidle0' });
+  // Background precaching can stay busy; wait for the actual UI below instead.
+  await page.reload({ waitUntil: 'domcontentloaded' });
   await page.evaluate(() => document.querySelector('#startup-skip')?.click());
   await page.waitForFunction(() => document.querySelector('.view.active') || (!document.querySelector('#gate-guest-button').disabled && document.querySelector('#gate-guest-button').getBoundingClientRect().height));
   await page.evaluate(() => { if (!document.querySelector('.view.active')) document.querySelector('#gate-guest-button').click(); });

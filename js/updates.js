@@ -16,7 +16,7 @@
  * release on its next visit, because the app is served network-first.
  */
 
-/** Release the page itself was loaded from: "./js/app.js?v=88" → "45". */
+/** Release the page itself was loaded from: "./js/app.js?v=89" → "45". */
 export const RELEASE = new URL(import.meta.url).searchParams.get("v") || "dev";
 
 /** "const CACHE_NAME = \"vignan-vidyanikethan-ai-v45\"" → "45". */
@@ -37,8 +37,8 @@ export function isNewer(remote, current) {
  * May the page reload right now?
  *
  * Only one reason to say no: an answer is being written and reloading would
- * throw it away. `busy` covers that. Hidden tabs reload instantly — nobody is
- * reading them.
+ * throw it away. `busy` covers that. A visibility change alone is not an update
+ * signal. Pending updates still respect the supplied busy/unsent-work guard.
  */
 export function shouldReloadNow({ busy = false } = {}) {
   return !busy;
@@ -61,12 +61,13 @@ export function startUpdateWatch(
   if (!workers?.addEventListener) return () => {};
 
   let reloading = false;
+  let updatePending = false;
   let retryTimer = 0;
   let stopped = false;
   let hadController = Boolean(workers.controller);
 
   const reload = () => {
-    if (stopped || reloading) return;
+    if (stopped || reloading || !updatePending) return;
     if (!shouldReloadNow({ busy: shouldWait() })) {
       container.clearTimeout?.(retryTimer);
       retryTimer = container.setTimeout(reload, retryMs);
@@ -83,6 +84,7 @@ export function startUpdateWatch(
       hadController = true;
       return;
     }
+    updatePending = true;
     reload();
   };
 

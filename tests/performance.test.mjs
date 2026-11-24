@@ -77,3 +77,47 @@ test('view reveal finishes geometry reads before writing any reveal classes', as
   vm.runInContext(source + '\ninitMotion();', context);
   assert.deepEqual(events, ['read0', 'read1', 'read2', 'write0', 'write1', 'write2']);
 });
+
+test('leaving lite mode removes data-lite instead of an unrelated attribute', () => {
+  const source = readFileSync(new URL('../js/app.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function applyStyle(');
+  const end = source.indexOf('/** One tile per style', start);
+  const removed = [];
+  const root = { dataset: { lite: '1' }, removeAttribute(name) { removed.push(name); if (name === 'data-lite') delete this.dataset.lite; } };
+  const context = vm.createContext({
+    state: { settings: {} }, document: { documentElement: root }, CLASSIC_STYLE: 'minimal',
+    normalizeStyle: id => id, isPaintedStyle: () => false, preferLiteGlass: () => false,
+    stopGlass() {}, syncThemeSwitchLock() {}, requestAnimationFrame() {}, syncBrowserChrome() {},
+    $: () => null,
+  });
+  vm.runInContext(source.slice(start, end) + "\napplyStyle('minimal', { save: false, remember: false });", context);
+  assert.equal(root.dataset.lite, undefined);
+  assert.ok(removed.includes('data-lite'));
+});
+
+test('social polling removes visibility listeners on stop instead of accumulating after logins', () => {
+  const source = readFileSync(new URL('../js/social.js', import.meta.url), 'utf8');
+  const start = source.indexOf('let pollingVisibilityHandler');
+  const end = source.indexOf('export const social =', start);
+  const listeners = new Set(), intervals = new Set();
+  let calls = 0, next = 0;
+  const context = vm.createContext({
+    state: { timer: null }, POLL_MS: 20000,
+    document: { visibilityState: 'visible', addEventListener: (_type, fn) => listeners.add(fn), removeEventListener: (_type, fn) => listeners.delete(fn) },
+    syncSocial: async () => { calls++; },
+    setInterval: () => { const id = ++next; intervals.add(id); return id; }, clearInterval: id => intervals.delete(id),
+  });
+  vm.runInContext(source.slice(start, end).replaceAll('export function', 'function'), context);
+  for (let i = 0; i < 4; i++) {
+    vm.runInContext('startSocialPolling(); startSocialPolling();', context);
+    assert.equal(listeners.size, 1);
+    assert.equal(intervals.size, 1);
+    const queuedHandler = [...listeners][0];
+    vm.runInContext('stopSocialPolling();', context);
+    const before = calls;
+    queuedHandler();
+    assert.equal(calls, before, 'queued callbacks do not fetch after stopping');
+    assert.equal(listeners.size, 0);
+    assert.equal(intervals.size, 0);
+  }
+});

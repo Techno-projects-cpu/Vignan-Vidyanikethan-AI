@@ -325,3 +325,18 @@ Browser recovery and five-size Chat geometry gates pass; inference is mocked.
 - Deliberate Minimal choice and light/dark value survive a real browser reload.
 - Generated palette blocks use `background-color`, not a `background` shorthand
   that clears the painting. Existing theme palette/contrast tests still pass.
+
+### 2.47.2 reliability and efficiency pass
+
+- Updates: changing tab visibility is not an update signal; genuine updates still
+  respect the busy/unsent-question guard and reload at most once.
+- Cache activation deletes only this app's old release caches, preserving local
+  model and unrelated caches. Operator pages bypass interception; private and
+  no-store network responses are not written to the app cache.
+- Blocked cache opening/matching cannot prevent successful network responses.
+- Social polling unregisters its visibility listener on stop; repeated starts are
+  idempotent. Leaving lite mode removes the correct `data-lite` attribute.
+- New optional real-worker Chromium gate: `tools/check-browser-resilience.mjs`.
+  Model-cache verification uses a synthetic marker, not downloaded model weights.
+- 779 tests / offline checks pass. Appearance (17 looks), recovery, real runtime
+  import and five-size Chat browser gates pass. Live inference remains unverified.
