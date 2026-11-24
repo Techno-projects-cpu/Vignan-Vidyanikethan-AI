@@ -18,8 +18,8 @@ for(const width of [390,768,1024,1366]){
 }
 await p.setViewport({width:1024,height:768});
 await p.evaluateOnNewDocument(()=>localStorage.setItem('vignan.firstRun.v3','done'));
-await p.goto(origin + "/",{waitUntil:'networkidle0'});await p.evaluate(()=>document.querySelector('#startup-skip')?.click());await p.waitForFunction(()=>!document.querySelector('#gate-guest-button').disabled);await p.click('#gate-guest-button');
-await p.waitForFunction(()=>document.querySelector('#view-start.active'));
+await p.goto(origin + "/",{waitUntil:'networkidle0'});await p.evaluate(()=>document.querySelector('#startup-skip')?.click());await p.waitForFunction(()=>document.querySelector('.view.active')?.getBoundingClientRect().height || (!document.querySelector('#gate-guest-button').disabled && document.querySelector('#gate-guest-button').getBoundingClientRect().height));await p.evaluate(()=>{if(!document.querySelector('.view.active')?.getBoundingClientRect().height)document.querySelector('#gate-guest-button').click()});
+await p.waitForFunction(()=>document.querySelector('#view-start.active') && !document.body.classList.contains('auth-locked'));
 await new Promise(r=>setTimeout(r,600));
 assert.ok(await p.$eval('#start-title', n => n.getBoundingClientRect().height > 0), 'Start heading must actually be visible');
 assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, 'Start horizontal overflow');
@@ -57,7 +57,7 @@ p.on('request', r=>{
  else if(r.url().endsWith('/api/ai')){calls++;assert.ok(!r.postData().includes('sk-or-'));r.respond({status:200,contentType:'application/json',body:JSON.stringify({content:'Photosynthesis uses light to make food from carbon dioxide and water. [1]',model:'test-cloud'})});}
  else r.continue();
 });
-await p.goto(origin + "/",{waitUntil:'networkidle0'});await p.evaluate(()=>document.querySelector('#startup-skip')?.click());await p.waitForFunction(()=>!document.querySelector('#gate-guest-button').disabled);await p.click('#gate-guest-button');await p.waitForFunction(()=>document.querySelector('#view-start.active'));
+await p.goto(origin + "/",{waitUntil:'networkidle0'});await p.evaluate(()=>document.querySelector('#startup-skip')?.click());await p.waitForFunction(()=>document.querySelector('.view.active')?.getBoundingClientRect().height || (!document.querySelector('#gate-guest-button').disabled && document.querySelector('#gate-guest-button').getBoundingClientRect().height));await p.evaluate(()=>{if(!document.querySelector('.view.active')?.getBoundingClientRect().height)document.querySelector('#gate-guest-button').click()});await p.waitForFunction(()=>document.querySelector('#view-start.active') && !document.body.classList.contains('auth-locked'));
 await new Promise(r=>setTimeout(r,1200));await p.type('#start-question','What is photosynthesis?');await p.click('#start-question-form button');
 await p.waitForFunction(()=>[...document.querySelectorAll('.message.assistant')].some(n=>n.textContent.includes('Photosynthesis uses light to make food')),{timeout:10000});assert.ok(calls>0);console.log('Configured health → untouched defaults → same-origin /api/ai answer PASS (mocked provider)');
 const access = async (action)=>p.evaluate(async action=>{const boot=new URL(document.querySelector('script[src*="js/boot.js"]').src);const db=await import('/js/db.js'+boot.search);const settings=await db.getSetting('settings');if(action==='local'){settings.routing.answer='webllm';settings.activeProvider='webllm';settings.freeRouterDismissed=true;await db.setSetting('settings',settings);}return settings;},action);

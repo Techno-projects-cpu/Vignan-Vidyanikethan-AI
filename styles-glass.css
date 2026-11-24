@@ -1825,3 +1825,22 @@ html[data-style="glass"] body.premium-ui #view-ask .message.assistant .message-b
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+
+/* Fresh-visitor introduction needs the same readable sheet as the login form.
+   Keep the classroom visible around it, not directly behind small body copy. */
+html[data-style="glass"] body.premium-ui .auth-gate-intro {
+  padding: clamp(18px, 3vw, 32px);
+  background-color: var(--tg-tint-strong);
+  background-image: var(--tg-sheet);
+  border-radius: 0;
+  box-shadow: var(--tg-rim);
+  -webkit-backdrop-filter: var(--tg-filter);
+  backdrop-filter: var(--tg-filter);
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  body.premium-ui .auth-gate-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 1.15fr);
+    gap: 24px;
+  }
+  body.premium-ui .auth-gate-intro h1 { font-size: clamp(34px, 4.5vw, 50px); }
+}

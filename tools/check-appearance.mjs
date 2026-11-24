@@ -14,7 +14,7 @@ try {
   await page.evaluate(() => document.querySelector('#startup-skip')?.click());
   await page.waitForFunction(() => !document.querySelector('#gate-guest-button').disabled);
   await page.click('#gate-guest-button');
-  await page.waitForFunction(() => document.querySelector('#view-start.active'));
+  await page.waitForFunction(() => document.querySelector('#view-start.active') && !document.body.classList.contains('auth-locked'));
   await new Promise(resolve => setTimeout(resolve, 700));
   await page.evaluate(() => document.querySelector('.start-tools [data-view="settings"]').click());
   await page.waitForFunction(() => document.querySelector('#view-settings.active'));
