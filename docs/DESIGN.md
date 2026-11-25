@@ -923,3 +923,32 @@ precache generator excludes that scratch directory to avoid shipping them.
 presentation / mocked routing browser gates pass. The live Render health endpoint
 was observed on 2.47.2/main before this release; this is not a live inference test
 or proof every possible screen/state is bug-free.
+
+## 2.48.0 — learning studio and visible quiz variety
+
+See `docs/LEARNING-STUDIO.md` for the demo sequence, sourced event references,
+privacy disclosures and explicit feature boundaries. This release adds one real
+screen, not disconnected mockup buttons: essay outlines/model drafts/feedback;
+shared-device debate rosters, sides, rounds, model turns, cancellation, export and
+coaching; independent Chekumuki/National Science Seminar/science-fair preparation.
+
+The quiz problem was substantive: offline MCQs were cloze prompts with choices.
+They now ask students to identify a complete evidence-matching statement, while
+short answers request explanation and Mixed is the screen default. AI output is
+also checked before use so malformed/all-fill mixed output does not silently
+pass as variety. These heuristics do not promise professional exam question
+quality. Explicit Fill remains available by choice.
+
+No textbook PDFs were copied. The Library gives an official Telangana SCERT
+entry link and import instructions. The official root returned HTTP 500 during
+research; no invented deep links, permissions or syllabus completeness claims.
+Competition references are historical/organiser resources, not current-year rules.
+New studio UI labels are English; AI output requests the selected app language.
+
+The browser gate verifies both successful and failed mocked AI turns, human
+contributions preserved, coaching, literal safe text display, essay validation,
+four-width layout and the actual offline Mixed quiz generated from starter pages.
+787 tests, secret/offline checks and the existing Start/presentation/routing gate
+pass. Live providers, actual model inference and production deployment require
+separate verification. This release intentionally avoids further unrelated
+features in the run-up to the presentation.

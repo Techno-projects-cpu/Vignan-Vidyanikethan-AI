@@ -1,6 +1,6 @@
 {
-  "version": 90,
-  "generatedAt": "2026-11-24T07:00:00.206Z",
+  "version": 91,
+  "generatedAt": "2026-11-25T14:38:32.320Z",
   "urls": [
     "./",
     "./index.html",
@@ -198,6 +198,7 @@
     "./js/key-pool.js",
     "./js/knowledge.js",
     "./js/languages.js",
+    "./js/learning-studio.js",
     "./js/link-reader.js",
     "./js/llm.js",
     "./js/local-ai-worker.js",
@@ -230,6 +231,7 @@
     "./js/starter-shelf.js",
     "./js/startup.js",
     "./js/student-keys.js",
+    "./js/studio-core.js",
     "./js/study-card.js",
     "./js/study-decks.js",
     "./js/study-sheet.js",

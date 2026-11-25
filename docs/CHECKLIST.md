@@ -353,3 +353,18 @@ runs, verifies login backing/no overflow, all eight tour targets unobscured,
 completion to Start and question submission. This does not test live providers.
 `check-study-start.mjs` also accepts automatic guest entry when accounts are
 unavailable, instead of clicking the already hidden login gate in that case.
+
+### 2.48.0 — question variety and learning studio
+
+- Quiz defaults to Mixed; offline MCQs use full statements, short answers ask
+  for explanation, AI malformed/all-fill mixed output triggers offline fallback.
+- Start → Speak & write and drawer → Learning studio: essay outline/draft/feedback,
+  configurable pass-and-play human/AI debate teams, explicit turns, cancellation,
+  transcript export and post-debate AI coaching. No fake offline model speeches.
+- Science-event preparation for Chekumuki, National Science Seminar and science
+  fairs with independent exercises, four original questions and rehearsal timer.
+  These are not official full exam packs. Current rules must be checked elsewhere.
+- Library official Telangana SCERT link plus PDF-import guidance; no books bundled.
+- Presentation runbook and privacy/feature limits: `docs/LEARNING-STUDIO.md`.
+- 787 tests plus offline/secret checks; rendered studio four-width gate uses a
+  mocked provider, including a failed request with no skipped/erased turns.

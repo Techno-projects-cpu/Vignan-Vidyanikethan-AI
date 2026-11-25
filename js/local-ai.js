@@ -11,7 +11,7 @@
  * engine (or Ollama / LM Studio configured as separate providers).
  */
 
-import { SYSTEM_PROMPT } from "./context.js?v=90";
+import { SYSTEM_PROMPT } from "./context.js?v=91";
 
 export const LOCAL_RUNTIME = "WebLLM 0.2.85 · Apache-2.0";
 
@@ -239,7 +239,7 @@ function defaultWorkerFactory() {
   if (typeof globalThis.Worker === "undefined") {
     throw new Error("Local AI needs a browser with Web Worker support.");
   }
-  return new globalThis.Worker(new URL("./local-ai-worker.js?v=90", import.meta.url), {
+  return new globalThis.Worker(new URL("./local-ai-worker.js?v=91", import.meta.url), {
     type: "module",
     name: "vignan-local-ai",
   });

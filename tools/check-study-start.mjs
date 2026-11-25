@@ -23,13 +23,13 @@ await p.waitForFunction(()=>document.querySelector('#view-start.active') && !doc
 await new Promise(r=>setTimeout(r,600));
 assert.ok(await p.$eval('#start-title', n => n.getBoundingClientRect().height > 0), 'Start heading must actually be visible');
 assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false, 'Start horizontal overflow');
-for(const view of ['library','quiz','exam','flashcards','code','progress','friends','chat','play','settings','ask']){
+for(const view of ['studio','library','quiz','exam','flashcards','code','progress','friends','chat','play','settings','ask']){
  await p.evaluate(view=>document.querySelector(`.start-tools [data-view="${view}"]`).click(),view);
  assert.ok(await p.$eval(`#view-${view}`,e=>e.classList.contains('active')));
  // Return via the drawer's action, not a global setView test hook.
  await p.evaluate(()=>{document.querySelector('#home-logo').click();document.querySelector('[data-menu-view="start"]').click()});
 }
-console.log('Start navigation: all 11 destinations + return PASS');
+console.log('Start navigation: all 12 destinations + return PASS');
 await p.evaluate(()=>document.querySelector('.start-tools [data-view="settings"]').click());await new Promise(r=>setTimeout(r,500));
 for(const width of [390,768,1024,1366]){
  await p.setViewport({width,height:900});await new Promise(r=>setTimeout(r,250));
