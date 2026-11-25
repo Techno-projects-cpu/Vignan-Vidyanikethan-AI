@@ -544,3 +544,27 @@ body.premium-ui .reader-page-text {
 @media (prefers-reduced-motion: reduce) {
   .style-tile, .settings-tab, .first-run { transition: none !important; }
 }
+
+/* Learning studio: ordinary responsive surfaces, no fixed overlays. */
+.learning-studio { max-width: 1100px; margin-inline: auto; }
+.studio-panel[hidden], .learning-studio [hidden] { display: none !important; }
+.studio-panel { margin-block: 18px; padding: clamp(16px, 3vw, 28px); }
+.studio-field { display: grid; gap: 7px; margin-block: 16px; min-width: 0; }
+.studio-field > span { font-weight: 600; }
+.learning-studio :is(input, textarea, select) { width: 100%; min-width: 0; padding: 12px; border: 1px solid var(--line-strong); border-radius: 0; color: var(--ink); background: var(--surface); font: inherit; }
+.learning-studio textarea { resize: vertical; }
+.studio-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-block: 16px; }
+.studio-actions button { white-space: normal; min-height: 44px; }
+.studio-output { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; line-height: 1.7; }
+.studio-roster-row { display: grid; grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: center; margin-block: 12px; }
+.studio-transcript article { padding: 16px; margin-block: 12px; }
+.studio-transcript p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.learning-studio fieldset { min-width: 0; padding: 16px; margin-block: 16px; }
+.learning-studio fieldset button { display: block; width: 100%; white-space: normal; text-align: left; margin-block: 8px; }
+.learning-studio output { font-size: 28px; display: block; margin-block: 12px; font-variant-numeric: tabular-nums; }
+@media (max-width: 500px) { .studio-roster-row { grid-template-columns: 1fr; } }
+body.premium-ui[data-view="studio"] .page-head { display: none !important; }
+.learning-studio { padding-top: 48px; }
+.studio-heading { padding: clamp(18px, 3vw, 28px); }
+.studio-heading h2 { margin-top: 0; }
+.studio-actions [aria-pressed="true"] { outline: 2px solid currentColor; outline-offset: -2px; font-weight: 700; }

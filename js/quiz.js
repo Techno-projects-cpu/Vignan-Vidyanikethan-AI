@@ -6,9 +6,9 @@
  * can show the student what to revise instead of just a score.
  */
 
-import { questionCopy } from "./question-copy.js?v=90";
-import { hashFeature } from "./vector.js?v=90";
-import { splitSentences, tokenize } from "./text.js?v=90";
+import { questionCopy } from "./question-copy.js?v=91";
+import { hashFeature } from "./vector.js?v=91";
+import { splitSentences, tokenize } from "./text.js?v=91";
 import {
   clamp,
   levenshtein,
@@ -18,7 +18,7 @@ import {
   uid,
   unique,
   wordOverlap,
-} from "./util.js?v=90";
+} from "./util.js?v=91";
 
 const FILLER = new Set(
   `about above after again against because before being below between could during each every first following from have into itself more most other second should some such than that their these those through where which while would your textbook chapter page section notes`.split(
@@ -153,7 +153,7 @@ function buildQuestion({ candidate, type, difficulty, distractorPool, index, phr
       type: "short",
       prompt: language === "te" ? `“${keyword}” గురించి మీ పుస్తకం ఏమి చెబుతుందో మీ మాటల్లో వివరించండి.`
         : language === "hi" ? `“${keyword}” के बारे में अपनी किताब की बात अपने शब्दों में समझाएँ।`
-          : `${copy.whatIs.replace("{subject}", keyword)} — ${copy.complete}`,
+          : language === "en" ? `Explain the role of “${keyword}” in ${hit.section || "this passage"}. Use the textbook evidence in your own words.` : copy.whatIs.replace("{subject}", keyword),
       options: [],
       answer: "",
       acceptable: tokenize(sentence).slice(0, 8),
@@ -191,15 +191,31 @@ function buildQuestion({ candidate, type, difficulty, distractorPool, index, phr
     if (distractors.length >= 3) break;
     if (normalizeAnswer(option) !== normalizeAnswer(correct) && !distractors.some((value) => normalizeAnswer(value) === normalizeAnswer(option))) distractors.push(option);
   }
-  const options = seededShuffle([correct, ...distractors], `${sentence}-options-${index}`);
+  // Full statements test recognition of a claim, not completion of a blank.
+  const statements = [sentence, ...distractors.map(term => sentence.replace(new RegExp(escapeRegExp(phrase), "i"), term))];
+  const options = seededShuffle(statements, `${sentence}-options-${index}`);
   return {
     ...base,
     type: "mcq",
-    prompt: `${copy.choose}: “${truncate(blanked, 220)}”`,
+    prompt: `${copy.statement || copy.choose} (${hit.section || hit.title})`,
     options,
-    answer: correct,
-    acceptable: [correct],
+    answer: sentence,
+    acceptable: [sentence],
   };
+}
+
+/** Reject malformed or completion-only AI output rather than mislabelling it. */
+export function validateQuizQuestions(questions, requestedType = "mix", count = 5) {
+  const valid = questions.filter(q => {
+    if (!q || !["mcq", "fill", "short"].includes(q.type) || typeof q.prompt !== "string" || !q.prompt.trim()) return false;
+    if (requestedType !== "mix" && q.type !== requestedType) return false;
+    if (q.type !== "fill" && /_{3,}|\[\s*blank\s*\]|fill in (?:the )?blank|complete (?:the|this) sentence/i.test(q.prompt)) return false;
+    if (q.type === "mcq") return Array.isArray(q.options) && q.options.length >= 2 && q.options.length <= 6 && new Set(q.options).size === q.options.length && q.options.includes(q.answer);
+    return q.type !== "fill" || Boolean(q.answer?.trim());
+  }).slice(0, count);
+  if (!valid.length) throw new Error("The AI did not return usable questions of the requested type.");
+  if (requestedType === "mix" && count >= 3 && (!valid.some(q => q.type === "mcq") || !valid.some(q => q.type === "short"))) throw new Error("The AI did not return a mixed quiz; using the offline mixed writer instead.");
+  return valid;
 }
 
 export function prepareQuestions(questions = []) {

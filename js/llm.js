@@ -1,3 +1,4 @@
+import { validateQuizQuestions } from "./quiz.js?v=91";
 /**
  * Vignan Vidyanikethan AI's orchestration layer.
  *
@@ -16,16 +17,16 @@ import {
   extractJson,
   formatContext,
   formatOutsideContext,
-} from "./context.js?v=90";
-import { languageName } from "./i18n.js?v=90";
+} from "./context.js?v=91";
+import { languageName } from "./i18n.js?v=91";
 import {
   callProvider,
   callRoutedModel,
   gradeShortWithModel,
   testProvider,
   verifyAnswer,
-} from "./model-router.js?v=90";
-import { truncate, uid } from "./util.js?v=90";
+} from "./model-router.js?v=91";
+import { truncate, uid } from "./util.js?v=91";
 
 export {
   FLASHCARD_SCHEMA,
@@ -158,7 +159,7 @@ export async function generateQuizWithModel({ topic, hits, count, type, difficul
   }
   const context = formatContext(hits, { perPassage: 750, maxTotal: 4200 });
   const messages = [
-    { role: "system", content: `${SYSTEM_PROMPT}\n\nYou are writing a quiz. ${QUIZ_SCHEMA}` },
+    { role: "system", content: `${SYSTEM_PROMPT}\n\nYou are writing a quiz. MCQs must ask conceptual, cause/effect, application or full-statement questions, never disguised fill-in-the-blanks. Short answers must invite explanation or reasoning. For mix include mcq, fill and short; keep fill to at most one quarter. ${QUIZ_SCHEMA}` },
     {
       role: "user",
       content: `Topic: ${topic || "this chapter"}\nDifficulty: ${difficulty}\nNumber of questions: ${count}\nPreferred type: ${type}\n${languageInstruction(settings?.language)}\n\nLIBRARY PASSAGES (web imports are labelled):\n${context}`,
@@ -169,7 +170,7 @@ export async function generateQuizWithModel({ topic, hits, count, type, difficul
   const parsed = extractJson(result.content);
   const rawQuestions = Array.isArray(parsed) ? parsed : parsed?.questions;
   if (!Array.isArray(rawQuestions) || !rawQuestions.length) throw new Error("Model did not return a quiz.");
-  return rawQuestions
+  const questions = rawQuestions
     .map((question, index) => {
       const sourceIndex = Number(question.sourceIndex ?? question.source ?? 1) - 1;
       const source = hits[sourceIndex] || hits[0];
@@ -197,6 +198,7 @@ export async function generateQuizWithModel({ topic, hits, count, type, difficul
     })
     .filter((question) => question?.prompt)
     .slice(0, count);
+  return validateQuizQuestions(questions, type, count);
 }
 
 /** Use any routed AI (including the local WebLLM model) to write cited cards. */
