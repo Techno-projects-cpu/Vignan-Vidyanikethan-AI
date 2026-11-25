@@ -952,3 +952,21 @@ four-width layout and the actual offline Mixed quiz generated from starter pages
 pass. Live providers, actual model inference and production deployment require
 separate verification. This release intentionally avoids further unrelated
 features in the run-up to the presentation.
+
+## 2.49.0 — private online debate, separate from pass-and-play
+
+The studio gains an Online debate tab with real authenticated server persistence
+and server-authoritative turn-taking, not a browser transcript pretending to be
+multiplayer. Rooms require an unguessable invitation and signed-in membership;
+hosts assign sides and control starts, skips, closure and invitation rotation.
+Server AI uses the configured hosted key pool, never client-authored AI text.
+Room revisions use compare-and-swap, and AI reservations prevent duplicate turns
+or late responses overwriting a host skip. Local storage is single-process JSON;
+Supabase uses its own new RLS-restricted table and conditional updates.
+
+Polling is deliberately conservative (~4 seconds while visible), avoiding new
+socket/CDN infrastructure before the presentation. Speech composition stays
+outside the rebuilt room view, so refresh does not destroy typing. Session-local
+room IDs restore server transcripts on reload; unsent drafts remain tab-only.
+The new migration is delivered, not applied to a live database. See
+`docs/ONLINE-DEBATE.md` for the deployment steps, limits, privacy and retention.

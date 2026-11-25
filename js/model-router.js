@@ -12,13 +12,13 @@ import {
   extractJson,
   formatContext,
   VERIFY_SYSTEM_PROMPT,
-} from "./context.js?v=91";
-import { postModelRequest, resolveProvider } from "./providers.js?v=91";
-import { generateWithLocalAI, getLocalAIState } from "./local-ai.js?v=91";
-import { providerKeyVariants } from "./key-pool.js?v=91";
-import { studentKeyPayload } from "./student-keys.js?v=91";
-import { classifyFailure, routeIdentity, routeCooling, recordRouteFailure, recordRouteSuccess, reportRecovery } from "./recovery.js?v=91";
-import { withNetworkDeadline, clamp, truncate } from "./util.js?v=91";
+} from "./context.js?v=92";
+import { postModelRequest, resolveProvider } from "./providers.js?v=92";
+import { generateWithLocalAI, getLocalAIState } from "./local-ai.js?v=92";
+import { providerKeyVariants } from "./key-pool.js?v=92";
+import { studentKeyPayload } from "./student-keys.js?v=92";
+import { classifyFailure, routeIdentity, routeCooling, recordRouteFailure, recordRouteSuccess, reportRecovery } from "./recovery.js?v=92";
+import { withNetworkDeadline, clamp, truncate } from "./util.js?v=92";
 
 export const TASKS = [
   {

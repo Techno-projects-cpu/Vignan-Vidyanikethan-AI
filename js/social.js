@@ -6,8 +6,8 @@
  * sync and makes retries readable.
  */
 
-import { authApiUrl } from "./auth.js?v=91";
-import { blockInOfflineMode } from "./offline-mode.js?v=91";
+import { authApiUrl } from "./auth.js?v=92";
+import { blockInOfflineMode } from "./offline-mode.js?v=92";
 
 const REQUEST_TIMEOUT = 15000;
 const CSRF_COOKIE = "vignan_csrf";
@@ -65,9 +65,9 @@ export class SocialClientError extends Error {
   }
 }
 
-async function api(path, { method = "GET", body, signal } = {}) {
+async function api(path, { method = "GET", body, signal, timeout = REQUEST_TIMEOUT } = {}) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+  const timer = setTimeout(() => controller.abort(), timeout);
   const cancel = () => controller.abort();
   signal?.addEventListener("abort", cancel, { once: true });
   try {
@@ -216,3 +216,9 @@ export function setActiveThread(threadId = "") {
   state.threadId = threadId;
   emit();
 }
+
+/** Same cookie session / CSRF / offline guard as Friends. */
+export const debateApi = {
+  get: id => api(`social/debates/room?id=${encodeURIComponent(id)}`),
+  post: (action, body) => api(`social/debates/${action}`, { method: "POST", body, timeout: ["ai", "coach"].includes(action) ? 60000 : REQUEST_TIMEOUT }),
+};

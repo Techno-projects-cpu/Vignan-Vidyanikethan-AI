@@ -15,7 +15,7 @@ is somebody else's.
 │                           accessibility.html  disclaimer.html  copyright.html
 ├── blog/                   ten pieces + an index, hand-written HTML
 │
-├── js/                     84 modules, native ES modules, no bundler
+├── js/                     85 modules, native ES modules, no bundler
 ├── LICENSES/               third-party licence texts for vendored code (glasswork)
 ├── styles*.css             14 stylesheets, one per surface (see below)
 ├── assets/                 two bundled fonts, brand marks, twenty-four painted plates (WebP + AVIF, two widths each)
@@ -30,7 +30,7 @@ is somebody else's.
 ├── precache.json           generated: every file the worker installs
 ├── manifest.webmanifest    the installable-app manifest
 │
-├── tests/                  86 files, `node --test`, no dependencies
+├── tests/                  87 files, `node --test`, no dependencies
 ├── tools/                  precache generator, offline simulator, secret scan,
 │                           the live-deploy check, the address rewriter, and the
 │                           two colour reporters (palette of a plate, and the
