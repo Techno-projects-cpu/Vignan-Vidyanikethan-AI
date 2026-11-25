@@ -1,5 +1,6 @@
-import { callModel } from './llm.js?v=91';
-import { EVENTS, SCIENCE_QUESTIONS, wordCount, makeRoster, debateSpeaker, debatePhase, debateDone, debateMessages, essayMessages, offlineOutline, transcriptText } from './studio-core.js?v=91';
+import { initOnlineDebate } from "./online-debate.js?v=92";
+import { callModel } from './llm.js?v=92';
+import { EVENTS, SCIENCE_QUESTIONS, wordCount, makeRoster, debateSpeaker, debatePhase, debateDone, debateMessages, essayMessages, offlineOutline, transcriptText } from './studio-core.js?v=92';
 
 function el(tag, text, className) { const n = document.createElement(tag); if (text) n.textContent = text; if (className) n.className = className; return n; }
 function button(text, handler) { const n = el('button', text, 'button ghost'); n.type = 'button'; n.addEventListener('click', handler); return n; }
@@ -8,7 +9,7 @@ function input(id, placeholder, area = false) { const n = el(area ? 'textarea' :
 function select(id, choices) { const n = el('select'); n.id = id; for (const [value, title] of choices) { const o = el('option', title); o.value = value; n.append(o); } return n; }
 function download(name, text) { const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' })); const a = el('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
 
-export function initLearningStudio({ getSettings }) {
+export function initLearningStudio({ getSettings, getUser }) {
   const root = document.querySelector('#learning-studio');
   if (!root || root.dataset.ready) return;
   root.dataset.ready = '1'; root.className = 'learning-studio';
@@ -17,11 +18,12 @@ export function initLearningStudio({ getSettings }) {
   root.append(heading);
   const nav = el('nav', '', 'studio-actions'); nav.setAttribute('aria-label', 'Learning studio'); root.append(nav);
   const panels = {};
-  for (const [id, title] of [['essay', 'Essay workshop'], ['debate', 'Debate room'], ['events', 'Science events']]) {
+  for (const [id, title] of [['essay', 'Essay workshop'], ['debate', 'Debate room'], ['events', 'Science events'], ['online', 'Online debate']]) {
     const panel = el('section', '', 'card studio-panel'); panel.id = `studio-${id}`; panel.hidden = id !== 'essay'; panels[id] = panel;
     const tab = button(title, () => { for (const [key, item] of Object.entries(panels)) item.hidden = key !== id; for (const b of nav.children) b.setAttribute('aria-pressed', String(b === tab)); });
     tab.dataset.studioTab = id; tab.setAttribute('aria-pressed', String(id === 'essay')); nav.append(tab); root.append(panel);
   }
+  initOnlineDebate(panels.online, { getSettings, getUser });
   // Requests are user-triggered, cancellable and never automatically retried.
   let controller = null;
   const status = el('p', '', 'studio-status'); status.id = 'studio-status'; status.setAttribute('role', 'status');

@@ -1,6 +1,6 @@
 {
-  "version": 91,
-  "generatedAt": "2026-11-25T14:38:32.320Z",
+  "version": 92,
+  "generatedAt": "2026-11-25T15:23:39.846Z",
   "urls": [
     "./",
     "./index.html",
@@ -210,6 +210,7 @@
     "./js/notes.js",
     "./js/offline-check.js",
     "./js/offline-mode.js",
+    "./js/online-debate.js",
     "./js/password-policy.js",
     "./js/play-ui.js",
     "./js/premium-ui.js",

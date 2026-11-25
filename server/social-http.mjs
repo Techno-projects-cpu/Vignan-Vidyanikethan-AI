@@ -1,3 +1,4 @@
+import { DebateError } from "./debate-rooms.mjs";
 /**
  * HTTP routes for the social layer.
  *
@@ -26,7 +27,7 @@ const OUTAGE_MESSAGE =
  * Render log still has the full picture.
  */
 function failure(error, scope) {
-  if (error instanceof SocialError) return error;
+  if (error instanceof SocialError || error instanceof DebateError) return error;
   // A nickname clash is the student's to fix, not an outage.
   if (String(error?.code || "") === "23505" && String(error?.table || "").includes("social_profiles")) {
     return new SocialError("That nickname is already used by another student in Friends. Change your name in Progress, then try again.", 409);
@@ -39,7 +40,7 @@ function failure(error, scope) {
   return error$;
 }
 
-export function createSocialRouter({ service, accounts, accountsBackend, currentSession, sendJson, sendError, authOptions, readJson, rateLimit }) {
+export function createSocialRouter({ service, debateService, accounts, accountsBackend, currentSession, sendJson, sendError, authOptions, readJson, rateLimit }) {
   const options = (request) => authOptions(request);
 
   async function student(request, response) {
@@ -91,7 +92,9 @@ export function createSocialRouter({ service, accounts, accountsBackend, current
     try {
       return await handle({ request, response, apiPath, url });
     } catch (error) {
-      const wrapped = failure(error, apiPath);
+      const wrapped = apiPath.startsWith("/api/social/debates/") && !(error instanceof DebateError) && !(error instanceof SocialError)
+        ? new SocialError("Online debate storage is unavailable. The site owner may need to apply supabase/migrations/20261029000000_debate_rooms.sql. Try again later.", 503)
+        : failure(error, apiPath);
       if (wrapped.logged) {
         const key = `${wrapped.logged.code}:${wrapped.logged.message}`;
         if (!logged.has(key)) {
@@ -109,6 +112,24 @@ export function createSocialRouter({ service, accounts, accountsBackend, current
     const who = await student(request, response);
     if (!who) return true;
     const { user } = who;
+
+    if (apiPath.startsWith("/api/social/debates/")) {
+      if (!debateService) throw new SocialError("Online debate is unavailable on this server.", 503);
+      const endpoint = apiPath.slice("/api/social/debates/".length);
+      if (endpoint === "room" && method === "GET") {
+        if (!limited(request, response, `debate-read:${user.id}`, 90)) return true;
+        json(request, response, { room: await debateService.get(user, url.searchParams.get("id")) }); return true;
+      }
+      if (method !== "POST" || !["create", "join", "act", "ai", "coach"].includes(endpoint)) throw new SocialError("Unknown debate endpoint or method.", 404);
+      if (!limited(request, response, `debate-${endpoint}:${user.id}`, endpoint === "create" ? 3 : ["ai", "coach"].includes(endpoint) ? 8 : endpoint === "join" ? 10 : 50, endpoint === "create" ? 3600000 : 60000)) return true;
+      if (["ai", "coach"].includes(endpoint) && !limited(request, response, "debate-ai-network", 12)) return true;
+      const data = await body(request);
+      const room = endpoint === "create" ? await debateService.create(user, data)
+        : endpoint === "join" ? await debateService.join(user, data.invite)
+        : ["ai", "coach"].includes(endpoint) ? await debateService.ai(user, data.id, data.revision, endpoint === "coach")
+        : await debateService.act(user, data.id, data);
+      json(request, response, { room }); return true;
+    }
 
     if (apiPath === "/api/social/state" && method === "GET") {
       if (!limited(request, response, `social-state:${user.id}`, 240, 60_000)) return true;

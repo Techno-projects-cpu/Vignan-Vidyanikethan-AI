@@ -38,7 +38,7 @@ async function startServer(t, overrides = {}) {
     env: {
       ...process.env,
       STUDY_AI_HOST: "127.0.0.1", STUDY_AI_PORT: "0", STUDY_AI_ACCOUNTS_BACKEND: "local",
-      STUDY_AI_ACCOUNTS_FILE: accountFile, STUDY_AI_COOKIE_SECURE: "true", STUDY_AI_TRUST_PROXY: "false",
+      STUDY_AI_ACCOUNTS_FILE: accountFile, STUDY_AI_DEBATE_FILE: path.join(directory, "debates.json"), STUDY_AI_COOKIE_SECURE: "true", STUDY_AI_TRUST_PROXY: "false",
       STUDY_AI_ALLOWED_ORIGINS: "", STUDY_AI_SEARCH_URL: "", STUDY_AI_WIKIPEDIA_SEARCH: "false", STUDY_AI_GEMINI_KEY: "", STUDY_AI_GROQ_KEY: "",
       ...overrides,
     },
@@ -89,7 +89,7 @@ test("account HTTP endpoints enforce CSRF, safe cookies, rate limits and preserv
   const robots = await get("/robots.txt");
   assert.equal(robots.status, 200);
   assert.match(await robots.text(), /Sitemap: https:/);
-  const icon = await get("/icons/icon.svg?v=91");
+  const icon = await get("/icons/icon.svg?v=92");
   assert.equal(icon.status, 200);
   assert.match(icon.headers.get("content-type"), /^image\/svg\+xml/);
 
@@ -448,4 +448,25 @@ test("static serving rejects encoded traversal and nested dotfiles before readin
   }
   assert.equal((await fetch(base + '/.well-known/security.txt')).status, 200);
   assert.equal((await fetch(base + '/privacy.html')).status, 200);
+});
+
+test('online debate HTTP reuses accounts, CSRF and private responses across two signed-in clients', async t => {
+ const base=await startServer(t);
+ async function client(username){
+  const initial=await fetch(base+'/api/auth/me');let csrf=cookieValue(initial,'vignan_csrf');
+  const registered=await fetch(base+'/api/auth/register',{method:'POST',headers:{Origin:base,'Content-Type':'application/json',Cookie:cookieHeader(csrf),'X-CSRF-Token':csrf},body:JSON.stringify({username,password:'a unique debate passphrase',age:14})});assert.equal(registered.status,201);
+  csrf=cookieValue(registered,'vignan_csrf');const session=cookieValue(registered,'vignan_session');
+  return {csrf,session,call:(endpoint,body)=>fetch(base+'/api/social/debates/'+endpoint,{method:body?'POST':'GET',headers:{Origin:base,'Content-Type':'application/json',Cookie:cookieHeader(csrf,session),'X-CSRF-Token':csrf},...(body?{body:JSON.stringify(body)}:{})})};
+ }
+ const a=await client('debate-one'),b=await client('debate-two');
+ const bad=await fetch(base+'/api/social/debates/create',{method:'POST',headers:{Origin:base,'Content-Type':'application/json',Cookie:cookieHeader(a.csrf,a.session)},body:JSON.stringify({topic:'Forged action'})});assert.equal(bad.status,403);
+ assert.equal((await fetch(base+'/api/social/debates/room?id=missing')).status,401);
+ const created=await a.call('create',{topic:'Science needs good evidence',ais:0,rounds:2});assert.equal(created.status,200);assert.match(created.headers.get('cache-control'),/no-store/);let room=(await created.json()).room;
+ assert.equal((await b.call('room?id='+room.id)).status,403);
+ assert.equal((await b.call('join',{invite:room.invite})).status,200);
+ room=(await (await a.call('room?id='+room.id)).json()).room;
+ room=(await (await a.call('act',{id:room.id,revision:room.revision,action:'start'})).json()).room;
+ assert.equal((await b.call('act',{id:room.id,revision:room.revision,action:'speech',text:'Spoofed turn'})).status,403);
+ room=(await (await a.call('act',{id:room.id,revision:room.revision,action:'speech',text:'Evidence is needed.'})).json()).room;
+ const remote=(await (await b.call('room?id='+room.id)).json()).room;assert.equal(remote.turn,1);assert.equal(remote.transcript[0].text,'Evidence is needed.');assert.equal(remote.inviteSecret,undefined);assert.equal(remote.invite,undefined);
 });

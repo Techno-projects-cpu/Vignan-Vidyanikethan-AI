@@ -368,3 +368,17 @@ unavailable, instead of clicking the already hidden login gate in that case.
 - Presentation runbook and privacy/feature limits: `docs/LEARNING-STUDIO.md`.
 - 787 tests plus offline/secret checks; rendered studio four-width gate uses a
   mocked provider, including a failed request with no skipped/erased turns.
+
+### 2.49.0 — private online text debate
+
+- Learning studio → Online debate: signed-in invitation rooms, 6 human / 4 AI
+  caps, host teams/start/skip/close/rotate, server turns/deadlines/revisions,
+  shared transcript, explicit hosted AI turns/coaching, export and reload restore.
+- Shared-device debate remains unchanged. Online polling is ~4 seconds, not video
+  or websocket streaming. Hidden/offline tabs pause reads and typed drafts survive
+  polling; manual reload loses only unsent text.
+- New private RLS migration required for hosted Supabase: `npm run sql:debate`.
+  Not applied to production in this session. See `docs/ONLINE-DEBATE.md`.
+- 796 tests / offline / secret checks. Real HTTP and two-isolated-browser-session
+  local multiplayer gates pass. AI races/failures are controlled tests; no live
+  hosted inference, production Supabase or production multiplayer pass claimed.

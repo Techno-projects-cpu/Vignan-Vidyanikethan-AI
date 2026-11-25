@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { createDebateService } from "./server/debate-rooms.mjs";
+import { createLocalDebateStore, createSupabaseDebateStore } from "./server/debate-store.mjs";
 /**
  * Zero-dependency server for Vignan Vidyanikethan AI.
  *
@@ -191,9 +193,21 @@ const sessionStore = useSupabase
 
 // Friends, notifications, chat and games reuse the same session cookie, CSRF
 // token and rate limiter as accounts. Guest mode simply gets a 401.
+const debateService = accounts ? createDebateService({
+  store: useSupabase
+    ? createSupabaseDebateStore({ url: SUPABASE_URL, serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY })
+    : createLocalDebateStore(env("DEBATE_FILE") || path.join(ROOT, "server", "data", "debate-rooms.json")),
+  generateAI: async messages => {
+    if (!AI_UPSTREAMS.length) throw new Error("No hosted AI configured");
+    const result = await callFreeRouter({ upstreams: AI_UPSTREAMS, messages, temperature: 0.6, maxTokens: 600, cooldownMs: KEY_COOLDOWN_MS });
+    return result.content;
+  },
+}) : null;
+
 const socialRouter = socialService
   ? createSocialRouter({
       service: socialService,
+      debateService,
       accounts,
       accountsBackend,
       currentSession: (request) => currentSession(request),
@@ -1074,7 +1088,7 @@ function buildInfo() {
 function health() {
   return {
     ok: true,
-    version: "2.48.0",
+    version: "2.49.0",
     // `version` is what the code says; `build` is what the host says it built.
     // When those two disagree with the repository, the deploy target is wrong,
     // not the code.
@@ -1306,7 +1320,7 @@ function setupPage() {
     </ol>
 
     <div class="facts">
-      <div><span>release</span><strong>2.48.0</strong></div>
+      <div><span>release</span><strong>2.49.0</strong></div>
       <div><span>accounts backend</span><strong>${escapeHtml(accountsBackend)}</strong></div>
       <div><span>friends &amp; chat</span><strong>${escapeHtml(socialStore ? socialStore.backend : "unavailable")}</strong></div>
       <div><span>offline mode</span><strong>ready</strong></div>
@@ -1420,7 +1434,7 @@ async function handleAdminPage(request, response) {
     rows, total, search, page, pageSize,
     csrf: adminFormToken(session),
     backend: accountsBackend,
-    release: "2.48.0",
+    release: "2.49.0",
     message: failure,
   });
   sendHtml(request, response, 200, html.html);
