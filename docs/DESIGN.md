@@ -994,3 +994,30 @@ The real two-account local multiplayer and all17-theme gates pass, alongside
 800 tests/offline/secret checks. Production performance, provider inference and
 quantified FPS/battery gains are not established by these tests. No database
 migration or new service is required for this release.
+
+## 2.50.0 — solo-first Play (cache v94)
+
+Play now opens with a guest-accessible local section, separate from account-only
+multiplayer. Chess uses the existing legal engine with a bounded, casual computer
+in a module worker (not Stockfish, a rated opponent, or cloud AI). It supports
+White/Black, easy/normal, legal-square highlights, promotion choice, undo, hints,
+keyboard movement and optional same-device two-player play. Background/view changes
+cancel pending searches; returning resumes safely.
+
+Quiz has 24 original questions, maths generates difficulty-based arithmetic, and
+word scramble has 16 original clues. Daily sets are seeded by device-local date;
+small pools repeat rather than suggesting unlimited content. Hints, explanations,
+skip, mistake practice and downloadable answer review support learning. Browser
+records distinguish game/subject/difficulty/length and do not grant online XP.
+Sessions are tab-only; records are localStorage-only and can be cleared. Clearing
+browser data removes them. Offline play requires loading/caching the site online
+once. No database migration or provider key is required.
+
+Validation: 813 Node tests, secret scan and offline check pass. Real Chromium guest
+gate passes all four games, worker reply/undo/hint, deterministic daily replay,
+maths scoring, word hint, review/local records, zero game API requests, widths
+390/768/1366, and offline reload plus computer opening. Tablet screenshot inspected
+at `.arena/solo-chess-tablet.png` (ignored). Existing study/start rendered gate also
+passes four widths, all 12 destinations and language grids. No physical-device or
+production Render claim is made; the AI routing regression uses its documented
+mock provider. Cache/import versions and public release are advanced together.

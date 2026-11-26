@@ -401,3 +401,13 @@ unavailable, instead of clicking the already hidden login gate in that case.
   chose random ports and discarded logs. It now uses OS-assigned ports, waits
   for the actual listening message and reports startup errors. Final full run:
   800/800, offline simulation passed. Five-size pinned-chat gate also passed.
+
+### Solo Play release 2.50.0 / v94
+
+- Automated: 813 tests + offline/secret checks pass. `tools/check-solo-games.mjs`
+  verifies guest chess/quiz/maths/words, real worker, hints/undo, daily replay,
+  review, saved records, three viewport widths and offline reload/computer opening.
+- Chromium study/start regression passes navigation, four widths and language grids.
+- Still manually check: physical tablet touch/keyboard chess and screen reader;
+  first online cache then airplane mode; deployed release/version and online
+  multiplayer with two accounts. Solo bests are browser-only; no synced progress.

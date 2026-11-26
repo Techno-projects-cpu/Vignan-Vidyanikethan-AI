@@ -1,6 +1,6 @@
-import { initOnlineDebate } from "./online-debate.js?v=93";
-import { callModel } from './llm.js?v=93';
-import { EVENTS, SCIENCE_QUESTIONS, wordCount, makeRoster, debateSpeaker, debatePhase, debateDone, debateMessages, essayMessages, offlineOutline, transcriptText } from './studio-core.js?v=93';
+import { initOnlineDebate } from "./online-debate.js?v=94";
+import { callModel } from './llm.js?v=94';
+import { EVENTS, SCIENCE_QUESTIONS, wordCount, makeRoster, debateSpeaker, debatePhase, debateDone, debateMessages, essayMessages, offlineOutline, transcriptText } from './studio-core.js?v=94';
 
 function el(tag, text, className) { const n = document.createElement(tag); if (text) n.textContent = text; if (className) n.className = className; return n; }
 function button(text, handler) { const n = el('button', text, 'button ghost'); n.type = 'button'; n.addEventListener('click', handler); return n; }
