@@ -121,3 +121,51 @@ test('social polling removes visibility listeners on stop instead of accumulatin
     assert.equal(intervals.size, 0);
   }
 });
+
+test('unchanged room polls preserve DOM and stale revisions cannot overwrite newer state', () => {
+ const source=readFileSync(new URL('../js/online-debate.js',import.meta.url),'utf8');
+ const code=source.slice(source.indexOf('function accept(next)'),source.indexOf('  async function request('));
+ let renders=0;
+ const context=vm.createContext({room:{id:'room',revision:4,pending:false},lastRead:0,Date,remember(){},render(){renders++;}});
+ vm.runInContext(code,context);
+ vm.runInContext("accept({id:'room',revision:4,pending:false})",context);assert.equal(renders,0);assert.ok(context.lastRead>0);
+ vm.runInContext("accept({id:'room',revision:3,pending:false})",context);assert.equal(context.room.revision,4);assert.equal(renders,0);
+ vm.runInContext("accept({id:'room',revision:4,pending:true})",context);assert.equal(renders,1);
+ vm.runInContext("accept({id:'room',revision:5,pending:false})",context);assert.equal(renders,2);
+});
+
+test('a previous-account room read cannot unlock a new-account read', async () => {
+ const source=readFileSync(new URL('../js/online-debate.js',import.meta.url),'utf8');
+ const code=source.slice(source.indexOf('  async function refresh('),source.indexOf('  function render('));
+ let resolve;
+ const context=vm.createContext({room:{id:'old'},generation:1,reading:false,signedIn:()=>true,debateApi:{get:()=>new Promise(r=>resolve=r)},accept(){assert.fail('stale read accepted');},status:{},remember(){},render(){}});
+ vm.runInContext(code,context);const pending=vm.runInContext('refresh()',context);
+ context.generation=2;context.reading=true;resolve({room:{id:'old',revision:1}});await pending;
+ assert.equal(context.reading,true);
+});
+
+test('decorative background visibility watcher pauses/resumes and removes its listener', async () => {
+ const {watchBackgroundVisibility}=await import('../js/motion.js');
+ const listeners=new Set(),doc={hidden:false,documentElement:{dataset:{}},addEventListener:(_n,fn)=>listeners.add(fn),removeEventListener:(_n,fn)=>listeners.delete(fn)};
+ const stop=watchBackgroundVisibility(doc);assert.equal(doc.documentElement.dataset.backgroundPaused,'0');
+ doc.hidden=true;[...listeners][0]();assert.equal(doc.documentElement.dataset.backgroundPaused,'1');
+ doc.hidden=false;[...listeners][0]();assert.equal(doc.documentElement.dataset.backgroundPaused,'0');
+ stop();assert.equal(listeners.size,0);assert.equal(doc.documentElement.dataset.backgroundPaused,undefined);
+});
+
+test('chat and game scheduled polls make no requests offscreen, hidden or offline', async () => {
+ for(const kind of ['chat','play']){
+  const source=readFileSync(new URL(`../js/${kind}-ui.js`,import.meta.url),'utf8');
+  const end=kind==='chat'?source.indexOf('export async function openThread'):source.indexOf('function chessState');
+  const code=source.slice(source.indexOf('function schedulePoll()'),end);
+  let tick,calls=0;
+  const document={visibilityState:'visible',body:{dataset:{view:'start'}},activeElement:null};
+  const navigator={onLine:true};
+  const context=vm.createContext({document,navigator,POLL_MS:4000,chat:{threadId:'thread'},play:{gameId:'game',lobby:false},$:()=>({}),setInterval:fn=>{tick=fn;return 1;},clearInterval(){},loadMessages:async()=>{calls++;},fetchGame:async()=>{calls++;return {status:'active'};},renderArena(){},refreshSocial(){}});
+  vm.runInContext(code+'\nschedulePoll();',context);
+  await tick();assert.equal(calls,0,kind+' offscreen');
+  document.body.dataset.view=kind;navigator.onLine=false;await tick();assert.equal(calls,0,kind+' offline');
+  navigator.onLine=true;document.visibilityState='hidden';await tick();assert.equal(calls,0,kind+' hidden');
+  document.visibilityState='visible';await tick();assert.equal(calls,1,kind+' visible');
+ }
+});

@@ -970,3 +970,27 @@ outside the rebuilt room view, so refresh does not destroy typing. Session-local
 room IDs restore server transcripts on reload; unsent drafts remain tab-only.
 The new migration is delivered, not applied to a live database. See
 `docs/ONLINE-DEBATE.md` for the deployment steps, limits, privacy and retention.
+
+## 2.49.1 — avoid unnecessary background work
+
+Every four-second online-room response previously rebuilt the transcript and
+host controls, even with the same revision. That could interrupt selection/focus
+and generate needless layout work. Accept now compares room ID, revision and
+pending-AI state, updating freshness without replacing unchanged DOM. A stale
+account's GET completion also no longer clears a newer account's read lock.
+
+Chat/Play polls are gated by the active view plus visibility/network status;
+social badge polling retains cross-screen updates but skips offline/hidden
+starts and ticks. Hidden-page decorative CSS is paused using a visibility flag,
+without changing the selected image or disabling functional spinners. The
+seminar clock keeps wall-clock elapsed time but avoids offscreen DOM writes.
+Intervals still exist; this release does not claim to eliminate all timer wakes.
+
+Unit/VM tests cover unchanged/stale room acceptance, stale read cleanup,
+visibility-listener lifecycle and hidden/offline/offscreen network gating.
+Rendered tests verify stable invitation focus/transcript identity, no off-tab
+room reads, correct stopwatch resume and actual computed animation pause/resume.
+The real two-account local multiplayer and all17-theme gates pass, alongside
+800 tests/offline/secret checks. Production performance, provider inference and
+quantified FPS/battery gains are not established by these tests. No database
+migration or new service is required for this release.

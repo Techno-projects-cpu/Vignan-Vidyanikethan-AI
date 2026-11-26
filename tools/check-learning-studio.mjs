@@ -73,6 +73,19 @@ try {
  }
  assert.ok(types.includes('Multiple choice') && types.includes('Fill in the blank') && types.includes('Short answer'),JSON.stringify(types));
  console.log('Actual offline Mixed quiz from installed starter pages: MCQ + fill + explanation, four statement choices: PASS');
+ await open('studio');await page.click('[data-studio-tab="events"]');
+ await page.evaluate(()=>[...document.querySelectorAll('#studio-events button')].find(b=>b.textContent==='Start / pause').click());
+ await new Promise(r=>setTimeout(r,1200));const clock=await page.$eval('#seminar-clock',n=>n.textContent);
+ await page.click('[data-studio-tab="essay"]');await new Promise(r=>setTimeout(r,2200));
+ assert.equal(await page.$eval('#seminar-clock',n=>n.textContent),clock,'offscreen stopwatch does not repaint');
+ await page.click('[data-studio-tab="events"]');await new Promise(r=>setTimeout(r,1100));
+ assert.notEqual(await page.$eval('#seminar-clock',n=>n.textContent),clock,'resumed stopwatch includes elapsed time');
+ await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
+ assert.equal(await page.evaluate(()=>document.documentElement.dataset.backgroundPaused),'1');
+ assert.equal(await page.evaluate(()=>getComputedStyle(document.body,'::after').animationPlayState),'paused');
+ await page.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});
+ assert.equal(await page.evaluate(()=>document.documentElement.dataset.backgroundPaused),'0');
+ console.log('Offscreen stopwatch avoids DOM updates while retaining elapsed time; hidden-tab decorative CSS pauses/resumes: PASS');
  assert.deepEqual(errors,[]);
  console.log('Essay validation, offline scaffold, mocked AI feedback, two humans/two AI teams across eight turns, literal output safety, science quiz, four-width layout: PASS');
  console.log('AI responses mocked; no live inference or remote multiplayer claimed.');

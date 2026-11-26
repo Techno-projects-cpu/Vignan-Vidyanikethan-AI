@@ -89,7 +89,7 @@ test("account HTTP endpoints enforce CSRF, safe cookies, rate limits and preserv
   const robots = await get("/robots.txt");
   assert.equal(robots.status, 200);
   assert.match(await robots.text(), /Sitemap: https:/);
-  const icon = await get("/icons/icon.svg?v=92");
+  const icon = await get("/icons/icon.svg?v=93");
   assert.equal(icon.status, 200);
   assert.match(icon.headers.get("content-type"), /^image\/svg\+xml/);
 
@@ -289,25 +289,32 @@ test("the health payload can tell an operator which variable is wrong", async ()
 });
 
 async function withServer(env, run) {
-  const port = 5000 + Math.floor(Math.random() * 400);
+  // Let the OS reserve an available port; random ports can collide across tests.
   const child = spawn(process.execPath, ["serve.mjs"], {
     cwd: root,
-    env: { ...process.env, STUDY_AI_PORT: String(port), ...env },
-    stdio: "ignore",
+    env: { ...process.env, ...env, STUDY_AI_PORT: "0" },
+    stdio: ["ignore", "pipe", "pipe"],
   });
+  let output = "";
+  child.stderr.on("data", chunk => { output += chunk; });
   try {
-    let ready = false;
-    for (let attempt = 0; attempt < 60 && !ready; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 120));
-      try {
-        const probe = await fetch(`http://127.0.0.1:${port}/api/health`);
-        ready = probe.ok;
-      } catch { /* still starting */ }
-    }
-    assert.ok(ready, "server did not start");
-    return await run(`http://127.0.0.1:${port}`);
+    const origin = await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error(`Server did not start: ${output}`)), 10000);
+      child.stdout.on("data", chunk => {
+        output += chunk;
+        const match = output.match(/running at http:\/\/[^:]+:(\d+)\//);
+        if (match) { clearTimeout(timer); resolve(`http://127.0.0.1:${match[1]}`); }
+      });
+      child.once("exit", code => { clearTimeout(timer); reject(new Error(`Server exited ${code}: ${output}`)); });
+      child.once("error", error => { clearTimeout(timer); reject(error); });
+    });
+    return await run(origin);
   } finally {
-    child.kill("SIGKILL");
+    if (child.exitCode === null && child.signalCode === null) {
+      const exited = once(child, "exit");
+      child.kill("SIGKILL");
+      await exited;
+    }
   }
 }
 

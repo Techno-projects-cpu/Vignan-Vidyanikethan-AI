@@ -6,10 +6,10 @@
  * the sender is a friend or the room is the shared Study Hall.
  */
 
-import { decorateAvatar } from "./avatars.js?v=92";
-import * as ui from "./ui.js?v=92";
-import { onSocialChange, setActiveThread, social, socialState, syncSocial } from "./social.js?v=92";
-import { relativeTime } from "./friends-ui.js?v=92";
+import { decorateAvatar } from "./avatars.js?v=93";
+import * as ui from "./ui.js?v=93";
+import { onSocialChange, setActiveThread, social, socialState, syncSocial } from "./social.js?v=93";
+import { relativeTime } from "./friends-ui.js?v=93";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const POLL_MS = 4000;
@@ -171,7 +171,7 @@ async function loadMessages({ reset = false } = {}) {
 function schedulePoll() {
   if (chat.timer) clearInterval(chat.timer);
   chat.timer = setInterval(() => {
-    if (document.visibilityState === "hidden" || !chat.threadId) return;
+    if (document.visibilityState === "hidden" || navigator.onLine === false || document.body.dataset.view !== "chat" || !chat.threadId) return;
     if (document.activeElement === $("#chat-input")) return;
     loadMessages().catch(() => {});
   }, POLL_MS);
@@ -291,7 +291,7 @@ export function initChatUI() {
   });
   onSocialChange(() => renderChat());
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && chat.threadId) loadMessages().catch(() => {});
+    if (document.visibilityState === "visible" && navigator.onLine !== false && document.body.dataset.view === "chat" && chat.threadId) loadMessages().catch(() => {});
   });
   renderChat();
 }

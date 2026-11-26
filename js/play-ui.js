@@ -6,10 +6,10 @@
  * the client for anything the server also checks.
  */
 
-import * as ui from "./ui.js?v=92";
-import { legalMoves } from "./chess.js?v=92";
-import { onSocialChange, setActiveGame, social, socialState, syncSocial } from "./social.js?v=92";
-import { relativeTime } from "./friends-ui.js?v=92";
+import * as ui from "./ui.js?v=93";
+import { legalMoves } from "./chess.js?v=93";
+import { onSocialChange, setActiveGame, social, socialState, syncSocial } from "./social.js?v=93";
+import { relativeTime } from "./friends-ui.js?v=93";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 
@@ -318,7 +318,7 @@ async function fetchGame() {
 function schedulePoll() {
   if (play.timer) clearInterval(play.timer);
   play.timer = setInterval(async () => {
-    if (document.visibilityState === "hidden" || !play.gameId || play.lobby) return;
+    if (document.visibilityState === "hidden" || navigator.onLine === false || document.body.dataset.view !== "play" || !play.gameId || play.lobby) return;
     const game = await fetchGame();
     if (!game) {
       renderArena();
@@ -718,7 +718,7 @@ export function initPlayUI() {
   });
   // Returning to the tab should show the opponent's latest move immediately.
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState !== "visible" || play.lobby || !play.gameId) return;
+    if (document.visibilityState !== "visible" || navigator.onLine === false || document.body.dataset.view !== "play" || play.lobby || !play.gameId) return;
     fetchGame().then((game) => {
       if (game) renderArena();
     });

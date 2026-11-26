@@ -1,5 +1,5 @@
-import { debateApi } from './social.js?v=92';
-import { transcriptText } from './studio-core.js?v=92';
+import { debateApi } from './social.js?v=93';
+import { transcriptText } from './studio-core.js?v=93';
 
 const node = (tag, text = '') => { const n = document.createElement(tag); n.textContent = text; return n; };
 const button = (text, handler) => { const n = node('button', text); n.type = 'button'; n.className = 'button ghost'; n.addEventListener('click', handler); return n; };
@@ -26,7 +26,12 @@ export function initOnlineDebate(root, { getUser, getSettings }) {
   const signedIn=()=>Boolean(getUser()?.id);
   const storageKey=()=>`vignan.debate.room.${getUser()?.id || 'guest'}`;
   function remember(id){try{if(id)sessionStorage.setItem(storageKey(),id);else sessionStorage.removeItem(storageKey());}catch{/* optional */}}
-  function accept(next){if(room&&next.id===room.id&&next.revision<room.revision)return;room=next;lastRead=Date.now();remember(room.id);render();}
+  function accept(next){
+    if(room&&next.id===room.id&&next.revision<room.revision)return;
+    // An unchanged poll must not replace focused controls or transcript nodes.
+    const changed=!room||next.id!==room.id||next.revision!==room.revision||next.pending!==room.pending;
+    room=next;lastRead=Date.now();remember(room.id);if(changed)render();
+  }
   async function request(action,data){
     if(busy)return;
     if(!signedIn()){status.textContent='Log in with a student account first. Guest mode cannot join private rooms.';return;}
@@ -40,7 +45,7 @@ export function initOnlineDebate(root, { getUser, getSettings }) {
     if(reading||!room||!signedIn())return;reading=true;const epoch=generation,id=room.id;
     try{const result=await debateApi.get(id);if(epoch!==generation||room?.id!==id)return;accept(result.room);if(report)status.textContent='Connected — room synchronised.';}
     catch(error){if(epoch!==generation)return;if(error.status===401||error.status===403||error.status===404){room=null;remember(null);render();}status.textContent=`${error.message} Your unsent speech has not been sent or erased.`;}
-    finally{reading=false;}
+    finally{if(epoch===generation)reading=false;}
   }
   function render(){
     details.replaceChildren();controls.replaceChildren();compose.hidden=true;setup.hidden=Boolean(room);
