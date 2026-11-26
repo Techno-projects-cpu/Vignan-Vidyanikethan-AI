@@ -1,6 +1,6 @@
-import { initOnlineDebate } from "./online-debate.js?v=92";
-import { callModel } from './llm.js?v=92';
-import { EVENTS, SCIENCE_QUESTIONS, wordCount, makeRoster, debateSpeaker, debatePhase, debateDone, debateMessages, essayMessages, offlineOutline, transcriptText } from './studio-core.js?v=92';
+import { initOnlineDebate } from "./online-debate.js?v=93";
+import { callModel } from './llm.js?v=93';
+import { EVENTS, SCIENCE_QUESTIONS, wordCount, makeRoster, debateSpeaker, debatePhase, debateDone, debateMessages, essayMessages, offlineOutline, transcriptText } from './studio-core.js?v=93';
 
 function el(tag, text, className) { const n = document.createElement(tag); if (text) n.textContent = text; if (className) n.className = className; return n; }
 function button(text, handler) { const n = el('button', text, 'button ghost'); n.type = 'button'; n.addEventListener('click', handler); return n; }
@@ -99,6 +99,6 @@ export function initLearningStudio({ getSettings, getUser }) {
   SCIENCE_QUESTIONS.forEach((q, index) => { const group = el('fieldset'); group.append(el('legend', `${index + 1}. ${q.prompt}`)); const explanation = el('p'); explanation.setAttribute('role', 'status'); q.options.forEach((text, choice) => group.append(button(text, () => { explanation.textContent = `${choice === q.answer ? 'Correct.' : 'Not quite.'} ${q.why}`; }))); group.append(explanation); events.append(group); });
   const rehearsal = el('div', '', 'card'); rehearsal.append(el('h4', 'Seminar rehearsal stopwatch'), el('p', 'Local elapsed-time aid, not an official time limit. Choose your own target and practise aloud.'));
   const clock = el('output', '00:00'); clock.id = 'seminar-clock'; let began = 0, elapsed = 0, timer = null;
-  const update = () => { const seconds = Math.floor((elapsed + (timer ? Date.now() - began : 0)) / 1000); clock.textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`; };
+  const update = () => { if (document.hidden || document.body.dataset.view !== "studio" || events.hidden) return; const seconds = Math.floor((elapsed + (timer ? Date.now() - began : 0)) / 1000); clock.textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`; };
   rehearsal.append(clock, button('Start / pause', () => { if (timer) { elapsed += Date.now() - began; clearInterval(timer); timer = null; } else { began = Date.now(); timer = setInterval(update, 1000); } update(); }), button('Reset', () => { if (timer) clearInterval(timer); timer = null; elapsed = 0; update(); })); events.append(rehearsal);
 }

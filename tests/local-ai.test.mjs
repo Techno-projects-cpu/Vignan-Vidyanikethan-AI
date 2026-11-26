@@ -14,10 +14,10 @@ import {
   setLocalAICapabilities,
   setLocalAIWorkerFactory,
   testLocalAI,
-} from "../js/local-ai.js?v=92";
+} from "../js/local-ai.js?v=93";
 import { DEFAULT_SETTINGS, normalizeSettings } from "../js/settings.js";
 import { callProvider, callRoutedModel } from "../js/model-router.js";
-import { resetRecovery, recoverySnapshot } from "../js/recovery.js?v=92";
+import { resetRecovery, recoverySnapshot } from "../js/recovery.js?v=93";
 import {
   answerWithModel,
   generateFlashcardsWithModel,

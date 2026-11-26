@@ -382,3 +382,22 @@ unavailable, instead of clicking the already hidden login gate in that case.
 - 796 tests / offline / secret checks. Real HTTP and two-isolated-browser-session
   local multiplayer gates pass. AI races/failures are controlled tests; no live
   hosted inference, production Supabase or production multiplayer pass claimed.
+
+### 2.49.1 — less background work, stable room controls
+
+- Unchanged online-room polls update freshness without rebuilding controls or
+  transcript DOM. Invitation selection/focus is preserved. Revision/pending
+  changes still render. Older-account read completion cannot unlock a newer read.
+- Chat and Play scheduled polling pauses on other screens, hidden tabs and
+  offline devices. Social badge polling also skips hidden/offline starts/ticks.
+- Decorative background/tour movement pauses on hidden tabs without hiding
+  artwork or stopping functional progress indicators. Motion observer cleanup
+  also runs when reinitializing with reduced motion.
+- Seminar stopwatch skips offscreen/hidden DOM updates but retains elapsed time.
+- 800 tests, offline and secret checks pass. Real two-account local room gate,
+  four-width studio gate, hidden-background/stopwatch gate and all17 appearance
+  gate pass. No FPS, battery-life or live provider benchmark is claimed.
+- An intermittent server-test startup failure exposed a weak test harness: it
+  chose random ports and discarded logs. It now uses OS-assigned ports, waits
+  for the actual listening message and reports startup errors. Final full run:
+  800/800, offline simulation passed. Five-size pinned-chat gate also passed.

@@ -568,3 +568,12 @@ body.premium-ui[data-view="studio"] .page-head { display: none !important; }
 .studio-heading { padding: clamp(18px, 3vw, 28px); }
 .studio-heading h2 { margin-top: 0; }
 .studio-actions [aria-pressed="true"] { outline: 2px solid currentColor; outline-offset: -2px; font-weight: 700; }
+
+/* Keep the selected artwork; pause only decorative movement in hidden tabs. */
+html[data-background-paused="1"] body.premium-ui::before,
+html[data-background-paused="1"] body.premium-ui::after,
+html[data-background-paused="1"] .app-shell::before,
+html[data-background-paused="1"] .wall-art img,
+html[data-background-paused="1"] .tour-target {
+  animation-play-state: paused !important;
+}

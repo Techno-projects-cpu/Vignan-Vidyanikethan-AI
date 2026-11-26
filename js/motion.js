@@ -19,11 +19,26 @@ function markAll(root) {
   root?.querySelectorAll?.("[data-reveal]").forEach((element) => element.classList.add(REVEALED));
 }
 
+/** Pause decorative CSS work without disabling functional progress indicators. */
+export function watchBackgroundVisibility(doc = globalThis.document) {
+  if (!doc?.documentElement) return () => {};
+  const update = () => { doc.documentElement.dataset.backgroundPaused = doc.hidden ? "1" : "0"; };
+  update();
+  doc.addEventListener?.("visibilitychange", update);
+  return () => { doc.removeEventListener?.("visibilitychange", update); delete doc.documentElement.dataset.backgroundPaused; };
+}
+let stopBackgroundVisibility = () => {};
+
 export function initMotion({ root = globalThis.document } = {}) {
+  stopBackgroundVisibility();
+  observer?.disconnect();
+  observer = null;
+  const stopBackground = watchBackgroundVisibility();
+  stopBackgroundVisibility = stopBackground;
   reducedMotion = prefersReducedMotion();
   if (!root || reducedMotion || typeof globalThis.IntersectionObserver === "undefined") {
     markAll(root);
-    return () => {};
+    return stopBackground;
   }
   observer?.disconnect();
   observer = new globalThis.IntersectionObserver(
@@ -43,7 +58,7 @@ export function initMotion({ root = globalThis.document } = {}) {
     observer.observe(element);
   });
   revealVisible(root);
-  return () => observer?.disconnect();
+  return () => { observer?.disconnect(); stopBackground(); };
 }
 
 /** Reveal anything already on screen (useful after switching hidden views). */
