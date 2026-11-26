@@ -1,5 +1,5 @@
-import { debateApi } from './social.js?v=93';
-import { transcriptText } from './studio-core.js?v=93';
+import { debateApi } from './social.js?v=94';
+import { transcriptText } from './studio-core.js?v=94';
 
 const node = (tag, text = '') => { const n = document.createElement(tag); n.textContent = text; return n; };
 const button = (text, handler) => { const n = node('button', text); n.type = 'button'; n.className = 'button ghost'; n.addEventListener('click', handler); return n; };

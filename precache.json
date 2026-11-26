@@ -1,6 +1,6 @@
 {
-  "version": 93,
-  "generatedAt": "2026-11-26T02:46:47.286Z",
+  "version": 94,
+  "generatedAt": "2026-11-26T14:36:16.150Z",
   "urls": [
     "./",
     "./index.html",
@@ -229,6 +229,10 @@
     "./js/settings.js",
     "./js/shell.js",
     "./js/social.js",
+    "./js/solo-chess-worker.js",
+    "./js/solo-chess.js",
+    "./js/solo-games.js",
+    "./js/solo-play-ui.js",
     "./js/starter-shelf.js",
     "./js/startup.js",
     "./js/student-keys.js",

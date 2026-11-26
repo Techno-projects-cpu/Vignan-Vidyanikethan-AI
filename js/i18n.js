@@ -10,8 +10,8 @@
  * point at the original passage.
  */
 
-import { CORE_STRINGS } from "./translations-core.js?v=93";
-import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=93";
+import { CORE_STRINGS } from "./translations-core.js?v=94";
+import { LANGUAGE_CATALOGUE, LANGUAGE_CODES, isRtlLanguage, languageMeta } from "./languages.js?v=94";
 
 const LANGUAGE_KEY = "vignan-study-ai.language";
 
@@ -92,7 +92,7 @@ const EN = {
   "view.chat.subtitle": "The Study Hall for everyone, and private chats with friends.",
   "view.play.kicker": "PLAY & LEARN",
   "view.play.title": "Play",
-  "view.play.subtitle": "Chess, quiz duels and maths races with classmates. Every answer is checked on the school server.",
+  "view.play.subtitle": "Play solo right away, or challenge classmates online. Solo games work on this device; multiplayer moves are checked by the server.",
   "view.settings.kicker": "CONTROL",
   "view.settings.title": "Settings",
   "view.settings.subtitle": "Choose a local model, free keys, fallback and privacy options.",
@@ -270,7 +270,7 @@ const TE = {
   "view.chat.title": "చాట్",
   "view.chat.subtitle": "అందరికీ స్టడీ హాల్, స్నేహితులతో ప్రైవేట్ చాట్.",
   "view.play.title": "ఆటలు",
-  "view.play.subtitle": "చెస్, క్విజ్ డ్యూయల్, గణిత పోటీలు — ప్రతి సమాధానం సర్వర్‌లో తనిఖీ అవుతుంది.",
+  "view.play.subtitle": "ఒంటరిగా ఆడండి లేదా ఆన్‌లైన్‌లో సహవిద్యార్థులతో పోటీపడండి. సోలో ఆటలు ఈ పరికరంలోనే పనిచేస్తాయి.",
   "app.tagline": "మీ పుస్తకాలు ఈ పరికరంలోనే ఉంటాయి.",
   "app.schoolSite": "హోమ్",
   "app.offlineReady": "ఆఫ్\u200cలైన్\u200cకు సిద్ధం",
@@ -450,7 +450,7 @@ const HI = {
   "view.chat.title": "चैट",
   "view.chat.subtitle": "सबके लिए स्टडी हॉल और दोस्तों से निजी बातचीत।",
   "view.play.title": "खेल",
-  "view.play.subtitle": "शतरंज, क्विज़ ड्यूअल और गणित की दौड़ — हर जवाब सर्वर पर जाँचा जाता है।",
+  "view.play.subtitle": "अकेले खेलें या सहपाठियों के साथ ऑनलाइन खेलें। सोलो गेम इसी डिवाइस पर चलते हैं।",
   "app.tagline": "आपकी किताबें इसी उपकरण में रहती हैं।", "app.schoolSite": "मुख्य पृष्ठ",
   "app.offlineReady": "ऑफ़लाइन तैयार", "app.online": "ऑनलाइन", "app.offline": "ऑफ़लाइन", "app.private": "निजता पहले", "app.offlineMode": "ऑफ़लाइन मोड", "offline.toggle": "ऑफ़लाइन मोड — सिर्फ़ इस डिवाइस पर जो है वही इस्तेमाल करें", "offline.help": "जवाब सिर्फ़ इस डिवाइस के पन्नों से आते हैं। कोई वेब खोज, दोस्त या लीडरबोर्ड नहीं। पढ़ाई का सब कुछ चलता रहता है।",
   "common.cancel": "रद्द करें", "common.close": "बंद करें", "common.save": "सहेजें", "common.delete": "हटाएँ",

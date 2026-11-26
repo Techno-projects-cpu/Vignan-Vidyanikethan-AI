@@ -1,3 +1,4 @@
+import { initSoloPlay } from "./solo-play-ui.js?v=94";
 /**
  * Play: chess and three academic duels, with friends or a random classmate.
  *
@@ -6,10 +7,10 @@
  * the client for anything the server also checks.
  */
 
-import * as ui from "./ui.js?v=93";
-import { legalMoves } from "./chess.js?v=93";
-import { onSocialChange, setActiveGame, social, socialState, syncSocial } from "./social.js?v=93";
-import { relativeTime } from "./friends-ui.js?v=93";
+import * as ui from "./ui.js?v=94";
+import { legalMoves } from "./chess.js?v=94";
+import { onSocialChange, setActiveGame, social, socialState, syncSocial } from "./social.js?v=94";
+import { relativeTime } from "./friends-ui.js?v=94";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 
@@ -190,13 +191,14 @@ export function renderPlay() {
   const app = socialState();
 
   if (!app.signedIn) {
+    play.catalogueAttempted = false;
     panel.hidden = false;
     arena.hidden = true;
     panel.textContent = "";
     const gate = ui.element("div", "social-gate");
     gate.appendChild(ui.element("span", "social-gate-mark", "♞"));
-    gate.appendChild(ui.element("h3", "", "Games need a student account"));
-    gate.appendChild(ui.element("p", "", "Log in to play chess and academic duels with classmates. Guest mode keeps the quizzes, flashcards and AI."));
+    gate.appendChild(ui.element("h3", "", "Multiplayer needs a student account"));
+    gate.appendChild(ui.element("p", "", "Play solo above without an account. Log in only if you want to challenge classmates online."));
     const actions = ui.element("div", "social-gate-actions");
     const go = ui.element("button", "button primary", "Log in or register");
     go.type = "button";
@@ -205,6 +207,11 @@ export function renderPlay() {
     gate.appendChild(actions);
     panel.appendChild(gate);
     return;
+  }
+
+  if (!play.catalogueAttempted && navigator.onLine !== false) {
+    play.catalogueAttempted = true;
+    social.catalogue().then(() => { play.lastRender = ""; renderPlay(); }).catch(() => {});
   }
 
   if (!play.lobby && play.game) {
@@ -713,6 +720,7 @@ function renderArena() {
 export function initPlayUI() {
   if (play.initialised) return;
   play.initialised = true;
+  initSoloPlay();
   onSocialChange(() => {
     if (play.lobby) renderPlay();
   });
@@ -723,12 +731,6 @@ export function initPlayUI() {
       if (game) renderArena();
     });
   });
-  social.catalogue()
-    .then(() => {
-      play.lastRender = "";
-      renderPlay();
-    })
-    .catch(() => {});
   window.addEventListener("vignan:open-game", (event) => {
     const id = event.detail?.gameId;
     if (id) openGame(id);
