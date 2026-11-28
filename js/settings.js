@@ -1,12 +1,12 @@
 /** Settings defaults, migration and health checks for the model router. */
 
-import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=94";
-import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=94";
-import { parseApiKeys } from "./key-pool.js?v=94";
-import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=94";
-import { aiProfile } from "./ai-nicknames.js?v=94";
-import { LANGUAGE_CODES } from "./languages.js?v=94";
-import { DEFAULT_STYLE, STYLE_ERA, THEMES, migrateStyleChoice } from "./themes.js?v=94";
+import { PROVIDERS, PROVIDER_IDS, defaultProviderConfig } from "./providers.js?v=95";
+import { DEFAULT_LOCAL_MODEL_ID, LOCAL_MODELS } from "./local-ai.js?v=95";
+import { parseApiKeys } from "./key-pool.js?v=95";
+import { cleanStudentKeyVault, defaultStudentKeyVault } from "./student-keys.js?v=95";
+import { aiProfile } from "./ai-nicknames.js?v=95";
+import { LANGUAGE_CODES } from "./languages.js?v=95";
+import { DEFAULT_STYLE, STYLE_ERA, THEMES, migrateStyleChoice } from "./themes.js?v=95";
 
 export const ROUTING_TASKS = ["answer", "quiz", "flashcards", "grade", "verify"];
 
@@ -44,6 +44,8 @@ export const DEFAULT_SETTINGS = {
   // The default style is a painted room, not the classic base look — see
   // DEFAULT_STYLE in js/themes.js for why the default is the thing you see.
   style: DEFAULT_STYLE,
+  artwork: 'theme',
+  solidSurfaces: false,
   profile: "Student",
   // Monogram avatar (`p0`-`p7`), kept locally so guests get one too.
   avatar: "",
@@ -127,6 +129,8 @@ export function normalizeSettings(value = {}) {
   const style = migrateStyleChoice({ style: merged.style, era: raw.styleEra });
   merged.style = style.style;
   merged.styleEra = style.era;
+  merged.artwork = ['theme', 'glass', 'none', ...THEMES.filter(t => t.painted).map(t => t.id)].includes(raw.artwork) ? raw.artwork : 'theme';
+  merged.solidSurfaces = raw.solidSurfaces === true;
   merged.freeRouterDismissed = Boolean(raw.freeRouterDismissed);
   merged.offlineMode = raw.offlineMode === true;
   merged.autoRecovery = raw.autoRecovery !== false;

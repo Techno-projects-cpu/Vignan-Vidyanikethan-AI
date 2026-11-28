@@ -17,8 +17,8 @@
  *      does, only how it looks, and it is saved per device.
  */
 
-import { PAINTED_THEMES, asTheme } from "./theme-paint.js?v=94";
-import { GLASS_THEME, asGlassTheme, isGlassStyle } from "./theme-glass.js?v=94";
+import { PAINTED_THEMES, asTheme } from "./theme-paint.js?v=95";
+import { GLASS_THEME, asGlassTheme, isGlassStyle } from "./theme-glass.js?v=95";
 
 /**
  * Glass Morphism, six classic styles, then the painted edition.

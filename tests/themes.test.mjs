@@ -322,3 +322,16 @@ test("the theme is mirrored, so a dark device does not flash white first", () =>
   assert.ok(html.includes('const theme = localStorage.getItem("vignan.theme")'));
   assert.ok(html.includes('if (theme === "dark" || theme === "light") document.documentElement.dataset.theme = theme'));
 });
+
+test('artwork and solid-surface preferences normalize independently of palette', () => {
+  const settings = normalizeSettings({style:'soft', styleEra:STYLE_ERA, artwork:'rain', solidSurfaces:true});
+  assert.equal(settings.style,'soft');
+  assert.equal(settings.artwork,'rain');
+  assert.equal(settings.solidSurfaces,true);
+  const defaults = normalizeSettings({artwork:'url(https://example.com/track)', solidSurfaces:'true'});
+  assert.equal(defaults.artwork,'theme');
+  assert.equal(defaults.solidSurfaces,false);
+  for (const artwork of ['theme','glass','none', ...THEMES.filter(t=>t.painted).map(t=>t.id)]) {
+    assert.equal(normalizeSettings({artwork}).artwork,artwork);
+  }
+});

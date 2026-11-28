@@ -1,6 +1,6 @@
-import { makeSoloQuestions, soloSeed, localDateKey, checkSoloAnswer, recordSoloResult } from './solo-games.js?v=94';
-import { initialPosition, legalMoves, playMove, gameStatus, squareName, toFen } from './chess.js?v=94';
-import { chooseComputerMove } from './solo-chess.js?v=94';
+import { makeSoloQuestions, soloSeed, localDateKey, checkSoloAnswer, recordSoloResult } from './solo-games.js?v=95';
+import { initialPosition, legalMoves, playMove, gameStatus, squareName, toFen } from './chess.js?v=95';
+import { chooseComputerMove } from './solo-chess.js?v=95';
 const el=(tag,text='')=>{const n=document.createElement(tag);n.textContent=text;return n;};
 const button=(text,fn)=>{const n=el('button',text);n.type='button';n.className='button ghost';n.addEventListener('click',fn);return n;};
 function select(id,values){const n=el('select');n.id=id;for(const [value,text]of values){const o=el('option',text);o.value=value;n.append(o);}return n;}
@@ -79,7 +79,7 @@ export function initSoloPlay(){
  function compute(hint=false){
   const s=session;if(!s||s.kind!=='chess')return;stopWorker();const id=job,fen=toFen(s.state);s.busy=true;renderChess();
   const apply=result=>{if(session!==s||id!==job||toFen(s.state)!==fen)return;worker?.terminate();worker=null;s.busy=false;if(result.error){status.textContent=result.error;renderChess();return;}if(result.move){if(hint){s.hint=`Try ${squareName(result.move.from)} to ${squareName(result.move.to)}. This is a local suggestion, not a guaranteed best move.`;renderChess();}else moveChess(result.move);}else renderChess();};
-  try{worker=new Worker(new URL('./solo-chess-worker.js?v=94',import.meta.url),{type:'module'});worker.onmessage=event=>apply(event.data);worker.onerror=()=>{status.textContent='Using a basic local move because this browser could not load the worker.';apply(chooseComputerMove(s.state,{level:'easy',maxNodes:100}));};worker.postMessage({id,state:s.state,level:s.level});}
+  try{worker=new Worker(new URL('./solo-chess-worker.js?v=95',import.meta.url),{type:'module'});worker.onmessage=event=>apply(event.data);worker.onerror=()=>{status.textContent='Using a basic local move because this browser could not load the worker.';apply(chooseComputerMove(s.state,{level:'easy',maxNodes:100}));};worker.postMessage({id,state:s.state,level:s.level});}
   catch{apply(chooseComputerMove(s.state,{level:'easy',maxNodes:100}));}
  }
  function resumeComputer(){const s=session;if(document.hidden||document.body.dataset.view!=='play'||!s||s.kind!=='chess'||s.busy||s.opponent!=='computer'||s.state.turn===s.human||outcome(s).over)return;compute();}

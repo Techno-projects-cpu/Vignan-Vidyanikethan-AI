@@ -1,4 +1,4 @@
-import { validateQuizQuestions } from "./quiz.js?v=94";
+import { validateQuizQuestions } from "./quiz.js?v=95";
 /**
  * Vignan Vidyanikethan AI's orchestration layer.
  *
@@ -17,16 +17,16 @@ import {
   extractJson,
   formatContext,
   formatOutsideContext,
-} from "./context.js?v=94";
-import { languageName } from "./i18n.js?v=94";
+} from "./context.js?v=95";
+import { languageName } from "./i18n.js?v=95";
 import {
   callProvider,
   callRoutedModel,
   gradeShortWithModel,
   testProvider,
   verifyAnswer,
-} from "./model-router.js?v=94";
-import { truncate, uid } from "./util.js?v=94";
+} from "./model-router.js?v=95";
+import { truncate, uid } from "./util.js?v=95";
 
 export {
   FLASHCARD_SCHEMA,

@@ -235,7 +235,7 @@ test('an HTML success page is not accepted as an AI answer', async () => {
 });
 
 test('recovery skips repeatedly failing cloud routes until manually reset', async () => {
-  const { resetRecovery, recoverySnapshot } = await import('../js/recovery.js?v=94');
+  const { resetRecovery, recoverySnapshot } = await import('../js/recovery.js?v=95');
   resetRecovery();
   const oldFetch = globalThis.fetch; let calls = 0;
   globalThis.fetch = async () => { calls++; return new Response('{}', { status: 503 }); };
@@ -250,8 +250,8 @@ test('recovery skips repeatedly failing cloud routes until manually reset', asyn
 });
 
 test('automatic recovery never starts a model download and can be switched off', async () => {
-  const { resetRecovery } = await import('../js/recovery.js?v=94');
-  const { resetLocalAIForTests, setLocalAICapabilities, setLocalAIWorkerFactory } = await import('../js/local-ai.js?v=94');
+  const { resetRecovery } = await import('../js/recovery.js?v=95');
+  const { resetLocalAIForTests, setLocalAICapabilities, setLocalAIWorkerFactory } = await import('../js/local-ai.js?v=95');
   resetRecovery(); resetLocalAIForTests();
   setLocalAICapabilities({ webgpu: true, worker: true });
   let workers = 0, calls = 0;
