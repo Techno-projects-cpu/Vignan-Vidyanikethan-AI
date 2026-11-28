@@ -1021,3 +1021,35 @@ at `.arena/solo-chess-tablet.png` (ignored). Existing study/start rendered gate 
 passes four widths, all 12 destinations and language grids. No physical-device or
 production Render claim is made; the AI routing regression uses its documented
 mock provider. Cache/import versions and public release are advanced together.
+
+## 2.50.1 — isolated intro and independent appearance (cache v95)
+
+The intro now has its own opaque-backed room and suppresses the login gate's
+visibility while open; the existing inert/focus trap/once-per-tab flow remains.
+Intro ink/buttons follow the selected palette, fixing white-on-white light-style
+text. Tablet section headers also leave space for the fixed menu logo.
+
+Artwork is separate from palette: Follow theme, classroom, ten bundled paintings,
+or no image. Switching palettes preserves an explicit picture. Glass is the default
+across palettes; a separate solid-surfaces checkbox, reduced-transparency media
+query and unsupported-blur fallback retain readable opaque panels. The existing
+Glass palette keeps its own measured tint/sheet; other palettes use a 78% surface
+tint. Canvas wrappers are explicitly transparent so they cannot hide the picture.
+Preferences are device-local, normalized against known IDs, and mirrored using a
+restricted local-asset URL pattern for the first intro/login frame. No new remote
+image service, uploaded-image storage or account synchronization is introduced.
+
+Optimization is structural, not an FPS claim: CSS frosting replaces unused SVG
+refraction construction/observers; full-screen painted/background-position drift
+and the glass wash animation are stopped. Lite devices use a smaller 4px blur.
+Upstream lens source/notices remain; no provider or multiplayer behavior changed.
+
+Validation: 814 Node tests, secrets and offline checks pass. Updated Chromium
+appearance gate covers 17 palettes, ten distinct computed paintings, image decode,
+independent-picture retention, transparent canvas wrappers, actual blur/solid toggle,
+persistence, and intro/login isolation at 390/768/1366. Tablet intro/light-intro and
+settings screenshots were inspected (ignored .arena artifacts). A separate real
+browser reload decoded the chosen painting offline. Existing solo/offline-worker,
+five-size chat layout, four-size Start/presentation/language gates pass. AI routing
+regression uses its documented mock provider. Physical hardware, quantified power/
+FPS improvements and production Render deployment remain unverified.

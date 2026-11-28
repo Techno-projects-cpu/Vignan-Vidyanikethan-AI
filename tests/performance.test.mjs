@@ -87,7 +87,7 @@ test('leaving lite mode removes data-lite instead of an unrelated attribute', ()
   const context = vm.createContext({
     state: { settings: {} }, document: { documentElement: root }, CLASSIC_STYLE: 'minimal',
     normalizeStyle: id => id, isPaintedStyle: () => false, preferLiteGlass: () => false,
-    stopGlass() {}, syncThemeSwitchLock() {}, requestAnimationFrame() {}, syncBrowserChrome() {},
+    stopGlass() {}, applyBackground() {}, syncThemeSwitchLock() {}, requestAnimationFrame() {}, syncBrowserChrome() {},
     $: () => null,
   });
   vm.runInContext(source.slice(start, end) + "\napplyStyle('minimal', { save: false, remember: false });", context);

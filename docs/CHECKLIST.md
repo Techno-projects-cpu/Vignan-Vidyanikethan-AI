@@ -411,3 +411,16 @@ unavailable, instead of clicking the already hidden login gate in that case.
 - Still manually check: physical tablet touch/keyboard chess and screen reader;
   first online cache then airplane mode; deployed release/version and online
   multiplayer with two accounts. Solo bests are browser-only; no synced progress.
+
+### Intro/appearance release 2.50.1 / v95
+
+- 814 tests, secret scan and offline simulator pass.
+- Real Chromium: intro/login isolation and overflow at three widths; 17 themes,
+  ten decoded/distinct paintings, background/palette independence, actual glass
+  filters, clear canvas wrappers, solid toggle and reload persistence pass.
+- Solo worker/offline gate, five-size chat layout and four-size Start/presentation/
+  language/navigation gates pass. Tablet intro/settings screenshots inspected.
+- Manual deployment check: fresh tab intro must not show login; dismiss → usable
+  login/guest. Settings → Look & language → choose picture → change palette:
+  picture and glass should stay. Try solid checkbox and reload in airplane mode.
+- Physical device/screen-reader checks and Render production verification pending.

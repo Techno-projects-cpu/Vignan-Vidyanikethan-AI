@@ -1,4 +1,4 @@
-import { initSoloPlay } from "./solo-play-ui.js?v=94";
+import { initSoloPlay } from "./solo-play-ui.js?v=95";
 /**
  * Play: chess and three academic duels, with friends or a random classmate.
  *
@@ -7,10 +7,10 @@ import { initSoloPlay } from "./solo-play-ui.js?v=94";
  * the client for anything the server also checks.
  */
 
-import * as ui from "./ui.js?v=94";
-import { legalMoves } from "./chess.js?v=94";
-import { onSocialChange, setActiveGame, social, socialState, syncSocial } from "./social.js?v=94";
-import { relativeTime } from "./friends-ui.js?v=94";
+import * as ui from "./ui.js?v=95";
+import { legalMoves } from "./chess.js?v=95";
+import { onSocialChange, setActiveGame, social, socialState, syncSocial } from "./social.js?v=95";
+import { relativeTime } from "./friends-ui.js?v=95";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 

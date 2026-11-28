@@ -597,3 +597,77 @@ html[data-background-paused="1"] .tour-target {
 .solo-chess-board .solo-square:focus-visible { outline: 3px solid #121212; outline-offset: -3px; z-index: 1; }
 #solo-stage li { margin-block: 12px; overflow-wrap: anywhere; }
 @media(max-width:500px) { .solo-options { grid-template-columns: minmax(0,1fr); } }
+
+/* Appearance preferences: artwork and frosted surfaces are independent of palette. */
+html[data-artwork] body.premium-ui {
+  background-image: var(--appearance-wall) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-attachment: fixed !important;
+}
+html[data-artwork] body.premium-ui .wall-art { display: none !important; }
+html[data-artwork="glass"] body.premium-ui .wall-art {
+  display: block !important; position: fixed; inset: 0; width: 100%; height: 100%;
+  z-index: -2; pointer-events: none;
+}
+html[data-artwork="glass"] body.premium-ui .wall-art img { width: 100%; height: 100%; object-fit: cover; }
+html[data-artwork="glass"] body.premium-ui { background-image: none !important; isolation: isolate; }
+html[data-artwork] body.premium-ui :is(.app-shell, .workspace, .main, .main-content, .view) { background: transparent !important; }
+html[data-surface="glass"] body.premium-ui :is(.card, .panel, .sidebar, .composer, .auth-gate-panel, .command-panel, .app-menu-panel, .sheet-panel, .friends-panel, .play-panel, .shortcuts-panel, .exam-panel, .section-toolbar, .settings-tabs) {
+  background-color: var(--tg-tint, color-mix(in srgb, var(--p-surface, #fff) 78%, transparent)) !important;
+  background-image: var(--tg-sheet, none) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(115%) !important;
+  backdrop-filter: blur(10px) saturate(115%) !important;
+}
+html[data-surface="solid"] body.premium-ui :is(.card, .panel, .sidebar, .composer, .auth-gate-panel, .command-panel, .app-menu-panel, .sheet-panel, .friends-panel, .play-panel, .shortcuts-panel, .exam-panel, .section-toolbar, .settings-tabs) {
+  background: var(--p-surface, #fff) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+}
+/* A modal intro is its own room, NEVER a window onto the login controls. */
+body.premium-ui:has(#startup-screen:not([hidden])) #auth-gate { visibility: hidden !important; }
+html body.premium-ui .startup-screen {
+  background-color: var(--p-bg, #fdf7f2) !important;
+  background-image: linear-gradient(rgba(245,240,233,.25), rgba(245,240,233,.25)), var(--appearance-wall, url('./assets/walls/study-afternoon-wide.webp?v=95')) !important;
+  background-position: center !important; background-size: cover !important;
+}
+html:not([data-style="glass"]) body.premium-ui .startup-screen { background-image: none !important; }
+/* Static wallpaper avoids a permanent giant composited animation layer. */
+html[data-artwork] body.premium-ui::after { animation: none !important; will-change: auto !important; transform: none !important; }
+@media (max-width: 720px) {
+  html[data-artwork="glass"] body.premium-ui .startup-screen {
+    background-image: linear-gradient(rgba(245,240,233,.25), rgba(245,240,233,.25)), url('./assets/walls/study-afternoon-tall.webp?v=95') !important;
+  }
+}
+/* Low-resource devices retain real translucency with a cheaper, smaller blur. */
+html[data-lite="1"][data-surface="glass"] body.premium-ui :is(.card, .panel, .sidebar, .composer, .auth-gate-panel) {
+  -webkit-backdrop-filter: blur(4px) !important; backdrop-filter: blur(4px) !important;
+}
+@supports not (background: color-mix(in srgb, white 50%, transparent)) {
+  html[data-surface] body.premium-ui :is(.card, .panel, .sidebar, .composer, .auth-gate-panel) { background: var(--p-surface, #fff) !important; }
+}
+/* Intro typography must follow LIGHT palettes too, not retain white-on-white. */
+html body.premium-ui .startup-screen :is(.startup-wordmark, .startup-copy h1, .startup-copy h1 em, .startup-footer strong) { color: var(--p-ink, #221b28) !important; }
+html body.premium-ui .startup-screen :is(.startup-wordmark span, .startup-edition, .startup-side, .startup-kicker, .startup-footer span, .startup-footer small, .startup-copy > p, #startup-skip) { color: var(--p-ink-2, var(--p-ink, #3b3340)) !important; }
+html body.premium-ui .startup-screen .startup-actions a { color: var(--p-ink, #221b28) !important; }
+html body.premium-ui .startup-screen .startup-enter { background: var(--p-ink, #221b28); color: var(--p-bg, #fdf7f2); border-color: var(--p-ink, #221b28); }
+html body.premium-ui .startup-screen .startup-enter:hover { background: var(--p-bg, #fdf7f2); color: var(--p-ink, #221b28); }
+html body.premium-ui .startup-screen :is(button, a):focus-visible { outline-color: var(--p-ink, #221b28) !important; }
+html body.premium-ui .startup-screen :is(.startup-top, .startup-footer) { border-color: var(--p-line-strong, #aaa); }
+@media (prefers-reduced-transparency: reduce) {
+  html[data-surface="glass"] body.premium-ui :is(.card, .panel, .sidebar, .composer, .auth-gate-panel, .command-panel, .app-menu-panel, .sheet-panel, .friends-panel, .play-panel, .shortcuts-panel, .exam-panel, .section-toolbar, .settings-tabs) {
+    background: var(--p-surface, #fff) !important;
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  }
+}
+html[data-artwork] body.premium-ui { animation: none !important; }
+html:is([data-style="soft"], [data-style="editorial"], [data-style="luxury"], [data-style="brutal"], [data-style="blush"], [data-style="sand"], [data-style="mint"], [data-theme="light"]:not([data-paint="1"])) body.premium-ui .startup-footer .nezaad-logo { filter: none; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-surface="glass"] body.premium-ui :is(.card, .panel, .sidebar, .composer, .auth-gate-panel, .command-panel, .app-menu-panel, .sheet-panel, .friends-panel, .play-panel, .shortcuts-panel, .exam-panel, .section-toolbar, .settings-tabs) { background: var(--p-surface, #fff) !important; }
+}
+
+html[data-artwork] body.premium-ui .checkbox-line { display: flex; flex-direction: row; align-items: center; gap: 10px; margin: 14px 0; }
+html[data-artwork] body.premium-ui .checkbox-line input { flex: 0 0 auto; width: 18px; height: 18px; margin: 0; }
+
+@media (max-width: 900px) {
+  html[data-artwork] body.premium-ui .view:not(#view-ask) > .section-toolbar { padding-inline-start: 64px; }
+}

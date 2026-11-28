@@ -249,17 +249,13 @@ test("the glass kit is a control, not a picture of one", () => {
   }
 });
 
-test("the refraction lens runs on glass only, and the credit travels with it", () => {
-  // A displacement filter per panel is expensive, and on another theme it is
-  // pointless — the sheet it refracts is gone. So it is built when glass is
-  // chosen and torn down when anything else is, in the one function that decides
-  // the style.
+test("shared frosting avoids unused SVG lens work and retains upstream credit", () => {
   const app = read("js/app.js");
   const applyStyle = app.slice(app.indexOf("function applyStyle("));
   const body = applyStyle.slice(0, applyStyle.indexOf("\n}\n") + 3);
-  assert.match(body, /if \(style === "glass"\) void fitGlass\(/, "the lens is built for glass");
-  assert.match(body, /else stopGlass\(\);/, "and every other style tears it down");
-  assert.match(app, /import \{ fitGlass, stopGlass \} from "\.\/glass-lens\.js\?v=\d+"/, "the lens is a versioned module like every other");
+  assert.match(body, /stopGlass\(\);/, "switching style tears down any previous lens");
+  assert.doesNotMatch(body, /void fitGlass\(/, "CSS frosting must not create unused SVG filters");
+  assert.match(app, /import \{ stopGlass \} from "\.\/glass-lens\.js\?v=\d+"/);
 
   // It is a lens, not a lookalike: one filter, capped, torn down when it leaves.
   const lens = read("js/glass-lens.js");
